@@ -20,4 +20,12 @@ export class HDSegwitBech32Wallet extends AbstractHDElectrumWallet {
   allowSendMax() {
     return true;
   }
+
+  allowHodlHodlTrading() {
+    return true;
+  }
+
+  allowRBF() {
+    return true;
+  }
 }

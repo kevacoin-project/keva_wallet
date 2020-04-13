@@ -635,21 +635,38 @@ export class AbstractHDElectrumWallet extends AbstractHDWallet {
   }
 
   async fetchUtxo() {
-    // considering only confirmed balance
-    // also, fetching utxo of addresses that only have some balance
+    // fetching utxo of addresses that only have some balance
     let addressess = [];
 
+    // considering confirmed balance:
     for (let c = 0; c < this.next_free_address_index + this.gap_limit; c++) {
       if (this._balances_by_external_index[c] && this._balances_by_external_index[c].c && this._balances_by_external_index[c].c > 0) {
         addressess.push(this._getExternalAddressByIndex(c));
       }
     }
-
     for (let c = 0; c < this.next_free_change_address_index + this.gap_limit; c++) {
       if (this._balances_by_internal_index[c] && this._balances_by_internal_index[c].c && this._balances_by_internal_index[c].c > 0) {
         addressess.push(this._getInternalAddressByIndex(c));
       }
     }
+
+    // considering UNconfirmed balance:
+    for (let c = 0; c < this.next_free_address_index + this.gap_limit; c++) {
+      if (this._balances_by_external_index[c] && this._balances_by_external_index[c].u && this._balances_by_external_index[c].u > 0) {
+        addressess.push(this._getExternalAddressByIndex(c));
+      }
+    }
+    for (let c = 0; c < this.next_free_change_address_index + this.gap_limit; c++) {
+      if (this._balances_by_internal_index[c] && this._balances_by_internal_index[c].u && this._balances_by_internal_index[c].u > 0) {
+        addressess.push(this._getInternalAddressByIndex(c));
+      }
+    }
+
+    // note: we could remove checks `.c` and `.u` to simplify code, but the resulting `addressess` array would be bigger, thus bigger batch
+    // to fetch (or maybe even several fetches), which is not critical but undesirable.
+    // anyway, result has `.confirmations` property for each utxo, so outside caller can easily filter out unconfirmed if he wants to
+
+    addressess = [...new Set(addressess)]; // deduplicate just for any case
 
     this._utxo = [];
     for (let arr of Object.values(await BlueElectrum.multiGetUtxoByAddress(addressess))) {
@@ -665,10 +682,70 @@ export class AbstractHDElectrumWallet extends AbstractHDWallet {
       u.wif = this._getWifForAddress(u.address);
       u.confirmations = u.height ? 1 : 0;
     }
+
+    this.utxo = this.utxo.sort((a, b) => a.amount - b.amount);
+    // more consistent, so txhex in unit tests wont change
   }
 
+  /**
+   * Getter for previously fetched UTXO. For example:
+   *     [ { height: 0,
+   *    value: 666,
+   *    address: 'string',
+   *    txId: 'string',
+   *    vout: 1,
+   *    txid: 'string',
+   *    amount: 666,
+   *    wif: 'string',
+   *    confirmations: 0 } ]
+   *
+   * @returns {[]}
+   */
   getUtxo() {
+    if (this._utxo.length === 0) return this.getDerivedUtxoFromOurTransaction(); // oy vey, no stored utxo. lets attempt to derive it from stored transactions
     return this._utxo;
+  }
+
+  getDerivedUtxoFromOurTransaction() {
+    let utxos = [];
+    for (let tx of this.getTransactions()) {
+      for (let output of tx.outputs) {
+        let address = false;
+        if (output.scriptPubKey && output.scriptPubKey.addresses && output.scriptPubKey.addresses[0]) {
+          address = output.scriptPubKey.addresses[0];
+        }
+        if (this.weOwnAddress(address)) {
+          let value = new BigNumber(output.value).multipliedBy(100000000).toNumber();
+          utxos.push({
+            txid: tx.txid,
+            txId: tx.txid,
+            vout: output.n,
+            address,
+            value,
+            amount: value,
+            confirmations: tx.confirmations,
+            wif: this._getWifForAddress(address),
+            height: BlueElectrum.estimateCurrentBlockheight() - tx.confirmations,
+          });
+        }
+      }
+    }
+
+    // got all utxos we ever had. lets filter out the ones that are spent:
+    let ret = [];
+    for (let utxo of utxos) {
+      let spent = false;
+      for (let tx of this.getTransactions()) {
+        for (let input of tx.inputs) {
+          if (input.txid === utxo.txid && input.vout === utxo.vout) spent = true;
+          // utxo we got previously was actually spent right here ^^
+        }
+      }
+
+      if (!spent) ret.push(utxo);
+    }
+
+    return ret;
   }
 
   _getDerivationPathByAddress(address) {

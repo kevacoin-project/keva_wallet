@@ -1,8 +1,9 @@
 import { createStackNavigator, createAppContainer } from 'react-navigation';
 
-import SettingsContainer from './screen/settings/settings';
+import Settings from './screen/settings/settings';
 import About from './screen/settings/about';
 import ReleaseNotes from './screen/settings/releasenotes';
+import Licensing from './screen/settings/licensing';
 import Selftest from './screen/selftest';
 import Language from './screen/settings/language';
 import Currency from './screen/settings/currency';
@@ -10,6 +11,8 @@ import EncryptStorage from './screen/settings/encryptStorage';
 import PlausibleDeniability from './screen/plausibledeniability';
 import LightningSettings from './screen/settings/lightningSettings';
 import ElectrumSettings from './screen/settings/electrumSettings';
+import GeneralSettings from './screen/settings/GeneralSettings';
+import NetworkSettings from './screen/settings/NetworkSettings';
 import DefaultView from './screen/settings/defaultView';
 
 import WalletsList from './screen/wallets/list';
@@ -22,14 +25,13 @@ import WalletDetails from './screen/wallets/details';
 import WalletExport from './screen/wallets/export';
 import WalletXpub from './screen/wallets/xpub';
 import BuyBitcoin from './screen/wallets/buyBitcoin';
+import HodlHodl from './screen/wallets/hodlHodl';
 import Marketplace from './screen/wallets/marketplace';
 import ReorderWallets from './screen/wallets/reorderWallets';
 import SelectWallet from './screen/wallets/selectWallet';
 
 import details from './screen/transactions/details';
 import TransactionStatus from './screen/transactions/transactionStatus';
-import rbf from './screen/transactions/RBF';
-import createrbf from './screen/transactions/RBF-create';
 import cpfp from './screen/transactions/CPFP';
 import rbfBumpFee from './screen/transactions/RBFBumpFee';
 import rbfCancel from './screen/transactions/RBFCancel';
@@ -37,7 +39,7 @@ import rbfCancel from './screen/transactions/RBFCancel';
 import receiveDetails from './screen/receive/details';
 
 import sendDetails from './screen/send/details';
-import ScanQRCode from './screen/send/scanQrAddress';
+import ScanQRCode from './screen/send/ScanQRCode';
 import sendCreate from './screen/send/create';
 import Confirm from './screen/send/confirm';
 import PsbtWithHardwareWallet from './screen/send/psbtWithHardwareWallet';
@@ -78,11 +80,8 @@ const WalletsStackNavigator = createStackNavigator(
     WalletDetails: {
       screen: WalletDetails,
     },
-    RBF: {
-      screen: rbf,
-    },
-    CreateRBF: {
-      screen: createrbf,
+    HodlHodl: {
+      screen: HodlHodl,
     },
     CPFP: {
       screen: cpfp,
@@ -94,7 +93,7 @@ const WalletsStackNavigator = createStackNavigator(
       screen: rbfCancel,
     },
     Settings: {
-      screen: SettingsContainer,
+      screen: Settings,
       path: 'Settings',
       navigationOptions: {
         headerStyle: {
@@ -122,6 +121,10 @@ const WalletsStackNavigator = createStackNavigator(
     Selftest: {
       screen: Selftest,
     },
+    Licensing: {
+      screen: Licensing,
+      path: 'Licensing',
+    },
     DefaultView: {
       screen: DefaultView,
       path: 'DefaultView',
@@ -133,6 +136,14 @@ const WalletsStackNavigator = createStackNavigator(
     EncryptStorage: {
       screen: EncryptStorage,
       path: 'EncryptStorage',
+    },
+    GeneralSettings: {
+      screen: GeneralSettings,
+      path: 'GeneralSettings',
+    },
+    NetworkSettings: {
+      screen: NetworkSettings,
+      path: 'NetworkSettings',
     },
     PlausibleDeniability: {
       screen: PlausibleDeniability,
@@ -259,7 +270,7 @@ const HandleOffchainAndOnChainStackNavigator = createStackNavigator(
         header: null,
       },
     },
-    ScanQrAddress: {
+    ScanQRCode: {
       screen: ScanQRCode,
     },
     SendDetails: {
@@ -330,7 +341,7 @@ const MainBottomTabs = createStackNavigator(
         header: null,
       },
     },
-    ScanQrAddress: {
+    ScanQRCode: {
       screen: ScanQRCode,
     },
     LappBrowser: {

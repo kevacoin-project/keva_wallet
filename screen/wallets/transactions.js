@@ -17,9 +17,11 @@ import {
   Linking,
   KeyboardAvoidingView,
   Alert,
+  Clipboard,
 } from 'react-native';
 import PropTypes from 'prop-types';
 import { NavigationEvents } from 'react-navigation';
+import ImagePicker from 'react-native-image-picker';
 import {
   BlueSendButtonIcon,
   BlueListItem,
@@ -31,14 +33,17 @@ import {
 import WalletGradient from '../../class/walletGradient';
 import { Icon } from 'react-native-elements';
 import { LightningCustodianWallet, WatchOnlyWallet } from '../../class';
-import Handoff from 'react-native-handoff';
 import Modal from 'react-native-modal';
 import NavigationService from '../../NavigationService';
+import HandoffSettings from '../../class/handoff';
+import Handoff from 'react-native-handoff';
+import ActionSheet from '../ActionSheet';
 /** @type {AppStorage} */
 let BlueApp = require('../../BlueApp');
 let loc = require('../../loc');
 let EV = require('../../events');
 let BlueElectrum = require('../../BlueElectrum');
+const LocalQRCode = require('@remobile/react-native-qrcode-local-image');
 
 export default class WalletTransactions extends Component {
   static navigationOptions = ({ navigation }) => {
@@ -76,6 +81,7 @@ export default class WalletTransactions extends Component {
     const wallet = props.navigation.getParam('wallet');
     this.props.navigation.setParams({ wallet: wallet, isLoading: true });
     this.state = {
+      isHandOffUseEnabled: false,
       isLoading: true,
       isManageFundsModalVisible: false,
       showShowFlatListRefreshControl: false,
@@ -87,11 +93,13 @@ export default class WalletTransactions extends Component {
     };
   }
 
-  componentDidMount() {
+  async componentDidMount() {
     this.props.navigation.setParams({ isLoading: false });
     this.interval = setInterval(() => {
       this.setState(prev => ({ timeElapsed: prev.timeElapsed + 1 }));
     }, 60000);
+    const isHandOffUseEnabled = await HandoffSettings.isHandoffUseEnabled();
+    this.setState({ isHandOffUseEnabled });
   }
 
   /**
@@ -222,12 +230,13 @@ export default class WalletTransactions extends Component {
            */}
           {this.renderMarketplaceButton()}
           {this.state.wallet.type === LightningCustodianWallet.type && Platform.OS === 'ios' && this.renderLappBrowserButton()}
+          {this.state.wallet.allowHodlHodlTrading() && this.renderHodlHodlButton()}
         </View>
         <Text
           style={{
             flex: 1,
             marginLeft: 16,
-            marginTop: 24,
+            marginTop: 8,
             marginBottom: 8,
             fontWeight: 'bold',
             fontSize: 24,
@@ -375,6 +384,29 @@ export default class WalletTransactions extends Component {
     );
   };
 
+  renderHodlHodlButton = () => {
+    return (
+      <TouchableOpacity
+        onPress={() => {
+          this.props.navigation.navigate('HodlHodl', { fromWallet: this.state.wallet });
+        }}
+        style={{
+          marginLeft: 5,
+          backgroundColor: '#f2f2f2',
+          borderRadius: 9,
+          minHeight: 49,
+          flex: 1,
+          paddingHorizontal: 8,
+          justifyContent: 'center',
+          flexDirection: 'row',
+          alignItems: 'center',
+        }}
+      >
+        <Text style={{ color: '#062453', fontSize: 18 }}>local trader</Text>
+      </TouchableOpacity>
+    );
+  };
+
   onWalletSelect = async wallet => {
     if (wallet) {
       NavigationService.navigate('WalletTransactions', {
@@ -420,19 +452,110 @@ export default class WalletTransactions extends Component {
 
   renderItem = item => {
     return (
-      <BlueTransactionListItem
-        item={item.item}
-        itemPriceUnit={this.state.wallet.getPreferredBalanceUnit()}
-        shouldRefresh={this.state.timeElapsed}
-      />
+      <View style={{ marginHorizontal: 4 }}>
+        <BlueTransactionListItem
+          item={item.item}
+          itemPriceUnit={this.state.wallet.getPreferredBalanceUnit()}
+          shouldRefresh={this.state.timeElapsed}
+        />
+      </View>
     );
+  };
+
+  onBarCodeRead = ret => {
+    if (!this.state.isLoading) {
+      this.setState({ isLoading: true }, () => {
+        this.setState({ isLoading: false });
+        this.props.navigation.navigate(this.state.wallet.chain === Chain.ONCHAIN ? 'SendDetails' : 'ScanLndInvoice', {
+          fromSecret: this.state.wallet.getSecret(),
+          uri: ret.data ? ret.data : ret,
+          fromWallet: this.state.wallet,
+        });
+      });
+    }
+  };
+
+  choosePhoto = () => {
+    ImagePicker.launchImageLibrary(
+      {
+        title: null,
+        mediaType: 'photo',
+        takePhotoButtonTitle: null,
+      },
+      response => {
+        if (response.uri) {
+          const uri = Platform.OS === 'ios' ? response.uri.toString().replace('file://', '') : response.path.toString();
+          LocalQRCode.decode(uri, (error, result) => {
+            if (!error) {
+              this.onBarCodeRead({ data: result });
+            } else {
+              alert('The selected image does not contain a QR Code.');
+            }
+          });
+        }
+      },
+    );
+  };
+
+  copyFromClipbard = async () => {
+    this.onBarCodeRead({ data: await Clipboard.getString() });
+  };
+
+  sendButtonLongPress = () => {
+    if (Platform.OS === 'ios') {
+      ActionSheet.showActionSheetWithOptions(
+        { options: [loc.send.details.cancel, 'Choose Photo', 'Scan QR Code', 'Copy from Clipboard'], cancelButtonIndex: 0 },
+        buttonIndex => {
+          if (buttonIndex === 1) {
+            this.choosePhoto();
+          } else if (buttonIndex === 2) {
+            this.props.navigation.navigate('ScanQRCode', {
+              launchedBy: this.props.navigation.state.routeName,
+              onBarScanned: this.onBarCodeRead,
+              showFileImportButton: false,
+            });
+          } else if (buttonIndex === 3) {
+            this.copyFromClipbard();
+          }
+        },
+      );
+    } else if (Platform.OS === 'android') {
+      ActionSheet.showActionSheetWithOptions({
+        title: '',
+        message: '',
+        buttons: [
+          {
+            text: loc.send.details.cancel,
+            onPress: () => {},
+            style: 'cancel',
+          },
+          {
+            text: 'Choose Photo',
+            onPress: this.choosePhoto,
+          },
+          {
+            text: 'Scan QR Code',
+            onPress: () =>
+              this.props.navigation.navigate('ScanQRCode', {
+                launchedBy: this.props.navigation.state.routeName,
+                onBarScanned: this.onBarCodeRead,
+                showFileImportButton: false,
+              }),
+          },
+          {
+            text: 'Copy From Clipboard',
+            onPress: this.copyFromClipbard,
+          },
+        ],
+      });
+    }
   };
 
   render() {
     const { navigate } = this.props.navigation;
     return (
       <View style={{ flex: 1 }}>
-        {this.state.wallet.chain === Chain.ONCHAIN && (
+        {this.state.wallet.chain === Chain.ONCHAIN && this.state.isHandOffUseEnabled && (
           <Handoff
             title={`Bitcoin Wallet ${this.state.wallet.getLabel()}`}
             type="io.bluewallet.bluewallet"
@@ -466,8 +589,7 @@ export default class WalletTransactions extends Component {
                 },
                 onFailure: () =>
                   this.props.navigation.navigate('WalletExport', {
-                    address: this.state.wallet.getAddress(),
-                    secret: this.state.wallet.getSecret(),
+                    wallet: this.state.wallet,
                   }),
               });
             }
@@ -586,6 +708,7 @@ export default class WalletTransactions extends Component {
             ) {
               return (
                 <BlueSendButtonIcon
+                  onLongPress={this.sendButtonLongPress}
                   onPress={() => {
                     if (this.state.wallet.chain === Chain.OFFCHAIN) {
                       navigate('ScanLndInvoice', { fromSecret: this.state.wallet.getSecret() });
@@ -667,5 +790,8 @@ WalletTransactions.propTypes = {
     goBack: PropTypes.func,
     getParam: PropTypes.func,
     setParams: PropTypes.func,
+    state: PropTypes.shape({
+      routeName: PropTypes.string,
+    }),
   }),
 };

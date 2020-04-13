@@ -1,12 +1,13 @@
 import AsyncStorage from '@react-native-community/async-storage';
-import { AppStorage } from './class';
+import { Platform } from 'react-native';
+import { AppStorage, LegacyWallet, SegwitBech32Wallet, SegwitP2SHWallet } from './class';
 const bitcoin = require('bitcoinjs-lib');
 const ElectrumClient = require('electrum-client');
 let reverse = require('buffer-reverse');
 let BigNumber = require('bignumber.js');
 
 const storageKey = 'ELECTRUM_PEERS';
-const defaultPeer = { host: 'electrum1.bluewallet.io', tcp: '50001' };
+const defaultPeer = { host: 'electrum1.bluewallet.io', ssl: '443' };
 const hardcodedPeers = [
   // { host: 'noveltybobble.coinjoined.com', tcp: '50001' }, // down
   // { host: 'electrum.be', tcp: '50001' },
@@ -16,37 +17,54 @@ const hardcodedPeers = [
   // { host: 'Bitkoins.nl', tcp: '50001' }, // down
   // { host: 'fullnode.coinkite.com', tcp: '50001' },
   // { host: 'preperfect.eleCTruMioUS.com', tcp: '50001' }, // down
-  { host: 'electrum1.bluewallet.io', tcp: '50001' },
-  { host: 'electrum1.bluewallet.io', tcp: '50001' }, // 2x weight
-  { host: 'electrum2.bluewallet.io', tcp: '50001' },
-  { host: 'electrum3.bluewallet.io', tcp: '50001' },
-  { host: 'electrum3.bluewallet.io', tcp: '50001' }, // 2x weight
+  { host: 'electrum1.bluewallet.io', ssl: '443' },
+  { host: 'electrum1.bluewallet.io', ssl: '443' }, // 2x weight
+  { host: 'electrum2.bluewallet.io', ssl: '443' },
+  { host: 'electrum3.bluewallet.io', ssl: '443' },
+  { host: 'electrum3.bluewallet.io', ssl: '443' }, // 2x weight
 ];
 
-let mainClient = false;
+let mainClient: ElectrumClient = false;
 let mainConnected = false;
 let wasConnectedAtLeastOnce = false;
+let serverName = false;
+let disableBatching = false;
+
+let txhashHeightCache = {};
 
 async function connectMain() {
   let usingPeer = await getRandomHardcodedPeer();
   let savedPeer = await getSavedPeer();
-  if (savedPeer && savedPeer.host && savedPeer.tcp) {
+  if (savedPeer && savedPeer.host && (savedPeer.tcp || savedPeer.ssl)) {
     usingPeer = savedPeer;
   }
 
   try {
     console.log('begin connection:', JSON.stringify(usingPeer));
-    mainClient = new ElectrumClient(usingPeer.tcp, usingPeer.host, 'tcp');
+    mainClient = new ElectrumClient(usingPeer.ssl || usingPeer.tcp, usingPeer.host, usingPeer.ssl ? 'tls' : 'tcp');
     mainClient.onError = function(e) {
-      console.log('ElectrumClient error: ' + e);
+      if (Platform.OS === 'android' && mainConnected) {
+        // android sockets are buggy and dont always issue CLOSE event, which actually makes the persistence code to reconnect.
+        // so lets do it manually, but only if we were previously connected (mainConnected), otherwise theres other
+        // code which does connection retries
+        mainClient.close();
+        mainConnected = false;
+        setTimeout(connectMain, 500);
+        console.warn('reconnecting after socket error');
+        return;
+      }
       mainConnected = false;
     };
-    await mainClient.connect();
-    const ver = await mainClient.server_version('2.7.11', '1.4');
+    const ver = await mainClient.initElectrum({ client: 'bluewallet', version: '1.4' });
     if (ver && ver[0]) {
       console.log('connected to ', ver);
+      serverName = ver[0];
       mainConnected = true;
       wasConnectedAtLeastOnce = true;
+      if (ver[0].startsWith('ElectrumPersonalServer') || ver[0].startsWith('electrs')) {
+        // TODO: once they release support for batching - disable batching only for lower versions
+        disableBatching = true;
+      }
       // AsyncStorage.setItem(storageKey, JSON.stringify(peers));  TODO: refactor
     }
   } catch (e) {
@@ -56,9 +74,7 @@ async function connectMain() {
 
   if (!mainConnected) {
     console.log('retry');
-    mainClient.keepAlive = () => {}; // dirty hack to make it stop reconnecting
-    mainClient.reconnect = () => {}; // dirty hack to make it stop reconnecting
-    mainClient.close();
+    mainClient.close && mainClient.close();
     setTimeout(connectMain, 500);
   }
 }
@@ -78,7 +94,8 @@ async function getRandomHardcodedPeer() {
 async function getSavedPeer() {
   let host = await AsyncStorage.getItem(AppStorage.ELECTRUM_HOST);
   let port = await AsyncStorage.getItem(AppStorage.ELECTRUM_TCP_PORT);
-  return { host, tcp: port };
+  let sslPort = await AsyncStorage.getItem(AppStorage.ELECTRUM_SSL_PORT);
+  return { host, tcp: port, ssl: sslPort };
 }
 
 /**
@@ -131,7 +148,8 @@ module.exports.getConfig = async function() {
   return {
     host: mainClient.host,
     port: mainClient.port,
-    status: mainClient.status,
+    status: mainClient.status && mainConnected ? 1 : 0,
+    serverName,
   };
 };
 
@@ -146,6 +164,7 @@ module.exports.getTransactionsByAddress = async function(address) {
   let hash = bitcoin.crypto.sha256(script);
   let reversedHash = Buffer.from(reverse(hash));
   let history = await mainClient.blockchainScripthash_getHistory(reversedHash.toString('hex'));
+  if (history.tx_hash) txhashHeightCache[history.tx_hash] = history.height; // cache tx height
   return history;
 };
 
@@ -216,7 +235,16 @@ module.exports.multiGetBalanceByAddress = async function(addresses, batchsize) {
       scripthash2addr[reversedHash] = addr;
     }
 
-    let balances = await mainClient.blockchainScripthash_getBalanceBatch(scripthashes);
+    let balances = [];
+
+    if (disableBatching) {
+      for (let sh of scripthashes) {
+        let balance = await mainClient.blockchainScripthash_getBalance(sh);
+        balances.push({ result: balance, param: sh });
+      }
+    } else {
+      balances = await mainClient.blockchainScripthash_getBalanceBatch(scripthashes);
+    }
 
     for (let bal of balances) {
       ret.balance += +bal.result.confirmed;
@@ -246,7 +274,13 @@ module.exports.multiGetUtxoByAddress = async function(addresses, batchsize) {
       scripthash2addr[reversedHash] = addr;
     }
 
-    let results = await mainClient.blockchainScripthash_listunspentBatch(scripthashes);
+    let results = [];
+
+    if (disableBatching) {
+      // ElectrumPersonalServer doesnt support `blockchain.scripthash.listunspent`
+    } else {
+      results = await mainClient.blockchainScripthash_listunspentBatch(scripthashes);
+    }
 
     for (let utxos of results) {
       ret[scripthash2addr[utxos.param]] = utxos.result;
@@ -281,10 +315,20 @@ module.exports.multiGetHistoryByAddress = async function(addresses, batchsize) {
       scripthash2addr[reversedHash] = addr;
     }
 
-    let results = await mainClient.blockchainScripthash_getHistoryBatch(scripthashes);
+    let results = [];
+
+    if (disableBatching) {
+      for (let sh of scripthashes) {
+        let history = await mainClient.blockchainScripthash_getHistory(sh);
+        results.push({ result: history, param: sh });
+      }
+    } else {
+      results = await mainClient.blockchainScripthash_getHistoryBatch(scripthashes);
+    }
 
     for (let history of results) {
       ret[scripthash2addr[history.param]] = history.result;
+      if (history.result[0]) txhashHeightCache[history.result[0].tx_hash] = history.result[0].height; // cache tx height
       for (let hist of ret[scripthash2addr[history.param]]) {
         hist.address = scripthash2addr[history.param];
       }
@@ -295,16 +339,45 @@ module.exports.multiGetHistoryByAddress = async function(addresses, batchsize) {
 };
 
 module.exports.multiGetTransactionByTxid = async function(txids, batchsize, verbose) {
-  batchsize = batchsize || 81;
+  batchsize = batchsize || 61;
   // this value is fine-tuned so althrough wallets in test suite will occasionally
   // throw 'response too large (over 1,000,000 bytes', test suite will pass
   verbose = verbose !== false;
   if (!mainClient) throw new Error('Electrum client is not connected');
   let ret = {};
+  txids = [...new Set(txids)]; // deduplicate just for any case
 
   let chunks = splitIntoChunks(txids, batchsize);
   for (let chunk of chunks) {
-    let results = await mainClient.blockchainTransaction_getBatch(chunk, verbose);
+    let results = [];
+
+    if (disableBatching) {
+      for (let txid of chunk) {
+        try {
+          // in case of ElectrumPersonalServer it might not track some transactions (like source transactions for our transactions)
+          // so we wrap it in try-catch
+          let tx = await mainClient.blockchainTransaction_get(txid, verbose);
+          if (typeof tx === 'string' && verbose) {
+            // apparently electrum server (EPS?) didnt recognize VERBOSE parameter, and  sent us plain txhex instead of decoded tx.
+            // lets decode it manually on our end then:
+            tx = txhexToElectrumTransaction(tx);
+            if (txhashHeightCache[txid]) {
+              // got blockheight where this tx was confirmed
+              tx.confirmations = this.estimateCurrentBlockheight() - txhashHeightCache[txid];
+              if (tx.confirmations < 0) {
+                // ugly fix for when estimator lags behind
+                tx.confirmations = 1;
+              }
+              tx.time = this.calculateBlockTime(txhashHeightCache[txid]);
+              tx.blocktime = this.calculateBlockTime(txhashHeightCache[txid]);
+            }
+          }
+          results.push({ result: tx, param: txid });
+        } catch (_) {}
+      }
+    } else {
+      results = await mainClient.blockchainTransaction_getBatch(chunk, verbose);
+    }
 
     for (let txdata of results) {
       ret[txdata.param] = txdata.result;
@@ -341,7 +414,7 @@ module.exports.waitTillConnected = async function() {
         clearInterval(waitTillConnectedInterval);
         reject(new Error('Waiting for Electrum connection timeout'));
       }
-    }, 1000);
+    }, 500);
   });
 };
 
@@ -372,6 +445,11 @@ module.exports.estimateFee = async function(numberOfBlocks) {
   );
 };
 
+module.exports.serverFeatures = async function() {
+  if (!mainClient) throw new Error('Electrum client is not connected');
+  return mainClient.server_features();
+};
+
 module.exports.broadcast = async function(hex) {
   if (!mainClient) throw new Error('Electrum client is not connected');
   try {
@@ -387,21 +465,36 @@ module.exports.broadcastV2 = async function(hex) {
   return mainClient.blockchainTransaction_broadcast(hex);
 };
 
+module.exports.estimateCurrentBlockheight = function() {
+  const baseTs = 1585837504347; // uS
+  const baseHeight = 624197;
+  return Math.floor(baseHeight + (+new Date() - baseTs) / 1000 / 60 / 10);
+};
+
+/**
+ *
+ * @param height
+ * @returns {number} Timestamp in seconds
+ */
+module.exports.calculateBlockTime = function(height) {
+  const baseTs = 1585837504; // sec
+  const baseHeight = 624083;
+  return baseTs + (height - baseHeight) * 10 * 60;
+};
+
 /**
  *
  * @param host
  * @param tcpPort
+ * @param sslPort
  * @returns {Promise<boolean>} Whether provided host:port is a valid electrum server
  */
-module.exports.testConnection = async function(host, tcpPort) {
-  let client = new ElectrumClient(tcpPort, host, 'tcp');
+module.exports.testConnection = async function(host, tcpPort, sslPort) {
+  let client = new ElectrumClient(sslPort || tcpPort, host, sslPort ? 'tls' : 'tcp');
   try {
     await client.connect();
     await client.server_version('2.7.11', '1.4');
     await client.server_ping();
-
-    client.keepAlive = () => {}; // dirty hack to make it stop reconnecting
-    client.reconnect = () => {}; // dirty hack to make it stop reconnecting
     client.close();
     return true;
   } catch (_) {
@@ -410,8 +503,6 @@ module.exports.testConnection = async function(host, tcpPort) {
 };
 
 module.exports.forceDisconnect = () => {
-  mainClient.keepAlive = () => {}; // dirty hack to make it stop reconnecting
-  mainClient.reconnect = () => {}; // dirty hack to make it stop reconnecting
   mainClient.close();
 };
 
@@ -425,3 +516,70 @@ let splitIntoChunks = function(arr, chunkSize) {
   }
   return groups;
 };
+
+function txhexToElectrumTransaction(txhex) {
+  let tx = bitcoin.Transaction.fromHex(txhex);
+
+  let ret = {
+    txid: tx.getId(),
+    hash: tx.getId(),
+    version: tx.version,
+    size: Math.ceil(txhex.length / 2),
+    vsize: tx.virtualSize(),
+    weight: tx.weight(),
+    locktime: tx.locktime,
+    vin: [],
+    vout: [],
+    hex: txhex,
+    blockhash: '',
+    confirmations: 0,
+    time: 0,
+    blocktime: 0,
+  };
+
+  for (let inn of tx.ins) {
+    let txinwitness = [];
+    if (inn.witness[0]) txinwitness.push(inn.witness[0].toString('hex'));
+    if (inn.witness[1]) txinwitness.push(inn.witness[1].toString('hex'));
+
+    ret.vin.push({
+      txid: reverse(inn.hash).toString('hex'),
+      vout: inn.index,
+      scriptSig: { hex: inn.script.toString('hex'), asm: '' },
+      txinwitness,
+      sequence: inn.sequence,
+    });
+  }
+
+  let n = 0;
+  for (let out of tx.outs) {
+    let value = new BigNumber(out.value).dividedBy(100000000).toNumber();
+    let address = false;
+    let type = false;
+
+    if (SegwitBech32Wallet.scriptPubKeyToAddress(out.script.toString('hex'))) {
+      address = SegwitBech32Wallet.scriptPubKeyToAddress(out.script.toString('hex'));
+      type = 'witness_v0_keyhash';
+    } else if (SegwitP2SHWallet.scriptPubKeyToAddress(out.script.toString('hex'))) {
+      address = SegwitP2SHWallet.scriptPubKeyToAddress(out.script.toString('hex'));
+      type = '???'; // TODO
+    } else if (LegacyWallet.scriptPubKeyToAddress(out.script.toString('hex'))) {
+      address = LegacyWallet.scriptPubKeyToAddress(out.script.toString('hex'));
+      type = '???'; // TODO
+    }
+
+    ret.vout.push({
+      value,
+      n,
+      scriptPubKey: {
+        asm: '',
+        hex: out.script.toString('hex'),
+        reqSigs: 1, // todo
+        type,
+        addresses: [address],
+      },
+    });
+    n++;
+  }
+  return ret;
+}

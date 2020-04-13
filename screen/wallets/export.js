@@ -5,7 +5,7 @@ import { BlueSpacing20, SafeBlueArea, BlueNavigationStyle, BlueText, BlueCopyTex
 import PropTypes from 'prop-types';
 import Privacy from '../../Privacy';
 import Biometric from '../../class/biometrics';
-import { LightningCustodianWallet } from '../../class';
+import { LegacyWallet, LightningCustodianWallet, SegwitBech32Wallet, SegwitP2SHWallet, WatchOnlyWallet } from '../../class';
 /** @type {AppStorage} */
 let BlueApp = require('../../BlueApp');
 let loc = require('../../loc');
@@ -20,17 +20,7 @@ export default class WalletExport extends Component {
 
   constructor(props) {
     super(props);
-
-    let address = props.navigation.state.params.address;
-    let secret = props.navigation.state.params.secret;
-    let wallet;
-    for (let w of BlueApp.getWallets()) {
-      if ((address && w.getAddress() === address) || w.getSecret() === secret) {
-        // found our wallet
-        wallet = w;
-      }
-    }
-
+    let wallet = props.navigation.state.params.wallet;
     this.state = {
       isLoading: true,
       qrCodeHeight: height > width ? width - 40 : width / 2,
@@ -78,18 +68,14 @@ export default class WalletExport extends Component {
     }
 
     return (
-      <SafeBlueArea style={{ flex: 1, paddingTop: 20 }}>
-        <ScrollView
-          centerContent
-          contentContainerStyle={{ alignItems: 'center', justifyContent: 'center', flexGrow: 1 }}
-          onLayout={this.onLayout}
-        >
+      <SafeBlueArea style={{ flex: 1 }}>
+        <ScrollView contentContainerStyle={{ alignItems: 'center', justifyContent: 'center', flexGrow: 1 }} onLayout={this.onLayout}>
           <View>
-            <BlueText>{this.state.wallet.typeReadable}</BlueText>
+            <BlueText style={{ fontSize: 17, fontWeight: '700', color: '#0c2550' }}>{this.state.wallet.typeReadable}</BlueText>
           </View>
 
           {(() => {
-            if (this.state.wallet.getAddress()) {
+            if ([LegacyWallet.type, SegwitBech32Wallet.type, SegwitP2SHWallet.type].includes(this.state.wallet.type)) {
               return (
                 <BlueCard>
                   <BlueText>{this.state.wallet.getAddress()}</BlueText>
@@ -110,10 +96,12 @@ export default class WalletExport extends Component {
           />
 
           <BlueSpacing20 />
-          {this.state.wallet.type === LightningCustodianWallet.type ? (
+          {this.state.wallet.type === LightningCustodianWallet.type || this.state.wallet.type === WatchOnlyWallet.type ? (
             <BlueCopyTextToClipboard text={this.state.wallet.getSecret()} />
           ) : (
-            <BlueText style={{ alignItems: 'center', paddingHorizontal: 8 }}>{this.state.wallet.getSecret()}</BlueText>
+            <BlueText style={{ alignItems: 'center', paddingHorizontal: 16, fontSize: 16, color: '#0C2550', lineHeight: 24 }}>
+              {this.state.wallet.getSecret()}
+            </BlueText>
           )}
         </ScrollView>
       </SafeBlueArea>
@@ -125,8 +113,7 @@ WalletExport.propTypes = {
   navigation: PropTypes.shape({
     state: PropTypes.shape({
       params: PropTypes.shape({
-        address: PropTypes.string,
-        secret: PropTypes.string,
+        wallet: PropTypes.object.isRequired,
       }),
     }),
     navigate: PropTypes.func,

@@ -104,8 +104,12 @@ export class AbstractWallet {
     return false;
   }
 
+  allowHodlHodlTrading() {
+    return false;
+  }
+
   weOwnAddress(address) {
-    return this._address === address;
+    throw Error('not implemented');
   }
 
   /**
@@ -128,7 +132,12 @@ export class AbstractWallet {
   }
 
   setSecret(newSecret) {
-    this.secret = newSecret.trim();
+    this.secret = newSecret
+      .trim()
+      .replace('bitcoin:', '')
+      .replace('BITCOIN:', '');
+
+    if (this.secret.startsWith('BC1')) this.secret = this.secret.toLowerCase();
 
     try {
       const parsedSecret = JSON.parse(this.secret);

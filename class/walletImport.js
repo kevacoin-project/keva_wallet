@@ -9,6 +9,7 @@ import {
   HDSegwitBech32Wallet,
   LightningCustodianWallet,
   PlaceholderWallet,
+  SegwitBech32Wallet,
 } from '../class';
 import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 const EV = require('../events');
@@ -16,6 +17,9 @@ const A = require('../analytics');
 /** @type {AppStorage} */
 const BlueApp = require('../BlueApp');
 const loc = require('../loc');
+const bip38 = require('../blue_modules/bip38');
+const wif = require('wif');
+const prompt = require('../prompt');
 
 export default class WalletImport {
   /**
@@ -87,6 +91,8 @@ export default class WalletImport {
     }
     const placeholderWallet = WalletImport.addPlaceholderWallet(importText);
     // Plan:
+    // -2. check if BIP38 encrypted
+    // -1. check lightning custodian
     // 0. check if its HDSegwitBech32Wallet (BIP84)
     // 1. check if its HDSegwitP2SHWallet (BIP49)
     // 2. check if its HDLegacyP2PKHWallet (BIP44)
@@ -98,6 +104,21 @@ export default class WalletImport {
     // 7. check if its private key (legacy address) TODO
 
     try {
+      if (importText.startsWith('6P')) {
+        let password = false;
+        do {
+          password = await prompt('This looks like password-protected private key (BIP38)', 'Enter password to decrypt', false);
+        } while (!password);
+
+        let decryptedKey = await bip38.decrypt(importText, password, status => {
+          console.warn(status.percent + '%');
+        });
+
+        if (decryptedKey) {
+          importText = wif.encode(0x80, decryptedKey.privateKey, decryptedKey.compressed);
+        }
+      }
+
       // is it lightning custodian?
       if (importText.indexOf('blitzhub://') !== -1 || importText.indexOf('lndhub://') !== -1) {
         let lnd = new LightningCustodianWallet();
@@ -125,7 +146,7 @@ export default class WalletImport {
       if (hd4.validateMnemonic()) {
         await hd4.fetchBalance();
         if (hd4.getBalance() > 0) {
-          await hd4.fetchTransactions();
+          // await hd4.fetchTransactions(); // experiment: dont fetch tx now. it will import faster. user can refresh his wallet later
           return WalletImport._saveWallet(hd4);
         }
       }
@@ -138,11 +159,19 @@ export default class WalletImport {
         let legacyWallet = new LegacyWallet();
         legacyWallet.setSecret(importText);
 
+        let segwitBech32Wallet = new SegwitBech32Wallet();
+        segwitBech32Wallet.setSecret(importText);
+
         await legacyWallet.fetchBalance();
+        await segwitBech32Wallet.fetchBalance();
         if (legacyWallet.getBalance() > 0) {
           // yep, its legacy we're importing
           await legacyWallet.fetchTransactions();
           return WalletImport._saveWallet(legacyWallet);
+        } else if (segwitBech32Wallet.getBalance() > 0) {
+          // yep, its single-address bech32 wallet
+          await segwitBech32Wallet.fetchTransactions();
+          return WalletImport._saveWallet(segwitBech32Wallet);
         } else {
           // by default, we import wif as Segwit P2SH
           await segwitWallet.fetchBalance();
@@ -168,7 +197,7 @@ export default class WalletImport {
       if (hd1.validateMnemonic()) {
         await hd1.fetchBalance();
         if (hd1.getBalance() > 0) {
-          await hd1.fetchTransactions();
+          // await hd1.fetchTransactions(); // experiment: dont fetch tx now. it will import faster. user can refresh his wallet later
           return WalletImport._saveWallet(hd1);
         }
       }
@@ -178,7 +207,7 @@ export default class WalletImport {
       if (hd2.validateMnemonic()) {
         await hd2.fetchBalance();
         if (hd2.getBalance() > 0) {
-          await hd2.fetchTransactions();
+          // await hd2.fetchTransactions(); // experiment: dont fetch tx now. it will import faster. user can refresh his wallet later
           return WalletImport._saveWallet(hd2);
         }
       }
@@ -188,7 +217,7 @@ export default class WalletImport {
       if (hd3.validateMnemonic()) {
         await hd3.fetchBalance();
         if (hd3.getBalance() > 0) {
-          await hd3.fetchTransactions();
+          // await hd3.fetchTransactions(); // experiment: dont fetch tx now. it will import faster. user can refresh his wallet later
           return WalletImport._saveWallet(hd3);
         }
       }
@@ -230,7 +259,7 @@ export default class WalletImport {
       let watchOnly = new WatchOnlyWallet();
       watchOnly.setSecret(importText);
       if (watchOnly.valid()) {
-        await watchOnly.fetchTransactions();
+        // await watchOnly.fetchTransactions(); // experiment: dont fetch tx now. it will import faster. user can refresh his wallet later
         await watchOnly.fetchBalance();
         return WalletImport._saveWallet(watchOnly, additionalProperties);
       }

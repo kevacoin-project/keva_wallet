@@ -1,88 +1,35 @@
-/* global it, describe, jasmine, afterAll, beforeAll  */
+/* global it, describe */
 import { WatchOnlyWallet } from '../../class';
 let assert = require('assert');
-global.net = require('net'); // needed by Electrum client. For RN it is proviced in shim.js
-let BlueElectrum = require('../../BlueElectrum'); // so it connects ASAP
-
-afterAll(async () => {
-  // after all tests we close socket so the test suite can actually terminate
-  BlueElectrum.forceDisconnect();
-  return new Promise(resolve => setTimeout(resolve, 10000)); // simple sleep to wait for all timeouts termination
-});
-
-beforeAll(async () => {
-  // awaiting for Electrum to be connected. For RN Electrum would naturally connect
-  // while app starts up, but for tests we need to wait for it
-  await BlueElectrum.waitTillConnected();
-});
 
 describe('Watch only wallet', () => {
-  it('can fetch balance', async () => {
-    let w = new WatchOnlyWallet();
-    w.setSecret('1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa');
-    await w.fetchBalance();
-    assert.ok(w.getBalance() > 16);
-  });
-
-  it('can fetch tx', async () => {
-    jasmine.DEFAULT_TIMEOUT_INTERVAL = 150 * 1000;
-    let w = new WatchOnlyWallet();
-
-    w.setSecret('167zK5iZrs1U6piDqubD3FjRqUTM2CZnb8');
-    await w.fetchTransactions();
-    assert.strictEqual(w.getTransactions().length, 233);
-
-    w = new WatchOnlyWallet();
-    w.setSecret('1BiJW1jyUaxcJp2JWwbPLPzB1toPNWTFJV');
-    await w.fetchTransactions();
-    assert.strictEqual(w.getTransactions().length, 2);
-
-    // fetch again and make sure no duplicates
-    await w.fetchTransactions();
-    assert.strictEqual(w.getTransactions().length, 2);
-  });
-
-  it('can fetch complex TXs', async () => {
-    jasmine.DEFAULT_TIMEOUT_INTERVAL = 120 * 1000;
-    let w = new WatchOnlyWallet();
-    w.setSecret('3NLnALo49CFEF4tCRhCvz45ySSfz3UktZC');
-    await w.fetchTransactions();
-    for (let tx of w.getTransactions()) {
-      assert.ok(tx.value, 'incorrect tx.value');
-    }
-  });
-
   it('can validate address', async () => {
     let w = new WatchOnlyWallet();
-    w.setSecret('12eQ9m4sgAwTSQoNXkRABKhCXCsjm2jdVG');
-    assert.ok(w.valid());
-    assert.strictEqual(w.isHd(), false);
-    w.setSecret('3BDsBDxDimYgNZzsqszNZobqQq3yeUoJf2');
-    assert.ok(w.valid());
-    assert.strictEqual(w.isHd(), false);
+    for (let secret of [
+      'bc1quhnve8q4tk3unhmjts7ymxv8cd6w9xv8wy29uv',
+      '12eQ9m4sgAwTSQoNXkRABKhCXCsjm2jdVG',
+      '3BDsBDxDimYgNZzsqszNZobqQq3yeUoJf2',
+      'BC1QUHNVE8Q4TK3UNHMJTS7YMXV8CD6W9XV8WY29UV',
+    ]) {
+      w.setSecret(secret);
+      assert.ok(w.valid());
+      assert.strictEqual(w.isHd(), false);
+    }
+
     w.setSecret('not valid');
     assert.ok(!w.valid());
 
-    w.setSecret('xpub6CQdfC3v9gU86eaSn7AhUFcBVxiGhdtYxdC5Cw2vLmFkfth2KXCMmYcPpvZviA89X6DXDs4PJDk5QVL2G2xaVjv7SM4roWHr1gR4xB3Z7Ps');
-    assert.ok(w.valid());
-    w.setSecret('ypub6XRzrn3HB1tjhhvrHbk1vnXCecZEdXohGzCk3GXwwbDoJ3VBzZ34jNGWbC6WrS7idXrYjjXEzcPDX5VqnHEnuNf5VAXgLfSaytMkJ2rwVqy');
-    assert.ok(w.valid());
-    w.setSecret('zpub6r7jhKKm7BAVx3b3nSnuadY1WnshZYkhK8gKFoRLwK9rF3Mzv28BrGcCGA3ugGtawi1WLb2vyjQAX9ZTDGU5gNk2bLdTc3iEXr6tzR1ipNP');
-    assert.ok(w.valid());
-    assert.strictEqual(w.isHd(), true);
-    assert.strictEqual(w.getMasterFingerprint(), false);
-    assert.strictEqual(w.getMasterFingerprintHex(), '00000000');
-  });
-
-  it('can fetch balance & transactions from zpub HD', async () => {
-    jasmine.DEFAULT_TIMEOUT_INTERVAL = 100 * 1000;
-    let w = new WatchOnlyWallet();
-    w.setSecret('zpub6r7jhKKm7BAVx3b3nSnuadY1WnshZYkhK8gKFoRLwK9rF3Mzv28BrGcCGA3ugGtawi1WLb2vyjQAX9ZTDGU5gNk2bLdTc3iEXr6tzR1ipNP');
-    await w.fetchBalance();
-    assert.strictEqual(w.getBalance(), 200000);
-    await w.fetchTransactions();
-    assert.strictEqual(w.getTransactions().length, 4);
-    assert.ok((await w.getAddressAsync()).startsWith('bc1'));
+    for (let secret of [
+      'xpub6CQdfC3v9gU86eaSn7AhUFcBVxiGhdtYxdC5Cw2vLmFkfth2KXCMmYcPpvZviA89X6DXDs4PJDk5QVL2G2xaVjv7SM4roWHr1gR4xB3Z7Ps',
+      'ypub6XRzrn3HB1tjhhvrHbk1vnXCecZEdXohGzCk3GXwwbDoJ3VBzZ34jNGWbC6WrS7idXrYjjXEzcPDX5VqnHEnuNf5VAXgLfSaytMkJ2rwVqy',
+      'zpub6r7jhKKm7BAVx3b3nSnuadY1WnshZYkhK8gKFoRLwK9rF3Mzv28BrGcCGA3ugGtawi1WLb2vyjQAX9ZTDGU5gNk2bLdTc3iEXr6tzR1ipNP',
+    ]) {
+      w.setSecret(secret);
+      assert.ok(w.valid());
+      assert.strictEqual(w.isHd(), true);
+      assert.strictEqual(w.getMasterFingerprint(), false);
+      assert.strictEqual(w.getMasterFingerprintHex(), '00000000');
+    }
   });
 
   it('can create PSBT base64 without signature for HW wallet', async () => {
@@ -117,7 +64,6 @@ describe('Watch only wallet', () => {
   });
 
   it('can import coldcard/electrum compatible JSON skeleton wallet, and create a tx with master fingerprint', async () => {
-    jasmine.DEFAULT_TIMEOUT_INTERVAL = 120 * 1000;
     const skeleton =
       '{"keystore": {"ckcc_xpub": "xpub661MyMwAqRbcGmUDQVKxmhEESB5xTk8hbsdTSV3Pmhm3HE9Fj3s45R9Y8LwyaQWjXXPytZjuhTKSyCBPeNrB1VVWQq1HCvjbEZ27k44oNmg", "xpub": "zpub6rFDtF1nuXZ9PUL4XzKURh3vJBW6Kj6TUrYL4qPtFNtDXtcTVfiqjQDyrZNwjwzt5HS14qdqo3Co2282Lv3Re6Y5wFZxAVuMEpeygnnDwfx", "label": "Coldcard Import 168DD603", "ckcc_xfp": 64392470, "type": "hardware", "hw_type": "coldcard", "derivation": "m/84\'/0\'/0\'"}, "wallet_type": "standard", "use_encryption": false, "seed_version": 17}';
     let w = new WatchOnlyWallet();
@@ -174,35 +120,17 @@ describe('Watch only wallet', () => {
     );
   });
 
-  it('can fetch balance & transactions from ypub HD', async () => {
-    jasmine.DEFAULT_TIMEOUT_INTERVAL = 100 * 1000;
+  it('ypub watch-only can generate addresses', async () => {
     let w = new WatchOnlyWallet();
     w.setSecret('ypub6Y9u3QCRC1HkZv3stNxcQVwmw7vC7KX5Ldz38En5P88RQbesP2oy16hNyQocVCfYRQPxdHcd3pmu9AFhLv7NdChWmw5iNLryZ2U6EEHdnfo');
-    await w.fetchBalance();
-    assert.strictEqual(w.getBalance(), 51432);
-    await w.fetchTransactions();
-    assert.strictEqual(w.getTransactions().length, 107);
-    assert.ok((await w.getAddressAsync()).startsWith('3'));
+    w.init();
+    assert.ok((await w._getExternalAddressByIndex(0)).startsWith('3'));
   });
 
-  it('can fetch balance & transactions from xpub HD', async () => {
-    jasmine.DEFAULT_TIMEOUT_INTERVAL = 100 * 1000;
+  it('xpub watch-only can generate addresses', async () => {
     let w = new WatchOnlyWallet();
     w.setSecret('xpub6CQdfC3v9gU86eaSn7AhUFcBVxiGhdtYxdC5Cw2vLmFkfth2KXCMmYcPpvZviA89X6DXDs4PJDk5QVL2G2xaVjv7SM4roWHr1gR4xB3Z7Ps');
-    await w.fetchBalance();
-    assert.strictEqual(w.getBalance(), 0);
-    await w.fetchTransactions();
-    assert.strictEqual(w.getTransactions().length, 4);
-    assert.ok((await w.getAddressAsync()).startsWith('1'));
-  });
-
-  it('can fetch large HD', async () => {
-    jasmine.DEFAULT_TIMEOUT_INTERVAL = 500 * 1000;
-    let w = new WatchOnlyWallet();
-    w.setSecret('ypub6WnnYxkQCGeowv4BXq9Y9PHaXgHMJg9TkFaDJkunhcTAfbDw8z3LvV9kFNHGjeVaEoGdsSJgaMWpUBvYvpYGMJd43gTK5opecVVkvLwKttx');
-    await w.fetchBalance();
-
-    await w.fetchTransactions();
-    assert.ok(w.getTransactions().length >= 167);
+    w.init();
+    assert.ok((await w._getExternalAddressByIndex(0)).startsWith('1'));
   });
 });

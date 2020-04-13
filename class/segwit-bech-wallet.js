@@ -10,6 +10,10 @@ export class SegwitBech32Wallet extends LegacyWallet {
     let address;
     try {
       let keyPair = bitcoin.ECPair.fromWIF(this.secret);
+      if (!keyPair.compressed) {
+        console.warn('only compressed public keys are good for segwit');
+        return false;
+      }
       address = bitcoin.payments.p2wpkh({
         pubkey: keyPair.publicKey,
       }).address;
@@ -47,5 +51,9 @@ export class SegwitBech32Wallet extends LegacyWallet {
       return false;
     }
     return ret;
+  }
+
+  allowSend() {
+    return false;
   }
 }
