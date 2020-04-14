@@ -11,7 +11,7 @@ module.exports = {
     select_wallet: 'Selecteer portemonnee',
     options: 'opties',
     createBitcoinWallet:
-      'Om een Lightning-portemonnee te kunnen gebruiken, is een Bitcoin-portemonnee nodig om deze te financieren. Wil je toch doorgaan?',
+      'Om een Lightning-portemonnee te kunnen gebruiken, is een Kevacoin-portemonnee nodig om deze te financieren. Wil je toch doorgaan?',
     list: {
       app_name: 'BlueWallet',
       title: 'portemonnees',
@@ -26,7 +26,7 @@ module.exports = {
       empty_txs1_lightning:
         'Lightning wallet should be used for your daily transactions. Fees are unfairly cheap and speed is blazing fast.',
       empty_txs2_lightning: '\nTo start using it tap on "manage funds" and topup your balance.',
-      tap_here_to_buy: 'Klik hier om Bitcoin te kopen',
+      tap_here_to_buy: 'Klik hier om Kevacoin te kopen',
     },
     reorder: {
       title: 'Portemonnees opnieuw ordenen',
@@ -46,7 +46,7 @@ module.exports = {
       imported: 'Geïmporteerd',
       coming_soon: 'Komt binnenkort',
       lightning: 'Lightning',
-      bitcoin: 'Bitcoin',
+      bitcoin: 'Kevacoin',
     },
     details: {
       title: 'Portemonnee',
@@ -63,7 +63,7 @@ module.exports = {
       save: 'Opslaan',
       delete_this_wallet: 'Verwijder deze portemonnee',
       export_backup: 'Exporteren / back-up maken',
-      buy_bitcoin: 'Koop Bitcoin',
+      buy_bitcoin: 'Koop Kevacoin',
       show_xpub: 'Toon portemonnee XPUB',
     },
     export: {
@@ -125,8 +125,8 @@ module.exports = {
       total_exceeds_balance: 'Het verzendingsbedrag overschrijdt het beschikbare saldo.',
       create_tx_error: 'Er is een fout opgetreden bij het maken van de transactie. Zorg ervoor dat het adres geldig is.',
       address: 'adres',
-      amount_placeholder: 'te verzenden bedrag (in BTC)',
-      fee_placeholder: 'plus transactie vergoeding (in BTC)',
+      amount_placeholder: 'te verzenden bedrag (in KVA)',
+      fee_placeholder: 'plus transactie vergoeding (in KVA)',
       note_placeholder: 'notitie voor mezelf',
       cancel: 'Annuleren',
       scan: 'Scannen',
@@ -170,7 +170,7 @@ module.exports = {
     scan_lnurl: 'Scan to receive',
   },
   buyBitcoin: {
-    header: 'Koop Bitcoin',
+    header: 'Koop Kevacoin',
     tap_your_address: 'Tik op uw adres om het naar het klembord te kopiëren:',
     copied: 'Gekopieerd naar het klembord!',
   },

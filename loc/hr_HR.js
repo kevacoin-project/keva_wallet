@@ -11,7 +11,7 @@ module.exports = {
     select_wallet: 'Odaberi volet',
     options: 'opcije',
     createBitcoinWallet:
-      'You currently do not have a Bitcoin wallet. In order to fund a Lightning wallet, a Bitcoin wallet needs to be created or imported. Would you like to continue anyway?',
+      'You currently do not have a Kevacoin wallet. In order to fund a Lightning wallet, a Kevacoin wallet needs to be created or imported. Would you like to continue anyway?',
     list: {
       app_name: 'BlueWallet',
       title: 'Voleti',
@@ -45,7 +45,7 @@ module.exports = {
       imported: 'Unešeno',
       coming_soon: 'Dolazi uskoro',
       lightning: 'Lightning',
-      bitcoin: 'Bitcoin',
+      bitcoin: 'Kevacoin',
     },
     details: {
       title: 'Volet',
@@ -124,8 +124,8 @@ module.exports = {
       total_exceeds_balance: 'Iznos je veći od raspoloživog.',
       create_tx_error: 'Pogreška prilikom stvaranja transakcije. Molimo provijeri da je adresa ispravna.',
       address: 'adresa',
-      amount_placeholder: 'iznos za slanje (u BTC)',
-      fee_placeholder: 'plus trošak transakcije (u BTC)',
+      amount_placeholder: 'iznos za slanje (u KVA)',
+      fee_placeholder: 'plus trošak transakcije (u KVA)',
       note_placeholder: 'bilješka za evidenciju',
       cancel: 'Otkaži',
       scan: 'Skeniraj',

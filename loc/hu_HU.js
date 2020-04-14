@@ -11,7 +11,7 @@ module.exports = {
     select_wallet: 'Válassz tárcát',
     options: 'beállítások',
     createBitcoinWallet:
-      'Jelenleg még nincsen Bitcoin tárcád. Lightning tárca létrehozásához először készíts egy Bitcoin tárcát, vagy importálj egy már meglévő tárcát. Mindenképp folytatod?',
+      'Jelenleg még nincsen Kevacoin tárcád. Lightning tárca létrehozásához először készíts egy Kevacoin tárcát, vagy importálj egy már meglévő tárcát. Mindenképp folytatod?',
     list: {
       app_name: 'BlueWallet',
       title: 'tárcák',
@@ -26,7 +26,7 @@ module.exports = {
       empty_txs1_lightning:
         'A Lightning tárcát a mindennapi tranzakcióidhoz használhatod. A tranzakciók azonnal végrehajtódnak, minimális átutalási díjjal.',
       empty_txs2_lightning: '\nA kezdéshez kattints a "Kezelés"-re, és töltsd fel az egyenleged.',
-      tap_here_to_buy: 'Bitcoin vásárláshoz kattints ide',
+      tap_here_to_buy: 'Kevacoin vásárláshoz kattints ide',
     },
     reorder: {
       title: 'Tárcák rendezése',
@@ -46,7 +46,7 @@ module.exports = {
       imported: 'Importálva',
       coming_soon: 'Hamarosan',
       lightning: 'Lightning',
-      bitcoin: 'Bitcoin',
+      bitcoin: 'Kevacoin',
     },
     details: {
       title: 'Tárca',
@@ -63,7 +63,7 @@ module.exports = {
       save: 'Ment',
       delete_this_wallet: 'Töröld ezt a tárcát',
       export_backup: 'Exportálás / Biztonsági mentés',
-      buy_bitcoin: 'Bitcoin vásáslás',
+      buy_bitcoin: 'Kevacoin vásáslás',
       show_xpub: 'Mutasd a tárca XPUB kulcsát',
     },
     export: {
@@ -125,8 +125,8 @@ module.exports = {
       total_exceeds_balance: 'A megadott összeg nagyobb, mint a tárca elérhető egyenlege',
       create_tx_error: 'Hiba történt a tranzakció létrehozásakor. Ellenőrizd a megadott cím érvényességét.',
       address: 'cím',
-      amount_placeholder: 'küldendő összeg (BTC)',
-      fee_placeholder: 'tranzakciós díj (BTC)',
+      amount_placeholder: 'küldendő összeg (KVA)',
+      fee_placeholder: 'tranzakciós díj (KVA)',
       note_placeholder: 'saját megjegyzés',
       cancel: 'Megszakít',
       scan: 'Scan',
@@ -170,7 +170,7 @@ module.exports = {
     scan_lnurl: 'Scan to receive',
   },
   buyBitcoin: {
-    header: 'Bitcoin vásárlása',
+    header: 'Kevacoin vásárlása',
     tap_your_address: 'Kattints a címre a vágólapra másoláshoz:',
     copied: 'Vágólapra másolva!',
   },

@@ -11,12 +11,12 @@ module.exports = {
     select_wallet: 'Wähle eine Wallet',
     options: 'Einstellungen',
     createBitcoinWallet:
-      'Um eine Lightning wallet zu verwenden, muss erstmal eine Bitcoin Wallet eingerichtet werden. Bitte erstell oder importier eine Bitcoin Wallet.',
+      'Um eine Lightning wallet zu verwenden, muss erstmal eine Kevacoin Wallet eingerichtet werden. Bitte erstell oder importier eine Kevacoin Wallet.',
     list: {
       app_name: 'BlueWallet',
       title: 'Wallets',
       header:
-        'Eine Wallet spiegelt ein Paar kryptographische Schlüssel wider. Einen geheimen Schlüseel und eine Adresse als öffentlichen Schlüssel. Den öffentlichen Schlüssel kann man zum Empfang von Bitcoin teilen.',
+        'Eine Wallet spiegelt ein Paar kryptographische Schlüssel wider. Einen geheimen Schlüseel und eine Adresse als öffentlichen Schlüssel. Den öffentlichen Schlüssel kann man zum Empfang von Kevacoin teilen.',
       add: 'Wallet hinzufügen',
       create_a_wallet: 'Wallet erstellen',
       create_a_wallet1: 'Es ist kostenlos und du kannst',
@@ -27,7 +27,7 @@ module.exports = {
       empty_txs1_lightning:
         'Verwende das Lightning Wallet für Deine täglichen Bezahlungen. Lightning Transaktionen sind konkurrenzlos günstig und verblüffend schnell.',
       empty_txs2_lightning: '\nDrücke zum Starten «Beträge verwalten», um das Wallet zu laden.',
-      tap_here_to_buy: 'Klicke hier, um Bitcoin zu kaufen',
+      tap_here_to_buy: 'Klicke hier, um Kevacoin zu kaufen',
     },
     reorder: {
       title: 'Wallets neu ordnen',
@@ -47,7 +47,7 @@ module.exports = {
       imported: 'Importiert',
       coming_soon: 'Demnächst verfügbar',
       lightning: 'Lightning',
-      bitcoin: 'Bitcoin',
+      bitcoin: 'Kevacoin',
     },
     details: {
       title: 'Wallet',
@@ -64,7 +64,7 @@ module.exports = {
       save: 'Sichern',
       delete_this_wallet: 'Lösche diese Wallet',
       export_backup: 'Exportieren / Backup',
-      buy_bitcoin: 'Bitcoin kaufen',
+      buy_bitcoin: 'Kevacoin kaufen',
       show_xpub: 'Wallet XPUB zeigen',
     },
     export: {
@@ -126,8 +126,8 @@ module.exports = {
       total_exceeds_balance: 'Der zu sendende Betrag ist größer als der verfügbare Betrag.',
       create_tx_error: 'Fehler beim Erstellen der Transaktion. Bitte stelle sicher, dass die Adresse korrekt ist.',
       address: 'Adresse',
-      amount_placeholder: 'Betrag (in BTC)',
-      fee_placeholder: 'plus Gebühr (in BTC)',
+      amount_placeholder: 'Betrag (in KVA)',
+      fee_placeholder: 'plus Gebühr (in KVA)',
       note_placeholder: 'Notiz',
       cancel: 'Abbrechen',
       scan: 'Scannen',
@@ -171,7 +171,7 @@ module.exports = {
     scan_lnurl: 'Scannen, zum Erhalten',
   },
   buyBitcoin: {
-    header: 'Kaufe Bitcoin',
+    header: 'Kaufe Kevacoin',
     tap_your_address: 'Adresse antippen, um sie in die Zwischenablage zu kopieren:',
     copied: 'In die Zwischenablage kopiert!',
   },

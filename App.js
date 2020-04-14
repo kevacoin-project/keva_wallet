@@ -20,7 +20,7 @@ if (process.env.NODE_ENV !== 'development') {
   });
 }
 
-const bitcoinModalString = 'Bitcoin address';
+const bitcoinModalString = 'Kevacoin address';
 const lightningModalString = 'Lightning Invoice';
 const loc = require('./loc');
 const BlueApp = require('./BlueApp');

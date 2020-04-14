@@ -228,9 +228,11 @@ export default class WalletTransactions extends Component {
 
             For ONCHAIN wallet type no LappBrowser button should be displayed, its Lightning-network specific.
            */}
+          {/*
           {this.renderMarketplaceButton()}
           {this.state.wallet.type === LightningCustodianWallet.type && Platform.OS === 'ios' && this.renderLappBrowserButton()}
           {this.state.wallet.allowHodlHodlTrading() && this.renderHodlHodlButton()}
+          */}
         </View>
         <Text
           style={{
@@ -267,7 +269,7 @@ export default class WalletTransactions extends Component {
               onPress={a => {
                 const wallets = [...BlueApp.getWallets().filter(item => item.chain === Chain.ONCHAIN && item.allowSend())];
                 if (wallets.length === 0) {
-                  alert('In order to proceed, please create a Bitcoin wallet to refill with.');
+                  alert('In order to proceed, please create a Kevacoin wallet to refill with.');
                 } else {
                   this.setState({ isManageFundsModalVisible: false });
                   this.props.navigation.navigate('SelectWallet', { onWalletSelect: this.onWalletSelect, chainType: Chain.ONCHAIN });
@@ -557,7 +559,7 @@ export default class WalletTransactions extends Component {
       <View style={{ flex: 1 }}>
         {this.state.wallet.chain === Chain.ONCHAIN && this.state.isHandOffUseEnabled && (
           <Handoff
-            title={`Bitcoin Wallet ${this.state.wallet.getLabel()}`}
+            title={`Kevacoin Wallet ${this.state.wallet.getLabel()}`}
             type="io.bluewallet.bluewallet"
             url={`https://blockpath.com/search/addr?q=${this.state.wallet.getXpub()}`}
           />
@@ -640,7 +642,7 @@ export default class WalletTransactions extends Component {
                 <Text />
                 <Text />
 
-                {!this.isLightning() && (
+                {false && !this.isLightning() && (
                   <Text
                     style={{
                       fontSize: 18,

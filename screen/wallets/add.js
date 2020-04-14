@@ -56,9 +56,10 @@ export default class WalletsAdd extends Component {
 
     this.setState({
       isLoading: false,
-      activeBitcoin: undefined,
+      activeBitcoin: true,
+      selectedIndex: 2, //HD SegWit.
       label: '',
-      isAdvancedOptionsEnabled,
+      isAdvancedOptionsEnabled: false,
       walletBaseURI,
     });
   }
@@ -148,10 +149,11 @@ export default class WalletsAdd extends Component {
                   });
                 }}
                 style={{
-                  width: '45%',
-                  height: 88,
+                  width: '100%',
+                  height: 195,
                 }}
               />
+              {/*
               <View style={{ borderWidth: 0, justifyContent: 'center', marginHorizontal: 8, alignSelf: 'center' }}>
                 <BlueTextCentered style={{ color: '#0c2550' }}>{loc.wallets.add.or}</BlueTextCentered>
               </View>
@@ -169,6 +171,7 @@ export default class WalletsAdd extends Component {
                   height: 88,
                 }}
               />
+              */}
             </View>
 
             <View style={{ marginHorizontal: 20 }}>

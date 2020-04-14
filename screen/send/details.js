@@ -79,7 +79,7 @@ export default class SendDetails extends Component {
     const wallets = BlueApp.getWallets().filter(wallet => wallet.type !== LightningCustodianWallet.type);
 
     if (wallets.length === 0) {
-      alert('Before creating a transaction, you must first add a Bitcoin wallet.');
+      alert('Before creating a transaction, you must first add a Kevacoin wallet.');
       return props.navigation.goBack(null);
     } else {
       if (!fromWallet && wallets.length > 0) {
@@ -205,7 +205,7 @@ export default class SendDetails extends Component {
           this.setState({ addresses, memo: initialMemo, isLoading: false });
         } catch (error) {
           console.log(error);
-          alert('Error: Unable to decode Bitcoin address');
+          alert('Error: Unable to decode Kevacoin address');
         }
       }
     } else if (this.props.navigation.state.params.address) {
@@ -248,7 +248,7 @@ export default class SendDetails extends Component {
             } catch (error) {
               console.log(error);
               this.setState({ isLoading: false });
-              alert('Error: Unable to decode Bitcoin address');
+              alert('Error: Unable to decode Kevacoin address');
             }
           }
         }
@@ -593,7 +593,7 @@ export default class SendDetails extends Component {
       ReactNativeHapticFeedback.trigger('notificationWarning');
       Alert.alert(
         'Wallet Selection',
-        `The selected wallet does not support sending Bitcoin to multiple recipients. Are you sure to want to select this wallet?`,
+        `The selected wallet does not support sending Kevacoin to multiple recipients. Are you sure to want to select this wallet?`,
         [
           {
             text: loc._.ok,

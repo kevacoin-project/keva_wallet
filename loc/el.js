@@ -11,7 +11,7 @@ module.exports = {
     select_wallet: 'Διάλεξε Πορτοφόλι',
     options: 'επιλογές',
     createBitcoinWallet:
-      'Δεν έχεις πορτοφόλι Bitcoin. Για να βάλεις χρήματα στο πορτοφόλι Lightning, πρέπει πρώτα να δημιουργήσεις ή να εισάγεις ένα πορτοφόλι Bitcoin. Θα ήθελες να προχωρήσεις ούτως ή άλλως;',
+      'Δεν έχεις πορτοφόλι Kevacoin. Για να βάλεις χρήματα στο πορτοφόλι Lightning, πρέπει πρώτα να δημιουργήσεις ή να εισάγεις ένα πορτοφόλι Kevacoin. Θα ήθελες να προχωρήσεις ούτως ή άλλως;',
     list: {
       app_name: 'BlueWallet',
       title: 'πορτοφόλια',
@@ -28,7 +28,7 @@ module.exports = {
       empty_txs1_lightning:
         'Lightning wallet should be used for your daily transactions. Fees are unfairly cheap and speed is blazing fast.',
       empty_txs2_lightning: '\nTo start using it tap on "manage funds" and topup your balance.',
-      tap_here_to_buy: 'Πάτησε εδώ για να αγοράσεις Bitcoin',
+      tap_here_to_buy: 'Πάτησε εδώ για να αγοράσεις Kevacoin',
     },
     reorder: {
       title: 'Άλλαξε την σειρά των Πορτοφολιών',
@@ -48,7 +48,7 @@ module.exports = {
       imported: 'Εισήχθηκε',
       coming_soon: 'Σύντομα',
       lightning: 'Lightning',
-      bitcoin: 'Bitcoin',
+      bitcoin: 'Kevacoin',
     },
     details: {
       title: 'Πορτοφόλι',
@@ -65,7 +65,7 @@ module.exports = {
       save: 'Σώσε',
       delete_this_wallet: 'Διέγραψε το πορτοφόλι',
       export_backup: 'Εξήγαγε / δημιούργησε αντίγραφο ασφαλείας',
-      buy_bitcoin: 'Αγόρασε Bitcoin',
+      buy_bitcoin: 'Αγόρασε Kevacoin',
       show_xpub: 'Δείξε το XPUB του πορτοφολιού',
     },
     export: {
@@ -172,7 +172,7 @@ module.exports = {
     scan_lnurl: 'Scan to receive',
   },
   buyBitcoin: {
-    header: 'Αγόρασε Bitcoin',
+    header: 'Αγόρασε Kevacoin',
     tap_your_address: 'Πάτησε στην διεύθυνσή σου για να αντιγραφεί στο clipboard:',
     copied: 'Αντιγράφηκε στο Clipboard!',
   },

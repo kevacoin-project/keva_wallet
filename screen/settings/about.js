@@ -80,7 +80,7 @@ const About = () => {
               }}
             />
             <Text style={{ maxWidth: 260, marginVertical: 24, color: '#9AA0AA', fontSize: 15, textAlign: 'center', fontWeight: '500' }}>
-              BlueWallet is a free and open source project. Crafted by Bitcoin users.
+              BlueWallet is a free and open source project. Crafted by Kevacoin users.
             </Text>
             <Text style={{ maxWidth: 260, marginBottom: 40, color: '#0C2550', fontSize: 15, textAlign: 'center', fontWeight: '500' }}>
               Always backup your keys!

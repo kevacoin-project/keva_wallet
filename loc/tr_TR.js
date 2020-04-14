@@ -11,7 +11,7 @@ module.exports = {
     select_wallet: 'Cüzdan Seç',
     options: 'seçenekler',
     createBitcoinWallet:
-      'Şu anda Bitcoin cüzdanınız yok. Lightning cüzdanına yükleme yapmak için Bitcoin cüzdanı oluşturmak veya içeri yüklemek gerekir. Yine de devam etmek istiyor musunuz?',
+      'Şu anda Kevacoin cüzdanınız yok. Lightning cüzdanına yükleme yapmak için Kevacoin cüzdanı oluşturmak veya içeri yüklemek gerekir. Yine de devam etmek istiyor musunuz?',
     list: {
       app_name: 'BlueWallet',
       title: 'cüzdanlar',
@@ -26,7 +26,7 @@ module.exports = {
       empty_txs1_lightning:
         'Lightning wallet should be used for your daily transactions. Fees are unfairly cheap and speed is blazing fast.',
       empty_txs2_lightning: '\nTo start using it tap on "manage funds" and topup your balance.',
-      tap_here_to_buy: 'Bitcoin almak için buraya dokunun',
+      tap_here_to_buy: 'Kevacoin almak için buraya dokunun',
     },
     reorder: {
       title: 'Cüzdanları Sırala',
@@ -46,7 +46,7 @@ module.exports = {
       imported: 'Yüklendi',
       coming_soon: 'Yakında',
       lightning: 'Lightning',
-      bitcoin: 'Bitcoin',
+      bitcoin: 'Kevacoin',
     },
     details: {
       title: 'Cüzdan',
@@ -63,7 +63,7 @@ module.exports = {
       save: 'Kaydet',
       delete_this_wallet: 'Bu cüzdanı sil',
       export_backup: 'Dışa yükle / yedekle',
-      buy_bitcoin: 'Bitcoin satın al',
+      buy_bitcoin: 'Kevacoin satın al',
       show_xpub: 'Cüzdan XPUB göster',
     },
     export: {
@@ -125,8 +125,8 @@ module.exports = {
       total_exceeds_balance: 'Gönderme miktarı mevcut bakiyeyi aşıyor.',
       create_tx_error: 'İşlem oluşturulurken bir hata oluştu. Lütfen adresin geçerli olduğundan emin olun.',
       address: 'adres',
-      amount_placeholder: 'gönderilecek miktar (BTC cinsinden)',
-      fee_placeholder: 'artı işlem ücreti (BTC cinsinden)',
+      amount_placeholder: 'gönderilecek miktar (KVA cinsinden)',
+      fee_placeholder: 'artı işlem ücreti (KVA cinsinden)',
       note_placeholder: 'kendime not',
       cancel: 'Vazgeç',
       scan: 'Tara',
@@ -170,7 +170,7 @@ module.exports = {
     scan_lnurl: 'Scan to receive',
   },
   buyBitcoin: {
-    header: 'Bitcoin Satın al',
+    header: 'Kevacoin Satın al',
     tap_your_address: 'Panoya kopyalamak için adresinize dokunun:',
     copied: 'Panoya kopyalandı!',
   },

@@ -11,7 +11,7 @@ module.exports = {
     select_wallet: 'Velg Lommebok',
     options: 'innstillinger',
     createBitcoinWallet:
-      'Du har ingen Bitcoin-lommebok. For å finansiere en Lightning-lommebok, må en Bitcoin-lommebok være opprettet eller importert. Vil du fortsette uansett?',
+      'Du har ingen Kevacoin-lommebok. For å finansiere en Lightning-lommebok, må en Kevacoin-lommebok være opprettet eller importert. Vil du fortsette uansett?',
     list: {
       app_name: 'BlueWallet',
       title: 'lommebøker',
@@ -26,7 +26,7 @@ module.exports = {
       empty_txs1_lightning:
         'Lightning wallet should be used for your daily transactions. Fees are unfairly cheap and speed is blazing fast.',
       empty_txs2_lightning: '\nTo start using it tap on "manage funds" and topup your balance.',
-      tap_here_to_buy: 'Trykk her for å kjøpe Bitcoin',
+      tap_here_to_buy: 'Trykk her for å kjøpe Kevacoin',
     },
     reorder: {
       title: 'Omorganisere lommebøker',
@@ -46,7 +46,7 @@ module.exports = {
       imported: 'Importert',
       coming_soon: 'Kommer snart',
       lightning: 'Lightning',
-      bitcoin: 'Bitcoin',
+      bitcoin: 'Kevacoin',
     },
     details: {
       title: 'Lommebok',
@@ -63,7 +63,7 @@ module.exports = {
       save: 'Lagre',
       delete_this_wallet: 'Slett denne lommeboken',
       export_backup: 'Eksporter / backup',
-      buy_bitcoin: 'Kjøp Bitcoin',
+      buy_bitcoin: 'Kjøp Kevacoin',
       show_xpub: 'Vis lommebok XPUB',
     },
     export: {
@@ -125,8 +125,8 @@ module.exports = {
       total_exceeds_balance: 'Sendingsbeløpet overstiger den tilgjengelige saldoen.',
       create_tx_error: 'Det oppsto en feil under opprettelse av transaksjonen. Vennligst vær sikker på at adressen er gyldig.',
       address: 'adresse',
-      amount_placeholder: 'mengde å sende (i BTC)',
-      fee_placeholder: 'pluss transaksjonsgebyr (i BTC)',
+      amount_placeholder: 'mengde å sende (i KVA)',
+      fee_placeholder: 'pluss transaksjonsgebyr (i KVA)',
       note_placeholder: 'notat til meg selv',
       cancel: 'Avbryt',
       scan: 'Skanne',
@@ -170,7 +170,7 @@ module.exports = {
     scan_lnurl: 'Scan to receive',
   },
   buyBitcoin: {
-    header: 'Kjøp Bitcoin',
+    header: 'Kjøp Kevacoin',
     tap_your_address: 'Trykk på adressen din for å kopiere den til utklippstavlen:',
     copied: 'Kopiert til utklippstavlen!',
   },

@@ -11,7 +11,7 @@ module.exports = {
     select_wallet: 'Pilih dompet',
     options: 'Opsi',
     createBitcoinWallet:
-      'Belum ada dompet bitcoin. Untuk mendanai dompet Lightning, dompet Bitcoin harus dibuat atau diimpor. Yakin ingin melanjutkan?',
+      'Belum ada dompet bitcoin. Untuk mendanai dompet Lightning, dompet Kevacoin harus dibuat atau diimpor. Yakin ingin melanjutkan?',
     list: {
       app_name: 'BlueWallet',
       title: 'Dompet',
@@ -46,7 +46,7 @@ module.exports = {
       imported: 'Diimpor',
       coming_soon: 'Akan datang',
       lightning: 'Lightning',
-      bitcoin: 'Bitcoin',
+      bitcoin: 'Kevacoin',
     },
     details: {
       title: 'Dompet',
@@ -63,7 +63,7 @@ module.exports = {
       save: 'Simpan',
       delete_this_wallet: 'Hapus dompet ini',
       export_backup: 'Ekspor / backup',
-      buy_bitcoin: 'Beli Bitcoin',
+      buy_bitcoin: 'Beli Kevacoin',
       show_xpub: 'Tampilkan XPUB dompet',
     },
     export: {
@@ -124,8 +124,8 @@ module.exports = {
       total_exceeds_balance: 'Jumlah yang dikirim melebihi saldo.',
       create_tx_error: 'Kesalahan dalam membuat transaksi. Cek kembali alamat tujuan.',
       address: 'alamat',
-      amount_placeholder: 'jumlah (dalam BTC)',
-      fee_placeholder: 'Tambahan biaya transaksi (dalam BTC)',
+      amount_placeholder: 'jumlah (dalam KVA)',
+      fee_placeholder: 'Tambahan biaya transaksi (dalam KVA)',
       note_placeholder: 'catatan pribadi',
       cancel: 'Batalkan',
       scan: 'Pindai',

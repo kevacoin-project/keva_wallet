@@ -207,7 +207,7 @@ export default class ReceiveDetails extends Component {
       <SafeBlueArea style={{ flex: 1 }}>
         {this.state.isHandOffUseEnabled && this.state.address !== undefined && (
           <Handoff
-            title={`Bitcoin Transaction ${this.state.address}`}
+            title={`Kevacoin Transaction ${this.state.address}`}
             type="io.bluewallet.bluewallet"
             url={`https://blockstream.info/tx/${this.state.address}`}
           />

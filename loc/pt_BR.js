@@ -10,7 +10,7 @@ module.exports = {
   wallets: {
     options: 'opções',
     select_wallet: 'Escolher carteira',
-    createBitcoinWallet: 'Antes de criar a carteira Lightning é preciso criar uma carteira Bitcoin, tudo bem?',
+    createBitcoinWallet: 'Antes de criar a carteira Lightning é preciso criar uma carteira Kevacoin, tudo bem?',
 
     list: {
       tabBarLabel: 'Carteiras',
@@ -28,7 +28,7 @@ module.exports = {
         'A carteira Lightning faz transações super rápidas (coisa de segundos) e tem taxas ridiculamente baratas,' +
         ' ideal para transações diárias e de baixo valor.',
       empty_txs2_lightning: '\nPara começar a usar clique em "administrar fundos" e recarregue o seu saldo.',
-      tap_here_to_buy: 'Toque aqui para comprar Bitcoin',
+      tap_here_to_buy: 'Toque aqui para comprar Kevacoin',
     },
     reorder: {
       title: 'Reordenar carteiras',
@@ -48,7 +48,7 @@ module.exports = {
       imported: 'Importado',
       coming_soon: 'Em breve',
       lightning: 'Lightning',
-      bitcoin: 'Bitcoin',
+      bitcoin: 'Kevacoin',
     },
     details: {
       title: 'Carteira',
@@ -63,7 +63,7 @@ module.exports = {
       no_cancel: 'Não, cancelar',
       delete_this_wallet: 'Apagar esta carteira',
       export_backup: 'Exportar / backup',
-      buy_bitcoin: 'Comprar Bitcoin',
+      buy_bitcoin: 'Comprar Kevacoin',
       show_xpub: 'Ver XPUB',
       delete: 'Apagar',
       save: 'Salvar',
@@ -132,8 +132,8 @@ module.exports = {
       fee_field_is_not_valid: 'Campo de taxa não é válido',
       address_field_is_not_valid: 'Campo de endereço não é válido',
       receiver_placeholder: 'endereço de envio aqui',
-      amount_placeholder: 'quantia a enviar (em BTC)',
-      fee_placeholder: 'mais a taxa de transacção (em BTC)',
+      amount_placeholder: 'quantia a enviar (em KVA)',
+      fee_placeholder: 'mais a taxa de transacção (em KVA)',
       create_tx_error: 'Erro na criação da transação, por favor confira se o endereço é válido.',
       note_placeholder: 'Nota pessoal',
       cancel: 'Cancelar',
@@ -173,7 +173,7 @@ module.exports = {
     scan_lnurl: 'Receber lendo QR',
   },
   buyBitcoin: {
-    header: 'Comprar Bitcoin',
+    header: 'Comprar Kevacoin',
     tap_your_address: 'Toque seu endereço para copiá-lo para a área de transferência:',
     copied: 'Copiado!',
   },

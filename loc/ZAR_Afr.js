@@ -11,7 +11,7 @@
     select_wallet: 'Kies Beursie',
     options: 'opsies',
     createBitcoinWallet:
-      'U het nie huidiglik `n geldige Bitcoin Beursie nie. Skep of voer eers ‘n Bitcoin Beursie in, sodat ‘n Bitcoin Lightning Beursie geskep en bevonds mag word. Wil U voortgaan?',
+      'U het nie huidiglik `n geldige Kevacoin Beursie nie. Skep of voer eers ‘n Kevacoin Beursie in, sodat ‘n Kevacoin Lightning Beursie geskep en bevonds mag word. Wil U voortgaan?',
     list: {
       app_name: 'BlueWallet',
       title: 'beursies',
@@ -28,7 +28,7 @@
       empty_txs1_lightning:
         'Lightning wallet should be used for your daily transactions. Fees are unfairly cheap and speed is blazing fast.',
       empty_txs2_lightning: '\nTo start using it tap on "manage funds" and topup your balance.',
-      tap_here_to_buy: 'Raak hier om Bitcoin te koop',
+      tap_here_to_buy: 'Raak hier om Kevacoin te koop',
     },
     reorder: {
       title: 'Herorganiseer Beursies',
@@ -48,7 +48,7 @@
       imported: 'Ingevoer',
       coming_soon: 'In die toekoms',
       lightning: 'Lightning',
-      bitcoin: 'Bitcoin',
+      bitcoin: 'Kevacoin',
     },
     details: {
       title: 'Beursiet',
@@ -65,7 +65,7 @@
       save: 'Berg',
       delete_this_wallet: 'Vernietig hierdie beursie',
       export_backup: 'voer uit / kopieer',
-      buy_bitcoin: 'Koop Bitcoin',
+      buy_bitcoin: 'Koop Kevacoin',
       show_xpub: 'Wys beursie XPUB',
     },
     export: {
@@ -127,8 +127,8 @@
       total_exceeds_balance: 'Die bedrag is meer as die beskikbare balans.',
       create_tx_error: 'Daar was ‘n probleem met die skepping van die transaksie. Bevestig asseblief die adres is geldig.',
       address: 'adres',
-      amount_placeholder: 'bedrag om te stuur (in BTC)',
-      fee_placeholder: 'plus transaksie fooi (in BTC)',
+      amount_placeholder: 'bedrag om te stuur (in KVA)',
+      fee_placeholder: 'plus transaksie fooi (in KVA)',
       note_placeholder: 'persoonlike notas',
       cancel: 'Kanselleer',
       scan: 'Skandeer',
@@ -172,7 +172,7 @@
     scan_lnurl: 'Scan to receive',
   },
   buyBitcoin: {
-    header: 'Koop Bitcoin',
+    header: 'Koop Kevacoin',
     tap_your_address: 'Raak aan die adres om dit na die klipbord the stuur:',
     copied: 'Gekopieer na klipbord!',
   },

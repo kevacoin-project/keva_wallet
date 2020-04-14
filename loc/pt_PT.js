@@ -10,12 +10,12 @@ module.exports = {
   wallets: {
     options: 'opções',
     select_wallet: 'Seleccione uma Wallet',
-    createBitcoinWallet: 'Para poder usar uma wallet Lightning, é necessária uma wallet Bitcoin para a financiar. Deseja continuar?',
+    createBitcoinWallet: 'Para poder usar uma wallet Lightning, é necessária uma wallet Kevacoin para a financiar. Deseja continuar?',
 
     list: {
       app_name: 'BlueWallet',
       title: 'wallets',
-      header: 'Uma wallet representa um par entre um segredo (chave privada) e um endereço' + 'que pode partilhar para receber Bitcoin.',
+      header: 'Uma wallet representa um par entre um segredo (chave privada) e um endereço' + 'que pode partilhar para receber Kevacoin.',
       add: 'adicionar wallet',
       create_a_wallet: 'Adicionar uma wallet',
       create_a_wallet1: 'É gratuito e pode',
@@ -26,7 +26,7 @@ module.exports = {
       empty_txs1_lightning:
         'A wallet Lightning deve ser usada para as suas transações diárias. As taxas são muito baixas e a velocidade muito elevada',
       empty_txs2_lightning: '\nPara começar a usar toque em "gerir fundos" e recarregue o seu saldo.',
-      tap_here_to_buy: 'Toque aqui para comprar Bitcoin',
+      tap_here_to_buy: 'Toque aqui para comprar Kevacoin',
     },
     reorder: {
       title: 'Reordenar Wallets',
@@ -46,7 +46,7 @@ module.exports = {
       imported: 'Importada',
       coming_soon: 'Brevemente',
       lightning: 'Lightning',
-      bitcoin: 'Bitcoin',
+      bitcoin: 'Kevacoin',
     },
     details: {
       title: 'wallet',
@@ -63,7 +63,7 @@ module.exports = {
       no_cancel: 'Não, cancelar',
       delete_this_wallet: 'Apagar esta wallet',
       export_backup: 'Exportar / backup',
-      buy_bitcoin: 'Comprar Bitcoin',
+      buy_bitcoin: 'Comprar Kevacoin',
       show_xpub: 'Mostar XPUB da wallet',
     },
     export: {
@@ -130,8 +130,8 @@ module.exports = {
       fee_field_is_not_valid: 'Campo de taxa não é válido',
       address_field_is_not_valid: 'Campo de endereço não é válido',
       receiver_placeholder: 'endereço de envio aqui',
-      amount_placeholder: 'quantia a enviar (em BTC)',
-      fee_placeholder: 'mais a taxa de transacção (em BTC)',
+      amount_placeholder: 'quantia a enviar (em KVA)',
+      fee_placeholder: 'mais a taxa de transacção (em KVA)',
       create_tx_error: 'Houve um erro na criação da transacção. Por favor verifique que o endereço é válido.',
       note_placeholder: 'Nota pessoal',
       total_exceeds_balance: 'O valor total excede o saldo disponível.',
@@ -159,7 +159,7 @@ module.exports = {
     },
   },
   buyBitcoin: {
-    header: 'Comprar Bitcoin',
+    header: 'Comprar Kevacoin',
     tap_your_address: 'Toque no seu endereço para o copiar para o clipboard:',
     copied: 'Copied to Clipboard!',
   },

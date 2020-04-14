@@ -10,7 +10,7 @@ module.exports = {
   wallets: {
     select_wallet: 'Choix du portefeuille',
     options: 'options',
-    createBitcoinWallet: 'In order to use a Lightning wallet, a Bitcoin wallet is needed to fund it. Would you like to continue anyway?',
+    createBitcoinWallet: 'In order to use a Lightning wallet, a Kevacoin wallet is needed to fund it. Would you like to continue anyway?',
 
     list: {
       app_name: 'BlueWallet',
@@ -27,7 +27,7 @@ module.exports = {
       empty_txs1_lightning:
         'Lightning wallet should be used for your daily transactions. Fees are unfairly cheap and speed is blazing fast.',
       empty_txs2_lightning: '\nTo start using it tap on "manage funds" and topup your balance.',
-      tap_here_to_buy: 'Cliquez ici pour acheter du Bitcoin',
+      tap_here_to_buy: 'Cliquez ici pour acheter du Kevacoin',
     },
     reorder: {
       title: 'Trier vos portefeuilles',
@@ -47,7 +47,7 @@ module.exports = {
       imported: 'Importé',
       coming_soon: 'Bientôt',
       lightning: 'Lightning',
-      bitcoin: 'Bitcoin',
+      bitcoin: 'Kevacoin',
     },
     details: {
       title: 'Portefeuille',
@@ -64,7 +64,7 @@ module.exports = {
       save: 'Sauvegarder',
       delete_this_wallet: 'Supprimer ce portefeuille',
       export_backup: 'Exporter / sauvegarder',
-      buy_bitcoin: 'Acheter du Bitcoin',
+      buy_bitcoin: 'Acheter du Kevacoin',
       show_xpub: 'Afficher XPUB du portefeuille',
     },
     export: {
@@ -126,8 +126,8 @@ module.exports = {
       total_exceeds_balance: 'Le montant à envoyer excède le montant disponible.',
       create_tx_error: 'There was an error creating the transaction. Please, make sure the address is valid.',
       address: 'adresse',
-      amount_placeholder: 'montant à envoyer (en BTC)',
-      fee_placeholder: 'plus frais de transaction (en BTC)',
+      amount_placeholder: 'montant à envoyer (en KVA)',
+      fee_placeholder: 'plus frais de transaction (en KVA)',
       note_placeholder: 'note (optionnelle)',
       cancel: 'Annuler',
       scan: 'Scanner',
@@ -171,7 +171,7 @@ module.exports = {
     scan_lnurl: 'Scan to receive',
   },
   buyBitcoin: {
-    header: 'Acheter du Bitcoin',
+    header: 'Acheter du Kevacoin',
     tap_your_address: 'Cliquez votre adresse pour la copier:',
     copied: 'Copié dans le presse-papiers!',
   },

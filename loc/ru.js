@@ -10,12 +10,12 @@ module.exports = {
   wallets: {
     options: 'Настройки',
     select_wallet: 'Выбрать кошелек',
-    createBitcoinWallet: 'Чтобы воспользоватья кошельком Lightning, нужно сначала пополнить его с помощью кошелька Bitcoin. Продолжить?',
+    createBitcoinWallet: 'Чтобы воспользоватья кошельком Lightning, нужно сначала пополнить его с помощью кошелька Kevacoin. Продолжить?',
 
     list: {
       app_name: 'BlueWallet',
       title: 'Кошельки',
-      header: 'Кошелек - это секретный (приватный) ключ и соответствующий ему адрес на который можно получать Bitcoin',
+      header: 'Кошелек - это секретный (приватный) ключ и соответствующий ему адрес на который можно получать Kevacoin',
       add: 'Добавить Кошелек',
       create_a_wallet: 'Создать кошелек',
       create_a_wallet1: 'Это бесплатно и ты можешь создать',
@@ -26,7 +26,7 @@ module.exports = {
       empty_txs1_lightning:
         'Lightning wallet should be used for your daily transactions. Fees are unfairly cheap and speed is blazing fast.',
       empty_txs2_lightning: '\nTo start using it tap on "manage funds" and topup your balance.',
-      tap_here_to_buy: 'Купить Bitcoin',
+      tap_here_to_buy: 'Купить Kevacoin',
     },
     reorder: {
       title: 'Отсортировать кошельки',
@@ -46,7 +46,7 @@ module.exports = {
       imported: 'Кошелек импортирован',
       coming_soon: 'Скоро будет',
       lightning: 'Lightning',
-      bitcoin: 'Bitcoin',
+      bitcoin: 'Kevacoin',
     },
     details: {
       title: 'Информация о кошельке',
@@ -63,7 +63,7 @@ module.exports = {
       no_cancel: 'Нет, отмена',
       delete_this_wallet: 'Удалить этот кошелек',
       export_backup: 'Экспорт / резервная копия',
-      buy_bitcoin: 'Купить Bitcoin',
+      buy_bitcoin: 'Купить Kevacoin',
       show_xpub: 'Показать XPUB',
     },
     export: {
@@ -158,7 +158,7 @@ module.exports = {
     },
   },
   buyBitcoin: {
-    header: 'Купить Bitcoin',
+    header: 'Купить Kevacoin',
     tap_your_address: 'Нажми на адрес, чтобы скопировать его:',
     copied: 'Скопировано',
   },
@@ -203,14 +203,14 @@ module.exports = {
     title: 'Правдоподобная имитация',
     help:
       'При определенных обстоятельствах тебя могут вынудить раскрыть пароль. ' +
-      'Чтобы сохранить свой Bitcoin в безопасности, BlueWallet может создать ' +
+      'Чтобы сохранить свой Kevacoin в безопасности, BlueWallet может создать ' +
       'еще одно зашифрованое хранилище, с другим паролем. В случае шантажа ' +
       'ты можешь раскрыть третьим лицам этот пароль. Если ввести этот пароль в ' +
       "BlueWallet, разблокируется 'фальшивое' хранилище. Это будет выглядеть " +
       'правдоподобно для третьих лиц, но при этом сохранит ваше основное хранилище ' +
-      'с Bitcoin в безопасности.',
+      'с Kevacoin в безопасности.',
     help2:
-      'Новое хранилище будет полностью функциональным и ты даже можешь хранить на нем немного Bitcoin, ' +
+      'Новое хранилище будет полностью функциональным и ты даже можешь хранить на нем немного Kevacoin, ' +
       'чтобы это выглядело более правдоподобно.',
     create_fake_storage: 'Создать фальшивое хранилище',
     go_back: 'Назад',

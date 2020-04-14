@@ -10,7 +10,7 @@ module.exports = {
   wallets: {
     select_wallet: 'Vyberte peněženku',
     options: 'možnosti',
-    createBitcoinWallet: 'In order to use a Lightning wallet, a Bitcoin wallet is needed to fund it. Would you like to continue anyway?',
+    createBitcoinWallet: 'In order to use a Lightning wallet, a Kevacoin wallet is needed to fund it. Would you like to continue anyway?',
     list: {
       app_name: 'BlueWallet',
       title: 'peněženky',
@@ -45,7 +45,7 @@ module.exports = {
       imported: 'Importována',
       coming_soon: 'Již brzy',
       lightning: 'Lightning',
-      bitcoin: 'Bitcoin',
+      bitcoin: 'Kevacoin',
     },
     details: {
       title: 'Peněženka',
@@ -62,7 +62,7 @@ module.exports = {
       save: 'Uložit',
       delete_this_wallet: 'Smazat peněženku',
       export_backup: 'Exportovat / zálohovat',
-      buy_bitcoin: 'Koupit Bitcoin',
+      buy_bitcoin: 'Koupit Kevacoin',
       show_xpub: 'Ukázat XPUB',
     },
     export: {
@@ -124,8 +124,8 @@ module.exports = {
       total_exceeds_balance: 'Částka, kterou se snažíte poslat, přesahuje dostupný zůstatek.',
       create_tx_error: 'Nastala chyba při vytváření transakce. Prosím ujistěte se, že adresa je platná.',
       address: 'adresa',
-      amount_placeholder: 'částka k odeslání (v BTC)',
-      fee_placeholder: 'plus transakční poplatek (v BTC)',
+      amount_placeholder: 'částka k odeslání (v KVA)',
+      fee_placeholder: 'plus transakční poplatek (v KVA)',
       note_placeholder: 'poznámka pro sebe',
       cancel: 'Zrušit',
       scan: 'Skenovat',
@@ -169,7 +169,7 @@ module.exports = {
     scan_lnurl: 'Scan to receive',
   },
   buyBitcoin: {
-    header: 'Koupit Bitcoin',
+    header: 'Koupit Kevacoin',
     tap_your_address: 'Klikněte na svojí adresu pro zkopírování do schránky:',
     copied: 'Zkopírováno do schránky.',
   },

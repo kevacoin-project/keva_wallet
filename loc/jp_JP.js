@@ -11,7 +11,7 @@ module.exports = {
     select_wallet: 'ウォレット選択',
     options: 'オプション',
     createBitcoinWallet:
-      'Bitcoin ウォレットを持っていません。Lightning ウォレットへ課金する場合は Bitcoin ウォレットを新規作成するかインポートする必要があります。続行しますか?',
+      'Kevacoin ウォレットを持っていません。Lightning ウォレットへ課金する場合は Kevacoin ウォレットを新規作成するかインポートする必要があります。続行しますか?',
     list: {
       app_name: 'BlueWallet',
       title: 'ウォレット',
@@ -25,7 +25,7 @@ module.exports = {
       empty_txs2: '現在は何もありません',
       empty_txs1_lightning: 'Lightning ウォレットを日常の取引にご利用ください。手数料は安く、送金はあっという間に完了します。',
       empty_txs2_lightning: '\n利用を開始するには"資金の管理"をタップしてウォレットへ送金してください。',
-      tap_here_to_buy: 'Bitcoin を購入するにはここをタップ',
+      tap_here_to_buy: 'Kevacoin を購入するにはここをタップ',
     },
     reorder: {
       title: 'ウォレットの並び替え',
@@ -45,7 +45,7 @@ module.exports = {
       imported: 'インポート完了',
       coming_soon: '準備中',
       lightning: 'Lightning',
-      bitcoin: 'Bitcoin',
+      bitcoin: 'Kevacoin',
     },
     details: {
       title: 'ウォレット',
@@ -62,7 +62,7 @@ module.exports = {
       save: '保存',
       delete_this_wallet: 'このウォレットの削除',
       export_backup: 'エクスポート / バックアップ',
-      buy_bitcoin: 'Bitcoin の購入',
+      buy_bitcoin: 'Kevacoin の購入',
       show_xpub: 'ウォレット XPUB の表示',
     },
     export: {
@@ -124,8 +124,8 @@ module.exports = {
       total_exceeds_balance: '送金額が利用可能残額を超えています。',
       create_tx_error: '取引作成中にエラーが発生しました。有効な送金アドレスか確認してください。',
       address: 'アドレス',
-      amount_placeholder: '送金額 (BTC)',
-      fee_placeholder: '取引手数料 (BTC)',
+      amount_placeholder: '送金額 (KVA)',
+      fee_placeholder: '取引手数料 (KVA)',
       note_placeholder: 'ラベル',
       cancel: '中止',
       scan: '読取り',
@@ -169,7 +169,7 @@ module.exports = {
     scan_lnurl: 'Scan to receive',
   },
   buyBitcoin: {
-    header: 'Bitcoin の購入',
+    header: 'Kevacoin の購入',
     tap_your_address: 'タップしてアドレスをクリップボードにコピー:',
     copied: 'クリップボードにコピーしました!',
   },

@@ -10,7 +10,7 @@ module.exports = {
   wallets: {
     options: 'options',
     select_wallet: 'Select Wallet',
-    createBitcoinWallet: 'In order to use a Lightning wallet, a Bitcoin wallet is needed to fund it. Would you like to continue anyway?',
+    createBitcoinWallet: 'In order to use a Lightning wallet, a Kevacoin wallet is needed to fund it. Would you like to continue anyway?',
 
     list: {
       app_name: 'BlueWallet',
@@ -26,7 +26,7 @@ module.exports = {
       empty_txs1_lightning:
         'Lightning wallet should be used for your daily transactions. Fees are unfairly cheap and speed is blazing fast.',
       empty_txs2_lightning: '\nTo start using it tap on "manage funds" and topup your balance.',
-      tap_here_to_buy: 'Tap here to buy Bitcoin',
+      tap_here_to_buy: 'Tap here to buy Kevacoin',
     },
     reorder: {
       title: 'Reorder Wallets',
@@ -46,7 +46,7 @@ module.exports = {
       imported: 'імпортовано',
       coming_soon: 'Буде скоро',
       lightning: 'Lightning',
-      bitcoin: 'Bitcoin',
+      bitcoin: 'Kevacoin',
     },
     details: {
       title: 'Інформація про Гаманець',
@@ -63,7 +63,7 @@ module.exports = {
       no_cancel: 'Ні, відміна',
       delete_this_wallet: 'Видалити цей гаманець',
       export_backup: 'Експорт / резервна копія',
-      buy_bitcoin: 'Buy Bitcoin',
+      buy_bitcoin: 'Buy Kevacoin',
       show_xpub: 'Show wallet XPUB',
     },
     export: {
@@ -170,7 +170,7 @@ module.exports = {
     scan_lnurl: 'Scan to receive',
   },
   buyBitcoin: {
-    header: 'Buy Bitcoin',
+    header: 'Buy Kevacoin',
     tap_your_address: 'Tap your address to copy it to clipboard:',
     copied: 'Copied to Clipboard!',
   },

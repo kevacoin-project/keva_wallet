@@ -4,7 +4,7 @@ const signer = require('../models/signer');
 const BigNumber = require('bignumber.js');
 
 /**
- * Creates Segwit P2SH Bitcoin address
+ * Creates Segwit P2SH Kevacoin address
  * @param pubkey
  * @param network
  * @returns {String}

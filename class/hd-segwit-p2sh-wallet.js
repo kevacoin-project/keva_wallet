@@ -144,7 +144,7 @@ export class HDSegwitP2SHWallet extends AbstractHDElectrumWallet {
   }
 
   /**
-   * Creates Segwit P2SH Bitcoin address
+   * Creates Segwit P2SH Kevacoin address
    * @param hdNode
    * @returns {String}
    */

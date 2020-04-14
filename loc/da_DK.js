@@ -10,7 +10,7 @@ module.exports = {
   wallets: {
     select_wallet: 'Vælg wallet',
     options: 'valgmuligheder',
-    createBitcoinWallet: 'In order to use a Lightning wallet, a Bitcoin wallet is needed to fund it. Would you like to continue anyway?',
+    createBitcoinWallet: 'In order to use a Lightning wallet, a Kevacoin wallet is needed to fund it. Would you like to continue anyway?',
     list: {
       app_name: 'BlueWallet',
       title: 'wallets',
@@ -25,7 +25,7 @@ module.exports = {
       empty_txs1_lightning:
         'Lightning wallet should be used for your daily transactions. Fees are unfairly cheap and speed is blazing fast.',
       empty_txs2_lightning: '\nTo start using it tap on "manage funds" and topup your balance.',
-      tap_here_to_buy: 'Tryk her for at købe Bitcoin',
+      tap_here_to_buy: 'Tryk her for at købe Kevacoin',
     },
     reorder: {
       title: 'Ændre rækkefølgen af wallets',
@@ -45,7 +45,7 @@ module.exports = {
       imported: 'Importeret',
       coming_soon: 'Kommer snart',
       lightning: 'Lightning',
-      bitcoin: 'Bitcoin',
+      bitcoin: 'Kevacoin',
     },
     details: {
       title: 'Wallet',
@@ -62,7 +62,7 @@ module.exports = {
       save: 'Gem',
       delete_this_wallet: 'Slet denne wallet',
       export_backup: 'Eksporter / backup',
-      buy_bitcoin: 'Køb Bitcoin',
+      buy_bitcoin: 'Køb Kevacoin',
       show_xpub: 'Vis wallet XPUB',
     },
     export: {
@@ -124,8 +124,8 @@ module.exports = {
       total_exceeds_balance: 'Beløbet du prøver at sende er større end din kontosaldo.',
       create_tx_error: 'Der skete en fejl ved oprettelse af transaktionen. Check om addressen er gyldig.',
       address: 'adresse',
-      amount_placeholder: 'beløb der skal sendes (i BTC)',
-      fee_placeholder: 'plus transaktionsgebyr (i BTC)',
+      amount_placeholder: 'beløb der skal sendes (i KVA)',
+      fee_placeholder: 'plus transaktionsgebyr (i KVA)',
       note_placeholder: 'Notat til eget brug',
       cancel: 'Annuller',
       scan: 'Scan',
@@ -169,7 +169,7 @@ module.exports = {
     scan_lnurl: 'Scan to receive',
   },
   buyBitcoin: {
-    header: 'Køb Bitcoin',
+    header: 'Køb Kevacoin',
     tap_your_address: 'Tryk på addressen og kopier den til udklipsholder:',
     copied: 'Kopieret til udklipsholder!',
   },

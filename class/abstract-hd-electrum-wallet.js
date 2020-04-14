@@ -939,7 +939,7 @@ export class AbstractHDElectrumWallet extends AbstractHDWallet {
   }
 
   /**
-   * Creates Segwit Bech32 Bitcoin address
+   * Creates Segwit Bech32 Kevacoin address
    *
    * @param hdNode
    * @returns {String}

@@ -11,13 +11,13 @@ module.exports = {
     select_wallet: 'Seleziona Portafoglio',
     options: 'Opzioni',
     createBitcoinWallet:
-      'Non hai un portafoglio Bitcoin attualmente. Per ricaricare un portafoglio Lightning, è necessario creare o importare un portafoglio Bitcoin. Vuoi continuare lo stesso?',
+      'Non hai un portafoglio Kevacoin attualmente. Per ricaricare un portafoglio Lightning, è necessario creare o importare un portafoglio Kevacoin. Vuoi continuare lo stesso?',
     list: {
       app_name: 'BlueWallet',
       title: 'Portafogli',
       header:
         'Un portafoglio rappresenta la coppia fra un segreto (chiave privata) e un indirizzo' +
-        'che puoi condividere per ricevere Bitcoin.',
+        'che puoi condividere per ricevere Kevacoin.',
       add: 'Aggiungi Portafoglio',
       create_a_wallet: 'Crea un portafoglio',
       create_a_wallet1: 'È gratuito e puoi crearne',
@@ -28,7 +28,7 @@ module.exports = {
       empty_txs1_lightning:
         'Lightning wallet should be used for your daily transactions. Fees are unfairly cheap and speed is blazing fast.',
       empty_txs2_lightning: '\nTo start using it tap on "manage funds" and topup your balance.',
-      tap_here_to_buy: 'Clicca qui per comprare Bitcoin',
+      tap_here_to_buy: 'Clicca qui per comprare Kevacoin',
     },
     reorder: {
       title: 'Riordina Portafogli',
@@ -48,7 +48,7 @@ module.exports = {
       imported: 'Importato',
       coming_soon: 'In arrivo',
       lightning: 'Lightning',
-      bitcoin: 'Bitcoin',
+      bitcoin: 'Kevacoin',
     },
     details: {
       title: 'Portafoglio',
@@ -65,7 +65,7 @@ module.exports = {
       save: 'Salva',
       delete_this_wallet: 'Elimina questo portafoglio',
       export_backup: 'Esporta / Backup',
-      buy_bitcoin: 'Compra Bitcoin',
+      buy_bitcoin: 'Compra Kevacoin',
       show_xpub: 'Mostra XPUB del portafoglio',
     },
     export: {
@@ -172,7 +172,7 @@ module.exports = {
     scan_lnurl: 'Scan to receive',
   },
   buyBitcoin: {
-    header: 'Compra Bitcoin',
+    header: 'Compra Kevacoin',
     tap_your_address: 'Clicca sul tuo indirizzo per copiarlo negli appunti:',
     copied: 'Copiato negli appunti!',
   },
@@ -203,12 +203,12 @@ module.exports = {
     title: 'Negazione Plausibile',
     help:
       'In alcune circostanze, potresti essere costretto a rivelare la ' +
-      'password. Per mantenere i tuoi Bitcoin al sicuro, BlueWallet può creare un altro ' +
+      'password. Per mantenere i tuoi Kevacoin al sicuro, BlueWallet può creare un altro ' +
       'archivio criptato, con una password diversa. Se costretto, ' +
       'puoi rivelare questa password alle terze parti. Se inserita in ' +
       'BlueWallet, questa sbloccherà un "falso" archivio. Esso sembrerà ' +
       'autentico alle terze parti, ma manterrà segretamente il tuo archivio principale ' +
-      'con i Bitcoin al sicuro.',
+      'con i Kevacoin al sicuro.',
     help2: 'Il nuovo archivio sarà completamente funzionante, e puoi conservarci ' + 'piccole quantità così sembrerà più credibile.',
     create_fake_storage: 'Crea archivio falso criptato',
     go_back: 'Indietro',

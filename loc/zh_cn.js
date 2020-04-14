@@ -10,7 +10,7 @@ module.exports = {
   wallets: {
     select_wallet: '选择钱包',
     options: '选项',
-    createBitcoinWallet: '您当前没有bitcoin钱包. 为了支持闪电钱包, 我们需要创建或者导入一个比特币钱包. 是否需要继续?',
+    createBitcoinWallet: '您当前没有kevacoin钱包. 为了支持闪电钱包, 我们需要创建或者导入一个Kevacoin钱包. 是否需要继续?',
     list: {
       app_name: 'BlueWallet',
       title: '钱包',
@@ -25,7 +25,7 @@ module.exports = {
       empty_txs1_lightning:
         'Lightning wallet should be used for your daily transactions. Fees are unfairly cheap and speed is blazing fast.',
       empty_txs2_lightning: '\nTo start using it tap on "manage funds" and topup your balance.',
-      tap_here_to_buy: '点击购买比特币',
+      tap_here_to_buy: '点击购买Kevacoin',
     },
     reorder: {
       title: '重新排列钱包',
@@ -44,7 +44,7 @@ module.exports = {
       imported: '已经导入',
       coming_soon: '即将来临',
       lightning: '闪电',
-      bitcoin: '比特币',
+      bitcoin: 'Kevacoin',
     },
     details: {
       title: '钱包',
@@ -61,7 +61,7 @@ module.exports = {
       save: '保存',
       delete_this_wallet: '删除这个钱包',
       export_backup: '导出备份',
-      buy_bitcoin: '购买比特币',
+      buy_bitcoin: '购买Kevacoin',
       show_xpub: '展示钱包 XPUB',
     },
     export: {
@@ -122,8 +122,8 @@ module.exports = {
       total_exceeds_balance: '余额不足',
       create_tx_error: '创建交易失败. 请确认地址格式正确.',
       address: '地址',
-      amount_placeholder: '发送金额(in BTC)',
-      fee_placeholder: '手续费用 (in BTC)',
+      amount_placeholder: '发送金额(in KVA)',
+      fee_placeholder: '手续费用 (in KVA)',
       note_placeholder: '消息',
       cancel: '取消',
       scan: '扫描',
@@ -167,7 +167,7 @@ module.exports = {
     scan_lnurl: 'Scan to receive',
   },
   buyBitcoin: {
-    header: '购买比特币',
+    header: '购买Kevacoin',
     tap_your_address: '点击地址复制到粘贴板:',
     copied: '复制到粘贴板!',
   },
@@ -196,7 +196,7 @@ module.exports = {
     title: '可否认性',
     help:
       '在某些情况下, 你不得不暴露 ' +
-      '密码. 为了让你的比特币更加安全, BlueWallet可以创建一些 ' +
+      '密码. 为了让你的Kevacoin更加安全, BlueWallet可以创建一些 ' +
       '加密空间, 用不同的密码. 在压力之下, ' +
       '你可以暴露这个钱包密码. 再次进入 ' +
       'BlueWallet, 我们会解锁一些虚拟空间. 对第三方来说看上去' +

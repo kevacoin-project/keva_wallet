@@ -1,10 +1,10 @@
 Guardar, enviar e receber bitcoin com uma carteira focada na segurança e simplicidade.
 
-Na BlueWallet você possui as suas chaves privadas. Uma carteira Bitcoin focada nos usuários.
+Na BlueWallet você possui as suas chaves privadas. Uma carteira Kevacoin focada nos usuários.
 
 Você pode instantaneamente transacionar com qualquer pessoa no mundo e transformar o sistema financeiro diretamente do seu bolso.
 
-Crie carteiras Bitcoin ilimitadas e gratuitamente, ou acesse as suas carteiras existentes através do seu dispositivo iOS. É simples e rápido.
+Crie carteiras Kevacoin ilimitadas e gratuitamente, ou acesse as suas carteiras existentes através do seu dispositivo iOS. É simples e rápido.
 
 As funcionalidades disponíveis:
 
@@ -34,4 +34,4 @@ Substituição de Fee (RBF)
 Acelere as suas transações aumentendo o fee (BIP125). Pode também alterar o endereço de destinatário em transações não confirmadas
 
 Carteira Sentinela
-Carteira de "assitir apenas", observe o seu armazenamento externo de Bitcoin sem ter de lhe tocar
+Carteira de "assitir apenas", observe o seu armazenamento externo de Kevacoin sem ter de lhe tocar
