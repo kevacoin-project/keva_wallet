@@ -1,6 +1,5 @@
 import { LegacyWallet } from './legacy-wallet';
 import Frisbee from 'frisbee';
-import bolt11 from 'bolt11';
 import { BitcoinUnit, Chain } from '../models/bitcoinUnits';
 
 export class LightningCustodianWallet extends LegacyWallet {
@@ -533,7 +532,8 @@ export class LightningCustodianWallet extends LegacyWallet {
    * @return {Promise.<Object>}
    */
   decodeInvoice(invoice) {
-    let { payeeNodeKey, tags, satoshis, millisatoshis, timestamp } = bolt11.decode(invoice);
+    //let { payeeNodeKey, tags, satoshis, millisatoshis, timestamp } = bolt11.decode(invoice);
+    let { payeeNodeKey, tags, satoshis, millisatoshis, timestamp } = {};
 
     let decoded = {
       destination: payeeNodeKey,

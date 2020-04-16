@@ -7,6 +7,10 @@ import { AbstractHDElectrumWallet } from './abstract-hd-electrum-wallet';
 const bitcoin = require('bitcoinjs-lib');
 const HDNode = require('bip32');
 
+//TODO: update for Kevacoin.
+const ypub_VERSION      = '049d7cb2';
+const ypub_VERSION_HEX  = 0x049d7cb2;
+
 /**
  * HD Wallet (BIP39).
  * In particular, BIP49 (P2SH Segwit)
@@ -91,7 +95,7 @@ export class HDSegwitP2SHWallet extends AbstractHDElectrumWallet {
     // bitcoinjs does not support ypub yet, so we just convert it from xpub
     let data = b58.decode(xpub);
     data = data.slice(4);
-    data = Buffer.concat([Buffer.from('049d7cb2', 'hex'), data]);
+    data = Buffer.concat([Buffer.from(ypub_VERSION, 'hex'), data]);
     this._xpub = b58.encode(data);
 
     return this._xpub;
@@ -136,8 +140,11 @@ export class HDSegwitP2SHWallet extends AbstractHDElectrumWallet {
    */
   static _ypubToXpub(ypub) {
     let data = b58.decode(ypub);
-    if (data.readUInt32BE() !== 0x049d7cb2) throw new Error('Not a valid ypub extended key!');
+    if (data.readUInt32BE() !== ypub_VERSION_HEX) throw new Error('Not a valid ypub extended key!');
     data = data.slice(4);
+
+    //TODO: change it for Kevacoin.
+    //data = Buffer.concat([Buffer.from('01ada464', 'hex'), data]);
     data = Buffer.concat([Buffer.from('0488b21e', 'hex'), data]);
 
     return b58.encode(data);

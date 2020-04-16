@@ -5,7 +5,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
-	<string>BlueWallet</string>
+	<string>KevaWallet</string>
 	<key>CFBundleDocumentTypes</key>
 	<array>
 		<dict>
