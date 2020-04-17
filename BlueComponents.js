@@ -991,7 +991,7 @@ const stylesBlueIcon = StyleSheet.create({
     width: 30,
     height: 30,
     borderRadius: 15,
-    backgroundColor: '#ccddf9',
+    backgroundColor: '#d97b9b',
   },
   ballIncoming: {
     width: 30,
@@ -1056,7 +1056,7 @@ export class BluePlusIcon extends Component {
               name={'ios-add'}
               size={26}
               style={{
-                color: BlueApp.settings.foregroundColor,
+                color: "#ffffff",
                 backgroundColor: 'transparent',
                 left: 8,
                 top: 1,
