@@ -9,7 +9,7 @@ import { PlaceholderWallet } from './placeholder-wallet';
 import { SegwitBech32Wallet } from './segwit-bech-wallet';
 
 export default class WalletGradient {
-  static hdSegwitP2SHWallet = ['#65ceef', '#68bbe1'];
+  static hdSegwitP2SHWallet = ['#d56c8f', '#d97b9b'];
   static hdSegwitBech32Wallet = ['#68bbe1', '#3b73d4'];
   static segwitBech32Wallet = ['#f8bbe1', '#945a90'];
   static watchOnlyWallet = ['#7d7d7d', '#4a4a4a'];

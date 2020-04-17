@@ -36,9 +36,9 @@ export class AppStorage {
     this.settings = {
       brandingColor: '#ffffff',
       foregroundColor: '#0c2550',
-      buttonBackgroundColor: '#ccddf9',
-      buttonTextColor: '#0c2550',
-      buttonAlternativeTextColor: '#2f5fb3',
+      buttonBackgroundColor: '#c83f6d',
+      buttonTextColor: '#ffffff',
+      buttonAlternativeTextColor: '#ffffff',
       buttonDisabledBackgroundColor: '#eef0f4',
       buttonDisabledTextColor: '#9aa0aa',
       inputBorderColor: '#d2d2d2',
@@ -54,8 +54,8 @@ export class AppStorage {
       failedColor: '#ff0000',
       shadowColor: '#000000',
       inverseForegroundColor: '#ffffff',
-      hdborderColor: '#68BBE1',
-      hdbackgroundColor: '#ECF9FF',
+      hdborderColor: '#df8faa',
+      hdbackgroundColor: '#f1cfda',
       lnborderColor: '#F7C056',
       lnbackgroundColor: '#FFFAEF',
     };
