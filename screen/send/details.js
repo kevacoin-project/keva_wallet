@@ -1039,6 +1039,7 @@ export default class SendDetails extends Component {
                   inputAccessoryViewID={BlueDismissKeyboardInputAccessory.InputAccessoryViewID}
                 />
               </View>
+              {/*
               <TouchableOpacity
                 onPress={() => this.setState({ isFeeSelectionModalVisible: true })}
                 disabled={this.state.isLoading}
@@ -1061,6 +1062,7 @@ export default class SendDetails extends Component {
                   <Text style={{ color: '#37c0a1', paddingRight: 4, textAlign: 'left' }}>sat/b</Text>
                 </View>
               </TouchableOpacity>
+              */}
               {this.renderCreateButton()}
               {this.renderFeeSelectionModal()}
               {this.renderAdvancedTransactionOptionsModal()}

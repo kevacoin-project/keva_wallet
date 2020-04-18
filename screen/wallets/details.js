@@ -244,7 +244,7 @@ export default class WalletDetails extends Component {
                     </React.Fragment>
                   )}
 
-                  {this.state.wallet.type !== LightningCustodianWallet.type && (
+                  {false && this.state.wallet.type !== LightningCustodianWallet.type && (
                     <BlueButton
                       icon={{
                         name: 'shopping-cart',
