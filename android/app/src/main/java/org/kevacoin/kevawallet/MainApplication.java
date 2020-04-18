@@ -1,4 +1,4 @@
-package io.bluewallet.bluewallet;
+package org.kevacoin.kevawallet;
 
 import android.app.Application;
 import android.content.Context;
@@ -72,4 +72,3 @@ public class MainApplication extends Application implements ReactApplication {
     }
   }
 }
- 

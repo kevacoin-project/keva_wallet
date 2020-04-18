@@ -1,4 +1,4 @@
-package io.bluewallet.bluewallet;
+package org.kevacoin.kevawallet;
 
 import com.facebook.react.ReactActivity;
 

@@ -38,7 +38,7 @@ const About = () => {
   };
 
   const handleOnTwitterPress = () => {
-    Linking.openURL('https://twitter.com/bluewalletio');
+    Linking.openURL('https://twitter.com/kevacoin');
   };
 
   const handleOnGithubPress = () => {
@@ -52,11 +52,11 @@ const About = () => {
   const handleOnRatePress = () => {
     const options = {
       AppleAppID: '1376878040',
-      GooglePackageName: 'io.bluewallet.bluewallet',
+      GooglePackageName: 'org.kevacoin.kevawallet',
       preferredAndroidMarket: AndroidMarket.Google,
       preferInApp: true,
       openAppStoreIfInAppFails: true,
-      fallbackPlatformURL: 'https://bluewallet.io',
+      fallbackPlatformURL: 'https://kevacoin.org',
     };
     Rate.rate(options, success => {
       if (success) {
@@ -80,7 +80,7 @@ const About = () => {
               }}
             />
             <Text style={{ maxWidth: 260, marginVertical: 24, color: '#9AA0AA', fontSize: 15, textAlign: 'center', fontWeight: '500' }}>
-              BlueWallet is a free and open source project. Crafted by Kevacoin users.
+              KevaWallet is a free and open source project. Crafted by Kevacoin users.
             </Text>
             <Text style={{ maxWidth: 260, marginBottom: 40, color: '#0C2550', fontSize: 15, textAlign: 'center', fontWeight: '500' }}>
               Always backup your keys!
@@ -97,6 +97,7 @@ const About = () => {
           onPress={handleOnTwitterPress}
           title="Follow us on Twitter"
         />
+        {/*
         <BlueListItem
           leftIcon={{
             name: 'telegram',
@@ -115,6 +116,7 @@ const About = () => {
           onPress={handleOnGithubPress}
           title="GitHub"
         />
+        */}
         <BlueCard>
           <View style={{ backgroundColor: '#f9f9f9', padding: 16, paddingTop: 0, borderRadius: 8 }}>
             <BlueSpacing20 />
@@ -145,6 +147,7 @@ const About = () => {
           onPress={handleOnLicensingPress}
           title="MIT License"
         />
+        {/*
         <BlueListItem
           leftIcon={{
             name: 'flask',
@@ -155,6 +158,7 @@ const About = () => {
           title="Run self test"
           testID="RunSelfTestButton"
         />
+        */}
         <BlueSpacing20 />
         <BlueSpacing20 />
         <BlueTextCentered>
