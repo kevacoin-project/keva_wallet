@@ -57,9 +57,9 @@ export default class WalletsAdd extends Component {
     this.setState({
       isLoading: false,
       activeBitcoin: true,
-      selectedIndex: 2, //HD SegWit.
+      selectedIndex: 0, //HD SegWit Multiple Address.
       label: '',
-      isAdvancedOptionsEnabled: false,
+      isAdvancedOptionsEnabled,
       walletBaseURI,
     });
   }
@@ -182,14 +182,16 @@ export default class WalletsAdd extends Component {
                       <BlueSpacing20 />
                       <Text style={{ color: '#0c2550', fontWeight: '500' }}>{loc.settings.advanced_options}</Text>
                       <RadioGroup onSelect={(index, value) => this.onSelect(index, value)} selectedIndex={0}>
+                        {/*
                         <RadioButton value={HDSegwitBech32Wallet.type}>
                           <BlueText>{HDSegwitBech32Wallet.typeReadable} - Multiple addresses</BlueText>
                         </RadioButton>
-                        <RadioButton value={SegwitP2SHWallet.type}>
-                          <BlueText>{SegwitP2SHWallet.typeReadable} - Single address</BlueText>
-                        </RadioButton>
+                        */}
                         <RadioButton value={HDSegwitP2SHWallet.type}>
                           <BlueText>{HDSegwitP2SHWallet.typeReadable} - Multiple addresses</BlueText>
+                        </RadioButton>
+                        <RadioButton value={SegwitP2SHWallet.type}>
+                          <BlueText>{SegwitP2SHWallet.typeReadable} - Single address</BlueText>
                         </RadioButton>
                       </RadioGroup>
                     </View>
@@ -294,7 +296,7 @@ export default class WalletsAdd extends Component {
                             });
                           };
                           this.createLightningWallet();
-                        } else if (this.state.selectedIndex === 2) {
+                        } else if (this.state.selectedIndex === 0) {
                           // zero index radio - HD segwit
                           w = new HDSegwitP2SHWallet();
                           w.setLabel(this.state.label || loc.wallets.details.title);
