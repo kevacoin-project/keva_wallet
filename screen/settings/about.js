@@ -85,7 +85,7 @@ const About = () => {
             <Text style={{ maxWidth: 260, marginBottom: 40, color: '#0C2550', fontSize: 15, textAlign: 'center', fontWeight: '500' }}>
               Always backup your keys!
             </Text>
-            <BlueButton onPress={handleOnRatePress} title="help with a review ⭐🙏" />
+            <BlueButton onPress={handleOnRatePress} title="help with a review ⭐" />
           </View>
         </BlueCard>
         <BlueListItem
@@ -123,6 +123,7 @@ const About = () => {
 
             <BlueTextCentered>Built with the awesome 👍</BlueTextCentered>
             <BlueSpacing20 />
+            <BlueTextCentered>BlueWallet</BlueTextCentered>
             <BlueTextCentered>React Native</BlueTextCentered>
             <BlueTextCentered>bitcoinjs-lib</BlueTextCentered>
             <BlueTextCentered>Nodejs</BlueTextCentered>
