@@ -165,8 +165,8 @@ export default class Confirm extends Component {
                   alignSelf: 'center',
                 }}
               >
-                {loc.send.create.fee}: {loc.formatBalance(this.state.feeSatoshi, BitcoinUnit.BTC)} (
-                {currency.satoshiToLocalCurrency(this.state.feeSatoshi)})
+                {loc.send.create.fee}: {loc.formatBalance(this.state.feeSatoshi, BitcoinUnit.BTC)} {/*(
+                {currency.satoshiToLocalCurrency(this.state.feeSatoshi)}) */}
               </Text>
               <BlueSpacing40 />
               {this.state.isLoading ? (
