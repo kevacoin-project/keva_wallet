@@ -2,7 +2,7 @@ import 'intl';
 import 'intl/locale-data/jsonp/en';
 import React from 'react';
 import './shim.js';
-import { AppRegistry } from 'react-native';
+import { AppRegistry, StyleSheet, View, Text } from 'react-native';
 import WalletMigrate from './screen/wallets/walletMigrate';
 import { name as appName } from './app.json';
 import App from './App';
@@ -64,17 +64,38 @@ class BlueAppComponent extends React.Component {
         );
       } else {
         return (
-          <LottieView
-            ref={ref => (this.loadingSplash = ref)}
-            onAnimationFinish={this.onAnimationFinish}
-            source={require('./img/bluewalletsplash.json')}
-            autoPlay
-            loop={false}
-          />
+          <View style={styles.lottieContainer}>
+            <LottieView
+              ref={ref => (this.loadingSplash = ref)}
+              onAnimationFinish={this.onAnimationFinish}
+              source={require('./img/bluewalletsplash.json')}
+              autoPlay
+              loop={false}
+            />
+            <Text style={styles.keva}>
+              {"KEVA"}
+            </Text>
+          </View>
         );
       }
     }
   }
 }
+
+const styles = StyleSheet.create({
+  lottieContainer: {
+    flex: 1,
+    flexDirection: 'column',
+    justifyContent: 'flex-end'
+  },
+  keva: {
+    alignSelf: 'center',
+    fontSize: 42,
+    fontWeight: "100",
+    marginBottom: 80,
+    color: '#b1325d',
+    letterSpacing: 16
+  }
+});
 
 AppRegistry.registerComponent(appName, () => BlueAppComponent);
