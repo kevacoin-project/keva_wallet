@@ -19,7 +19,7 @@ const Settings = () => {
       <BlueHeaderDefaultSub leftText={loc.settings.header} rightComponent={null} />
       <ScrollView>
         <BlueListItem title={'General'} component={TouchableOpacity} onPress={() => navigate('GeneralSettings')} />
-        <BlueListItem title={loc.settings.currency} component={TouchableOpacity} onPress={() => navigate('Currency')} />
+        {/* <BlueListItem title={loc.settings.currency} component={TouchableOpacity} onPress={() => navigate('Currency')} /> */}
         <BlueListItem title={loc.settings.language} component={TouchableOpacity} onPress={() => navigate('Language')} />
         <BlueListItem title="Security" onPress={() => navigate('EncryptStorage')} component={TouchableOpacity} testID="SecurityButton" />
         <BlueListItem title="Network" component={TouchableOpacity} onPress={() => navigate('NetworkSettings')} />

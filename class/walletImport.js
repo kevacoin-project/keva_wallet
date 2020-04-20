@@ -250,8 +250,10 @@ export default class WalletImport {
       }
 
       // is it even valid? if yes we will import as:
-      if (hd4.validateMnemonic()) {
-        return WalletImport._saveWallet(hd4);
+      // Kevacoin: if balance is zero, default to HD SegWit (hd2).
+      // This is different from BlueWallet, which default to hd4.
+      if (hd2.validateMnemonic()) {
+        return WalletImport._saveWallet(hd2);
       }
 
       // not valid? maybe its a watch-only address?
