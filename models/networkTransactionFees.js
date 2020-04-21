@@ -21,6 +21,10 @@ export class NetworkTransactionFee {
   }
 }
 
+const FALLBACK_FAST_FEE     = 0.02;
+const FALLBACK_MEDIUMN_FEE  = 0.01;
+const FALLBACK_SLOW_FEE     = 0.005;
+
 export default class NetworkTransactionFees {
   static recommendedFees() {
     return new Promise(async (resolve, reject) => {
@@ -28,21 +32,21 @@ export default class NetworkTransactionFees {
         let response = await BlueElectrum.estimateFees();
         if (typeof response === 'object') {
           const fast = loc.formatBalanceWithoutSuffix(
-            new BigNumber(response.fast)
+            new BigNumber(response.fast > 0 ? response.fast : FALLBACK_FAST_FEE)
               .multipliedBy(100000)
               .toNumber()
               .toFixed(0),
             BitcoinUnit.SATS,
           );
           const medium = loc.formatBalanceWithoutSuffix(
-            new BigNumber(response.medium)
+            new BigNumber(response.medium > 0 ? response.medium : FALLBACK_MEDIUMN_FEE)
               .multipliedBy(100000)
               .toNumber()
               .toFixed(0),
             BitcoinUnit.SATS,
           );
           const slow = loc.formatBalanceWithoutSuffix(
-            new BigNumber(response.slow)
+            new BigNumber(response.slow > 0 ? response.slow : FALLBACK_SLOW_FEE)
               .multipliedBy(100000)
               .toNumber()
               .toFixed(0),
