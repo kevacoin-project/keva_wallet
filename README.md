@@ -1,7 +1,7 @@
 # KevaWallet - A Kevacoin Wallet
 
 Thin Kevacoin Wallet.
-Built with React Native and Electrum.This project is based on the open-source (BlueWallet)[https://github.com/BlueWallet/BlueWallet] Bitcoin wallet.
+Built with React Native and Electrum.This project is based on the open-source [BlueWallet](https://github.com/BlueWallet/BlueWallet) Bitcoin wallet.
 
 ## BUILD & RUN IT
 
