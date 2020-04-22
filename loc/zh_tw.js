@@ -3,7 +3,7 @@ module.exports = {
     storage_is_encrypted: '你的資訊已經被加密， 請輸入密碼解密',
     enter_password: '輸入密碼',
     bad_password: '密碼無效，請重試',
-    never: '不',
+    never: '無',
     continue: '繼續',
     ok: '好的',
   },
@@ -101,7 +101,7 @@ module.exports = {
       tabBarLabel: '轉賬',
       title: '轉賬',
       description: '當前所有錢包的轉入和轉出記錄',
-      conf: '配置',
+      conf: '确认',
     },
     details: {
       title: '轉賬',
