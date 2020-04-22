@@ -7,21 +7,10 @@ let reverse = require('buffer-reverse');
 let BigNumber = require('bignumber.js');
 
 const storageKey = 'ELECTRUM_PEERS';
-const defaultPeer = { host: 'electrum1.bluewallet.io', ssl: '443' };
+const defaultPeer = { host: 'ec0.kevacoin.org', ssl: '443' };
 const hardcodedPeers = [
-  // { host: 'noveltybobble.coinjoined.com', tcp: '50001' }, // down
-  // { host: 'electrum.be', tcp: '50001' },
-  // { host: 'node.ispol.sk', tcp: '50001' }, // down
-  // { host: '139.162.14.142', tcp: '50001' },
-  // { host: 'electrum.coinucopia.io', tcp: '50001' }, // SLOW
-  // { host: 'Bitkoins.nl', tcp: '50001' }, // down
-  // { host: 'fullnode.coinkite.com', tcp: '50001' },
-  // { host: 'preperfect.eleCTruMioUS.com', tcp: '50001' }, // down
-  { host: 'electrum1.bluewallet.io', ssl: '443' },
-  { host: 'electrum1.bluewallet.io', ssl: '443' }, // 2x weight
-  { host: 'electrum2.bluewallet.io', ssl: '443' },
-  { host: 'electrum3.bluewallet.io', ssl: '443' },
-  { host: 'electrum3.bluewallet.io', ssl: '443' }, // 2x weight
+  { host: 'ec0.kevacoin.org', ssl: '50002' },
+  { host: 'ec1.kevacoin.org', ssl: '50002' },
 ];
 
 let mainClient: ElectrumClient = false;
