@@ -13,7 +13,7 @@ module.exports = {
     createBitcoinWallet:
       'You currently do not have a Kevacoin wallet. In order to fund a Lightning wallet, a Kevacoin wallet needs to be created or imported. Would you like to continue anyway?',
     list: {
-      app_name: 'BlueWallet',
+      app_name: 'KevaWallet',
       title: 'wallets',
       header: 'A wallet represents a pair of a secret (private key) and an address' + 'you can share to receive coins.',
       add: 'Add Wallet',
@@ -76,7 +76,7 @@ module.exports = {
     import: {
       title: 'import',
       explanation:
-        "Write here your mnemonic, private key, WIF, or anything you've got. BlueWallet will do its best to guess the correct format and import your wallet",
+        "Write here your mnemonic, private key, WIF, or anything you've got. KevaWallet will do its best to guess the correct format and import your wallet",
       imported: 'Imported',
       error: 'Failed to import. Please, make sure that the provided data is valid.',
       success: 'Success',
@@ -187,7 +187,7 @@ module.exports = {
     lightning_settings: 'Lightning Settings',
     lightning_settings_explain:
       'To connect to your own LND node please install LndHub' +
-      " and put its URL here in settings. Leave blank to use BlueWallet's LNDHub (lndhub.io). Wallets created after saving changes will connect to the specified LNDHub.",
+      " and put its URL here in settings. Leave blank to use KevaWallet's LNDHub (lndhub.io). Wallets created after saving changes will connect to the specified LNDHub.",
     electrum_settings: 'Electrum Settings',
     electrum_settings_explain: 'Set to blank to use default',
     save: 'Save',
@@ -201,10 +201,10 @@ module.exports = {
     title: 'Plausible Deniability',
     help:
       'Under certain circumstances, you might be forced to disclose a ' +
-      'password. To keep your coins safe, BlueWallet can create another ' +
+      'password. To keep your coins safe, KevaWallet can create another ' +
       'encrypted storage, with a different password. Under pressure, ' +
       'you can disclose this password to a 3rd party. If entered in ' +
-      "BlueWallet, it will unlock a new 'fake' storage. This will seem " +
+      "KevaWallet, it will unlock a new 'fake' storage. This will seem " +
       'legit to a 3rd party, but it will secretly keep your main storage ' +
       'with coins safe.',
     help2: 'The new storage will be fully functional, and you can store some ' + 'minimum amounts there so it looks more believable.',

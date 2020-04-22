@@ -13,7 +13,7 @@ module.exports = {
     createBitcoinWallet:
       'Şu anda Kevacoin cüzdanınız yok. Lightning cüzdanına yükleme yapmak için Kevacoin cüzdanı oluşturmak veya içeri yüklemek gerekir. Yine de devam etmek istiyor musunuz?',
     list: {
-      app_name: 'BlueWallet',
+      app_name: 'KevaWallet',
       title: 'cüzdanlar',
       header: 'Cüzdan biri gizli, biri halka açık olan bir çift anahtar ve koin almak için' + ' paylaşabileceğiniz bir adrestir.',
       add: 'Cüzdan Ekle',
@@ -76,7 +76,7 @@ module.exports = {
     import: {
       title: 'içeri yükle',
       explanation:
-        'Buraya cüzdan yedek cümlenizi, gizli anahtarınızı, WIF veya diğer bilginizi yazın. BlueWallet elinden gelen en iyi tahmini yaparak cüzdanınızı içeri aktarmaya çalışacak.',
+        'Buraya cüzdan yedek cümlenizi, gizli anahtarınızı, WIF veya diğer bilginizi yazın. KevaWallet elinden gelen en iyi tahmini yaparak cüzdanınızı içeri aktarmaya çalışacak.',
       imported: 'İçeri aktarıldı',
       error: 'İçeri aktarma başarısız oldu. Lütfen girilen bilginin doğru olduğundan emin olun.',
       success: 'Başarılı',
@@ -187,7 +187,7 @@ module.exports = {
     lightning_settings: 'Lightning Ayarları',
     lightning_settings_explain:
       'Kendi LND düğümünüze bağlanmak için lütfen LndHubı yükleyin.' +
-      " ve URL’sini buraya, ayarlara yazın. BlueWallet'in LNDHub (lndhub.io) programını kullanmak için boş bırakın. Değişiklikleri kaydettikten sonra oluşturulan cüzdanlar belirtilen LNDHub'a bağlanacaktır.",
+      " ve URL’sini buraya, ayarlara yazın. KevaWallet'in LNDHub (lndhub.io) programını kullanmak için boş bırakın. Değişiklikleri kaydettikten sonra oluşturulan cüzdanlar belirtilen LNDHub'a bağlanacaktır.",
     electrum_settings: 'Electrum Settings',
     electrum_settings_explain: 'Set to blank to use default',
     save: 'Kaydet',
@@ -201,10 +201,10 @@ module.exports = {
     title: 'Makul Ret',
     help:
       'Bazı koşullar altında, şifrenizi açıklamanız gerekebilir. ' +
-      'Paralarınızı güvende tutmak için, BlueWallet başka bir şifre ile ' +
+      'Paralarınızı güvende tutmak için, KevaWallet başka bir şifre ile ' +
       'şifreli depolama alanı yaratabilir. Baskı altında, ' +
       'Bu şifreyi 3. bir tarafa söyleyebilirsiniz. Girilirse ' +
-      "BlueWallet, yeni 'sahte' bir depolamanın kilidini açacaktır. Bu 3. şahıslara " +
+      "KevaWallet, yeni 'sahte' bir depolamanın kilidini açacaktır. Bu 3. şahıslara " +
       'normal görünecektir, ancak paraların olduğu ana depolama alanınızı gizlice saklamaya ' +
       'devam edecektir.',
     help2: 'Yeni depolama alanı tamamen işlevsel olacak ve ufak ' + 'bir miktar tutarsanız daha inanılır görünecektir.',

@@ -13,7 +13,7 @@ module.exports = {
     createBitcoinWallet:
       'Du har ännu ingen Bitcoinplånbok. För att kunna sätta in pengar i en Lightningplånbok behöver en Bitcoinplånbok skapas eller importeras. Vill du fortsätta ändå?',
     list: {
-      app_name: 'BlueWallet',
+      app_name: 'KevaWallet',
       title: 'plånböcker',
       header: 'En plånbok representerar ett par av en privat nyckel samt en adress' + 'som du kan dela med andra för att ta emot coins',
       add: 'Ny Plånbok',
@@ -76,7 +76,7 @@ module.exports = {
     import: {
       title: 'import',
       explanation:
-        'Skriv in dina ord, din privata nyckel, WIF, eller vad du kan tänkas ha. BlueWallet kommer att göra sitt bästa för att gissa formatet och importera plånboken',
+        'Skriv in dina ord, din privata nyckel, WIF, eller vad du kan tänkas ha. KevaWallet kommer att göra sitt bästa för att gissa formatet och importera plånboken',
       imported: 'Importerad',
       error: 'Import misslyckades. Kontrollera att informationen du matade in är korrekt.',
       success: 'Import lyckad!',
@@ -187,7 +187,7 @@ module.exports = {
     lightning_settings: 'Lightning Network',
     lightning_settings_explain:
       'För att ansluta till din egen LND-nod, installera LndHub' +
-      " och mata in dess URL nedan. Lämna blankt för att använda BlueWallet's LNDHub (lndhub.io). Plånböcker skapade efter att inställningarna sparats kommer att använda den angivna LNDHub:en",
+      " och mata in dess URL nedan. Lämna blankt för att använda KevaWallet's LNDHub (lndhub.io). Plånböcker skapade efter att inställningarna sparats kommer att använda den angivna LNDHub:en",
     electrum_settings: 'Electrum Settings',
     electrum_settings_explain: 'Set to blank to use default',
     save: 'Spara',
@@ -201,10 +201,10 @@ module.exports = {
     title: 'Trovärdigt förnekande',
     help:
       'Under vissa omständigheter kan du bli tvingad att uppge ditt ' +
-      'lösenord. För att se till att dina pengar är säkra kan BlueWallet skapa ytterligare en ' +
+      'lösenord. För att se till att dina pengar är säkra kan KevaWallet skapa ytterligare en ' +
       'krypterad lagringsyta, med ett annat lösenord. Vid tvång ' +
       'kan du uppge detta alternativa lösenord. När det matas in i ' +
-      "BlueWallet så kommer det att låsa upp din 'fejkade' lagringsyta. Det kommer att se " +
+      "KevaWallet så kommer det att låsa upp din 'fejkade' lagringsyta. Det kommer att se " +
       'ut precis som vanligt men i själva verket är dina pengar i säkert förvar på din ' +
       'primära lagringsyta.',
     help2:

@@ -12,7 +12,7 @@ module.exports = {
     options: '選項',
     createBitcoinWallet: '您當前沒有bitcoin錢包. 為了支援閃電錢包, 我們需要建立或者匯入一個比特幣錢包. 是否需要繼續?',
     list: {
-      app_name: 'BlueWallet',
+      app_name: 'KevaWallet',
       title: '錢包',
       header: '一個錢包代表一對的私鑰和地址' + '你可以通過分享收款.',
       add: '新增錢包',
@@ -73,7 +73,7 @@ module.exports = {
     },
     import: {
       title: '匯入',
-      explanation: '輸入你的助記詞，私鑰或者WIF, 或者其他格式的資料. BlueWallet將盡可能的自動識別資料格式並匯入錢包',
+      explanation: '輸入你的助記詞，私鑰或者WIF, 或者其他格式的資料. KevaWallet將盡可能的自動識別資料格式並匯入錢包',
       imported: '已經匯入',
       error: '匯入失敗，請確認你提供的資訊是有效的',
       success: '成功',
@@ -196,10 +196,10 @@ module.exports = {
     title: '可否認性',
     help:
       '在某些情況下, 你不得不暴露 ' +
-      '密碼. 為了讓你的比特幣更加安全, BlueWallet可以建立一些 ' +
+      '密碼. 為了讓你的比特幣更加安全, KevaWallet可以建立一些 ' +
       '加密空間, 用不同的密碼. 在壓力之下, ' +
       '你可以暴露這個錢包密碼. 再次進入 ' +
-      'BlueWallet, 我們會解鎖一些虛擬空間. 對第三方來說看上去' +
+      'KevaWallet, 我們會解鎖一些虛擬空間. 對第三方來說看上去' +
       '是合理的, 但會偷偷的幫你保證主錢包的安全 ' +
       '幣也就安全了.',
     help2: '新的空間具備完整的功能，你可以存在 ' + '少量的金額在裡面.',

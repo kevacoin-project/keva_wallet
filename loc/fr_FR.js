@@ -13,7 +13,7 @@ module.exports = {
     createBitcoinWallet: 'In order to use a Lightning wallet, a Kevacoin wallet is needed to fund it. Would you like to continue anyway?',
 
     list: {
-      app_name: 'BlueWallet',
+      app_name: 'KevaWallet',
       title: 'portefeuilles',
       header:
         'Un portefeuille represente une paire de clées (publique/privée) et une adresse que vous pouvez partager pour recevoir des transactions.',
@@ -77,7 +77,7 @@ module.exports = {
     import: {
       title: 'importer',
       explanation:
-        "Write here your mnemonic, private key, WIF, or anything you've got. BlueWallet will do its best to guess the correct format and import your wallet",
+        "Write here your mnemonic, private key, WIF, or anything you've got. KevaWallet will do its best to guess the correct format and import your wallet",
       imported: 'Importé',
       error: "Échec de l'import. Merci, de vérifier que les données saisies sont valides.",
       success: 'Succès',
@@ -203,10 +203,10 @@ module.exports = {
     title: 'Déni plausible',
     help:
       'Dans certaines circonstances, vous serez peut-être forcé par un tiers à communiquer ' +
-      'votre mot de passe. Pour protéger vos biens, BlueWallet permet de créer un autre ' +
+      'votre mot de passe. Pour protéger vos biens, KevaWallet permet de créer un autre ' +
       'espace de stockage, avec un mot de passe différent. Sous la contrainte, ' +
       'vous pourrez divulger ce mot de passe au tier. Quand il est saisi ' +
-      "BlueWallet, débloquera se 'faux' espace de stockage. Le tiers pourra " +
+      "KevaWallet, débloquera se 'faux' espace de stockage. Le tiers pourra " +
       'confondre ces données avec des données légitimes, votre espace de stockage ' +
       "principal restera sécurisé et hors d'atteinte.",
     help2: 'New storage will be fully functional, and you can store some ' + 'minimum amounts there so it looks more believable.',

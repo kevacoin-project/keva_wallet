@@ -13,7 +13,7 @@ module.exports = {
     createBitcoinWallet:
       'Om een Lightning-portemonnee te kunnen gebruiken, is een Kevacoin-portemonnee nodig om deze te financieren. Wil je toch doorgaan?',
     list: {
-      app_name: 'BlueWallet',
+      app_name: 'KevaWallet',
       title: 'portemonnees',
       header: 'Een portemonnee vertegenwoordigt een geheime (privésleutel) en een adres' + 'dat u kunt delen om munten te ontvangen.',
       add: 'Portemonnee toevoegen',
@@ -76,7 +76,7 @@ module.exports = {
     import: {
       title: 'importeren',
       explanation:
-        'Schrijf hier uw ezelsbruggetje, privésleutel, WIF, of een ander formaat. BlueWallet zal zijn best doen om het juiste formaat te raden en uw portemonnee te importeren',
+        'Schrijf hier uw ezelsbruggetje, privésleutel, WIF, of een ander formaat. KevaWallet zal zijn best doen om het juiste formaat te raden en uw portemonnee te importeren',
       imported: 'Geïmporteerd',
       error: 'Importeren mislukt. Zorg ervoor dat de verstrekte gegevens geldig zijn.',
       success: 'Succes',
@@ -203,9 +203,9 @@ module.exports = {
     help:
       'Onder bepaalde omstandigheden kunt u worden gedwongen om uw' +
       ' wachtwoord te onthullen. Om uw munten veilig te houden, kan ' +
-      'BlueWallet nog een versleutelde opslag aanmaken, met een ander ' +
+      'KevaWallet nog een versleutelde opslag aanmaken, met een ander ' +
       'wachtwoord. Onder druk kunt u dit wachtwoord bekendmaken aan ' +
-      'de derde partij. Indien ingevoerd in BlueWallet, zal het nieuwe ' +
+      'de derde partij. Indien ingevoerd in KevaWallet, zal het nieuwe ' +
       "nep'-opslagruimte worden ontgrendeld. Dit lijkt legitiem voor de " +
       'derde partij, maar zal uw hoofdopslag met munten niet bekend maken ' +
       'aan de derde partij',

@@ -13,7 +13,7 @@
     createBitcoinWallet:
       'Okwangoku awunayo ingxowa yebitcoin. Ukuze kuxhaswe ingxowa ekhawulezayo, Ingxowa yeBitcoin kufuneka idalwe okanye ikhutshelwe. Ungathanda ukuqhubeka ?',
     list: {
-      app_name: 'BlueWallet',
+      app_name: 'KevaWallet',
       title: 'Ingxowa',
       header: 'Ingxowa imele ukuba nemfihlelo yokuyivula nekheli kwaye unokuyisebenzisa ukwamkela imali.',
       add: 'Yongeza Ingxowa',
@@ -76,7 +76,7 @@
     import: {
       title: 'ukungenisa',
       explanation:
-        'Bhale apha imnemonic yakho, ngundoqo, WIF , okanye nantoni na onayo. BlueWallet uya kwenza konke okusemandleni ukuqiqa ifomathi efanelekileyo kwaye ingenise ingxowa yakho',
+        'Bhale apha imnemonic yakho, ngundoqo, WIF , okanye nantoni na onayo. KevaWallet uya kwenza konke okusemandleni ukuqiqa ifomathi efanelekileyo kwaye ingenise ingxowa yakho',
       imported: 'Ngenisiwe',
       error: 'Ayiphumelelanga ukungenisa. Nceda, uqiniseka ukuba idata ehlinzekiweyo iyasebenza.',
       success: 'Iphumelele',
@@ -201,10 +201,10 @@
     title: 'Ukuphika',
     help:
       'Phantsi kweemeko unokunyaneliswa ukuba uchaze a ' +
-      'inombolo yokuvula. BlueWallet ukugcina imali yakho ikhuselekile, unokudala enye ' +
+      'inombolo yokuvula. KevaWallet ukugcina imali yakho ikhuselekile, unokudala enye ' +
       'ukugcinwa kwekhowudi, ngegama eligqithisiweyo. Phantsi kwefuthe, ' +
       'unako ukutyhila le phasiwedi kumntu wesithatu. Ukuba ungenayo ' +
-      'BlueWallet, iya kuvula ukugcinwa kwetyala ‘entsha’. Oku kuya kubonakala ' +
+      'KevaWallet, iya kuvula ukugcinwa kwetyala ‘entsha’. Oku kuya kubonakala ' +
       'Umlenze kumntu wesithathu kodwa uza kugcina ngasese ukugcinwa kwakho ' +
       'ngemali ekhuselekile..',
     help2:

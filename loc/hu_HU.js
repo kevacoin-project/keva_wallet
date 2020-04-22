@@ -13,7 +13,7 @@ module.exports = {
     createBitcoinWallet:
       'Jelenleg még nincsen Kevacoin tárcád. Lightning tárca létrehozásához először készíts egy Kevacoin tárcát, vagy importálj egy már meglévő tárcát. Mindenképp folytatod?',
     list: {
-      app_name: 'BlueWallet',
+      app_name: 'KevaWallet',
       title: 'tárcák',
       header: 'Egy tárca nem más, mint egy kulcspár, és egy cím. A cím nyilvános, és megoszhatod másokkal, ha szeretnél Bitcoint fogadni',
       add: 'Új Tárca',
@@ -76,7 +76,7 @@ module.exports = {
     import: {
       title: 'importálás',
       explanation:
-        'Írd be a kulcsszavaidat, a titkos kulcsodat, WIF-et, vagy bármi mást. A BlueWallet megpróbálja kitalálni a helyes formátumot, és importálja a tárcádat',
+        'Írd be a kulcsszavaidat, a titkos kulcsodat, WIF-et, vagy bármi mást. A KevaWallet megpróbálja kitalálni a helyes formátumot, és importálja a tárcádat',
       imported: 'Importálva',
       error: 'Importálás sikertelen. Ellenőrizd, hogy helyes adatokat adtál-e meg.',
       success: 'Sikeres importálás!',
@@ -187,7 +187,7 @@ module.exports = {
     lightning_settings: 'Lightning Beállítások',
     lightning_settings_explain:
       'Saját LND-csomóponthoz való csatlakozáshoz telepítsd az LndHub-ot' +
-      ' és írd be az URL-ét alul. Hagyd üresen, ha a BlueWallet saját LNDHub-jához (lndhub.io) szeretnél csatlakozni.' +
+      ' és írd be az URL-ét alul. Hagyd üresen, ha a KevaWallet saját LNDHub-jához (lndhub.io) szeretnél csatlakozni.' +
       ' A beállítások mentése után, minden újonnan létrehozott tárca a megadott LDNHubot fogja használni.',
     electrum_settings: 'Electrum Settings',
     electrum_settings_explain: 'Set to blank to use default',
@@ -202,9 +202,9 @@ module.exports = {
     title: 'Elfogadható tagadhatóság',
     help:
       'Bizonyos körülmények között arra kényszerülhetsz, hogy megadd' +
-      'a jelszavadat. A pénzed biztonsága érdekében a BlueWallettel létrehozhatsz egy ' +
+      'a jelszavadat. A pénzed biztonsága érdekében a KevaWallettel létrehozhatsz egy ' +
       'alternatív titkosított tárhelyet, alternatív jelszóval. Kényszer hatása alatt ' +
-      'megadhatod az alternatív jelszavadat, ami után a BlueWallet az alternatív ' +
+      'megadhatod az alternatív jelszavadat, ami után a KevaWallet az alternatív ' +
       'tárhelyedet fogja megnyitni. Ez ugyanúgy fog kinézni, mint egy igazi tárhely, ' +
       'azzal a különbséggel, hogy a pénzed teljes biztonságban lesz az elsődleges ' +
       'tárhelyen.',

@@ -13,7 +13,7 @@ module.exports = {
     createBitcoinWallet:
       'Du har ingen Kevacoin-lommebok. For å finansiere en Lightning-lommebok, må en Kevacoin-lommebok være opprettet eller importert. Vil du fortsette uansett?',
     list: {
-      app_name: 'BlueWallet',
+      app_name: 'KevaWallet',
       title: 'lommebøker',
       header: 'En lommebok representerer en hemmelighet (privat nøkkel) og en adresse ' + ' du kan dele for å motta kryptovaluta.',
       add: 'Legg til lommebok',
@@ -76,7 +76,7 @@ module.exports = {
     import: {
       title: 'importer',
       explanation:
-        'Skriv her din mnemonic, private nøkkel, WIF, eller hva som helst annet. BlueWallet vil gjøre sitt beste for å gjette riktig format og importere lommeboken din',
+        'Skriv her din mnemonic, private nøkkel, WIF, eller hva som helst annet. KevaWallet vil gjøre sitt beste for å gjette riktig format og importere lommeboken din',
       imported: 'importert',
       error: 'Kunne ikke importere. Vennligst vær sikker på at de oppgitte dataene er gyldige.',
       success: 'Suksess',
@@ -187,7 +187,7 @@ module.exports = {
     lightning_settings: 'Lightning innstillinger',
     lightning_settings_explain:
       'For å koble til din egen LND-node, vennligst installer LndHub' +
-      ' og legg URLen her i innstillinger. La feltet være tomt for å bruke BlueWallets LNDHub (lndhub.io). Lommebøker opprettet etter lagring av endringer, vil koble til den angitte LNDHub.',
+      ' og legg URLen her i innstillinger. La feltet være tomt for å bruke KevaWallets LNDHub (lndhub.io). Lommebøker opprettet etter lagring av endringer, vil koble til den angitte LNDHub.',
     electrum_settings: 'Electrum Settings',
     electrum_settings_explain: 'Set to blank to use default',
     save: 'Lagre',
@@ -201,10 +201,10 @@ module.exports = {
     title: 'Troverdighet benektelse',
     help:
       'Under visse omstendigheter kan du bli tvunget til å avsløre en' +
-      'passord. For å holde mynten din trygg, kan BlueWallet opprette en annen' +
+      'passord. For å holde mynten din trygg, kan KevaWallet opprette en annen' +
       'kryptert lagring, med et annet passord. Under press,' +
       'Du kan oppgi dette passordet til en tredjepart. Hvis inntastet i' +
-      'BlueWallet, det vil låse opp ny "falsk" lagring. Dette vil virke' +
+      'KevaWallet, det vil låse opp ny "falsk" lagring. Dette vil virke' +
       'troverdig overfor en tredje part, men vil i hemmelighet beholde ' +
       'hovedlageret trygt.',
     help2: 'Ny lagring vil være fullt funksjonell, og du kan lagre en mindre sum der' + ' , slik at det ser mer troverdig ut.',

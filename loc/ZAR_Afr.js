@@ -13,7 +13,7 @@
     createBitcoinWallet:
       'U het nie huidiglik `n geldige Kevacoin Beursie nie. Skep of voer eers ‘n Kevacoin Beursie in, sodat ‘n Kevacoin Lightning Beursie geskep en bevonds mag word. Wil U voortgaan?',
     list: {
-      app_name: 'BlueWallet',
+      app_name: 'KevaWallet',
       title: 'beursies',
       header:
         'U beursie verteenwoordig ‘n sleutelkombinasie, bestaande uit geheims (privaat sleutel) en address' +
@@ -78,7 +78,7 @@
     import: {
       title: 'Invoer',
       explanation:
-        'Sleutel mnemonic, privaat sleutel, WIF, of enige text verwysing. BlueWallet sal die korrekte formaat kies en u beursie importeer ',
+        'Sleutel mnemonic, privaat sleutel, WIF, of enige text verwysing. KevaWallet sal die korrekte formaat kies en u beursie importeer ',
       imported: 'Invoer suksesvol',
       error: 'U invoer het misluk. Maak asseblief seker u data is korrek en geldig.',
       success: 'Suksesvol',
@@ -204,7 +204,7 @@
     title: 'Geloofwaardige Ontkenbaarheid',
     help:
       'Onder sekere omstandighede mag u dalk geforseer word om u ' +
-      'wagwoord te deel teen u wil. Om u te beskerm kan Bluewallet ‘n ' +
+      'wagwoord te deel teen u wil. Om u te beskerm kan KevaWallet ‘n ' +
       'tweede “fantasie” beursie skep wat as skerm kan dien. Indien u  ' +
       'hierdie wagwoord deel sal die 3de party nie toegang tot u hoof fondse kry nie.',
     help2: 'Fantasie berging is heeltemal funksioneel',

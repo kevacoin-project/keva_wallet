@@ -13,7 +13,7 @@ module.exports = {
     createBitcoinWallet: 'Para poder usar uma wallet Lightning, é necessária uma wallet Kevacoin para a financiar. Deseja continuar?',
 
     list: {
-      app_name: 'BlueWallet',
+      app_name: 'KevaWallet',
       title: 'wallets',
       header: 'Uma wallet representa um par entre um segredo (chave privada) e um endereço' + 'que pode partilhar para receber Kevacoin.',
       add: 'adicionar wallet',
@@ -190,7 +190,7 @@ module.exports = {
     lightning_settings_explain:
       'Para se ligar ao seu próprio node LND, por favor instale o LndHub ' +
       'e coloque o seu endereço aqui nas definições. ' +
-      'Deixe em branco para usar o LNDHub da BlueWallet (lndhub.io). ' +
+      'Deixe em branco para usar o LNDHub da KevaWallet (lndhub.io). ' +
       'Wallets criadas depois desta alteração ligar-se-ão ao LNDHub especificado.',
     electrum_settings: 'Definições do Electrum',
     electrum_settings_explain: 'Deixe em branco para usar o valor por omissão',
@@ -205,10 +205,10 @@ module.exports = {
     title: 'Negação plausível',
     help:
       'Em algumas circunstâncias, pode ser forçado a relevar uma ' +
-      'password. Para manter as suas moedas seguras, A BlueWallet pode criar outro ' +
+      'password. Para manter as suas moedas seguras, A KevaWallet pode criar outro ' +
       'armazenamento encriptado, com uma password diferente. Sobre pressão, ' +
       'pode revelar esta password a um terceiro. Se inserida na ' +
-      'BlueWallet, esta vai abrir um armazenamento "falso". Que vai parecer ' +
+      'KevaWallet, esta vai abrir um armazenamento "falso". Que vai parecer ' +
       'legítimo a um terceiro, mas que secretamente vai manter o seu armazenamento principal ' +
       'com as moedas em segurança.',
     help2: 'Este novo armazenamento é completamente funcional, e pode guardar ' + 'um valor minímo para parecer mais real.',
