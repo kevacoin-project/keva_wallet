@@ -12,14 +12,14 @@ import Foundation
 import EFQRCode
 
 class ReceiveInterfaceController: WKInterfaceController {
-  
+
   static let identifier = "ReceiveInterfaceController"
   @IBOutlet weak var imageInterface: WKInterfaceImage!
   private var wallet: Wallet?
   private var isRenderingQRCode: Bool?
   private var receiveMethod: String = "receive"
   @IBOutlet weak var loadingIndicator: WKInterfaceGroup!
-  
+
   override func awake(withContext context: Any?) {
     super.awake(withContext: context)
     guard let passedContext = context as? (Int, String), WatchDataSource.shared.wallets.count >= passedContext.0   else {
@@ -58,8 +58,8 @@ class ReceiveInterfaceController: WKInterfaceController {
         })
       } else {
         guard let notificationObject = notification.object as? SpecifyInterfaceController.SpecificQRCodeContent, let walletContext = self?.wallet, !walletContext.receiveAddress.isEmpty, let receiveAddress = self?.wallet?.receiveAddress else { return }
-        var address = "bitcoin:\(receiveAddress)"
-        
+        var address = "kevacoin:\(receiveAddress)"
+
         var hasAmount = false
         if let amount = notificationObject.amount {
           address.append("?amount=\(amount)&")
@@ -71,7 +71,7 @@ class ReceiveInterfaceController: WKInterfaceController {
           }
           address.append("label=\(description)")
         }
-        
+
         DispatchQueue.main.async {
           guard let cgImage = EFQRCode.generate(
             content: address) else {
@@ -86,16 +86,16 @@ class ReceiveInterfaceController: WKInterfaceController {
         }
       }
     }
-    
+
     guard !wallet.receiveAddress.isEmpty, let cgImage = EFQRCode.generate(
       content: wallet.receiveAddress), receiveMethod != "createInvoice" else {
         return
     }
-    
+
     let image = UIImage(cgImage: cgImage)
     imageInterface.setImage(image)
   }
-  
+
   override func didAppear() {
     super.didAppear()
     if wallet?.type == "lightningCustodianWallet" && receiveMethod == "createInvoice" {
@@ -107,14 +107,14 @@ class ReceiveInterfaceController: WKInterfaceController {
       }
     }
   }
-  
+
   override func didDeactivate() {
     super.didDeactivate()
     NotificationCenter.default.removeObserver(self, name: SpecifyInterfaceController.NotificationName.createQRCode, object: nil)
   }
-  
+
   @IBAction func specifyMenuItemTapped() {
     presentController(withName: SpecifyInterfaceController.identifier, context: wallet?.identifier)
   }
-  
+
 }

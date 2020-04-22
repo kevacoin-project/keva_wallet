@@ -121,7 +121,7 @@ export default class SendDetails extends Component {
   /**
    * TODO: refactor this mess, get rid of regexp, use https://github.com/bitcoinjs/bitcoinjs-lib/issues/890 etc etc
    *
-   * @param data {String} Can be address or `bitcoin:xxxxxxx` uri scheme, or invalid garbage
+   * @param data {String} Can be address or `kevacoin:xxxxxxx` uri scheme, or invalid garbage
    */
   processAddressData = data => {
     this.setState({ isLoading: true }, async () => {
@@ -137,7 +137,7 @@ export default class SendDetails extends Component {
         });
       } else {
         let recipients = this.state.addresses;
-        const dataWithoutSchema = data.replace('bitcoin:', '');
+        const dataWithoutSchema = data.replace('kevacoin:', '');
         if (
           btcAddressRx.test(dataWithoutSchema) ||
           ((dataWithoutSchema.indexOf('bc1') === 0 || dataWithoutSchema.indexOf('BC1') === 0) && dataWithoutSchema.indexOf('?') === -1)
@@ -152,8 +152,8 @@ export default class SendDetails extends Component {
           let address = '';
           let options;
           try {
-            if (!data.toLowerCase().startsWith('bitcoin:')) {
-              data = `bitcoin:${data}`;
+            if (!data.toLowerCase().startsWith('kevacoin:')) {
+              data = `kevacoin:${data}`;
             }
             const decoded = bip21.decode(data);
             address = decoded.address;

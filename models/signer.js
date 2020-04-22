@@ -285,7 +285,7 @@ exports.generateNewSegwitAddress = function() {
 };
 
 exports.URI = function(paymentInfo) {
-  let uri = 'bitcoin:';
+  let uri = 'kevacoin:';
   uri += paymentInfo.address;
   uri += '?amount=';
   uri += parseFloat(paymentInfo.amount / 100000000);

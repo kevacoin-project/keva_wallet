@@ -21,8 +21,8 @@ export default class BitcoinBIP70TransactionDecode {
     return new Promise(async (resolve, reject) => {
       try {
         let url;
-        if (data.match(/bitcoin:\?r=https?:\/\/\S+/gi)) {
-          url = data.toString().split('bitcoin:?r=')[1];
+        if (data.match(/kevacoin:\?r=https?:\/\/\S+/gi)) {
+          url = data.toString().split('kevacoin:?r=')[1];
         } else if (data.startsWith('https://bitpay.com/i/') || data.startsWith('https://www.bitpay.com/i/')) {
           url = data.toString();
         }
@@ -74,6 +74,6 @@ export default class BitcoinBIP70TransactionDecode {
   }
 
   static matchesPaymentURL(data) {
-    return data !== null && (data.match(/bitcoin:\?r=https?:\/\/\S+/gi) !== null || data.startsWith('https://bitpay.com/i/') || data.startsWith('https://www.bitpay.com/i/'));
+    return data !== null && (data.match(/kevacoin:\?r=https?:\/\/\S+/gi) !== null || data.startsWith('https://bitpay.com/i/') || data.startsWith('https://www.bitpay.com/i/'));
   }
 }

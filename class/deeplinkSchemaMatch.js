@@ -12,7 +12,7 @@ class DeeplinkSchemaMatch {
     if (typeof schemaString !== 'string' || schemaString.length <= 0) return false;
     const lowercaseString = schemaString.trim().toLowerCase();
     return (
-      lowercaseString.startsWith('bitcoin:') ||
+      lowercaseString.startsWith('kevacoin:') ||
       lowercaseString.startsWith('lightning:') ||
       lowercaseString.startsWith('blue:') ||
       lowercaseString.startsWith('bluewallet:') ||
@@ -193,8 +193,8 @@ class DeeplinkSchemaMatch {
 
   static isBitcoinAddress(address) {
     address = address
-      .replace('bitcoin:', '')
-      .replace('bitcoin=', '')
+      .replace('kevacoin:', '')
+      .replace('kevacoin=', '')
       .split('?')[0];
     let isValidBitcoinAddress = false;
     try {
@@ -229,14 +229,14 @@ class DeeplinkSchemaMatch {
 
   static isBothBitcoinAndLightning(url) {
     if (url.includes('lightning') && url.includes('bitcoin')) {
-      const txInfo = url.split(/(bitcoin:|lightning:|lightning=|bitcoin=)+/);
+      const txInfo = url.split(/(kevacoin:|lightning:|lightning=|kevacoin=)+/);
       let bitcoin;
       let lndInvoice;
       for (const [index, value] of txInfo.entries()) {
         try {
           // Inside try-catch. We dont wan't to  crash in case of an out-of-bounds error.
           if (value.startsWith('bitcoin')) {
-            bitcoin = `bitcoin:${txInfo[index + 1]}`;
+            bitcoin = `kevacoin:${txInfo[index + 1]}`;
             if (!DeeplinkSchemaMatch.isBitcoinAddress(bitcoin)) {
               bitcoin = false;
               break;
