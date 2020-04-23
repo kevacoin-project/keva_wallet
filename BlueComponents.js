@@ -305,7 +305,7 @@ export class BlueWalletNavigationHeader extends Component {
         )}
         <TouchableOpacity
           style={styles.balance}
-          onPress={() => this.changeWalletBalanceUnit()}
+          onPress={() => {}/*this.changeWalletBalanceUnit()*/}
           ref={ref => (this.walletBalanceText = ref)}
           onLongPress={() => (Platform.OS === 'ios' ? this.tooltip.showMenu() : this.showAndroidTooltip())}
         >

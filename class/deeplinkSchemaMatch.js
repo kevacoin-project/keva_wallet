@@ -228,14 +228,14 @@ class DeeplinkSchemaMatch {
   }
 
   static isBothBitcoinAndLightning(url) {
-    if (url.includes('lightning') && url.includes('bitcoin')) {
+    if (url.includes('lightning') && url.includes('kevacoin')) {
       const txInfo = url.split(/(kevacoin:|lightning:|lightning=|kevacoin=)+/);
       let bitcoin;
       let lndInvoice;
       for (const [index, value] of txInfo.entries()) {
         try {
           // Inside try-catch. We dont wan't to  crash in case of an out-of-bounds error.
-          if (value.startsWith('bitcoin')) {
+          if (value.startsWith('kevacoin')) {
             bitcoin = `kevacoin:${txInfo[index + 1]}`;
             if (!DeeplinkSchemaMatch.isBitcoinAddress(bitcoin)) {
               bitcoin = false;
