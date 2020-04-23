@@ -716,7 +716,7 @@ export default class SendDetails extends Component {
   importTransaction = async () => {
     try {
       const res = await DocumentPicker.pick({
-        type: Platform.OS === 'ios' ? ['io.bluewallet.psbt', 'io.bluewallet.psbt.txn'] : [DocumentPicker.types.allFiles],
+        type: Platform.OS === 'ios' ? ['org.kevacoin.psbt', 'org.kevacoin.psbt.txn'] : [DocumentPicker.types.allFiles],
       });
       if (DeeplinkSchemaMatch.isPossiblyPSBTFile(res.uri)) {
         const file = await RNFS.readFile(res.uri, 'ascii');

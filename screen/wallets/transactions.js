@@ -560,7 +560,7 @@ export default class WalletTransactions extends Component {
         {this.state.wallet.chain === Chain.ONCHAIN && this.state.isHandOffUseEnabled && (
           <Handoff
             title={`Kevacoin Wallet ${this.state.wallet.getLabel()}`}
-            type="io.bluewallet.bluewallet"
+            type="org.kevacoin.kevawallet"
             url={`https://blockpath.com/search/addr?q=${this.state.wallet.getXpub()}`}
           />
         )}

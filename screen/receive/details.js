@@ -208,7 +208,7 @@ export default class ReceiveDetails extends Component {
         {this.state.isHandOffUseEnabled && this.state.address !== undefined && (
           <Handoff
             title={`Kevacoin Transaction ${this.state.address}`}
-            type="io.bluewallet.bluewallet"
+            type="org.kevacoin.kevawallet"
             url={`https://blockstream.info/tx/${this.state.address}`}
           />
         )}

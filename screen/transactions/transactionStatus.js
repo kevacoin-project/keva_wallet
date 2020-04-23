@@ -150,7 +150,7 @@ export default class TransactionsStatus extends Component {
         {this.state.isHandOffUseEnabled && (
           <Handoff
             title={`Kevacoin Transaction ${this.state.tx.hash}`}
-            type="io.bluewallet.bluewallet"
+            type="org.kevacoin.kevawallet"
             url={`https://blockstream.info/tx/${this.state.tx.hash}`}
           />
         )}

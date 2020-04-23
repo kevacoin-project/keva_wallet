@@ -192,6 +192,8 @@ PODS:
   - React-jsinspector (0.61.5)
   - react-native-biometrics (2.0.0):
     - React
+  - react-native-blue-crypto (1.0.0):
+    - React
   - react-native-blur (0.8.0):
     - React
   - react-native-camera (3.21.0):
@@ -209,8 +211,6 @@ PODS:
   - react-native-randombytes (3.5.3):
     - React
   - react-native-slider (2.0.8):
-    - React
-  - react-native-tcp (3.3.2):
     - React
   - react-native-viewpager (3.3.0):
     - React
@@ -315,13 +315,13 @@ DEPENDENCIES:
   - React-jsiexecutor (from `../node_modules/react-native/ReactCommon/jsiexecutor`)
   - React-jsinspector (from `../node_modules/react-native/ReactCommon/jsinspector`)
   - react-native-biometrics (from `../node_modules/react-native-biometrics`)
+  - react-native-blue-crypto (from `../node_modules/react-native-blue-crypto`)
   - "react-native-blur (from `../node_modules/@react-native-community/blur`)"
   - react-native-camera (from `../node_modules/react-native-camera`)
   - react-native-document-picker (from `../node_modules/react-native-document-picker`)
   - react-native-image-picker (from `../node_modules/react-native-image-picker`)
   - react-native-randombytes (from `../node_modules/react-native-randombytes`)
   - "react-native-slider (from `../node_modules/@react-native-community/slider`)"
-  - react-native-tcp (from `../node_modules/react-native-tcp`)
   - "react-native-viewpager (from `../node_modules/@react-native-community/viewpager`)"
   - react-native-webview (from `../node_modules/react-native-webview`)
   - React-RCTActionSheet (from `../node_modules/react-native/Libraries/ActionSheetIOS`)
@@ -398,6 +398,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon/jsinspector"
   react-native-biometrics:
     :path: "../node_modules/react-native-biometrics"
+  react-native-blue-crypto:
+    :path: "../node_modules/react-native-blue-crypto"
   react-native-blur:
     :path: "../node_modules/@react-native-community/blur"
   react-native-camera:
@@ -410,8 +412,6 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-randombytes"
   react-native-slider:
     :path: "../node_modules/@react-native-community/slider"
-  react-native-tcp:
-    :path: "../node_modules/react-native-tcp"
   react-native-viewpager:
     :path: "../node_modules/@react-native-community/viewpager"
   react-native-webview:
@@ -496,13 +496,13 @@ SPEC CHECKSUMS:
   React-jsiexecutor: d5525f9ed5f782fdbacb64b9b01a43a9323d2386
   React-jsinspector: fa0ecc501688c3c4c34f28834a76302233e29dc0
   react-native-biometrics: c892904948a32295b128f633bcc11eda020645c5
+  react-native-blue-crypto: 23f1558ad3d38d7a2edb7e2f6ed1bc520ed93e56
   react-native-blur: cad4d93b364f91e7b7931b3fa935455487e5c33c
   react-native-camera: a9749fa0c1162cdb2f56b93a5d97a72ebd56694f
   react-native-document-picker: e3516aff0dcf65ee0785d9bcf190eb10e2261154
   react-native-image-picker: 3637d63fef7e32a230141ab4660d3ceb773c824f
   react-native-randombytes: 991545e6eaaf700b4ee384c291ef3d572e0b2ca8
   react-native-slider: b2f361499888302147205f17f6fffa921a7bda70
-  react-native-tcp: be8e119e631970aaeda7f6e3207f6b7be72d5eb8
   react-native-viewpager: 118e65d8c65c56fe48d12a35cdcf1fe7e027a366
   react-native-webview: f11ac6c8bcaba5b71ddda1c12a10c8ea059b080f
   React-RCTActionSheet: 600b4d10e3aea0913b5a92256d2719c0cdd26d76
@@ -539,4 +539,4 @@ SPEC CHECKSUMS:
 
 PODFILE CHECKSUM: 932f5bffd3ddea34b78c9ed0921a6f8cccf442b5
 
-COCOAPODS: 1.8.4
+COCOAPODS: 1.9.1
