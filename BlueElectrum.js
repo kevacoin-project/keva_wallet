@@ -7,7 +7,7 @@ let reverse = require('buffer-reverse');
 let BigNumber = require('bignumber.js');
 
 const storageKey = 'ELECTRUM_PEERS';
-const defaultPeer = { host: 'ec0.kevacoin.org', ssl: '443' };
+const defaultPeer = { host: 'ec0.kevacoin.org', ssl: '50002' };
 const hardcodedPeers = [
   { host: 'ec0.kevacoin.org', ssl: '50002' },
   { host: 'ec1.kevacoin.org', ssl: '50002' },
