@@ -42,7 +42,7 @@ import DocumentPicker from 'react-native-document-picker';
 import RNFS from 'react-native-fs';
 import DeeplinkSchemaMatch from '../../class/deeplinkSchemaMatch';
 const bitcoin = require('bitcoinjs-lib');
-const bip21 = require('bip21');
+const bip21 = require('../../bip21/bip21');
 let BigNumber = require('bignumber.js');
 const { width } = Dimensions.get('window');
 /** @type {AppStorage} */

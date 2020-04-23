@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { View, InteractionManager, Platform, TextInput, KeyboardAvoidingView, Keyboard, StyleSheet, ScrollView } from 'react-native';
 import QRCode from 'react-native-qrcode-svg';
-import bip21 from 'bip21';
+import bip21 from '../../bip21/bip21';
 import {
   BlueLoading,
   SafeBlueArea,
