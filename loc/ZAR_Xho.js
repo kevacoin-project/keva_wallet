@@ -47,6 +47,8 @@
       coming_soon: 'Kuza ngokukhawuleza',
       lightning: 'Umbane',
       bitcoin: 'Kevacoin',
+      multi_address: 'Multiple addresses',
+      single_address: 'Single address',
     },
     details: {
       title: 'Ingxowa',

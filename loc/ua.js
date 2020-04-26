@@ -47,6 +47,8 @@ module.exports = {
       coming_soon: 'Буде скоро',
       lightning: 'Lightning',
       bitcoin: 'Kevacoin',
+      multi_address: 'Multiple addresses',
+      single_address: 'Single address',
     },
     details: {
       title: 'Інформація про Гаманець',

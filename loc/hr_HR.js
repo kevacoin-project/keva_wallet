@@ -46,6 +46,8 @@ module.exports = {
       coming_soon: 'Dolazi uskoro',
       lightning: 'Lightning',
       bitcoin: 'Kevacoin',
+      multi_address: 'Multiple addresses',
+      single_address: 'Single address',
     },
     details: {
       title: 'Volet',

@@ -44,7 +44,9 @@ module.exports = {
       imported: '已經匯入',
       coming_soon: '即將來臨',
       lightning: '閃電',
-      bitcoin: '比特幣',
+      bitcoin: 'Kevacoin',
+      multi_address: '多地址',
+      single_address: '單地址',
     },
     details: {
       title: '錢包',

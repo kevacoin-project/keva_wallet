@@ -46,6 +46,8 @@ module.exports = {
       coming_soon: '準備中',
       lightning: 'Lightning',
       bitcoin: 'Kevacoin',
+      multi_address: 'Multiple addresses',
+      single_address: 'Single address',
     },
     details: {
       title: 'ウォレット',

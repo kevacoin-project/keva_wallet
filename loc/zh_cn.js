@@ -46,6 +46,8 @@ module.exports = {
       coming_soon: '即将来临',
       lightning: '闪电',
       bitcoin: 'Kevacoin',
+      multi_address: '多地址',
+      single_address: '单地址',
     },
     details: {
       title: '钱包',

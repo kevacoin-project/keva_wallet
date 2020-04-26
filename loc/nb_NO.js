@@ -47,6 +47,8 @@ module.exports = {
       coming_soon: 'Kommer snart',
       lightning: 'Lightning',
       bitcoin: 'Kevacoin',
+      multi_address: 'Multiple addresses',
+      single_address: 'Single address',
     },
     details: {
       title: 'Lommebok',

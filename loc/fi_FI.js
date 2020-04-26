@@ -49,6 +49,8 @@ module.exports = {
       coming_soon: 'Tulossa',
       lightning: 'Lightning',
       bitcoin: 'Kevacoin',
+      multi_address: 'Multiple addresses',
+      single_address: 'Single address',
     },
     details: {
       title: 'Lompakko',

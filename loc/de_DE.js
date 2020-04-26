@@ -48,6 +48,8 @@ module.exports = {
       coming_soon: 'Demnächst verfügbar',
       lightning: 'Lightning',
       bitcoin: 'Kevacoin',
+      multi_address: 'Multiple addresses',
+      single_address: 'Single address',
     },
     details: {
       title: 'Wallet',

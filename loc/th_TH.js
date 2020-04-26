@@ -46,6 +46,8 @@ module.exports = {
       coming_soon: 'เร็วๆนี้',
       lightning: 'ไลท์นิง',
       bitcoin: 'บิตคอยน์',
+      multi_address: 'Multiple addresses',
+      single_address: 'Single address',
     },
     details: {
       title: 'กระเป๋าสตางค์',
