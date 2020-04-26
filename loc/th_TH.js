@@ -173,6 +173,7 @@ module.exports = {
     copied: 'ก๊อปปี้ไปที่คลิปบอร์ดแล้ว!',
   },
   settings: {
+    general: 'General',
     header: 'ตั้งค่า',
     plausible_deniability: 'การปฏิเสธที่เป็นไปได้...',
     storage_not_encrypted: 'ที่เก็บข้อมูล: ยังไม่เข้ารหัส',
@@ -195,6 +196,7 @@ module.exports = {
     currency: 'เงินตรา',
     advanced_options: 'Advanced Options',
     enable_advanced_mode: 'Enable advanced mode',
+    advanced_mode_note: 'When enabled, you will be able to view selected wallets, and transactions, using your other Apple iCloud connected devices.',
   },
   plausibledeniability: {
     title: 'การปฏิเสธที่เป็นไปได้',

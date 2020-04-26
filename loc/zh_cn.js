@@ -12,6 +12,7 @@ module.exports = {
     options: '选项',
     createBitcoinWallet: '您当前没有kevacoin钱包. 为了支持闪电钱包, 我们需要创建或者导入一个Kevacoin钱包. 是否需要继续?',
     list: {
+      general: '常规',
       app_name: 'KevaWallet',
       title: '钱包',
       header: '一个钱包代表一对的私钥和地址' + '你可以通过分享收款.',
@@ -172,6 +173,7 @@ module.exports = {
     copied: '复制到粘贴板!',
   },
   settings: {
+    general: '常规',
     header: '设置',
     plausible_deniability: '可否认性...',
     storage_not_encrypted: '存储:未加密',
@@ -189,8 +191,9 @@ module.exports = {
     about: '关于',
     language: '语言',
     currency: '货币',
-    advanced_options: 'Advanced Options',
-    enable_advanced_mode: 'Enable advanced mode',
+    advanced_options: '高级选项',
+    enable_advanced_mode: '启用高级模式',
+    advanced_mode_note: '启用后，您将看到高级选项，例如不同的钱包类型。',
   },
   plausibledeniability: {
     title: '可否认性',

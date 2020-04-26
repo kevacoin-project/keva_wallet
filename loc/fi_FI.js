@@ -177,6 +177,7 @@ module.exports = {
     copied: 'Kopioitu leikepöydälle!',
   },
   settings: {
+    general: 'General',
     header: 'asetukset',
     plausible_deniability: 'Uskottava kiistettävyys...',
     storage_not_encrypted: 'Tallennustila: salaamaton',
@@ -198,6 +199,7 @@ module.exports = {
     currency: 'Valuutta',
     advanced_options: 'Advanced Options',
     enable_advanced_mode: 'Enable advanced mode',
+    advanced_mode_note: 'When enabled, you will be able to view selected wallets, and transactions, using your other Apple iCloud connected devices.',
   },
   plausibledeniability: {
     title: 'Uskottava Kiistettävyys',

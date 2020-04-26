@@ -61,8 +61,7 @@ const GeneralSettings = () => {
         />
         <BlueCard>
           <BlueText>
-            When enabled, you will see advanced options such as different wallet types and the ability to specify the LNDHub instance you
-            wish to connect to.
+            {loc.settings.advanced_mode_note}
           </BlueText>
         </BlueCard>
         <BlueSpacing20 />
@@ -73,7 +72,7 @@ const GeneralSettings = () => {
 
 GeneralSettings.navigationOptions = () => ({
   ...BlueNavigationStyle(),
-  title: 'General',
+  title: loc.settings.general,
 });
 
 GeneralSettings.propTypes = {

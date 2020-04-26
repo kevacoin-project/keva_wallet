@@ -174,6 +174,7 @@ module.exports = {
     copied: 'Kopieret til udklipsholder!',
   },
   settings: {
+    general: 'General',
     header: 'indstillinger',
     plausible_deniability: 'Sandsynlig benægtelse...',
     storage_not_encrypted: 'Lager: ikke krypteret',
@@ -196,6 +197,7 @@ module.exports = {
     currency: 'Valuta',
     advanced_options: 'Advanced Options',
     enable_advanced_mode: 'Enable advanced mode',
+    advanced_mode_note: 'When enabled, you will be able to view selected wallets, and transactions, using your other Apple iCloud connected devices.',
   },
   plausibledeniability: {
     title: 'Sandsynlig benægtelse',

@@ -177,6 +177,7 @@
     copied: 'Gekopieer na klipbord!',
   },
   settings: {
+    general: 'General',
     header: 'instellings',
     plausible_deniability: 'Geloofwaardige ontkenbaarheid...',
     storage_not_encrypted: 'Berging: Nie-geenkripteer nie',

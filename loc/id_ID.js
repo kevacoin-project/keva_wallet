@@ -174,6 +174,7 @@ module.exports = {
     copied: 'Disalin ke Clipboard!',
   },
   settings: {
+    general: 'General',
     header: 'setting',
     plausible_deniability: 'Plausible deniability...',
     storage_not_encrypted: 'Penyimpanan: tidak terenkripsi',
@@ -195,6 +196,7 @@ module.exports = {
     currency: 'Mata Uang',
     advanced_options: 'Advanced Options',
     enable_advanced_mode: 'Enable advanced mode',
+    advanced_mode_note: 'When enabled, you will be able to view selected wallets, and transactions, using your other Apple iCloud connected devices.',
   },
   plausibledeniability: {
     title: 'Plausible Deniability',

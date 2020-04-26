@@ -176,6 +176,7 @@ module.exports = {
     copied: 'In die Zwischenablage kopiert!',
   },
   settings: {
+    general: 'General',
     header: 'Einstellungen',
     plausible_deniability: 'Glaubhafte Täuschung...',
     storage_not_encrypted: 'Speicher nicht verschlüsselt',
@@ -198,6 +199,7 @@ module.exports = {
     currency: 'Währung',
     advanced_options: 'Erweiterte Optionen',
     enable_advanced_mode: 'Erweiterter Modus verwenden',
+    advanced_mode_note: 'When enabled, you will be able to view selected wallets, and transactions, using your other Apple iCloud connected devices.',
   },
   plausibledeniability: {
     title: 'Glaubhafte Täuschung',

@@ -174,6 +174,7 @@ module.exports = {
     copied: 'クリップボードにコピーしました!',
   },
   settings: {
+    general: '一般',
     header: '設定',
     plausible_deniability: '隠匿設定...',
     storage_not_encrypted: 'ウォレット: 暗号化されていません',
@@ -196,6 +197,7 @@ module.exports = {
     currency: '通貨',
     advanced_options: 'Advanced Options',
     enable_advanced_mode: 'Enable advanced mode',
+    advanced_mode_note: 'When enabled, you will be able to view selected wallets, and transactions, using your other Apple iCloud connected devices.',
   },
   plausibledeniability: {
     title: '隠匿設定',

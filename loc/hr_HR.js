@@ -174,6 +174,7 @@ module.exports = {
     copied: 'Spremljeno u međuspremnik!',
   },
   settings: {
+    general: 'General',
     header: 'Postavke',
     plausible_deniability: 'Fejk volet...',
     storage_not_encrypted: 'Spremnik: nije kriptiran',
@@ -196,6 +197,7 @@ module.exports = {
     currency: 'Valuta',
     advanced_options: 'Advanced Options',
     enable_advanced_mode: 'Enable advanced mode',
+    advanced_mode_note: 'When enabled, you will be able to view selected wallets, and transactions, using your other Apple iCloud connected devices.',
   },
   plausibledeniability: {
     title: 'Fejk volet',

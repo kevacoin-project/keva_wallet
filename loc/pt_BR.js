@@ -178,6 +178,7 @@ module.exports = {
     copied: 'Copiado!',
   },
   settings: {
+    general: 'General',
     tabBarLabel: 'preferências',
     header: 'definições',
     plausible_deniability: 'Negação plausível...',

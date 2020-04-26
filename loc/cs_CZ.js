@@ -174,6 +174,7 @@ module.exports = {
     copied: 'Zkopírováno do schránky.',
   },
   settings: {
+    general: 'General',
     header: 'nastavení',
     plausible_deniability: 'Plausible deniability...',
     storage_not_encrypted: 'Uložiště: nezašifrováno',
@@ -196,6 +197,7 @@ module.exports = {
     currency: 'Měna',
     advanced_options: 'Advanced Options',
     enable_advanced_mode: 'Enable advanced mode',
+    advanced_mode_note: 'When enabled, you will be able to view selected wallets, and transactions, using your other Apple iCloud connected devices.',
   },
   plausibledeniability: {
     title: 'Plausible Deniability',

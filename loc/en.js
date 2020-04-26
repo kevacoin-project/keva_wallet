@@ -175,6 +175,7 @@ module.exports = {
     copied: 'Copied to Clipboard!',
   },
   settings: {
+    general: 'General',
     header: 'settings',
     plausible_deniability: 'Plausible deniability',
     storage_not_encrypted: 'Storage: not encrypted',
@@ -196,6 +197,7 @@ module.exports = {
     currency: 'Currency',
     advanced_options: 'Advanced Options',
     enable_advanced_mode: 'Advanced mode',
+    advanced_mode_note: 'When enabled, you will be able to view selected wallets, and transactions, using your other Apple iCloud connected devices.',
   },
   plausibledeniability: {
     title: 'Plausible Deniability',

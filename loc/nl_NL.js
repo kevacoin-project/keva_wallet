@@ -175,6 +175,7 @@ module.exports = {
     copied: 'Gekopieerd naar het klembord!',
   },
   settings: {
+    general: 'General',
     header: 'instellingen',
     plausible_deniability: 'Plausibele ontkenning...',
     storage_not_encrypted: 'Opslag: niet versleuteld',

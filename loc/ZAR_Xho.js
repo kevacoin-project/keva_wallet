@@ -175,6 +175,7 @@
     copied: 'Ikhutshelwe kwi-clipboard!',
   },
   settings: {
+    general: 'General',
     header: 'Izicwangciso',
     plausible_deniability: 'Ukuphika...',
     storage_not_encrypted: 'Ukugciwa: hayi ngekhodi',
@@ -196,6 +197,7 @@
     currency: 'Lwemali',
     advanced_options: 'Advanced Options',
     enable_advanced_mode: 'Enable advanced mode',
+    advanced_mode_note: 'When enabled, you will be able to view selected wallets, and transactions, using your other Apple iCloud connected devices.',
   },
   plausibledeniability: {
     title: 'Ukuphika',

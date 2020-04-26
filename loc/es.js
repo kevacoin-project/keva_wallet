@@ -176,6 +176,7 @@ module.exports = {
     copied: 'Copied to Clipboard!',
   },
   settings: {
+    general: 'General',
     tabBarLabel: 'Ajustes',
     header: 'Ajustes',
     plausible_deniability: 'Negación plausible...',
@@ -199,6 +200,7 @@ module.exports = {
     currency: 'Moneda',
     advanced_options: 'Advanced Options',
     enable_advanced_mode: 'Enable advanced mode',
+    advanced_mode_note: 'When enabled, you will be able to view selected wallets, and transactions, using your other Apple iCloud connected devices.',
   },
   plausibledeniability: {
     title: 'Negación plausible',
