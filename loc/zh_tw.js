@@ -44,7 +44,9 @@ module.exports = {
       imported: '已經匯入',
       coming_soon: '即將來臨',
       lightning: '閃電',
-      bitcoin: '比特幣',
+      bitcoin: 'Kevacoin',
+      multi_address: '多地址',
+      single_address: '單地址',
     },
     details: {
       title: '錢包',
@@ -172,6 +174,7 @@ module.exports = {
     copied: '複製到貼上板!',
   },
   settings: {
+    general: '常規',
     header: '設定',
     plausible_deniability: '可否認性...',
     storage_not_encrypted: '儲存:未加密',
@@ -189,8 +192,9 @@ module.exports = {
     about: '關於',
     language: '語言',
     currency: '貨幣',
-    advanced_options: 'Advanced Options',
-    enable_advanced_mode: 'Enable advanced mode',
+    advanced_options: '高級選項',
+    enable_advanced_mode: '啟用高級模式',
+    advanced_mode_note: '啟用後，您將看到高級選項，例如不同的錢包類型。',
   },
   plausibledeniability: {
     title: '可否認性',

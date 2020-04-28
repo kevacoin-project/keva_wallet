@@ -49,6 +49,8 @@ module.exports = {
       coming_soon: 'In arrivo',
       lightning: 'Lightning',
       bitcoin: 'Kevacoin',
+      multi_address: 'Multiple addresses',
+      single_address: 'Single address',
     },
     details: {
       title: 'Portafoglio',
@@ -177,6 +179,7 @@ module.exports = {
     copied: 'Copiato negli appunti!',
   },
   settings: {
+    general: 'General',
     header: 'Impostazioni',
     plausible_deniability: 'Negazione plausibile...',
     storage_not_encrypted: 'Archivio: non criptato',
@@ -198,6 +201,7 @@ module.exports = {
     currency: 'Valuta',
     advanced_options: 'Advanced Options',
     enable_advanced_mode: 'Enable advanced mode',
+    advanced_mode_note: 'When enabled, you will be able to view selected wallets, and transactions, using your other Apple iCloud connected devices.',
   },
   plausibledeniability: {
     title: 'Negazione Plausibile',

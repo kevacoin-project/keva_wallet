@@ -47,6 +47,8 @@ module.exports = {
       coming_soon: 'Hamarosan',
       lightning: 'Lightning',
       bitcoin: 'Kevacoin',
+      multi_address: 'Multiple addresses',
+      single_address: 'Single address',
     },
     details: {
       title: 'Tárca',
@@ -175,6 +177,7 @@ module.exports = {
     copied: 'Vágólapra másolva!',
   },
   settings: {
+    general: 'General',
     header: 'beállítások',
     plausible_deniability: 'Elfogadható tagadhatóság...',
     storage_not_encrypted: 'Tárhely: nincs titkosítva',
@@ -197,6 +200,7 @@ module.exports = {
     currency: 'Valuta',
     advanced_options: 'Haladó Beállítások',
     enable_advanced_mode: 'Halandó mód bekapcsolása',
+    advanced_mode_note: 'When enabled, you will be able to view selected wallets, and transactions, using your other Apple iCloud connected devices.',
   },
   plausibledeniability: {
     title: 'Elfogadható tagadhatóság',

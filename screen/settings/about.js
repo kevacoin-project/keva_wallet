@@ -163,9 +163,9 @@ const About = () => {
         <BlueSpacing20 />
         <BlueSpacing20 />
         <BlueTextCentered>
-          {getApplicationName()} ver {getVersion()} (build {getBuildNumber()})
+          {getApplicationName()} ver {getVersion()} {/* (build {getBuildNumber()}) */}
         </BlueTextCentered>
-        <BlueTextCentered>{new Date(getBuildNumber() * 1000).toGMTString()}</BlueTextCentered>
+        {/* <BlueTextCentered>{new Date(getBuildNumber() * 1000).toGMTString()}</BlueTextCentered> */}
         <BlueTextCentered>{getBundleId()}</BlueTextCentered>
         <BlueTextCentered>
           w, h = {width}, {height}

@@ -47,6 +47,8 @@ module.exports = {
       coming_soon: 'Brevemente',
       lightning: 'Lightning',
       bitcoin: 'Kevacoin',
+      multi_address: 'Multiple addresses',
+      single_address: 'Single address',
     },
     details: {
       title: 'wallet',
@@ -176,6 +178,7 @@ module.exports = {
     scan_lnurl: 'Receber lendo QR',
   },
   settings: {
+    general: 'General',
     tabBarLabel: 'Definições',
     header: 'definições',
     plausible_deniability: 'Negação plausível...',
@@ -200,6 +203,7 @@ module.exports = {
     currency: 'Moeda',
     advanced_options: 'Opções Avançadas',
     enable_advanced_mode: 'Ligar modo avançado',
+    advanced_mode_note: 'When enabled, you will be able to view selected wallets, and transactions, using your other Apple iCloud connected devices.',
   },
   plausibledeniability: {
     title: 'Negação plausível',

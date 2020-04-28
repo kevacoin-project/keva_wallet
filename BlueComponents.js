@@ -371,7 +371,9 @@ export class BlueButtonLink extends Component {
         }}
         {...this.props}
       >
-        <Text style={{ color: BlueApp.settings.foregroundColor, textAlign: 'center', fontSize: 16 }}>{this.props.title}</Text>
+        <Text style={{ color: BlueApp.settings.foregroundColor, textAlign: 'center', fontSize: 16, color: BlueApp.settings.secondaryButtonTextColor, }}>
+          {this.props.title}
+        </Text>
       </TouchableOpacity>
     );
   }

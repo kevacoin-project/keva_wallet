@@ -47,6 +47,8 @@ module.exports = {
       coming_soon: 'Буде скоро',
       lightning: 'Lightning',
       bitcoin: 'Kevacoin',
+      multi_address: 'Multiple addresses',
+      single_address: 'Single address',
     },
     details: {
       title: 'Інформація про Гаманець',
@@ -175,6 +177,7 @@ module.exports = {
     copied: 'Copied to Clipboard!',
   },
   settings: {
+    general: 'General',
     tabBarLabel: 'Налаштування',
     header: 'Налаштування',
     plausible_deniability: 'Правдоподібне заперечення...',
@@ -198,6 +201,7 @@ module.exports = {
     currency: 'Валюта',
     advanced_options: 'Advanced Options',
     enable_advanced_mode: 'Enable advanced mode',
+    advanced_mode_note: 'When enabled, you will be able to view selected wallets, and transactions, using your other Apple iCloud connected devices.',
   },
   plausibledeniability: {
     title: 'Правдоподібне Заперечення',

@@ -47,6 +47,8 @@ module.exports = {
       coming_soon: 'Yakında',
       lightning: 'Lightning',
       bitcoin: 'Kevacoin',
+      multi_address: 'Multiple addresses',
+      single_address: 'Single address',
     },
     details: {
       title: 'Cüzdan',
@@ -175,6 +177,7 @@ module.exports = {
     copied: 'Panoya kopyalandı!',
   },
   settings: {
+    general: 'General',
     header: 'ayarlar',
     plausible_deniability: 'Makul ret...',
     storage_not_encrypted: 'Depolama: şifreli değil',
@@ -196,6 +199,7 @@ module.exports = {
     currency: 'Para Birimi',
     advanced_options: 'Advanced Options',
     enable_advanced_mode: 'Enable advanced mode',
+    advanced_mode_note: 'When enabled, you will be able to view selected wallets, and transactions, using your other Apple iCloud connected devices.',
   },
   plausibledeniability: {
     title: 'Makul Ret',

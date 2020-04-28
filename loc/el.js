@@ -49,6 +49,8 @@ module.exports = {
       coming_soon: 'Σύντομα',
       lightning: 'Lightning',
       bitcoin: 'Kevacoin',
+      multi_address: 'Multiple addresses',
+      single_address: 'Single address',
     },
     details: {
       title: 'Πορτοφόλι',
@@ -177,6 +179,7 @@ module.exports = {
     copied: 'Αντιγράφηκε στο Clipboard!',
   },
   settings: {
+    general: 'General',
     header: 'ρυθμίσεις',
     plausible_deniability: 'Εύλογη δυνατότητα άρνησης...',
     storage_not_encrypted: 'Το αρχείο δεν είναι κρυπτογραφημένο',
@@ -198,6 +201,7 @@ module.exports = {
     currency: 'Νόμισμα',
     advanced_options: 'Advanced Options',
     enable_advanced_mode: 'Enable advanced mode',
+    advanced_mode_note: 'When enabled, you will be able to view selected wallets, and transactions, using your other Apple iCloud connected devices.',
   },
   plausibledeniability: {
     title: 'Εύλογη δυνατότητα άρνησης',

@@ -41,6 +41,7 @@ export class AppStorage {
       buttonAlternativeTextColor: '#ffffff',
       buttonDisabledBackgroundColor: '#eef0f4',
       buttonDisabledTextColor: '#9aa0aa',
+      secondaryButtonTextColor: '#c83f6d',
       inputBorderColor: '#d2d2d2',
       inputBackgroundColor: '#f5f5f5',
       alternativeTextColor: '#9aa0aa',

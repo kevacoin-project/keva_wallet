@@ -149,8 +149,8 @@ export default class WalletsAdd extends Component {
                   });
                 }}
                 style={{
-                  width: '100%',
-                  height: 195,
+                  width: '55%',
+                  height: 100,
                 }}
               />
               {/*
@@ -188,10 +188,10 @@ export default class WalletsAdd extends Component {
                         </RadioButton>
                         */}
                         <RadioButton value={HDSegwitP2SHWallet.type}>
-                          <BlueText>{HDSegwitP2SHWallet.typeReadable} - Multiple addresses</BlueText>
+                        <BlueText>{HDSegwitP2SHWallet.typeReadable} - {loc.wallets.add.multi_address}</BlueText>
                         </RadioButton>
                         <RadioButton value={SegwitP2SHWallet.type}>
-                          <BlueText>{SegwitP2SHWallet.typeReadable} - Single address</BlueText>
+                          <BlueText>{SegwitP2SHWallet.typeReadable} - {loc.wallets.add.single_address}</BlueText>
                         </RadioButton>
                       </RadioGroup>
                     </View>

@@ -49,6 +49,8 @@
       coming_soon: 'In die toekoms',
       lightning: 'Lightning',
       bitcoin: 'Kevacoin',
+      multi_address: 'Multiple addresses',
+      single_address: 'Single address',
     },
     details: {
       title: 'Beursiet',
@@ -177,6 +179,7 @@
     copied: 'Gekopieer na klipbord!',
   },
   settings: {
+    general: 'General',
     header: 'instellings',
     plausible_deniability: 'Geloofwaardige ontkenbaarheid...',
     storage_not_encrypted: 'Berging: Nie-geenkripteer nie',
