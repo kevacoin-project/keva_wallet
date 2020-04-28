@@ -67,6 +67,7 @@ class BlueAppComponent extends React.Component {
           <View style={styles.lottieContainer}>
             <LottieView
               ref={ref => (this.loadingSplash = ref)}
+              resizeMode="center"
               onAnimationFinish={this.onAnimationFinish}
               source={require('./img/bluewalletsplash.json')}
               autoPlay
