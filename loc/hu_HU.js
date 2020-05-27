@@ -20,6 +20,7 @@ module.exports = {
       create_a_wallet: 'Új tárca',
       create_a_wallet1: 'Ingyenes, és annyit hozhatsz létre',
       create_a_wallet2: 'amennyit szeretnél',
+      create_a_button: 'add hozzá',
       latest_transaction: 'utolsó tranzakció',
       empty_txs1: 'A tranzakcióid itt fognak megjelenni',
       empty_txs2: 'de még nem volt tranzakciód!',
@@ -67,6 +68,9 @@ module.exports = {
       export_backup: 'Exportálás / Biztonsági mentés',
       buy_bitcoin: 'Kevacoin vásáslás',
       show_xpub: 'Mutasd a tárca XPUB kulcsát',
+      connected_to: 'Connected to',
+      advanced: 'Advanced',
+      use_with_hardware_wallet: 'Use with hardware wallet',
     },
     export: {
       title: 'tárca exportálása',

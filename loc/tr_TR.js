@@ -20,6 +20,7 @@ module.exports = {
       create_a_wallet: 'Cüzdan oluştur',
       create_a_wallet1: 'Oluşturması bedava ve',
       create_a_wallet2: 'istediğiniz kadar oluşturabilirsiniz',
+      create_a_button: 'şimdi ekle',
       latest_transaction: 'en son işlem',
       empty_txs1: 'İşlemleriniz burada görünür,',
       empty_txs2: 'şu anda hiç yok',
@@ -67,6 +68,9 @@ module.exports = {
       export_backup: 'Dışa yükle / yedekle',
       buy_bitcoin: 'Kevacoin satın al',
       show_xpub: 'Cüzdan XPUB göster',
+      connected_to: 'Connected to',
+      advanced: 'Advanced',
+      use_with_hardware_wallet: 'Use with hardware wallet',
     },
     export: {
       title: 'cüzdan yedekle',

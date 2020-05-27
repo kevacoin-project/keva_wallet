@@ -1,67 +1,44 @@
-v5.3.0
+v5.3.7
 ======
 
-* ADD: Open clipboard modal if address is detected at launch
-* ADD: Copy from clipboard on actionsheet
-* ADD: support for Electrum Personal Server and Electrs (disable protocol batching)
-* ADD: avatars in HodlHodl offers list
-* ADD: Long Press on Send. More optins to come
-* FIX: Remove quick actions if storage is encrypted (improves plausible deniability)
-* FIX: allow copy to clipboard on watch-only wallets
-* FIX: electrum connection status now updates realtime
-* FIX: import single-address bech32 wallet from WIF (closes #911)
-* FIX: duplicate input detected error (closes #912)
-* FIX: Error in back button - Marketplace #922
-* FIX: Don't display clipboard modal if content is from a lightning wallet
-* REF: some love to the about section
+* ADD: Storage delete/not-delete for unencrypted storage.
+* ADD: some missing localizations
+* FIX: Fee suggestion selection
+* FIX: allow view to be scrolled on small devices
+* FIX: Biometrics switch value
+* REF: prevent possible crash on ln view invoice screen
 
-
-v5.2.0
+v5.3.6
 ======
 
-* ADD: support for Electrum Personal Server (SSL connection)
-* ADD: HodlHodl trading platform integration
-* ADD: Decrypt Storage
-* ADD: UAH Fiat
-* FIX: Allow use of Today extension on iOS 10
-* REF: General Settings
-* REF: electrum reconnect improvements
+* ADD: Electrum seed recovery for Segwit as well (not just legacy)
+* ADD: support for  deeplinks (closes #892)
+* FIX: Electrum seed recovery bug
 
-v5.1.0
+v5.3.5
 ======
 
-* FIX: weird import screen scan qr code behaviour
-* FIX: allow using unconfirmed utxo when creating transaction
-* REF: removed obsolete single address RBF;
-* REF: refactored breadwallet format a bit
-* FIX: Wallet name input character entry bug
-* REF: experimental - dont fetch transactions when importing wallet, only balance. should be faster. txs can be fetched later manually
-* FIX: Import ColdCard wallet using JSON's label.
-* REF: German translations
-* REF: now BIP44 works through electrum
-* REF: single-address wallets now work through electrum
-* REF: wallet export screen improvements
+* ADD: support for Electrum Seed format, legacy BIP32 (closes #954)
+* ADD: refill lightning wallet with bank card
+* ADD: Local Trader CTA to main view
+* ADD: broadcast txhex screen
+* ADD: Broadcast on Network options
+* FIX: Hide toolbar when keyboard is dismissed
+* FIX: capitalized deeplink (closes #1005)
+* FIX: Import toolbar touch
+* FIX: pass local fiat currency to buy-bitcoin widget
+* REF: send functionality for all wallet types. All wallet types can now sendMAX
+* REF: Move the sell fiat button to the list header
+* REF: Move onchain marketplace to wallet details
+* REF: Cleaner wallet panel at blank state
 
-v5.0.0
+
+v5.3.2
 ======
 
-* ADD: Coldcard support
-* FIX: allow capitalized bech32 addresses (closes #838)
-* FIX: lnurl scan to receive is not returning the correct view (closes #828)
-* FIX: watch-only delete wallet doesnt have confirmation now
-* FIX: typo in spanish
-
-v4.9.4
-======
-
-* REL: ver bump 4.9.4
-* FIX: Lint
-* FIX: Listen to lnd invoice changes
-* FIX: There's two refresh icons on the main view, when you pull-to-refresh
-* FIX: Crash on scan in wallets import when closing the view
-* FIX: Allow walet change on invoice creation
-* FIX: Allow wallet text input to be empty for new wallet naming
-* FIX: LN Invoice amount renders 0
-* FIX: Handle both chains
-* FIX: deeplinking (safello etc)
-* DEL: Remove alerts from main list
+* ADD: Handoff Receive Address
+* FIX: BIP38 import support (password-protected private key from paper wallet)
+* FIX: iOS widget not working
+* FIX: negative confirmation num for electrum personal server
+* FIX: Keyboard avoiding
+* FIX: allow LocalTrader for watch-only HD wallets

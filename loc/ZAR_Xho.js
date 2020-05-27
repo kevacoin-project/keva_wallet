@@ -20,6 +20,7 @@
       create_a_wallet: 'Yenza ingxowa',
       create_a_wallet1: 'Ayihlawulelwa kwaye ungayenza',
       create_a_wallet2: 'Ungenza zibeninzi indlela zokuhlawula',
+      create_a_button: 'Add now',
       latest_transaction: 'Utshintsho olutsha',
       empty_txs1: 'Intengiso yakho iya kubonakala apha,',
       empty_txs2: 'akuho nanye okwangoku',
@@ -67,6 +68,9 @@
       export_backup: 'Ukuthumela ngaphandle / yokugcina',
       buy_bitcoin: 'Thenga ibitcoin',
       show_xpub: 'Bonise ingxowa XPUB',
+      connected_to: 'Connected to',
+      advanced: 'Advanced',
+      use_with_hardware_wallet: 'Use with hardware wallet',
     },
     export: {
       title: 'ukuthunyelwa kweebhanki ',

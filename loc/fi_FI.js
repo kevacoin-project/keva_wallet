@@ -19,9 +19,10 @@ module.exports = {
         'Lompakko koostuu salaisesta avaimesta (private key) sekä julkisesta osoitteesta' +
         ',jonka voit jakaa vastaanottaaksesi kolikoita.',
       add: 'Lisää Lompakko',
-      create_a_wallet: 'Luo lompakko',
+      create_a_wallet: 'Lisää lompakko',
       create_a_wallet1: 'Se on ilmaista ja voit luoda',
       create_a_wallet2: 'niin monta kuin haluat',
+      create_a_button: 'Lisää nyt',
       latest_transaction: 'viimeisin siirto',
       empty_txs1: 'Siirtosi näkyvät tässä,',
       empty_txs2: 'ei siirtoja',
@@ -69,6 +70,9 @@ module.exports = {
       export_backup: 'Vie / varmuuskopioi',
       buy_bitcoin: 'Osta Bitcoinia',
       show_xpub: 'Näytä lompakon XPUB',
+      connected_to: 'Connected to',
+      advanced: 'Advanced',
+      use_with_hardware_wallet: 'Use with hardware wallet',
     },
     export: {
       title: 'lompakon vienti',

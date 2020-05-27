@@ -21,6 +21,7 @@ module.exports = {
       create_a_wallet: 'Criar uma carteira',
       create_a_wallet1: 'é grátis e você pode criar',
       create_a_wallet2: 'quantas você quiser',
+      create_a_button: 'Criar agora',
       latest_transaction: 'última transação',
       empty_txs1: 'Suas transações aparecerão aqui,',
       empty_txs2: 'nenhuma no momento',
@@ -69,6 +70,9 @@ module.exports = {
       show_xpub: 'Ver XPUB',
       delete: 'Apagar',
       save: 'Salvar',
+      connected_to: 'Connected to',
+      advanced: 'Advanced',
+      use_with_hardware_wallet: 'Use with hardware wallet',
     },
     export: {
       title: 'Exportar carteira',

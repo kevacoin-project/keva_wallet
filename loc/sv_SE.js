@@ -20,6 +20,7 @@ module.exports = {
       create_a_wallet: 'Ny plånbok',
       create_a_wallet1: 'Det är gratis och du kan skapa',
       create_a_wallet2: 'hur många du vill',
+      create_a_button: 'Ny plånbok',
       latest_transaction: 'senaste transaktion',
       empty_txs1: 'Dina transaktioner kommer att visas här',
       empty_txs2: 'men än så länge finns inga!',
@@ -67,6 +68,9 @@ module.exports = {
       export_backup: 'Exportera / ta backup',
       buy_bitcoin: 'Köp bitcoin',
       show_xpub: 'Visa plånbokens XPUB',
+      connected_to: 'Connected to',
+      advanced: 'Advanced',
+      use_with_hardware_wallet: 'Use with hardware wallet',
     },
     export: {
       title: 'exportera plånbok',

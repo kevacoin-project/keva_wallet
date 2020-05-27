@@ -35,18 +35,17 @@ import Modal from 'react-native-modal';
 import NetworkTransactionFees, { NetworkTransactionFee } from '../../models/networkTransactionFees';
 import BitcoinBIP70TransactionDecode from '../../bip70/bip70';
 import { BitcoinUnit, Chain } from '../../models/bitcoinUnits';
-import { HDLegacyP2PKHWallet, HDSegwitBech32Wallet, HDSegwitP2SHWallet, LightningCustodianWallet, WatchOnlyWallet } from '../../class';
+import { AppStorage, HDSegwitBech32Wallet, LightningCustodianWallet, WatchOnlyWallet } from '../../class';
 import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 import { BitcoinTransaction } from '../../models/bitcoinTransactionInfo';
 import DocumentPicker from 'react-native-document-picker';
 import RNFS from 'react-native-fs';
-import DeeplinkSchemaMatch from '../../class/deeplinkSchemaMatch';
+import DeeplinkSchemaMatch from '../../class/deeplink-schema-match';
 const bitcoin = require('bitcoinjs-lib');
 const bip21 = require('../../bip21/bip21');
 let BigNumber = require('bignumber.js');
 const { width } = Dimensions.get('window');
-/** @type {AppStorage} */
-let BlueApp = require('../../BlueApp');
+let BlueApp: AppStorage = require('../../BlueApp');
 let loc = require('../../loc');
 
 const btcAddressRx = /^[a-zA-Z0-9]{26,35}$/;
@@ -69,10 +68,7 @@ export default class SendDetails extends Component {
     this.keyboardDidShowListener = Keyboard.addListener('keyboardDidShow', this._keyboardDidShow);
     this.keyboardDidHideListener = Keyboard.addListener('keyboardDidHide', this._keyboardDidHide);
 
-    let fromAddress;
-    if (props.navigation.state.params) fromAddress = props.navigation.state.params.fromAddress;
-    let fromSecret;
-    if (props.navigation.state.params) fromSecret = props.navigation.state.params.fromSecret;
+    /** @type {LegacyWallet} */
     let fromWallet = null;
     if (props.navigation.state.params) fromWallet = props.navigation.state.params.fromWallet;
 
@@ -84,8 +80,6 @@ export default class SendDetails extends Component {
     } else {
       if (!fromWallet && wallets.length > 0) {
         fromWallet = wallets[0];
-        fromAddress = fromWallet.getAddress();
-        fromSecret = fromWallet.getSecret();
       }
       this.state = {
         isLoading: false,
@@ -94,9 +88,7 @@ export default class SendDetails extends Component {
         isAdvancedTransactionOptionsVisible: false,
         isTransactionReplaceable: fromWallet.type === HDSegwitBech32Wallet.type,
         recipientsScrollIndex: 0,
-        fromAddress,
         fromWallet,
-        fromSecret,
         addresses: [],
         memo: '',
         networkTransactionFees: new NetworkTransactionFee(1, 1, 1),
@@ -136,12 +128,10 @@ export default class SendDetails extends Component {
           bip70TransactionExpiration: bip70.bip70TransactionExpiration,
         });
       } else {
+        console.warn('2');
         let recipients = this.state.addresses;
-        const dataWithoutSchema = data.replace('kevacoin:', '');
-        if (
-          btcAddressRx.test(dataWithoutSchema) ||
-          ((dataWithoutSchema.indexOf('bc1') === 0 || dataWithoutSchema.indexOf('BC1') === 0) && dataWithoutSchema.indexOf('?') === -1)
-        ) {
+        const dataWithoutSchema = data.replace('kevacoin:', '').replace('KEVACOIN:', '');
+        if (this.state.fromWallet.isAddressValid(dataWithoutSchema)) {
           recipients[[this.state.recipientsScrollIndex]].address = dataWithoutSchema;
           this.setState({
             address: recipients,
@@ -155,12 +145,12 @@ export default class SendDetails extends Component {
             if (!data.toLowerCase().startsWith('kevacoin:')) {
               data = `kevacoin:${data}`;
             }
-            const decoded = bip21.decode(data);
+            const decoded = DeeplinkSchemaMatch.bip21decode(data);
             address = decoded.address;
             options = decoded.options;
           } catch (error) {
             data = data.replace(/(amount)=([^&]+)/g, '').replace(/(amount)=([^&]+)&/g, '');
-            const decoded = bip21.decode(data);
+            const decoded = DeeplinkSchemaMatch.bip21decode(data);
             decoded.options.amount = 0;
             address = decoded.address;
             options = decoded.options;
@@ -219,7 +209,7 @@ export default class SendDetails extends Component {
     try {
       const cachedNetworkTransactionFees = JSON.parse(await AsyncStorage.getItem(NetworkTransactionFee.StorageKey));
 
-      if (cachedNetworkTransactionFees && cachedNetworkTransactionFees.hasOwnProperty('halfHourFee')) {
+      if (cachedNetworkTransactionFees && cachedNetworkTransactionFees.hasOwnProperty('mediumFee')) {
         this.setState({
           fee: cachedNetworkTransactionFees.fastestFee,
           networkTransactionFees: cachedNetworkTransactionFees,
@@ -264,11 +254,11 @@ export default class SendDetails extends Component {
   }
 
   _keyboardDidShow = () => {
-    this.setState({ renderWalletSelectionButtonHidden: true });
+    this.setState({ renderWalletSelectionButtonHidden: true, isAmountToolbarVisibleForAndroid: true });
   };
 
   _keyboardDidHide = () => {
-    this.setState({ renderWalletSelectionButtonHidden: false });
+    this.setState({ renderWalletSelectionButtonHidden: false, isAmountToolbarVisibleForAndroid: false });
   };
 
   decodeBitcoinUri(uri) {
@@ -277,7 +267,7 @@ export default class SendDetails extends Component {
     let address = uri || '';
     let memo = '';
     try {
-      parsedBitcoinUri = bip21.decode(uri);
+      parsedBitcoinUri = DeeplinkSchemaMatch.bip21decode(uri);
       address = parsedBitcoinUri.hasOwnProperty('address') ? parsedBitcoinUri.address : address;
       if (parsedBitcoinUri.hasOwnProperty('options')) {
         if (parsedBitcoinUri.options.hasOwnProperty('amount')) {
@@ -307,32 +297,6 @@ export default class SendDetails extends Component {
     }
 
     return (availableBalance === 'NaN' && balance) || availableBalance;
-  }
-
-  calculateFee(utxos, txhex, utxoIsInSatoshis) {
-    let index = {};
-    let c = 1;
-    index[0] = 0;
-    for (let utxo of utxos) {
-      if (!utxoIsInSatoshis) {
-        utxo.amount = new BigNumber(utxo.amount).multipliedBy(100000000).toNumber();
-      }
-      index[c] = utxo.amount + index[c - 1];
-      c++;
-    }
-
-    let tx = bitcoin.Transaction.fromHex(txhex);
-    let totalInput = index[tx.ins.length];
-    // ^^^ dumb way to calculate total input. we assume that signer uses utxos sequentially
-    // so total input == sum of yongest used inputs (and num of used inputs is `tx.ins.length`)
-    // TODO: good candidate to refactor and move to appropriate class. some day
-
-    let totalOutput = 0;
-    for (let o of tx.outs) {
-      totalOutput += o.value * 1;
-    }
-
-    return new BigNumber(totalInput - totalOutput).dividedBy(100000000).toNumber();
   }
 
   async processBIP70Invoice(text) {
@@ -424,126 +388,40 @@ export default class SendDetails extends Component {
       return;
     }
 
-    if (this.state.fromWallet.type === HDSegwitBech32Wallet.type || this.state.fromWallet.type === WatchOnlyWallet.type) {
-      // new send is supported by BIP84 or watchonly with HW wallet support (it uses BIP84 under the hood anyway)
-      try {
-        await this.createHDBech32Transaction();
-      } catch (Err) {
-        this.setState({ isLoading: false }, () => {
-          alert(Err.message);
-          ReactNativeHapticFeedback.trigger('notificationError', { ignoreAndroidSystemSettings: false });
-        });
-      }
-      return;
-    }
-
-    // legacy send below
-
-    this.setState({ isLoading: true }, async () => {
-      let utxo;
-      let actualSatoshiPerByte;
-      let tx, txid;
-      let tries = 1;
-      let fee = 0.000001; // initial fee guess
-      const firstTransaction = this.state.addresses[0];
-      try {
-        await this.state.fromWallet.fetchUtxo();
-        if (this.state.fromWallet.getChangeAddressAsync) {
-          await this.state.fromWallet.getChangeAddressAsync(); // to refresh internal pointer to next free address
-        }
-        if (this.state.fromWallet.getAddressAsync) {
-          await this.state.fromWallet.getAddressAsync(); // to refresh internal pointer to next free address
-        }
-
-        utxo = this.state.fromWallet.utxo;
-
-        do {
-          console.log('try #', tries, 'fee=', fee);
-          if (this.recalculateAvailableBalance(this.state.fromWallet.getBalance(), firstTransaction.amount, fee) < 0) {
-            // we could not add any fee. user is trying to send all he's got. that wont work
-            throw new Error(loc.send.details.total_exceeds_balance);
-          }
-
-          let startTime = Date.now();
-          tx = this.state.fromWallet.createTx(utxo, firstTransaction.amount, fee, firstTransaction.address, this.state.memo);
-          let endTime = Date.now();
-          console.log('create tx ', (endTime - startTime) / 1000, 'sec');
-
-          let txDecoded = bitcoin.Transaction.fromHex(tx);
-          txid = txDecoded.getId();
-          console.log('txid', txid);
-          console.log('txhex', tx);
-
-          let feeSatoshi = new BigNumber(fee).multipliedBy(100000000);
-          actualSatoshiPerByte = feeSatoshi.dividedBy(Math.round(tx.length / 2));
-          actualSatoshiPerByte = actualSatoshiPerByte.toNumber();
-          console.log({ satoshiPerByte: actualSatoshiPerByte });
-
-          if (Math.round(actualSatoshiPerByte) !== requestedSatPerByte * 1 || Math.floor(actualSatoshiPerByte) < 1) {
-            console.log('fee is not correct, retrying');
-            fee = feeSatoshi
-              .multipliedBy(requestedSatPerByte / actualSatoshiPerByte)
-              .plus(10)
-              .dividedBy(100000000)
-              .toNumber();
-          } else {
-            break;
-          }
-        } while (tries++ < 5);
-
-        BlueApp.tx_metadata = BlueApp.tx_metadata || {};
-        BlueApp.tx_metadata[txid] = {
-          txhex: tx,
-          memo: this.state.memo,
-        };
-        await BlueApp.saveToDisk();
-      } catch (err) {
-        console.log(err);
+    try {
+      await this.createPsbtTransaction();
+    } catch (Err) {
+      this.setState({ isLoading: false }, () => {
+        alert(Err.message);
         ReactNativeHapticFeedback.trigger('notificationError', { ignoreAndroidSystemSettings: false });
-        alert(err);
-        this.setState({ isLoading: false });
-        return;
-      }
-      this.props.navigation.navigate('Confirm', {
-        recipients: [firstTransaction],
-        // HD wallet's utxo is in sats, classic segwit wallet utxos are in btc
-        fee: this.calculateFee(
-          utxo,
-          tx,
-          this.state.fromWallet.type === HDSegwitP2SHWallet.type || this.state.fromWallet.type === HDLegacyP2PKHWallet.type,
-        ),
-        memo: this.state.memo,
-        fromWallet: this.state.fromWallet,
-        tx: tx,
-        satoshiPerByte: actualSatoshiPerByte.toFixed(2),
       });
-      this.setState({ isLoading: false });
-    });
+    }
   }
 
-  async createHDBech32Transaction() {
+  async createPsbtTransaction() {
     /** @type {HDSegwitBech32Wallet} */
     const wallet = this.state.fromWallet;
+    this.setState({loadStatus: 'Contacting Server ...'});
     await wallet.fetchUtxo();
-    const firstTransaction = this.state.addresses[0];
+    this.setState({loadStatus: 'Refreshing Address ...'});
     const changeAddress = await wallet.getChangeAddressAsync();
-    let satoshis = new BigNumber(firstTransaction.amount).multipliedBy(100000000).toNumber();
     const requestedSatPerByte = +this.state.fee.toString().replace(/\D/g, '');
-    console.log({ satoshis, requestedSatPerByte, utxo: wallet.getUtxo() });
+    console.log({ requestedSatPerByte, utxo: wallet.getUtxo() });
 
     let targets = [];
     for (const transaction of this.state.addresses) {
-      const amount =
-        transaction.amount === BitcoinUnit.MAX ? BitcoinUnit.MAX : new BigNumber(transaction.amount).multipliedBy(100000000).toNumber();
-      if (amount > 0.0 || amount === BitcoinUnit.MAX) {
-        targets.push({ address: transaction.address, value: amount });
+      if (transaction.amount === BitcoinUnit.MAX) {
+        // single output with MAX
+        targets = [{ address: transaction.address }];
+        break;
+      }
+      const value = new BigNumber(transaction.amount).multipliedBy(100000000).toNumber();
+      if (value > 0) {
+        targets.push({ address: transaction.address, value });
       }
     }
 
-    if (firstTransaction.amount === BitcoinUnit.MAX) {
-      targets = [{ address: firstTransaction.address, amount: BitcoinUnit.MAX }];
-    }
-
+    this.setState({loadStatus: 'Creating Transaction ...'});
     let { tx, fee, psbt } = wallet.createTransaction(
       wallet.getUtxo(),
       targets,
@@ -570,6 +448,7 @@ export default class SendDetails extends Component {
       txhex: tx.toHex(),
       memo: this.state.memo,
     };
+    this.setState({loadStatus: 'Saving to Disk ...'});
     await BlueApp.saveToDisk();
     this.props.navigation.navigate('Confirm', {
       fee: new BigNumber(fee).dividedBy(100000000).toNumber(),
@@ -584,7 +463,7 @@ export default class SendDetails extends Component {
 
   onWalletSelect = wallet => {
     const changeWallet = () => {
-      this.setState({ fromAddress: wallet.getAddress(), fromSecret: wallet.getSecret(), fromWallet: wallet }, () => {
+      this.setState({ fromWallet: wallet }, () => {
         this.renderNavigationHeader();
         this.props.navigation.pop();
       });
@@ -672,7 +551,7 @@ export default class SendDetails extends Component {
                 maxLength={9}
                 editable={!this.state.isLoading}
                 placeholderTextColor="#37c0a1"
-                placeholder={this.state.networkTransactionFees.halfHourFee.toString()}
+                placeholder={this.state.networkTransactionFees.mediumFee.toString()}
                 style={{ fontWeight: '600', color: '#37c0a1', marginBottom: 0, marginRight: 4, textAlign: 'right', fontSize: 36 }}
                 inputAccessoryViewID={BlueDismissKeyboardInputAccessory.InputAccessoryViewID}
               />
@@ -781,10 +660,8 @@ export default class SendDetails extends Component {
             {this.state.fromWallet.type === HDSegwitBech32Wallet.type && (
               <BlueListItem
                 title="Allow Fee Bump"
-                hideChevron
-                switchButton
-                switched={this.state.isTransactionReplaceable}
-                onSwitch={this.onReplaceableFeeSwitchValueChanged}
+                Component={TouchableWithoutFeedback}
+                switch={{ value: this.state.isTransactionReplaceable, onValueChange: this.onReplaceableFeeSwitchValueChanged }}
               />
             )}
             {this.state.fromWallet.type === WatchOnlyWallet.type &&
@@ -849,7 +726,11 @@ export default class SendDetails extends Component {
   renderCreateButton = () => {
     return (
       <View style={{ marginHorizontal: 56, marginVertical: 16, alignContent: 'center', backgroundColor: '#FFFFFF', minHeight: 44 }}>
-        {this.state.isLoading ? <ActivityIndicator /> : <BlueButton onPress={() => this.createTransaction()} title={'Next'} />}
+        {this.state.isLoading ? (
+          <ActivityIndicator />
+        ) : (
+          <BlueButton onPress={() => this.createTransaction()} title={'Next'} testID={'CreateTransactionButton'} />
+        )}
       </View>
     );
   };
@@ -919,8 +800,6 @@ export default class SendDetails extends Component {
               this.setState({ addresses: transactions });
             }}
             inputAccessoryViewID={this.state.fromWallet.allowSendMax() ? BlueUseAllFundsButton.InputAccessoryViewID : null}
-            onFocus={() => this.setState({ isAmountToolbarVisibleForAndroid: true })}
-            onBlur={() => this.setState({ isAmountToolbarVisibleForAndroid: false })}
           />
           <BlueAddressInput
             onChangeText={async text => {
@@ -990,6 +869,7 @@ export default class SendDetails extends Component {
       return (
         <View style={{ flex: 1, paddingTop: 20 }}>
           <BlueLoading />
+          <Text style={styles.statusText}>{this.state.loadStatus}</Text>
         </View>
       );
     }
@@ -1116,6 +996,15 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingHorizontal: 8,
   },
+  statusText: {
+    position: 'relative',
+    top: -200,
+    justifyContent: 'center',
+    alignSelf: 'center',
+    textAlign: 'center',
+    fontSize: 18,
+    color: '#c83f6d'
+  }
 });
 
 SendDetails.propTypes = {
@@ -1130,9 +1019,7 @@ SendDetails.propTypes = {
       params: PropTypes.shape({
         amount: PropTypes.number,
         address: PropTypes.string,
-        fromAddress: PropTypes.string,
         satoshiPerByte: PropTypes.string,
-        fromSecret: PropTypes.fromSecret,
         fromWallet: PropTypes.fromWallet,
         memo: PropTypes.string,
         uri: PropTypes.string,

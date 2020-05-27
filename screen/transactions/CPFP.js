@@ -1,6 +1,6 @@
 /* global alert */
 import React, { Component } from 'react';
-import { ActivityIndicator, View, TextInput, TouchableOpacity, Linking, Clipboard } from 'react-native';
+import { ActivityIndicator, View, TextInput, TouchableOpacity, Linking, Clipboard, ScrollView } from 'react-native';
 import {
   BlueSpacing20,
   BlueReplaceFeeSuggestions,
@@ -10,10 +10,11 @@ import {
   BlueText,
   BlueSpacing,
   BlueNavigationStyle,
+  BlueBigCheckmark,
 } from '../../BlueComponents';
 import PropTypes from 'prop-types';
 import { HDSegwitBech32Transaction, HDSegwitBech32Wallet } from '../../class';
-import { Icon, Text } from 'react-native-elements';
+import { Text } from 'react-native-elements';
 import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 /** @type {AppStorage} */
 let EV = require('../../events');
@@ -50,7 +51,6 @@ export default class CPFP extends Component {
         await BlueElectrum.waitTillConnected();
         let result = await this.state.wallet.broadcastTx(this.state.txhex);
         if (result) {
-          console.log('broadcast result = ', result);
           EV(EV.enum.REMOTE_TRANSACTIONS_COUNT_CHANGED); // someone should fetch txs
           this.setState({ stage: 3, isLoading: false });
           this.onSuccessBroadcast();
@@ -144,9 +144,14 @@ export default class CPFP extends Component {
       );
     }
 
-    return this.renderStage1(
-      'We will create another transaction that spends your unconfirmed transaction. Total fee will be higher than original transaction\n' +
-        'fee, so it should be mined faster. This is called CPFP - Child Pays For Parent.',
+    return (
+      <SafeBlueArea style={{ flex: 1, paddingBottom: 16 }}>
+        <ScrollView>
+          {this.renderStage1(
+            'We will create another transaction that spends your unconfirmed transaction. The total fee will be higher than the original transaction fee, so it should be mined faster. This is called CPFP - Child Pays For Parent.',
+          )}
+        </ScrollView>
+      </SafeBlueArea>
     );
   }
 
@@ -192,20 +197,7 @@ export default class CPFP extends Component {
         <BlueCard style={{ alignItems: 'center', flex: 1 }}>
           <View style={{ flexDirection: 'row', justifyContent: 'center', paddingTop: 76, paddingBottom: 16 }} />
         </BlueCard>
-        <View
-          style={{
-            backgroundColor: '#ccddf9',
-            width: 120,
-            height: 120,
-            borderRadius: 60,
-            alignSelf: 'center',
-            justifyContent: 'center',
-            marginTop: 43,
-            marginBottom: 53,
-          }}
-        >
-          <Icon name="check" size={50} type="font-awesome" color="#0f5cc0" />
-        </View>
+        <BlueBigCheckmark style={{ marginTop: 43, marginBottom: 53 }} />
         <BlueCard>
           <BlueButton
             onPress={() => {

@@ -408,10 +408,9 @@ module.exports.waitTillConnected = async function() {
 };
 
 module.exports.estimateFees = async function() {
-  if (!mainClient) throw new Error('Electrum client is not connected');
-  const fast = await mainClient.blockchainEstimatefee(1);
-  const medium = await mainClient.blockchainEstimatefee(5);
-  const slow = await mainClient.blockchainEstimatefee(10);
+  const fast = await module.exports.estimateFee(1);
+  const medium = await module.exports.estimateFee(18);
+  const slow = await module.exports.estimateFee(144);
   return { fast, medium, slow };
 };
 
@@ -455,9 +454,9 @@ module.exports.broadcastV2 = async function(hex) {
 };
 
 module.exports.estimateCurrentBlockheight = function() {
-  const baseTs = 1585837504347; // uS
-  const baseHeight = 624197;
-  return Math.floor(baseHeight + (+new Date() - baseTs) / 1000 / 60 / 10);
+  const baseTs = 1587570465609; // uS
+  const baseHeight = 627179;
+  return Math.floor(baseHeight + (+new Date() - baseTs) / 1000 / 60 / 9.5);
 };
 
 /**
