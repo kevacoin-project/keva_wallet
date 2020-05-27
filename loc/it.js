@@ -19,9 +19,10 @@ module.exports = {
         'Un portafoglio rappresenta la coppia fra un segreto (chiave privata) e un indirizzo' +
         'che puoi condividere per ricevere Kevacoin.',
       add: 'Aggiungi Portafoglio',
-      create_a_wallet: 'Crea un portafoglio',
+      create_a_wallet: 'Aggiungi un portafoglio',
       create_a_wallet1: 'È gratuito e puoi crearne',
       create_a_wallet2: 'quanti ne vuoi',
+      create_a_button: 'Aggiungi ora',
       latest_transaction: 'Transazioni recenti',
       empty_txs1: 'Le tue transazioni appariranno qui,',
       empty_txs2: 'Nessuna transazione',
@@ -69,6 +70,9 @@ module.exports = {
       export_backup: 'Esporta / Backup',
       buy_bitcoin: 'Compra Kevacoin',
       show_xpub: 'Mostra XPUB del portafoglio',
+      connected_to: 'Connected to',
+      advanced: 'Advanced',
+      use_with_hardware_wallet: 'Use with hardware wallet',
     },
     export: {
       title: 'Esporta portafoglio',

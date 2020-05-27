@@ -10,6 +10,8 @@ import {
   LightningCustodianWallet,
   PlaceholderWallet,
   SegwitBech32Wallet,
+  HDLegacyElectrumSeedP2PKHWallet,
+  HDSegwitElectrumSeedP2WPKHWallet,
 } from '../class';
 import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 const EV = require('../events');
@@ -97,6 +99,7 @@ export default class WalletImport {
     // 1. check if its HDSegwitP2SHWallet (BIP49)
     // 2. check if its HDLegacyP2PKHWallet (BIP44)
     // 3. check if its HDLegacyBreadwalletWallet (no BIP, just "m/0")
+    // 3.1 check HD Electrum legacy
     // 4. check if its Segwit WIF (P2SH)
     // 5. check if its Legacy WIF
     // 6. check if its address (watch-only wallet)
@@ -201,6 +204,24 @@ export default class WalletImport {
           return WalletImport._saveWallet(hd1);
         }
       }
+
+      try {
+        let hdElectrumSeedLegacy = new HDSegwitElectrumSeedP2WPKHWallet();
+        hdElectrumSeedLegacy.setSecret(importText);
+        if (await hdElectrumSeedLegacy.wasEverUsed()) {
+          // not fetching txs or balances, fuck it, yolo, life is too short
+          return WalletImport._saveWallet(hdElectrumSeedLegacy);
+        }
+      } catch (_) {}
+
+      try {
+        let hdElectrumSeedLegacy = new HDLegacyElectrumSeedP2PKHWallet();
+        hdElectrumSeedLegacy.setSecret(importText);
+        if (await hdElectrumSeedLegacy.wasEverUsed()) {
+          // not fetching txs or balances, fuck it, yolo, life is too short
+          return WalletImport._saveWallet(hdElectrumSeedLegacy);
+        }
+      } catch (_) {}
 
       let hd2 = new HDSegwitP2SHWallet();
       hd2.setSecret(importText);

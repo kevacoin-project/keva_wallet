@@ -20,6 +20,7 @@ module.exports = {
       create_a_wallet: 'สร้างกระเป๋าสตางค์',
       create_a_wallet1: 'ไม่มีค่าใช้จ่าย และคุณสามารถสร้างกระเป๋าสตางค์',
       create_a_wallet2: 'ได้มากเท่าที่ต้องการ',
+      create_a_button: 'เพิ่มตอนนี้',
       latest_transaction: 'ธุรกรรมล่าสุด',
       empty_txs1: 'ธุรกรรมจะปรากฏที่นี่,',
       empty_txs2: 'ไม่มี ณ ขณะนี้',
@@ -66,6 +67,9 @@ module.exports = {
       export_backup: 'ส่งออก / สำรอง',
       buy_bitcoin: 'ซื้อบิตคอยน์',
       show_xpub: 'แสดง XPUB ของกระเป๋าสตางค์',
+      connected_to: 'Connected to',
+      advanced: 'Advanced',
+      use_with_hardware_wallet: 'Use with hardware wallet',
     },
     export: {
       title: 'ส่งออกกระเป๋าสตางค์',

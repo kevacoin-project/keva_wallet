@@ -20,6 +20,7 @@ module.exports = {
       create_a_wallet: 'Portemonnee aanmaken',
       create_a_wallet1: 'Het is gratis en u kunt er',
       create_a_wallet2: 'zoveel maken als u wilt',
+      create_a_button: 'Voeg nu toe',
       latest_transaction: 'laatste transactie',
       empty_txs1: 'Uw transacties verschijnen hier,',
       empty_txs2: 'geen transacties op dit moment',
@@ -67,6 +68,9 @@ module.exports = {
       export_backup: 'Exporteren / back-up maken',
       buy_bitcoin: 'Koop Kevacoin',
       show_xpub: 'Toon portemonnee XPUB',
+      connected_to: 'Connected to',
+      advanced: 'Advanced',
+      use_with_hardware_wallet: 'Use with hardware wallet',
     },
     export: {
       title: 'portemonnee exporteren',

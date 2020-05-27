@@ -22,6 +22,7 @@
       create_a_wallet: 'Skep ‘n beursie',
       create_a_wallet1: 'Dit is gratis so skep',
       create_a_wallet2: 'soveel as wat u benodig',
+      create_a_button: 'Add now',
       latest_transaction: 'laaste transaksie',
       empty_txs1: 'U transaksies is hier beskikbaar,',
       empty_txs2: 'huidiglik geen transaksies',
@@ -69,6 +70,9 @@
       export_backup: 'voer uit / kopieer',
       buy_bitcoin: 'Koop Kevacoin',
       show_xpub: 'Wys beursie XPUB',
+      connected_to: 'Connected to',
+      advanced: 'Advanced',
+      use_with_hardware_wallet: 'Use with hardware wallet',
     },
     export: {
       title: 'beursie uitvoer',

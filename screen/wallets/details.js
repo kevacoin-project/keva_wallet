@@ -11,6 +11,8 @@ import {
   Keyboard,
   TouchableWithoutFeedback,
   Switch,
+  Platform,
+  Linking,
 } from 'react-native';
 import { BlueButton, SafeBlueArea, BlueCard, BlueSpacing20, BlueNavigationStyle, BlueText } from '../../BlueComponents';
 import PropTypes from 'prop-types';
@@ -115,6 +117,29 @@ export default class WalletDetails extends Component {
     });
   }
 
+  renderMarketplaceButton = () => {
+    return Platform.select({
+      android: (
+        <BlueButton
+          onPress={() =>
+            this.props.navigation.navigate('Marketplace', {
+              fromWallet: this.state.wallet,
+            })
+          }
+          title="Marketplace"
+        />
+      ),
+      ios: (
+        <BlueButton
+          onPress={async () => {
+            Linking.openURL('https://bluewallet.io/marketplace-btc/');
+          }}
+          title="Marketplace"
+        />
+      ),
+    });
+  };
+
   render() {
     if (this.state.isLoading) {
       return (
@@ -187,7 +212,9 @@ export default class WalletDetails extends Component {
                 <Text style={{ color: '#81868e', fontWeight: '500', fontSize: 14 }}>{this.state.wallet.typeReadable}</Text>
                 {this.state.wallet.type === LightningCustodianWallet.type && (
                   <React.Fragment>
-                    <Text style={{ color: '#0c2550', fontWeight: '500', fontSize: 14, marginVertical: 12 }}>{'connected to'}</Text>
+                    <Text style={{ color: '#0c2550', fontWeight: '500', fontSize: 14, marginVertical: 12 }}>
+                      {loc.wallets.details.connected_to.toLowerCase()}
+                    </Text>
                     <BlueText>{this.state.wallet.getBaseURI()}</BlueText>
                   </React.Fragment>
                 )}
@@ -195,9 +222,11 @@ export default class WalletDetails extends Component {
                   <BlueSpacing20 />
                   {this.state.wallet.type === WatchOnlyWallet.type && this.state.wallet.getSecret().startsWith('zpub') && (
                     <>
-                      <Text style={{ color: '#0c2550', fontWeight: '500', fontSize: 14, marginVertical: 16 }}>{'advanced'}</Text>
+                      <Text style={{ color: '#0c2550', fontWeight: '500', fontSize: 14, marginVertical: 16 }}>
+                        {loc.wallets.details.advanced.toLowerCase()}
+                      </Text>
                       <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-                        <BlueText>{'Use with hardware wallet'}</BlueText>
+                        <BlueText>{loc.wallets.details.use_with_hardware_wallet}</BlueText>
                         <Switch
                           value={this.state.useWithHardwareWallet}
                           onValueChange={value => this.onUseWithHardwareWalletSwitch(value)}
@@ -241,27 +270,16 @@ export default class WalletDetails extends Component {
                       />
 
                       <BlueSpacing20 />
+                      {this.renderMarketplaceButton()}
                     </React.Fragment>
                   )}
-
-                  {false && this.state.wallet.type !== LightningCustodianWallet.type && (
-                    <BlueButton
-                      icon={{
-                        name: 'shopping-cart',
-                        type: 'font-awesome',
-                        color: BlueApp.settings.buttonTextColor,
-                      }}
-                      onPress={() =>
-                        this.props.navigation.navigate('BuyBitcoin', {
-                          address: this.state.wallet.getAddress(),
-                          secret: this.state.wallet.getSecret(),
-                        })
-                      }
-                      title={loc.wallets.details.buy_bitcoin}
-                    />
+                  {this.state.wallet.type !== LightningCustodianWallet.type && (
+                    <React.Fragment>
+                      <BlueSpacing20 />
+                      <BlueButton onPress={() => this.props.navigation.navigate('Broadcast')} title="Broadcast transaction" />
+                    </React.Fragment>
                   )}
                   <BlueSpacing20 />
-
                   <TouchableOpacity
                     style={{ alignItems: 'center' }}
                     onPress={() => {

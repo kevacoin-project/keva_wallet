@@ -19,6 +19,7 @@ module.exports = {
       create_a_wallet: '建立一個錢包',
       create_a_wallet1: '建立錢包是免費的，你可以',
       create_a_wallet2: '想建立多少就建立多少個',
+      create_a_button: '立即添加',
       latest_transaction: '最近的轉賬',
       empty_txs1: '你的轉賬資訊將展示在這裡',
       empty_txs2: '當前無資訊',
@@ -65,6 +66,9 @@ module.exports = {
       export_backup: '匯出備份',
       buy_bitcoin: '購買比特幣',
       show_xpub: '展示錢包 XPUB',
+      connected_to: 'Connected to',
+      advanced: 'Advanced',
+      use_with_hardware_wallet: 'Use with hardware wallet',
     },
     export: {
       title: '錢包匯出',

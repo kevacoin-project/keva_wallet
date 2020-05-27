@@ -15,6 +15,7 @@ import AsyncStorage from '@react-native-community/async-storage';
 import {
   BlueTextCentered,
   BlueText,
+  BlueListItem,
   LightningButton,
   BitcoinButton,
   BlueFormLabel,
@@ -24,12 +25,12 @@ import {
   BlueButtonLink,
   BlueSpacing20,
 } from '../../BlueComponents';
-import { RadioGroup, RadioButton } from 'react-native-flexi-radio-button';
 import PropTypes from 'prop-types';
 import { HDSegwitP2SHWallet } from '../../class/hd-segwit-p2sh-wallet';
 import { LightningCustodianWallet } from '../../class/lightning-custodian-wallet';
 import { AppStorage, HDSegwitBech32Wallet, SegwitP2SHWallet } from '../../class';
 import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
+import { Icon } from 'react-native-elements';
 let EV = require('../../events');
 let A = require('../../analytics');
 let BlueApp: AppStorage = require('../../BlueApp');
@@ -46,6 +47,7 @@ export default class WalletsAdd extends Component {
     this.state = {
       isLoading: true,
       walletBaseURI: '',
+      selectedIndex: 0,
     };
   }
 
@@ -53,7 +55,6 @@ export default class WalletsAdd extends Component {
     let walletBaseURI = await AsyncStorage.getItem(AppStorage.LNDHUB);
     let isAdvancedOptionsEnabled = await BlueApp.isAdancedModeEnabled();
     walletBaseURI = walletBaseURI || '';
-
     this.setState({
       isLoading: false,
       activeBitcoin: true,
@@ -70,10 +71,9 @@ export default class WalletsAdd extends Component {
     }); /* also, a hack to make screen update new typed text */
   }
 
-  onSelect(index, value) {
+  onSelect(index) {
     this.setState({
       selectedIndex: index,
-      selectedValue: value,
     });
   }
 
@@ -94,8 +94,8 @@ export default class WalletsAdd extends Component {
 
     return (
       <SafeBlueArea>
-        <KeyboardAvoidingView enabled behavior={Platform.OS === 'ios' ? 'padding' : null} keyboardVerticalOffset={62}>
-          <ScrollView>
+        <ScrollView>
+          <KeyboardAvoidingView enabled behavior={Platform.OS === 'ios' ? 'padding' : null} keyboardVerticalOffset={62}>
             <BlueFormLabel>{loc.wallets.add.wallet_name}</BlueFormLabel>
             <View
               style={{
@@ -181,19 +181,41 @@ export default class WalletsAdd extends Component {
                     <View>
                       <BlueSpacing20 />
                       <Text style={{ color: '#0c2550', fontWeight: '500' }}>{loc.settings.advanced_options}</Text>
-                      <RadioGroup onSelect={(index, value) => this.onSelect(index, value)} selectedIndex={0}>
-                        {/*
-                        <RadioButton value={HDSegwitBech32Wallet.type}>
-                          <BlueText>{HDSegwitBech32Wallet.typeReadable} - Multiple addresses</BlueText>
-                        </RadioButton>
-                        */}
-                        <RadioButton value={HDSegwitP2SHWallet.type}>
-                        <BlueText>{HDSegwitP2SHWallet.typeReadable} - {loc.wallets.add.multi_address}</BlueText>
-                        </RadioButton>
-                        <RadioButton value={SegwitP2SHWallet.type}>
-                          <BlueText>{SegwitP2SHWallet.typeReadable} - {loc.wallets.add.single_address}</BlueText>
-                        </RadioButton>
-                      </RadioGroup>
+                      {/*
+                      <BlueListItem
+                        onPress={() => {
+                          this.onSelect(0, HDSegwitBech32Wallet.type);
+                        }}
+                        title={HDSegwitBech32Wallet.typeReadable}
+                        {...(this.state.selectedIndex === 0
+                          ? {
+                              rightIcon: <Icon name="check" type="font-awesome" color="#0c2550" />,
+                            }
+                          : { hideChevron: true })}
+                      />
+                      */}
+                      <BlueListItem
+                        onPress={() => {
+                          this.onSelect(1, SegwitP2SHWallet.type);
+                        }}
+                        title={SegwitP2SHWallet.typeReadable}
+                        {...(this.state.selectedIndex === 1
+                          ? {
+                              rightIcon: <Icon name="check" type="font-awesome" color="#0c2550" />,
+                            }
+                          : { hideChevron: true })}
+                      />
+                      <BlueListItem
+                        onPress={() => {
+                          this.onSelect(2, HDSegwitP2SHWallet.typeReadable.type);
+                        }}
+                        title={HDSegwitP2SHWallet.typeReadable}
+                        {...(this.state.selectedIndex === 2
+                          ? {
+                              rightIcon: <Icon name="check" type="font-awesome" color="#0c2550" />,
+                            }
+                          : { hideChevron: true })}
+                      />
                     </View>
                   );
                 } else if (this.state.activeLightning && this.state.isAdvancedOptionsEnabled) {
@@ -334,6 +356,7 @@ export default class WalletsAdd extends Component {
                 )}
               </View>
               <BlueButtonLink
+                testID="ImportWallet"
                 style={{ marginBottom: 0, marginTop: 24 }}
                 title={loc.wallets.add.import_wallet}
                 onPress={() => {
@@ -341,8 +364,8 @@ export default class WalletsAdd extends Component {
                 }}
               />
             </View>
-          </ScrollView>
-        </KeyboardAvoidingView>
+          </KeyboardAvoidingView>
+        </ScrollView>
       </SafeBlueArea>
     );
   }

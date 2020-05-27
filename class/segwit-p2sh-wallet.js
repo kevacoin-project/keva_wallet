@@ -1,7 +1,7 @@
 import { LegacyWallet } from './legacy-wallet';
 const bitcoin = require('bitcoinjs-lib');
-const signer = require('../models/signer');
-const BigNumber = require('bignumber.js');
+const coinSelectAccumulative = require('coinselect/accumulative');
+const coinSelectSplit = require('coinselect/split');
 
 /**
  * Creates Segwit P2SH Kevacoin address
@@ -67,34 +67,92 @@ export class SegwitP2SHWallet extends LegacyWallet {
   }
 
   /**
-   * Takes UTXOs (as presented by blockcypher api), transforms them into
-   * format expected by signer module, creates tx and returns signed string txhex.
    *
-   * @param utxos Unspent outputs, expects blockcypher format
-   * @param amount
-   * @param fee
-   * @param address
-   * @param memo
-   * @param sequence By default zero. Increased with each transaction replace.
-   * @return string Signed txhex ready for broadcast
+   * @param utxos {Array.<{vout: Number, value: Number, txId: String, address: String, txhex: String, }>} List of spendable utxos
+   * @param targets {Array.<{value: Number, address: String}>} Where coins are going. If theres only 1 target and that target has no value - this will send MAX to that address (respecting fee rate)
+   * @param feeRate {Number} satoshi per byte
+   * @param changeAddress {String} Excessive coins will go back to that address
+   * @param sequence {Number} Used in RBF
+   * @param skipSigning {boolean} Whether we should skip signing, use returned `psbt` in that case
+   * @param masterFingerprint {number} Decimal number of wallet's master fingerprint
+   * @returns {{outputs: Array, tx: Transaction, inputs: Array, fee: Number, psbt: Psbt}}
    */
-  createTx(utxos, amount, fee, address, memo, sequence) {
-    // TODO: memo is not used here, get rid of it
-    if (sequence === undefined) {
-      sequence = 0;
+  createTransaction(utxos, targets, feeRate, changeAddress, sequence, skipSigning = false, masterFingerprint) {
+    if (!changeAddress) throw new Error('No change address provided');
+    sequence = sequence || 0xffffffff; // disable RBF by default
+
+    let algo = coinSelectAccumulative;
+    if (targets.length === 1 && targets[0] && !targets[0].value) {
+      // we want to send MAX
+      algo = coinSelectSplit;
     }
-    // transforming UTXOs fields to how module expects it
-    for (let u of utxos) {
-      u.confirmations = 6; // hack to make module accept 0 confirmations
-      u.txid = u.tx_hash;
-      u.vout = u.tx_output_n;
-      u.amount = new BigNumber(u.value);
-      u.amount = u.amount.dividedBy(100000000);
-      u.amount = u.amount.toString(10);
+
+    let { inputs, outputs, fee } = algo(utxos, targets, feeRate);
+
+    // .inputs and .outputs will be undefined if no solution was found
+    if (!inputs || !outputs) {
+      throw new Error('Not enough balance. Try sending smaller amount');
     }
-    // console.log('creating tx ', amount, ' with fee ', fee, 'secret=', this.getSecret(), 'from address', this.getAddress());
-    let amountPlusFee = parseFloat(new BigNumber(amount).plus(fee).toString(10));
-    // to compensate that module substracts fee from amount
-    return signer.createSegwitTransaction(utxos, address, amountPlusFee, fee, this.getSecret(), this.getAddress(), sequence);
+
+    let psbt = new bitcoin.Psbt();
+
+    let c = 0;
+    let values = {};
+    let keyPair;
+
+    inputs.forEach(input => {
+      if (!skipSigning) {
+        // skiping signing related stuff
+        keyPair = bitcoin.ECPair.fromWIF(this.secret); // secret is WIF
+      }
+      values[c] = input.value;
+      c++;
+
+      const pubkey = keyPair.publicKey;
+      const p2wpkh = bitcoin.payments.p2wpkh({ pubkey });
+      let p2sh = bitcoin.payments.p2sh({ redeem: p2wpkh });
+
+      psbt.addInput({
+        hash: input.txid,
+        index: input.vout,
+        sequence,
+        witnessUtxo: {
+          script: p2sh.output,
+          value: input.value,
+        },
+        redeemScript: p2wpkh.output,
+      });
+    });
+
+    outputs.forEach(output => {
+      // if output has no address - this is change output
+      if (!output.address) {
+        output.address = changeAddress;
+      }
+
+      let outputData = {
+        address: output.address,
+        value: output.value,
+      };
+
+      psbt.addOutput(outputData);
+    });
+
+    if (!skipSigning) {
+      // skiping signing related stuff
+      for (let cc = 0; cc < c; cc++) {
+        psbt.signInput(cc, keyPair);
+      }
+    }
+
+    let tx;
+    if (!skipSigning) {
+      tx = psbt.finalizeAllInputs().extractTransaction();
+    }
+    return { tx, inputs, outputs, fee, psbt };
+  }
+
+  allowSendMax() {
+    return true;
   }
 }

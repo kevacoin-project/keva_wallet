@@ -1,6 +1,5 @@
 /* global it, describe */
 import { HDSegwitBech32Wallet } from '../../class';
-global.crypto = require('crypto'); // shall be used by tests under nodejs CLI, but not in RN environment
 let assert = require('assert');
 
 describe('Bech32 Segwit HD (BIP84)', () => {
@@ -24,6 +23,15 @@ describe('Bech32 Segwit HD (BIP84)', () => {
     assert.strictEqual(hd._getExternalAddressByIndex(1), 'bc1qnjg0jd8228aq7egyzacy8cys3knf9xvrerkf9g');
     assert.strictEqual(hd._getInternalAddressByIndex(0), 'bc1q8c6fshw2dlwun7ekn9qwf37cu2rn755upcp6el');
     assert.ok(hd._getInternalAddressByIndex(0) !== hd._getInternalAddressByIndex(1));
+
+    assert.strictEqual(
+      hd._getPubkeyByAddress(hd._getExternalAddressByIndex(0)).toString('hex'),
+      '0330d54fd0dd420a6e5f8d3624f5f3482cae350f79d5f0753bf5beef9c2d91af3c',
+    );
+    assert.strictEqual(
+      hd._getPubkeyByAddress(hd._getInternalAddressByIndex(0)).toString('hex'),
+      '03025324888e429ab8e3dbaf1f7802648b9cd01e9b418485c5fa4c1b9b5700e1a6',
+    );
 
     assert.strictEqual(hd._getDerivationPathByAddress(hd._getExternalAddressByIndex(0)), "m/84'/0'/0'/0/0");
     assert.strictEqual(hd._getDerivationPathByAddress(hd._getExternalAddressByIndex(1)), "m/84'/0'/0'/0/1");

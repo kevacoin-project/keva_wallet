@@ -21,6 +21,7 @@ module.exports = {
       create_a_wallet: 'Wallet erstellen',
       create_a_wallet1: 'Es ist kostenlos und du kannst',
       create_a_wallet2: 'so viele Wallets erstellen, wie du möchtest',
+      create_a_button: 'Jetzt hinzufügen',
       latest_transaction: 'Lezte Transaktion',
       empty_txs1: 'Deine Transaktionen erscheinen hier',
       empty_txs2: 'Noch keine Transaktionen',
@@ -68,6 +69,9 @@ module.exports = {
       export_backup: 'Exportieren / Backup',
       buy_bitcoin: 'Kevacoin kaufen',
       show_xpub: 'Wallet XPUB zeigen',
+      connected_to: 'Connected to',
+      advanced: 'Advanced',
+      use_with_hardware_wallet: 'Use with hardware wallet',
     },
     export: {
       title: 'Wallet exportieren',
@@ -238,7 +242,7 @@ module.exports = {
   pleasebackup: {
     title: 'Ihr Wallet wird erstellt...',
     text:
-      'Nimm Dir Zeit die mnemonischen Wörter zur späteren Wiederherstellung des Wallets aufzuschreiben. Die Wörter sind dien einziges Backup im Fall eines Geräteverlustes.',
+      'Nimm Dir Zeit die mnemonischen Wörter zur späteren Wiederherstellung des Wallets aufzuschreiben. Die Wörter sind dein einziges Backup im Fall eines Geräteverlustes.',
     ok: 'Ja, mein Geld ist sicher!',
   },
   lndViewInvoice: {
