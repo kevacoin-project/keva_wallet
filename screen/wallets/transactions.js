@@ -232,9 +232,9 @@ export default class WalletTransactions extends Component {
             The idea is to avoid showing on iOS an appstore/market style app that goes against the TOS.
 
            */}
-          {this.state.wallet.getTransactions().length > 0 &&
+          {/* this.state.wallet.getTransactions().length > 0 &&
             this.state.wallet.type !== LightningCustodianWallet.type &&
-            this.renderSellFiat()}
+          this.renderSellFiat() */}
           {this.state.wallet.type === LightningCustodianWallet.type && this.renderMarketplaceButton()}
           {this.state.wallet.type === LightningCustodianWallet.type && Platform.OS === 'ios' && this.renderLappBrowserButton()}
         </View>
@@ -664,7 +664,7 @@ export default class WalletTransactions extends Component {
                   </Text>
                 )}
 
-                {!this.isLightning() && (
+                {false && (
                   <TouchableOpacity
                     onPress={() =>
                       this.props.navigation.navigate('BuyBitcoin', {

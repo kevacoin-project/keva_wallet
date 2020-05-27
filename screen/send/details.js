@@ -401,7 +401,9 @@ export default class SendDetails extends Component {
   async createPsbtTransaction() {
     /** @type {HDSegwitBech32Wallet} */
     const wallet = this.state.fromWallet;
+    this.setState({loadStatus: 'Contacting Server ...'});
     await wallet.fetchUtxo();
+    this.setState({loadStatus: 'Refreshing Address ...'});
     const changeAddress = await wallet.getChangeAddressAsync();
     const requestedSatPerByte = +this.state.fee.toString().replace(/\D/g, '');
     console.log({ requestedSatPerByte, utxo: wallet.getUtxo() });
@@ -419,6 +421,7 @@ export default class SendDetails extends Component {
       }
     }
 
+    this.setState({loadStatus: 'Creating Transaction ...'});
     let { tx, fee, psbt } = wallet.createTransaction(
       wallet.getUtxo(),
       targets,
@@ -445,6 +448,7 @@ export default class SendDetails extends Component {
       txhex: tx.toHex(),
       memo: this.state.memo,
     };
+    this.setState({loadStatus: 'Saving to Disk ...'});
     await BlueApp.saveToDisk();
     this.props.navigation.navigate('Confirm', {
       fee: new BigNumber(fee).dividedBy(100000000).toNumber(),
@@ -865,6 +869,7 @@ export default class SendDetails extends Component {
       return (
         <View style={{ flex: 1, paddingTop: 20 }}>
           <BlueLoading />
+          <Text style={styles.statusText}>{this.state.loadStatus}</Text>
         </View>
       );
     }
@@ -991,6 +996,15 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingHorizontal: 8,
   },
+  statusText: {
+    position: 'relative',
+    top: -200,
+    justifyContent: 'center',
+    alignSelf: 'center',
+    textAlign: 'center',
+    fontSize: 18,
+    color: '#c83f6d'
+  }
 });
 
 SendDetails.propTypes = {

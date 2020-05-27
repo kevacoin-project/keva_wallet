@@ -369,8 +369,6 @@ export default class WalletsList extends Component {
     switch (item.section.key) {
       case WalletsListSections.CAROUSEL:
         return this.renderWalletsCarousel();
-      case WalletsListSections.LOCALTRADER:
-        return this.renderLocalTrader();
       case WalletsListSections.TRANSACTIONS:
         return this.renderTransactionListsRow(item);
       default:

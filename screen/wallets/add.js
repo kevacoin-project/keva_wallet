@@ -47,7 +47,7 @@ export default class WalletsAdd extends Component {
     this.state = {
       isLoading: true,
       walletBaseURI: '',
-      selectedIndex: 0,
+      selectedIndex: 2,
     };
   }
 
@@ -58,7 +58,7 @@ export default class WalletsAdd extends Component {
     this.setState({
       isLoading: false,
       activeBitcoin: true,
-      selectedIndex: 0, //HD SegWit Multiple Address.
+      selectedIndex: 2, //HD SegWit Multiple Address.
       label: '',
       isAdvancedOptionsEnabled,
       walletBaseURI,
@@ -201,7 +201,7 @@ export default class WalletsAdd extends Component {
                         title={SegwitP2SHWallet.typeReadable}
                         {...(this.state.selectedIndex === 1
                           ? {
-                              rightIcon: <Icon name="check" type="font-awesome" color="#0c2550" />,
+                              rightIcon: <Icon name="check" type="font-awesome" color="#c83f6d" />,
                             }
                           : { hideChevron: true })}
                       />
@@ -212,7 +212,7 @@ export default class WalletsAdd extends Component {
                         title={HDSegwitP2SHWallet.typeReadable}
                         {...(this.state.selectedIndex === 2
                           ? {
-                              rightIcon: <Icon name="check" type="font-awesome" color="#0c2550" />,
+                              rightIcon: <Icon name="check" type="font-awesome" color="#c83f6d" />,
                             }
                           : { hideChevron: true })}
                       />
@@ -318,7 +318,7 @@ export default class WalletsAdd extends Component {
                             });
                           };
                           this.createLightningWallet();
-                        } else if (this.state.selectedIndex === 0) {
+                        } else if (this.state.selectedIndex === 2) {
                           // zero index radio - HD segwit
                           w = new HDSegwitP2SHWallet();
                           w.setLabel(this.state.label || loc.wallets.details.title);

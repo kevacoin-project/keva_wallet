@@ -1360,9 +1360,11 @@ export class NewWalletPanel extends Component {
           >
             {loc.wallets.list.create_a_wallet2}
           </Text>
+          {/*
           <View style={{ marginTop: 12, backgroundColor: '#007AFF', paddingHorizontal: 32, paddingVertical: 12, borderRadius: 8 }}>
             <Text style={{ color: BlueApp.settings.brandingColor, fontWeight: '500' }}>{loc.wallets.list.create_a_button}</Text>
           </View>
+          */}
         </LinearGradient>
       </TouchableOpacity>
     );
