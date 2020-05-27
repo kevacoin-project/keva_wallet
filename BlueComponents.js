@@ -956,7 +956,7 @@ export class BlueLoading extends Component {
   render() {
     return (
       <SafeBlueArea>
-        <View style={{ flex: 1, paddingTop: 200 }} {...this.props}>
+        <View style={[{ flex: 1, paddingTop: 200 }, this.props.style]} {...this.props}>
           <ActivityIndicator />
         </View>
       </SafeBlueArea>

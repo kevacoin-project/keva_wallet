@@ -192,7 +192,7 @@ export default class ElectrumSettings extends Component {
             </View>
 
             <BlueSpacing20 />
-            {this.state.isLoading ? <BlueLoading /> : <BlueButton onPress={this.save} title={loc.settings.save} />}
+            {this.state.isLoading ? <BlueLoading style={{paddingTop: 10}}/> : <BlueButton onPress={this.save} title={loc.settings.save} />}
           </BlueCard>
         </ScrollView>
       </SafeBlueArea>
