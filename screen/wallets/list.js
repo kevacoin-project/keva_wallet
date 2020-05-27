@@ -445,15 +445,10 @@ export default class WalletsList extends Component {
           }}
           onWillBlur={() => this.setState({ cameraPreviewIsPaused: true })}
         />
-        <ViewPager
+        <View
           style={styles.wrapper}
-          onPageSelected={this.onPageSelected}
-          initialPage={1}
-          ref={this.viewPagerRef}
-          showPageIndicator={false}
-          testID="WalletsList"
-          accessible
         >
+          {/*
           <View style={styles.scanQRWrapper}>
             <ScanQRCode
               cameraPreviewIsPaused={this.state.cameraPreviewIsPaused}
@@ -463,6 +458,7 @@ export default class WalletsList extends Component {
               launchedBy={this.props.navigation.state.routeName}
             />
           </View>
+          */}
           <View style={styles.walletsListWrapper}>
             {this.renderNavigationHeader()}
             <SectionList
@@ -480,7 +476,7 @@ export default class WalletsList extends Component {
               ]}
             />
           </View>
-        </ViewPager>
+        </View>
       </SafeBlueArea>
     );
   }
