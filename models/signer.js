@@ -133,7 +133,7 @@ exports.createHDSegwitTransaction = function(utxos, toAddress, amount, fixedFee,
     psbt.signInput(c, ourOutputs[c].keyPair);
   }
 
-  let tx = psbt.finalizeAllInputs().extractTransaction();
+  let tx = psbt.finalizeAllInputs().extractTransaction(true);
   return tx.toHex();
 };
 
@@ -195,7 +195,7 @@ exports.createSegwitTransaction = function(utxos, toAddress, amount, fixedFee, W
     psbt.signInput(c, keyPair);
   }
 
-  let tx = psbt.finalizeAllInputs().extractTransaction();
+  let tx = psbt.finalizeAllInputs().extractTransaction(true);
   return tx.toHex();
 };
 
@@ -266,7 +266,7 @@ exports.createRBFSegwitTransaction = function(txhex, addressReplaceMap, feeDelta
     psbt.signInput(c, keyPair);
   }
 
-  let newTx = psbt.finalizeAllInputs().extractTransaction();
+  let newTx = psbt.finalizeAllInputs().extractTransaction(true);
   return newTx.toHex();
 };
 

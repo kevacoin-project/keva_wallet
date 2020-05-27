@@ -447,7 +447,9 @@ export default class SendDetails extends Component {
       let fee = 0.000001; // initial fee guess
       const firstTransaction = this.state.addresses[0];
       try {
+        this.setState({loadStatus: 'Contacting Server ...'});
         await this.state.fromWallet.fetchUtxo();
+        this.setState({loadStatus: 'Refreshing Address ...'});
         if (this.state.fromWallet.getChangeAddressAsync) {
           await this.state.fromWallet.getChangeAddressAsync(); // to refresh internal pointer to next free address
         }
@@ -459,6 +461,7 @@ export default class SendDetails extends Component {
 
         do {
           console.log('try #', tries, 'fee=', fee);
+          this.setState({loadStatus: 'Estimating fee ' + '.'.repeat(tries)});
           if (this.recalculateAvailableBalance(this.state.fromWallet.getBalance(), firstTransaction.amount, fee) < 0) {
             // we could not add any fee. user is trying to send all he's got. that wont work
             throw new Error(loc.send.details.total_exceeds_balance);
@@ -990,6 +993,7 @@ export default class SendDetails extends Component {
       return (
         <View style={{ flex: 1, paddingTop: 20 }}>
           <BlueLoading />
+          <Text style={styles.statusText}>{this.state.loadStatus}</Text>
         </View>
       );
     }
@@ -1116,6 +1120,15 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingHorizontal: 8,
   },
+  statusText: {
+    position: 'relative',
+    top: -200,
+    justifyContent: 'center',
+    alignSelf: 'center',
+    textAlign: 'center',
+    fontSize: 18,
+    color: '#c83f6d'
+  }
 });
 
 SendDetails.propTypes = {
