@@ -24,9 +24,7 @@ import ImportWallet from './screen/wallets/import';
 import WalletDetails from './screen/wallets/details';
 import WalletExport from './screen/wallets/export';
 import WalletXpub from './screen/wallets/xpub';
-import BuyBitcoin from './screen/wallets/buyBitcoin';
 import HodlHodl from './screen/wallets/hodlHodl';
-import Marketplace from './screen/wallets/marketplace';
 import ReorderWallets from './screen/wallets/reorderWallets';
 import SelectWallet from './screen/wallets/selectWallet';
 
@@ -45,12 +43,6 @@ import Confirm from './screen/send/confirm';
 import PsbtWithHardwareWallet from './screen/send/psbtWithHardwareWallet';
 import Success from './screen/send/success';
 import Broadcast from './screen/send/broadcast';
-
-import ScanLndInvoice from './screen/lnd/scanLndInvoice';
-import LappBrowser from './screen/lnd/browser';
-import LNDCreateInvoice from './screen/lnd/lndCreateInvoice';
-import LNDViewInvoice from './screen/lnd/lndViewInvoice';
-import LNDViewAdditionalInvoiceInformation from './screen/lnd/lndViewAdditionalInvoiceInformation';
 
 const ReorderWalletsStackNavigator = createStackNavigator({
   ReorderWallets: {
@@ -158,14 +150,6 @@ const WalletsStackNavigator = createStackNavigator(
       screen: ElectrumSettings,
       path: 'ElectrumSettings',
     },
-    LNDViewInvoice: {
-      screen: LNDViewInvoice,
-      swipeEnabled: false,
-      gesturesEnabled: false,
-    },
-    LNDViewAdditionalInvoiceInformation: {
-      screen: LNDViewAdditionalInvoiceInformation,
-    },
     Broadcast: {
       screen: Broadcast,
       navigationOptions: () => ({
@@ -213,25 +197,6 @@ const CreateTransactionStackNavigator = createStackNavigator({
   },
 });
 
-const LNDCreateInvoiceStackNavigator = createStackNavigator({
-  LNDCreateInvoice: {
-    screen: LNDCreateInvoice,
-  },
-  SelectWallet: {
-    screen: SelectWallet,
-    navigationOptions: {
-      headerLeft: null,
-    },
-  },
-  LNDViewInvoice: {
-    screen: LNDViewInvoice,
-    swipeEnabled: false,
-    gesturesEnabled: false,
-  },
-  LNDViewAdditionalInvoiceInformation: {
-    screen: LNDViewAdditionalInvoiceInformation,
-  },
-});
 
 const CreateWalletStackNavigator = createStackNavigator({
   AddWallet: {
@@ -254,37 +219,17 @@ const CreateWalletStackNavigator = createStackNavigator({
   },
 });
 
-const LightningScanInvoiceStackNavigator = createStackNavigator({
-  ScanLndInvoice: {
-    screen: ScanLndInvoice,
-  },
-  SelectWallet: {
-    screen: SelectWallet,
-    navigationOptions: {
-      headerRight: null,
-    },
-  },
-  Success: {
-    screen: Success,
-  },
-});
 
 const HandleOffchainAndOnChainStackNavigator = createStackNavigator(
   {
     SelectWallet: {
       screen: SelectWallet,
     },
-    // LND:
 
-    ScanLndInvoice: {
-      screen: LightningScanInvoiceStackNavigator,
-      navigationOptions: {
-        header: null,
-      },
-    },
     ScanQRCode: {
       screen: ScanQRCode,
     },
+
     SendDetails: {
       screen: CreateTransactionStackNavigator,
       navigationOptions: {
@@ -316,12 +261,6 @@ const MainBottomTabs = createStackNavigator(
     WalletXpub: {
       screen: WalletXpub,
     },
-    BuyBitcoin: {
-      screen: BuyBitcoin,
-    },
-    Marketplace: {
-      screen: Marketplace,
-    },
     //
     SendDetails: {
       routeName: 'SendDetails',
@@ -341,31 +280,12 @@ const MainBottomTabs = createStackNavigator(
       screen: receiveDetails,
     },
 
-    //
-
-    // LND:
-
-    ScanLndInvoice: {
-      screen: LightningScanInvoiceStackNavigator,
-      navigationOptions: {
-        header: null,
-      },
-    },
     ScanQRCode: {
       screen: ScanQRCode,
-    },
-    LappBrowser: {
-      screen: LappBrowser,
     },
 
     ReorderWallets: {
       screen: ReorderWalletsStackNavigator,
-      navigationOptions: {
-        header: null,
-      },
-    },
-    LNDCreateInvoice: {
-      screen: LNDCreateInvoiceStackNavigator,
       navigationOptions: {
         header: null,
       },
