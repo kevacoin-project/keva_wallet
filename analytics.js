@@ -2,16 +2,18 @@ import amplitude from 'amplitude-js';
 import { getVersion } from 'react-native-device-info';
 import { Platform } from 'react-native';
 
+/*
 amplitude.getInstance().init('8b7cf19e8eea3cdcf16340f5fbf16330', null, {
   useNativeDeviceInfo: true,
   platform: Platform.OS,
 });
 amplitude.getInstance().setVersionName(getVersion());
+*/
 
 let A = async event => {
-  console.log('posting analytics...', event);
+  console.log('skip posting analytics...', event);
   try {
-    amplitude.getInstance().logEvent(event);
+    //amplitude.getInstance().logEvent(event);
   } catch (err) {
     console.log(err);
   }
