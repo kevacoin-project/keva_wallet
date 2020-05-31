@@ -19,12 +19,12 @@ if (!Error.captureStackTrace) {
 class BlueAppComponent extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { isMigratingData: true, onAnimationFinished: false, successfullyAuthenticated: false };
+    this.state = { isMigratingData: false, onAnimationFinished: false, successfullyAuthenticated: false };
   }
 
   componentDidMount() {
-    const walletMigrate = new WalletMigrate(this.setIsMigratingData);
-    walletMigrate.start();
+    //const walletMigrate = new WalletMigrate(this.setIsMigratingData);
+    //walletMigrate.start();
   }
 
   setIsMigratingData = async () => {
