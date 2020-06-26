@@ -369,6 +369,11 @@ module.exports.multiGetTransactionByTxid = async function(txids, batchsize, verb
     }
 
     for (let txdata of results) {
+      if (txdata.error && txdata.error.code === -32600) {
+        // response too large
+        // lets do single call, that should go through okay:
+        txdata.result = await mainClient.blockchainTransaction_get(txdata.param, verbose);
+      }
       ret[txdata.param] = txdata.result;
     }
   }
