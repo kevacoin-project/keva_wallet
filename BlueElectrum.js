@@ -39,7 +39,7 @@ async function connectMain() {
         mainClient.close();
         mainConnected = false;
         setTimeout(connectMain, 500);
-        console.warn('reconnecting after socket error');
+        console.log('reconnecting after socket error');
         return;
       }
       mainConnected = false;
@@ -137,7 +137,7 @@ module.exports.getConfig = async function() {
   return {
     host: mainClient.host,
     port: mainClient.port,
-    status: mainClient.status && mainConnected ? 1 : 0,
+    status: mainClient.status ? 1 : 0,
     serverName,
   };
 };
@@ -328,7 +328,7 @@ module.exports.multiGetHistoryByAddress = async function(addresses, batchsize) {
 };
 
 module.exports.multiGetTransactionByTxid = async function(txids, batchsize, verbose) {
-  batchsize = batchsize || 61;
+  batchsize = batchsize || 45;
   // this value is fine-tuned so althrough wallets in test suite will occasionally
   // throw 'response too large (over 1,000,000 bytes', test suite will pass
   verbose = verbose !== false;
