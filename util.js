@@ -17,7 +17,7 @@ export function showStatus(message, duration=60000) {
     return Toast.show(message, {
       duration: duration,
       position: Toast.positions.BOTTOM,
-      backgroundColor: "#107E7D",
+      backgroundColor: "#53DD6C",
       opacity: 0.9,
       shadow: true,
       animation: false,
