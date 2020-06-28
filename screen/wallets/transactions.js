@@ -38,6 +38,7 @@ import NavigationService from '../../NavigationService';
 import HandoffSettings from '../../class/handoff';
 import Handoff from 'react-native-handoff';
 import ActionSheet from '../ActionSheet';
+import Toast from 'react-native-root-toast';
 /** @type {AppStorage} */
 let BlueApp = require('../../BlueApp');
 let loc = require('../../loc');
@@ -153,6 +154,23 @@ export default class WalletTransactions extends Component {
     return false;
   }
 
+  showStatus(message, duration=60000) {
+    return Toast.show(message, {
+      duration: duration,
+      position: Toast.positions.BOTTOM,
+      backgroundColor: "#2E294E",
+      opacity: 0.9,
+      shadow: true,
+      animation: true,
+      hideOnPress: true,
+      delay: 0
+    });
+  }
+
+  hideStatus(toast) {
+    Toast.hide(toast);
+  }
+
   /**
    * Forcefully fetches TXs and balance for wallet
    */
@@ -166,25 +184,36 @@ export default class WalletTransactions extends Component {
       async () => {
         let noErr = true;
         let smthChanged = false;
+        let toast;
         try {
+          toast = this.showStatus("Connecting to server");
           await BlueElectrum.ping();
           await BlueElectrum.waitTillConnected();
           /** @type {LegacyWallet} */
           let wallet = this.state.wallet;
           let balanceStart = +new Date();
           const oldBalance = wallet.getBalance();
+          this.hideStatus(toast);
+          toast = this.showStatus("Fetching balances");
           await wallet.fetchBalance();
+          this.hideStatus(toast);
           if (oldBalance !== wallet.getBalance()) smthChanged = true;
           let balanceEnd = +new Date();
           console.log(wallet.getLabel(), 'fetch balance took', (balanceEnd - balanceStart) / 1000, 'sec');
           let start = +new Date();
           const oldTxLen = wallet.getTransactions().length;
+          toast = this.showStatus("Fetching transactions");
           await wallet.fetchTransactions();
+          this.hideStatus(toast);
           if (wallet.fetchPendingTransactions) {
+            toast = this.showStatus("Fetching pending transactions");
             await wallet.fetchPendingTransactions();
+            this.hideStatus(toast);
           }
           if (wallet.fetchUserInvoices) {
+            toast = this.showStatus("Fetching user invoices");
             await wallet.fetchUserInvoices();
+            this.hideStatus(toast);
           }
           if (oldTxLen !== wallet.getTransactions().length) smthChanged = true;
           let end = +new Date();
@@ -199,7 +228,9 @@ export default class WalletTransactions extends Component {
         }
         if (noErr && smthChanged) {
           console.log('saving to disk');
+          toast = this.showStatus("Saving to disk");
           await BlueApp.saveToDisk(); // caching
+          this.hideStatus(toast);
           EV(EV.enum.TRANSACTIONS_COUNT_CHANGED); // let other components know they should redraw
         }
         this.redrawScreen();

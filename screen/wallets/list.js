@@ -16,6 +16,7 @@ let A = require('../../analytics');
 let BlueApp = require('../../BlueApp');
 let loc = require('../../loc');
 let BlueElectrum = require('../../BlueElectrum');
+import Toast from 'react-native-root-toast';
 
 const WalletsListSections = { CAROUSEL: 'CAROUSEL', LOCALTRADER: 'LOCALTRADER', TRANSACTIONS: 'TRANSACTIONS' };
 
@@ -69,6 +70,23 @@ export default class WalletsList extends Component {
     clearInterval(this.interval);
   }
 
+  showStatus(message, duration=60000) {
+    return Toast.show(message, {
+      duration: duration,
+      position: Toast.positions.BOTTOM,
+      backgroundColor: "#2E294E",
+      opacity: 0.9,
+      shadow: true,
+      animation: true,
+      hideOnPress: true,
+      delay: 0
+    });
+  }
+
+  hideStatus(toast) {
+    Toast.hide(toast);
+  }
+
   /**
    * Forcefully fetches TXs and balance for lastSnappedTo (i.e. current) wallet.
    * Triggered manually by user on pull-to-refresh.
@@ -86,22 +104,35 @@ export default class WalletsList extends Component {
       () => {
         InteractionManager.runAfterInteractions(async () => {
           let noErr = true;
+          let toast;
           try {
+            toast = this.showStatus("Connecting to server");
             await BlueElectrum.ping();
             await BlueElectrum.waitTillConnected();
             let balanceStart = +new Date();
+            this.hideStatus(toast);
+            toast = this.showStatus("Fetching balances");
             await BlueApp.fetchWalletBalances(this.lastSnappedTo || 0);
+            this.hideStatus(toast);
             let balanceEnd = +new Date();
             console.log('fetch balance took', (balanceEnd - balanceStart) / 1000, 'sec');
             let start = +new Date();
+            toast = this.showStatus("Fetching transactions");
             await BlueApp.fetchWalletTransactions(this.lastSnappedTo || 0);
+            this.hideStatus(toast);
             let end = +new Date();
             console.log('fetch tx took', (end - start) / 1000, 'sec');
           } catch (err) {
+            toast = this.showStatus(err, Toast.durations.LONG);
             noErr = false;
             console.warn(err);
           }
-          if (noErr) await BlueApp.saveToDisk(); // caching
+
+          if (noErr) {
+            toast = this.showStatus("Saving to disk");
+            await BlueApp.saveToDisk(); // caching
+            this.hideStatus(toast);
+          }
 
           this.redrawScreen();
         });
