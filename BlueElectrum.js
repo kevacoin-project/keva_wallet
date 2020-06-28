@@ -186,7 +186,7 @@ module.exports.ping = async function() {
         hideOnPress: true,
         delay: 0
       });
-      throw connErr;
+      throw new Error(loc._.bad_network);
     }
     return true;
   }

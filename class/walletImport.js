@@ -13,6 +13,9 @@ import {
   HDLegacyElectrumSeedP2PKHWallet,
   HDSegwitElectrumSeedP2WPKHWallet,
 } from '../class';
+import {
+  Alert
+} from 'react-native';
 import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 const EV = require('../events');
 const A = require('../analytics');
@@ -22,6 +25,7 @@ const loc = require('../loc');
 const bip38 = require('../blue_modules/bip38');
 const wif = require('wif');
 const prompt = require('../prompt');
+let BlueElectrum = require('../BlueElectrum'); // eslint-disable-line
 
 export default class WalletImport {
   /**
@@ -50,7 +54,7 @@ export default class WalletImport {
         BlueApp.wallets.push(w);
         await BlueApp.saveToDisk();
         A(A.ENUM.CREATED_WALLET);
-        alert(loc.wallets.import.success);
+        Alert.alert(loc.wallets.import.do_import, loc.wallets.import.success, [{text: "OK", onPress: ()=>{}}]);
       }
       EV(EV.enum.WALLETS_COUNT_CHANGED);
     } catch (e) {
@@ -107,6 +111,9 @@ export default class WalletImport {
     // 7. check if its private key (legacy address) TODO
 
     try {
+      // Make sure there is network connection.
+      await BlueElectrum.ping();
+
       if (importText.startsWith('6P')) {
         let password = false;
         do {
