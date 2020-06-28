@@ -6,6 +6,7 @@ module.exports = {
     never: 'never',
     continue: 'Continue',
     ok: 'OK',
+    bad_network: "Connection error, please try again",
   },
   wallets: {
     select_wallet: 'Select Wallet',

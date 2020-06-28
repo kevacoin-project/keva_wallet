@@ -47,6 +47,7 @@ let BigNumber = require('bignumber.js');
 const { width } = Dimensions.get('window');
 let BlueApp: AppStorage = require('../../BlueApp');
 let loc = require('../../loc');
+let BlueElectrum = require('../../BlueElectrum');
 
 const btcAddressRx = /^[a-zA-Z0-9]{26,35}$/;
 
@@ -402,6 +403,7 @@ export default class SendDetails extends Component {
     /** @type {HDSegwitBech32Wallet} */
     const wallet = this.state.fromWallet;
     this.setState({loadStatus: 'Contacting Server ...'});
+    await BlueElectrum.ping();
     await wallet.fetchUtxo();
     this.setState({loadStatus: 'Refreshing Address ...'});
     const changeAddress = await wallet.getChangeAddressAsync();

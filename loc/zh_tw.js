@@ -6,6 +6,7 @@ module.exports = {
     never: '無',
     continue: '繼續',
     ok: '好的',
+    bad_network: '網絡連接錯誤，請重試',
   },
   wallets: {
     select_wallet: '選擇錢包',
