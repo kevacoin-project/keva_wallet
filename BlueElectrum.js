@@ -7,6 +7,7 @@ const ElectrumClient = require('electrum-client');
 let reverse = require('buffer-reverse');
 let BigNumber = require('bignumber.js');
 let loc = require('./loc');
+import { showStatus, hideStatus } from './util';
 
 const storageKey = 'ELECTRUM_PEERS';
 const defaultPeer = { host: 'ec0.kevacoin.org', ssl: '50002' };
@@ -129,7 +130,9 @@ module.exports.getBalanceByAddress = async function(address) {
   let script = bitcoin.address.toOutputScript(address);
   let hash = bitcoin.crypto.sha256(script);
   let reversedHash = Buffer.from(reverse(hash));
+  let toast = showStatus("Getting address balance");
   let balance = await mainClient.blockchainScripthash_getBalance(reversedHash.toString('hex'));
+  hideStatus(toast);
   balance.addr = address;
   return balance;
 };
@@ -154,7 +157,9 @@ module.exports.getTransactionsByAddress = async function(address) {
   let script = bitcoin.address.toOutputScript(address);
   let hash = bitcoin.crypto.sha256(script);
   let reversedHash = Buffer.from(reverse(hash));
+  let toast = showStatus("Getting address txs");
   let history = await mainClient.blockchainScripthash_getHistory(reversedHash.toString('hex'));
+  hideStatus(toast);
   if (history.tx_hash) txhashHeightCache[history.tx_hash] = history.height; // cache tx height
   return history;
 };
@@ -258,7 +263,9 @@ module.exports.multiGetBalanceByAddress = async function(addresses, batchsize) {
         balances.push({ result: balance, param: sh });
       }
     } else {
+      let toast = showStatus("Getting balances of addresses: " + scripthashes.length);
       balances = await mainClient.blockchainScripthash_getBalanceBatch(scripthashes);
+      hideStatus(toast);
     }
 
     for (let bal of balances) {
@@ -294,7 +301,9 @@ module.exports.multiGetUtxoByAddress = async function(addresses, batchsize) {
     if (disableBatching) {
       // ElectrumPersonalServer doesnt support `blockchain.scripthash.listunspent`
     } else {
+      let toast = showStatus("Getting UTXO of addresses: " + scripthashes.length);
       results = await mainClient.blockchainScripthash_listunspentBatch(scripthashes);
+      hideStatus(toast);
     }
 
     for (let utxos of results) {
@@ -338,7 +347,9 @@ module.exports.multiGetHistoryByAddress = async function(addresses, batchsize) {
         results.push({ result: history, param: sh });
       }
     } else {
+      let toast = showStatus("Getting history of addresses: " + scripthashes.length);
       results = await mainClient.blockchainScripthash_getHistoryBatch(scripthashes);
+      hideStatus(toast);
     }
 
     for (let history of results) {
@@ -391,14 +402,18 @@ module.exports.multiGetTransactionByTxid = async function(txids, batchsize, verb
         } catch (_) {}
       }
     } else {
+      let toast = showStatus("Getting txs: " + chunk.length);
       results = await mainClient.blockchainTransaction_getBatch(chunk, verbose);
+      hideStatus(toast);
     }
 
     for (let txdata of results) {
       if (txdata.error && txdata.error.code === -32600) {
         // response too large
         // lets do single call, that should go through okay:
+        let toast = showStatus("Getting txs again");
         txdata.result = await mainClient.blockchainTransaction_get(txdata.param, verbose);
+        hideStatus(toast);
       }
       ret[txdata.param] = txdata.result;
     }

@@ -29,6 +29,7 @@ export class AppStorage {
   static PREFERRED_CURRENCY = 'preferredCurrency';
   static ADVANCED_MODE_ENABLED = 'advancedmodeenabled';
   static DELETE_WALLET_AFTER_UNINSTALL = 'deleteWalletAfterUninstall';
+  static STATUS_ENABLED = 'statusenabled';
 
   constructor() {
     /** {Array.<AbstractWallet>} */
@@ -532,6 +533,17 @@ export class AppStorage {
 
   async setIsAdancedModeEnabled(value) {
     await this.setItem(AppStorage.ADVANCED_MODE_ENABLED, value ? '1' : '');
+  }
+
+  async isStatusEnabled() {
+    try {
+      return !!(await this.getItem(AppStorage.STATUS_ENABLED));
+    } catch (_) {}
+    return false;
+  }
+
+  async setIsStatusEnabled(value) {
+    await this.setItem(AppStorage.STATUS_ENABLED, value ? '1' : '');
   }
 
   /**

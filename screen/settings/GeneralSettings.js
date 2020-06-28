@@ -7,11 +7,13 @@ import { useNavigation } from 'react-navigation-hooks';
 import HandoffSettings from '../../class/handoff';
 let BlueApp: AppStorage = require('../../BlueApp');
 let loc = require('../../loc');
+import { enableStatus } from '../../util';
 
 const GeneralSettings = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isAdancedModeEnabled, setIsAdancedModeEnabled] = useState(false);
   const [isHandoffUseEnabled, setIsHandoffUseEnabled] = useState(false);
+  const [isStatusEnabled, setIsStatusEnabled] = useState(false);
   const { navigate } = useNavigation();
   const onAdvancedModeSwitch = async value => {
     await BlueApp.setIsAdancedModeEnabled(value);
@@ -23,9 +25,16 @@ const GeneralSettings = () => {
     setIsHandoffUseEnabled(value);
   };
 
+  const onStatusSwitch = async value => {
+    await BlueApp.setIsStatusEnabled(value);
+    setIsStatusEnabled(value);
+    enableStatus(value);
+  };
+
   useEffect(() => {
     (async () => {
       setIsAdancedModeEnabled(await BlueApp.isAdancedModeEnabled());
+      setIsStatusEnabled(await BlueApp.isStatusEnabled());
       setIsHandoffUseEnabled(await HandoffSettings.isHandoffUseEnabled());
       setIsLoading(false);
     })();
@@ -68,6 +77,11 @@ const GeneralSettings = () => {
           </BlueText>
         </BlueCard>
         <BlueSpacing20 />
+        <BlueListItem
+          Component={TouchableWithoutFeedback}
+          title={"Show Refreshing Status"}
+          switch={{ onValueChange: onStatusSwitch, value: isStatusEnabled }}
+        />
       </ScrollView>
     </SafeBlueArea>
   );
