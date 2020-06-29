@@ -78,7 +78,7 @@
     "bolt11": "1.2.7",
     "buffer": "5.5.0",
     "buffer-reverse": "1.0.1",
-    "coinselect": "3.1.11",
+    "coinselect": "^3.1.12",
     "crypto-js": "3.1.9-1",
     "dayjs": "1.8.23",
     "ecurve": "1.0.6",
