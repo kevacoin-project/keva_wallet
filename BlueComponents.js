@@ -1803,16 +1803,19 @@ export class WalletsCarousel extends Component {
                 elevation: 5,
               }}
             >
-              <Image
-                source={require('./img/btc-shape.png')}
-                style={{
-                  width: 99,
-                  height: 94,
-                  position: 'absolute',
-                  bottom: 0,
-                  right: 0,
-                }}
-              />
+              {
+                (item.type != PlaceholderWallet.type) &&
+                <Image
+                  source={require('./img/btc-shape.png')}
+                  style={{
+                    width: 99,
+                    height: 94,
+                    position: 'absolute',
+                    bottom: 0,
+                    right: 0,
+                  }}
+                />
+              }
               <Text style={{ backgroundColor: 'transparent' }} />
               <Text
                 numberOfLines={1}
@@ -1837,7 +1840,7 @@ export class WalletsCarousel extends Component {
                   An error was encountered when attempting to import this wallet.
                 </Text>
               ) : (
-                <ActivityIndicator style={{ marginTop: 40 }} />
+                Platform.OS === 'ios' ? <ActivityIndicator color="#ffffff" style={{ marginTop: 40 }} /> : <ActivityIndicator color="#ffffff" style={{ marginTop: 40 }}/>
               )}
             </LinearGradient>
           </TouchableWithoutFeedback>

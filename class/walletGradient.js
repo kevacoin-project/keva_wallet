@@ -14,7 +14,7 @@ export default class WalletGradient {
   static hdSegwitP2SHWallet = ['#d56c8f', '#d97b9b'];
   static hdSegwitBech32Wallet = ['#68bbe1', '#3b73d4'];
   static segwitBech32Wallet = ['#f8bbe1', '#945a90'];
-  static watchOnlyWallet = ['#7d7d7d', '#4a4a4a'];
+  static watchOnlyWallet = ['#427aa1', '#427aa1'];
   static legacyWallet = ['#40fad1', '#15be98'];
   static hdLegacyP2PKHWallet = ['#e36dfa', '#bd10e0'];
   static hdLegacyBreadWallet = ['#fe6381', '#f99c42'];
