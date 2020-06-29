@@ -957,7 +957,7 @@ export class BlueLoading extends Component {
     return (
       <SafeBlueArea>
         <View style={[{ flex: 1, paddingTop: 200 }, this.props.style]} {...this.props}>
-          <ActivityIndicator />
+          {Platform.OS === 'ios' ? <ActivityIndicator /> : <ActivityIndicator size="large" color="#c83f6d"/>}
         </View>
       </SafeBlueArea>
     );
