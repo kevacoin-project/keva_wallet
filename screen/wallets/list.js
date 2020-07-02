@@ -319,10 +319,10 @@ export default class WalletsList extends Component {
       <View style={{ height: 44, alignItems: 'flex-end', justifyContent: 'center' }}>
         <TouchableOpacity
           testID="SettingsButton"
-          style={{ marginHorizontal: 16 }}
+          style={{ marginHorizontal: 16, position: 'relative', right: -8 }}
           onPress={() => this.props.navigation.navigate('Settings')}
         >
-          <Icon size={22} name="kebab-horizontal" type="octicon" color={BlueApp.settings.foregroundColor} />
+          <Icon size={22} name="kebab-horizontal" type="octicon" color={BlueApp.settings.foregroundColor} iconStyle={{padding: 10}}/>
         </TouchableOpacity>
       </View>
     );
