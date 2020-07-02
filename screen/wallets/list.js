@@ -90,13 +90,10 @@ export default class WalletsList extends Component {
       () => {
         InteractionManager.runAfterInteractions(async () => {
           let noErr = true;
-          let toast;
           try {
-            toast = showStatus("Connecting to server");
             await BlueElectrum.ping();
             await BlueElectrum.waitTillConnected();
             let balanceStart = +new Date();
-            hideStatus(toast);
             await BlueApp.fetchWalletBalances(this.lastSnappedTo || 0);
             let balanceEnd = +new Date();
             console.log('fetch balance took', (balanceEnd - balanceStart) / 1000, 'sec');
@@ -105,7 +102,6 @@ export default class WalletsList extends Component {
             let end = +new Date();
             console.log('fetch tx took', (end - start) / 1000, 'sec');
           } catch (err) {
-            toast = showStatus(err, Toast.durations.LONG);
             noErr = false;
             console.warn(err);
           }

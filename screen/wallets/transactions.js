@@ -169,16 +169,13 @@ export default class WalletTransactions extends Component {
       async () => {
         let noErr = true;
         let smthChanged = false;
-        let toast;
         try {
-          toast = showStatus("Connecting to server");
           await BlueElectrum.ping();
           await BlueElectrum.waitTillConnected();
           /** @type {LegacyWallet} */
           let wallet = this.state.wallet;
           let balanceStart = +new Date();
           const oldBalance = wallet.getBalance();
-          hideStatus(toast);
           await wallet.fetchBalance();
           if (oldBalance !== wallet.getBalance()) smthChanged = true;
           let balanceEnd = +new Date();
@@ -197,7 +194,7 @@ export default class WalletTransactions extends Component {
           console.log(wallet.getLabel(), 'fetch tx took', (end - start) / 1000, 'sec');
         } catch (err) {
           noErr = false;
-          alert(err.message);
+          //alert(err.message);
           this.setState({
             isLoading: false,
             showShowFlatListRefreshControl: false,

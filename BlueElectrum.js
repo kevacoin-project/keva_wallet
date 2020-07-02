@@ -167,22 +167,29 @@ module.exports.getTransactionsByAddress = async function(address) {
 const PING_TIMEOUT = 5000;
 
 module.exports.ping = async function() {
+  let toast;
   try {
+    toast = showStatus("Connecting to server");
     let promiseTimeout = new Promise((resolve, reject) => {
       setTimeout(() => reject(new Error('Ping timeout')), PING_TIMEOUT);
     });
     let promisePing = mainClient.server_ping();
     await Promise.race([promisePing, promiseTimeout]);
+    hideStatus(toast);
   } catch (err) {
+    hideStatus(toast);
     mainConnected = false;
     mainClient.close();
     try {
+      toast = showStatus("Try to connect again");
       let promiseConnect = connectMain();
       let promiseTimeout = new Promise((resolve, reject) => {
         setTimeout(() => reject(new Error('Ping timeout again')), PING_TIMEOUT);
       });
       await Promise.race([promiseConnect, promiseTimeout]);
+      hideStatus(toast);
     } catch (connErr) {
+      hideStatus(toast);
       Toast.show(loc._.bad_network, {
         duration: Toast.durations.LONG,
         position: Toast.positions.BOTTOM,
