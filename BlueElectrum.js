@@ -34,19 +34,6 @@ async function connectMain() {
   try {
     console.log('begin connection:', JSON.stringify(usingPeer));
     mainClient = new ElectrumClient(usingPeer.ssl || usingPeer.tcp, usingPeer.host, usingPeer.ssl ? 'tls' : 'tcp');
-    mainClient.onError = function(e) {
-      if (Platform.OS === 'android' && mainConnected) {
-        // android sockets are buggy and dont always issue CLOSE event, which actually makes the persistence code to reconnect.
-        // so lets do it manually, but only if we were previously connected (mainConnected), otherwise theres other
-        // code which does connection retries
-        mainClient.close();
-        mainConnected = false;
-        setTimeout(connectMain, 500);
-        console.log('reconnecting after socket error');
-        return;
-      }
-      mainConnected = false;
-    };
     const ver = await mainClient.initElectrum({ client: 'bluewallet', version: '1.4' });
     if (ver && ver[0]) {
       console.log('connected to ', ver);
@@ -62,12 +49,6 @@ async function connectMain() {
   } catch (e) {
     mainConnected = false;
     console.log('bad connection:', JSON.stringify(usingPeer), e);
-  }
-
-  if (!mainConnected) {
-    console.log('retry');
-    mainClient.close && mainClient.close();
-    setTimeout(connectMain, 500);
   }
 }
 
@@ -187,7 +168,11 @@ module.exports.ping = async function() {
         setTimeout(() => reject(new Error('Ping timeout again')), PING_TIMEOUT);
       });
       await Promise.race([promiseConnect, promiseTimeout]);
-      hideStatus(toast);
+      if (mainConnected) {
+        hideStatus(toast);
+      } else {
+        throw new Error("Cannot reconnect");
+      }
     } catch (connErr) {
       hideStatus(toast);
       Toast.show(loc._.bad_network, {
