@@ -16,7 +16,6 @@ let A = require('../../analytics');
 let BlueApp = require('../../BlueApp');
 let loc = require('../../loc');
 let BlueElectrum = require('../../BlueElectrum');
-import Toast from 'react-native-root-toast';
 import { showStatus, hideStatus, enableStatus } from '../../util';
 
 const WalletsListSections = { CAROUSEL: 'CAROUSEL', LOCALTRADER: 'LOCALTRADER', TRANSACTIONS: 'TRANSACTIONS' };

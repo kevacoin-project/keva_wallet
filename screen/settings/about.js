@@ -51,7 +51,7 @@ const About = () => {
 
   const handleOnRatePress = () => {
     const options = {
-      AppleAppID: '1376878040',
+      AppleAppID: '1515670405',
       GooglePackageName: 'org.kevacoin.kevawallet',
       preferredAndroidMarket: AndroidMarket.Google,
       preferInApp: true,
@@ -85,7 +85,7 @@ const About = () => {
             <Text style={{ maxWidth: 260, marginBottom: 40, color: '#0C2550', fontSize: 15, textAlign: 'center', fontWeight: '500' }}>
               Always backup your keys!
             </Text>
-            <BlueButton onPress={handleOnRatePress} title="help with a review ⭐" />
+            <BlueButton onPress={handleOnRatePress} title="Help with a review ⭐" />
           </View>
         </BlueCard>
         <BlueListItem
