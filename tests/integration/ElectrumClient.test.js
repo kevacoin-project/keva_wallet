@@ -17,7 +17,7 @@ const hardcodedPeers = [
 
 describe('ElectrumClient', () => {
   it('can connect and query', async () => {
-    const ElectrumClient = require('electrum-client');
+    const ElectrumClient = require('../../electrum-client');
 
     for (let peer of hardcodedPeers) {
       let mainClient = new ElectrumClient(peer.ssl || peer.tcp, peer.host, peer.ssl ? 'tls' : 'tcp');

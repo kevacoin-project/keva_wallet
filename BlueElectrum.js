@@ -3,7 +3,7 @@ import { Platform } from 'react-native';
 import { AppStorage, LegacyWallet, SegwitBech32Wallet, SegwitP2SHWallet } from './class';
 import Toast from 'react-native-root-toast';
 const bitcoin = require('bitcoinjs-lib');
-const ElectrumClient = require('electrum-client');
+const ElectrumClient = require('./electrum-client');
 let reverse = require('buffer-reverse');
 let BigNumber = require('bignumber.js');
 let loc = require('./loc');
