@@ -10,10 +10,8 @@
  *     global.tls = require('tls');
  * */
 let net = global.net;
-let tls = global.tls;
 const TIMEOUT = 5000;
 
-const TlsSocketWrapper = require('./TlsSocketWrapper.js');
 const EventEmitter = require('events').EventEmitter;
 const util = require('./util');
 
@@ -29,60 +27,6 @@ class Client {
     });
     this._protocol = protocol; // saving defaults
     this._options = options;
-    //this.initSocket(protocol, options);
-  }
-
-  initSocket(protocol, options) {
-    protocol = protocol || this._protocol;
-    options = options || this._options;
-    switch (protocol) {
-      case 'tcp':
-        this.conn = new net.Socket();
-        break;
-      case 'tls':
-      case 'ssl':
-        if (!tls) {
-          throw new Error('tls package could not be loaded');
-        }
-        this.conn = new TlsSocketWrapper(tls);
-        break;
-      default:
-        throw new Error('unknown protocol');
-    }
-
-    this.conn.setTimeout(TIMEOUT);
-    this.conn.setEncoding('utf8');
-    this.conn.setKeepAlive(true, 0);
-    this.conn.setNoDelay(true);
-    this.conn.on('connect', () => {
-      this.conn.setTimeout(0);
-      this.onConnect();
-    });
-    this.conn.on('close', e => {
-      this.onClose(e);
-    });
-    this.conn.on('timeout', () => {
-      const e = new Error('ETIMEDOUT');
-      e.errorno = 'ETIMEDOUT';
-      e.code = 'ETIMEDOUT';
-      e.connect = false;
-      this.conn.emit('error', e);
-    });
-    this.conn.on('data', chunk => {
-      this.conn.setTimeout(0);
-      this.onRecv(chunk);
-    });
-    this.conn.on('end', e => {
-      this.conn.setTimeout(0);
-      this.onEnd(e);
-    });
-    this.conn.on('error', e => {
-      this.onError(e);
-    });
-    this.conn.on('onerror', e => {
-      this.onError(e);
-    });
-    this.status = 0;
   }
 
   connect() {
@@ -139,7 +83,7 @@ class Client {
       const id = ++this.id;
       const content = util.makeRequest(method, params, id);
       this.callback_message_queue[id] = util.createPromiseResult(resolve, reject);
-      this.conn.write(content + '\n');
+      this.conn.write(content + '\n', 'utf8');
     });
   }
 
@@ -162,7 +106,7 @@ class Client {
       const content = '[' + contents.join(',') + ']';
       this.callback_message_queue[this.id] = util.createPromiseResultBatch(resolve, reject, arguments_far_calls);
       // callback will exist only for max id
-      this.conn.write(content + '\n');
+      this.conn.write(content + '\n', 'utf8');
     });
   }
 
@@ -224,7 +168,7 @@ class Client {
   }
 
   onError(e) {
-    console.log('OnError:' + e);
+    console.warn('OnError:' + e);
   }
 }
 
