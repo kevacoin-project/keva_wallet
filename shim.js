@@ -15,8 +15,9 @@ if (typeof process === 'undefined') {
 
 process.browser = false;
 
-global.net = require('react-native-tcp');
-global.tls = require('react-native-tcp/tls');
+import TcpSocket from 'react-native-tcp-socket';
+global.net = TcpSocket;
+global.tls = TcpSocket;
 
 // global.location = global.location || { port: 80 }
 const isDev = typeof __DEV__ === 'boolean' && __DEV__;

@@ -29,7 +29,7 @@ class Client {
     });
     this._protocol = protocol; // saving defaults
     this._options = options;
-    this.initSocket(protocol, options);
+    //this.initSocket(protocol, options);
   }
 
   initSocket(protocol, options) {
@@ -90,17 +90,33 @@ class Client {
       return Promise.resolve();
     }
     this.status = 1;
-    return this.connectSocket(this.conn, this.port, this.host);
+    return this.connectSocket(this.port, this.host, this._protocol);
   }
 
-  connectSocket(conn, port, host) {
+  connectSocket(port, host, protocol) {
     return new Promise((resolve, reject) => {
       const errorHandler = e => reject(e);
-      conn.connect(port, host, () => {
-        conn.removeListener('error', errorHandler);
+      let options = {
+        port: port,
+        host: host,
+        tls: protocol === 'tls',
+        timeout: TIMEOUT
+      };
+      this.conn = net.createConnection(options, () => {
+        this.conn.on('data', chunk => {
+          this.conn.setTimeout(0);
+          this.onRecv(chunk);
+        });
+        this.conn.on('end', e => {
+          this.conn.setTimeout(0);
+          this.onEnd(e);
+        });
+        this.conn.on('error', e => {
+          this.onError(e);
+        });
         resolve();
       });
-      conn.on('error', errorHandler);
+      this.conn.on('error', errorHandler);
     });
   }
 
@@ -108,8 +124,10 @@ class Client {
     if (this.status === 0) {
       return;
     }
-    this.conn.end();
-    this.conn.destroy();
+    if (this.conn) {
+      this.conn.destroy();
+      this.conn = null;
+    }
     this.status = 0;
   }
 
