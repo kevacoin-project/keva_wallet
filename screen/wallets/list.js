@@ -1,14 +1,11 @@
 import React, { Component } from 'react';
 import { View, StatusBar, TouchableOpacity, Text, StyleSheet, InteractionManager, RefreshControl, SectionList, Alert } from 'react-native';
-import { SafeBlueArea, WalletsCarousel, BlueHeaderDefaultMain, BlueTransactionListItem } from '../../BlueComponents';
-import { Icon } from 'react-native-elements';
+import { SafeBlueArea, WalletsCarousel, BlueHeaderDefaultMain, BlueTransactionListItem, BlueRoundIcon } from '../../BlueComponents';
 import { NavigationEvents } from 'react-navigation';
 import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 import PropTypes from 'prop-types';
 import { PlaceholderWallet } from '../../class';
 import WalletImport from '../../class/walletImport';
-import ViewPager from '@react-native-community/viewpager';
-import ScanQRCode from '../send/ScanQRCode';
 import DeeplinkSchemaMatch from '../../class/deeplink-schema-match';
 let EV = require('../../events');
 let A = require('../../analytics');
@@ -319,10 +316,10 @@ export default class WalletsList extends Component {
       <View style={{ height: 44, alignItems: 'flex-end', justifyContent: 'center' }}>
         <TouchableOpacity
           testID="SettingsButton"
-          style={{ marginHorizontal: 16, position: 'relative', right: -8 }}
+          style={{ paddingHorizontal: 16, position: 'relative', right: -6, top: -3 }}
           onPress={() => this.props.navigation.navigate('Settings')}
         >
-          <Icon size={22} name="kebab-horizontal" type="octicon" color={BlueApp.settings.foregroundColor} iconStyle={{padding: 10}}/>
+          <BlueRoundIcon size={22} dimmed={true} color="#c83f6d" name="kebab-horizontal"/>
         </TouchableOpacity>
       </View>
     );

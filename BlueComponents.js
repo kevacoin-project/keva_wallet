@@ -1,6 +1,6 @@
 /* eslint react/prop-types: 0 */
 import React, { Component, useEffect, useState } from 'react';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import Octicons from 'react-native-vector-icons/Octicons';
 import PropTypes from 'prop-types';
 import { Icon, Input, Text, Header, ListItem } from 'react-native-elements';
 import {
@@ -764,7 +764,7 @@ export class BlueHeaderDefaultMain extends Component {
                   height: 90,
                 }}
               >
-                <BluePlusIcon />
+                <BlueRoundIcon color="#c83f6d" name="plus" />
               </TouchableOpacity>
             )
           }
@@ -1038,24 +1038,25 @@ const stylesBlueIcon = StyleSheet.create({
     width: 30,
     height: 30,
     borderRadius: 15,
-    backgroundColor: 'gray',
+    backgroundColor: '#eef0f4',
   },
 });
-export class BluePlusIcon extends Component {
+export class BlueRoundIcon extends Component {
   render() {
+    const {name, dimmed, color} = this.props;
     return (
       <View {...this.props} style={stylesBlueIcon.container}>
         <View style={stylesBlueIcon.box1}>
-          <View style={stylesBlueIcon.ball}>
-            <Ionicons
+          <View style={dimmed ? stylesBlueIcon.ballDimmed : stylesBlueIcon.ballTransparrent}>
+            <Octicons
               {...this.props}
-              name={'ios-add'}
-              size={26}
+              name={name}
+              size={22}
+              color={color}
               style={{
-                color: "#ffffff",
                 backgroundColor: 'transparent',
-                left: 8,
-                top: 1,
+                left: 7,
+                top: 4,
               }}
             />
           </View>
