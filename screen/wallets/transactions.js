@@ -202,7 +202,7 @@ export default class WalletTransactions extends Component {
         }
         if (noErr && smthChanged) {
           console.log('saving to disk');
-          toast = showStatus("Saving to disk");
+          let toast = showStatus("Saving to disk");
           await BlueApp.saveToDisk(); // caching
           hideStatus(toast);
           EV(EV.enum.TRANSACTIONS_COUNT_CHANGED); // let other components know they should redraw

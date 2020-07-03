@@ -103,7 +103,7 @@ export default class WalletsList extends Component {
           }
 
           if (noErr) {
-            toast = showStatus("Saving to disk");
+            let toast = showStatus("Saving to disk");
             await BlueApp.saveToDisk(); // caching
             hideStatus(toast);
           }
