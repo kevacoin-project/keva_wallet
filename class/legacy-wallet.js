@@ -161,7 +161,8 @@ export class LegacyWallet extends AbstractWallet {
     // Filter out the txs that have been fetched.
     let toFetchTxs = {};
     for (let hash of Object.keys(txs)) {
-      if ((txs[hash].height > (this.height - EXTRA_CONFIRMATIONS)) || txs[hash].height == 0 || txs[hash].height == -1) {
+      txHeight = txs[hash].height;
+      if ((txHeight > (this.height - EXTRA_CONFIRMATIONS)) || txHeight == 0 || txHeight == -1) {
         toFetchTxs[hash] = txs[hash];
       }
     }
@@ -210,7 +211,6 @@ export class LegacyWallet extends AbstractWallet {
           clonedTx.outputs = tx.vout.slice(0);
           delete clonedTx.vin;
           delete clonedTx.vout;
-
           this._txs_by_external_.push(clonedTx);
         }
       }
@@ -222,7 +222,8 @@ export class LegacyWallet extends AbstractWallet {
           clonedTx.outputs = tx.vout.slice(0);
           delete clonedTx.vin;
           delete clonedTx.vout;
-
+          // Replace the existing tx if it is there, e.g. lower confirmations.
+          this._txs_by_external_ = this._txs_by_external_.filter(e => !(e.txid == clonedTx.txid));
           this._txs_by_external_.push(clonedTx);
         }
       }
