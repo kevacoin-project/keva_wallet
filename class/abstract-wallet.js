@@ -31,6 +31,7 @@ export class AbstractWallet {
     this.chain = Chain.ONCHAIN;
     this.hideBalance = false;
     this.userHasSavedExport = false;
+    this.height = 0;
   }
 
   getID() {

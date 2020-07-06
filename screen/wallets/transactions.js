@@ -169,6 +169,7 @@ export default class WalletTransactions extends Component {
       async () => {
         let noErr = true;
         let smthChanged = false;
+        let hasNewTxs = false;
         try {
           await BlueElectrum.ping();
           await BlueElectrum.waitTillConnected();
@@ -182,7 +183,7 @@ export default class WalletTransactions extends Component {
           console.log(wallet.getLabel(), 'fetch balance took', (balanceEnd - balanceStart) / 1000, 'sec');
           let start = +new Date();
           const oldTxLen = wallet.getTransactions().length;
-          await wallet.fetchTransactions();
+          hasNewTxs = await wallet.fetchTransactions();
           if (wallet.fetchPendingTransactions) {
             await wallet.fetchPendingTransactions();
           }
@@ -200,7 +201,7 @@ export default class WalletTransactions extends Component {
             showShowFlatListRefreshControl: false,
           });
         }
-        if (noErr && smthChanged) {
+        if (noErr && (smthChanged || hasNewTxs)) {
           console.log('saving to disk');
           let toast = showStatus("Saving to disk");
           await BlueApp.saveToDisk(); // caching

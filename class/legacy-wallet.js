@@ -1,10 +1,12 @@
 import { randomBytes } from './rng';
 import { AbstractWallet } from './abstract-wallet';
-import { HDSegwitBech32Wallet } from './';
+import BigNumber from 'bignumber.js';
 const bitcoin = require('bitcoinjs-lib');
 const BlueElectrum = require('../BlueElectrum');
 const coinSelectAccumulative = require('coinselect/accumulative');
 const coinSelectSplit = require('coinselect/split');
+
+const EXTRA_CONFIRMATIONS = 10;
 
 /**
  *  Has private key and single address like "1ABCD....."
@@ -13,6 +15,12 @@ const coinSelectSplit = require('coinselect/split');
 export class LegacyWallet extends AbstractWallet {
   static type = 'legacy';
   static typeReadable = 'Legacy (P2PKH)';
+
+  constructor() {
+    super();
+    this._txs_by_external_ = [];
+    this._txs_by_internal_ = [];
+  }
 
   /**
    * Simple function which says that we havent tried to fetch balance
@@ -135,21 +143,34 @@ export class LegacyWallet extends AbstractWallet {
    * @return {Promise.<void>}
    */
   async fetchTransactions() {
-    // Below is a simplified copypaste from HD electrum wallet
-    this._txs_by_external_index = [];
     let addresses2fetch = [this.getAddress()];
 
     // first: batch fetch for all addresses histories
     let histories = await BlueElectrum.multiGetHistoryByAddress(addresses2fetch);
     let txs = {};
+    let currentHeight = 0;
     for (let history of Object.values(histories)) {
       for (let tx of history) {
         txs[tx.tx_hash] = tx;
+        if (tx.height > currentHeight) {
+          currentHeight = tx.height;
+        }
       }
     }
 
+    // Filter out the txs that have been fetched.
+    let toFetchTxs = {};
+    for (let hash of Object.keys(txs)) {
+      if ((txs[hash].height > (this.height - EXTRA_CONFIRMATIONS)) || txs[hash].height == 0 || txs[hash].height == -1) {
+        toFetchTxs[hash] = txs[hash];
+      }
+    }
+
+    let txList = Object.keys(toFetchTxs);
+    let hasNewTxs = txList.length > 0;
     // next, batch fetching each txid we got
-    let txdatas = await BlueElectrum.multiGetTransactionByTxid(Object.keys(txs));
+    let txdatas = await BlueElectrum.multiGetTransactionByTxid(txList);
+    this.height = currentHeight;
 
     // now, tricky part. we collect all transactions from inputs (vin), and batch fetch them too.
     // then we combine all this data (we need inputs to see source addresses and amounts)
@@ -159,6 +180,7 @@ export class LegacyWallet extends AbstractWallet {
         vinTxids.push(vin.txid);
       }
     }
+
     let vintxdatas = await BlueElectrum.multiGetTransactionByTxid(vinTxids);
 
     // fetched all transactions from our inputs. now we need to combine it.
@@ -189,7 +211,7 @@ export class LegacyWallet extends AbstractWallet {
           delete clonedTx.vin;
           delete clonedTx.vout;
 
-          this._txs_by_external_index.push(clonedTx);
+          this._txs_by_external_.push(clonedTx);
         }
       }
       for (let vout of tx.vout) {
@@ -201,21 +223,60 @@ export class LegacyWallet extends AbstractWallet {
           delete clonedTx.vin;
           delete clonedTx.vout;
 
-          this._txs_by_external_index.push(clonedTx);
+          this._txs_by_external_.push(clonedTx);
         }
       }
     }
 
     this._lastTxFetch = +new Date();
+    return hasNewTxs;
   }
 
   getTransactions() {
-    // a hacky code reuse from electrum HD wallet:
-    this._txs_by_external_index = this._txs_by_external_index || [];
-    this._txs_by_internal_index = [];
+    let txs = [];
 
-    let hd = new HDSegwitBech32Wallet();
-    return hd.getTransactions.apply(this);
+    for (let addressTxs of Object.values(this._txs_by_external_)) {
+      txs = txs.concat(addressTxs);
+    }
+    for (let addressTxs of Object.values(this._txs_by_internal_)) {
+      txs = txs.concat(addressTxs);
+    }
+
+    let ret = [];
+    for (let tx of txs) {
+      tx.received = tx.blocktime * 1000;
+      if (!tx.blocktime) tx.received = +new Date() - 30 * 1000; // unconfirmed
+      tx.confirmations = tx.confirmations || 0; // unconfirmed
+      tx.hash = tx.txid;
+      tx.value = 0;
+
+      for (let vin of tx.inputs) {
+        // if input (spending) goes from our address - we are loosing!
+        if ((vin.address && this.weOwnAddress(vin.address)) || (vin.addresses && vin.addresses[0] && this.weOwnAddress(vin.addresses[0]))) {
+          tx.value -= new BigNumber(vin.value).multipliedBy(100000000).toNumber();
+        }
+      }
+
+      for (let vout of tx.outputs) {
+        // when output goes to our address - this means we are gaining!
+        if (vout.scriptPubKey.addresses && vout.scriptPubKey.addresses[0] && this.weOwnAddress(vout.scriptPubKey.addresses[0])) {
+          tx.value += new BigNumber(vout.value).multipliedBy(100000000).toNumber();
+        }
+      }
+      ret.push(tx);
+    }
+
+    // now, deduplication:
+    let usedTxIds = {};
+    let ret2 = [];
+    for (let tx of ret) {
+      if (!usedTxIds[tx.txid]) ret2.push(tx);
+      usedTxIds[tx.txid] = 1;
+    }
+
+    return ret2.sort(function(a, b) {
+      return b.received - a.received;
+    });
   }
 
   /**
