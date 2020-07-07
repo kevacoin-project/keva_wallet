@@ -211,6 +211,8 @@ export class LegacyWallet extends AbstractWallet {
           clonedTx.outputs = tx.vout.slice(0);
           delete clonedTx.vin;
           delete clonedTx.vout;
+          // Replace the existing tx if it is there, e.g. lower confirmations.
+          this._txs_by_external_ = this._txs_by_external_.filter(e => !(e.txid == clonedTx.txid));
           this._txs_by_external_.push(clonedTx);
         }
       }
