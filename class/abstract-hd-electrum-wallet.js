@@ -268,7 +268,6 @@ export class AbstractHDElectrumWallet extends AbstractHDWallet {
     let hasNewTxs = txList.length > 0;
     // next, batch fetching each txid we got
     let txdatas = await BlueElectrum.multiGetTransactionByTxid(txList);
-    this.height = currentHeight;
 
     // now, tricky part. we collect all transactions from inputs (vin), and batch fetch them too.
     // then we combine all this data (we need inputs to see source addresses and amounts)
@@ -402,6 +401,7 @@ export class AbstractHDElectrumWallet extends AbstractHDWallet {
     }
 
     this._lastTxFetch = +new Date();
+    this.height = currentHeight;
     return hasNewTxs;
   }
 
