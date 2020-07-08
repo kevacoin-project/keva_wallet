@@ -32,6 +32,17 @@ export class AbstractHDElectrumWallet extends AbstractHDWallet {
     this._utxo = [];
   }
 
+  clearHistory() {
+    this._balances_by_external_index = {};
+    this._balances_by_internal_index = {};
+
+    this._txs_by_external_index = {};
+    this._txs_by_internal_index = {};
+
+    this._utxo = [];
+    this.height = 0;
+  }
+
   /**
    * @inheritDoc
    */
@@ -244,7 +255,7 @@ export class AbstractHDElectrumWallet extends AbstractHDWallet {
     // first: batch fetch for all addresses histories
     let histories = await BlueElectrum.multiGetHistoryByAddress(addresses2fetch);
     let txs = {};
-    let currentHeight = 0;
+    let currentHeight = this.height;
     for (let history of Object.values(histories)) {
       for (let tx of history) {
         txs[tx.tx_hash] = tx;

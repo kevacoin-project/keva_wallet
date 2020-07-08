@@ -22,6 +22,12 @@ export class LegacyWallet extends AbstractWallet {
     this._txs_by_internal_ = [];
   }
 
+  clearHistory() {
+    this._txs_by_external_ = [];
+    this._txs_by_internal_ = [];
+    this.height = 0;
+  }
+
   /**
    * Simple function which says that we havent tried to fetch balance
    * for a long time
@@ -148,7 +154,7 @@ export class LegacyWallet extends AbstractWallet {
     // first: batch fetch for all addresses histories
     let histories = await BlueElectrum.multiGetHistoryByAddress(addresses2fetch);
     let txs = {};
-    let currentHeight = 0;
+    let currentHeight = this.height;
     for (let history of Object.values(histories)) {
       for (let tx of history) {
         txs[tx.tx_hash] = tx;

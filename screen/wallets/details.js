@@ -24,6 +24,7 @@ import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 import Biometric from '../../class/biometrics';
 import { HDSegwitBech32Wallet, SegwitP2SHWallet, LegacyWallet, SegwitBech32Wallet, WatchOnlyWallet } from '../../class';
 import { ScrollView } from 'react-native-gesture-handler';
+import { showStatus } from '../../util';
 const EV = require('../../events');
 const prompt = require('../../prompt');
 /** @type {AppStorage} */
@@ -140,6 +141,21 @@ export default class WalletDetails extends Component {
     });
   };
 
+  resetTransaction() {
+    Alert.alert(
+      'Reset History',
+      'All the transactions will be downloaded again the next time you refresh the transactions.',
+      [
+        { text: 'Cancel', onPress: () => {}, style: 'cancel' },
+        {
+          text: 'OK',
+          onPress: () => { this.state.wallet.clearHistory(); showStatus("Transaction history reset", 3000); },
+        },
+      ],
+      { cancelable: false },
+    );
+  }
+
   render() {
     if (this.state.isLoading) {
       return (
@@ -253,13 +269,12 @@ export default class WalletDetails extends Component {
                     title={loc.wallets.details.export_backup}
                   />
 
-                  <BlueSpacing20 />
-
                   {(this.state.wallet.type === HDLegacyBreadwalletWallet.type ||
                     this.state.wallet.type === HDLegacyP2PKHWallet.type ||
                     this.state.wallet.type === HDSegwitBech32Wallet.type ||
                     this.state.wallet.type === HDSegwitP2SHWallet.type) && (
                     <React.Fragment>
+                      <BlueSpacing20 />
                       <BlueButton
                         onPress={() =>
                           this.props.navigation.navigate('WalletXpub', {
@@ -279,6 +294,10 @@ export default class WalletDetails extends Component {
                       <BlueButton onPress={() => this.props.navigation.navigate('Broadcast')} title="Broadcast transaction" />
                     </React.Fragment>
                   )}
+                  <React.Fragment>
+                    <BlueSpacing20 />
+                    <BlueButton onPress={() => this.resetTransaction()} title="Reset Transaction History" backgroundColor="#fff" fontColor={BlueApp.settings.secondaryButtonTextColor} borderColor={BlueApp.settings.secondaryButtonTextColor}/>
+                  </React.Fragment>
                   <BlueSpacing20 />
                   <TouchableOpacity
                     style={{ alignItems: 'center' }}

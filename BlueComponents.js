@@ -50,7 +50,7 @@ if (aspectRatio > 1.6) {
 export class BlueButton extends Component {
   render() {
     let backgroundColor = this.props.backgroundColor ? this.props.backgroundColor : BlueApp.settings.buttonBackgroundColor;
-    let fontColor = BlueApp.settings.buttonTextColor;
+    let fontColor = this.props.fontColor ? this.props.fontColor : BlueApp.settings.buttonTextColor;
     if (this.props.hasOwnProperty('disabled') && this.props.disabled === true) {
       backgroundColor = BlueApp.settings.buttonDisabledBackgroundColor;
       fontColor = BlueApp.settings.buttonDisabledTextColor;
@@ -59,12 +59,13 @@ export class BlueButton extends Component {
     if (this.props.hasOwnProperty('noMinWidth')) {
       buttonWidth = 0;
     }
+    let borderColor = this.props.borderColor ? this.props.borderColor : backgroundColor;
     return (
       <TouchableOpacity
         style={{
           flex: 1,
-          borderWidth: 0.7,
-          borderColor: 'transparent',
+          borderWidth: 1,
+          borderColor: borderColor,
           backgroundColor: backgroundColor,
           minHeight: 45,
           height: 45,
