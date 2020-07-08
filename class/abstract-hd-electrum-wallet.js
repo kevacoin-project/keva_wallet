@@ -10,7 +10,6 @@ const coinSelectAccumulative = require('coinselect/accumulative');
 const coinSelectSplit = require('coinselect/split');
 const reverse = require('buffer-reverse');
 
-const EXTRA_CONFIRMATIONS = 10;
 
 /**
  * Electrum - means that it utilizes Electrum protocol for blockchain data
@@ -30,6 +29,7 @@ export class AbstractHDElectrumWallet extends AbstractHDWallet {
     this._txs_by_internal_index = {};
 
     this._utxo = [];
+    this.txCacheHD = {};
   }
 
   clearHistory() {
@@ -40,7 +40,7 @@ export class AbstractHDElectrumWallet extends AbstractHDWallet {
     this._txs_by_internal_index = {};
 
     this._utxo = [];
-    this.height = 0;
+    this.txCacheHD = {};
   }
 
   /**
@@ -255,30 +255,15 @@ export class AbstractHDElectrumWallet extends AbstractHDWallet {
     // first: batch fetch for all addresses histories
     let histories = await BlueElectrum.multiGetHistoryByAddress(addresses2fetch);
     let txs = {};
-    let currentHeight = this.height;
     for (let history of Object.values(histories)) {
       for (let tx of history) {
         txs[tx.tx_hash] = tx;
-        if (tx.height > currentHeight) {
-          currentHeight = tx.height;
-        }
       }
     }
 
-    // Filter out the txs that have been fetched.
-    let toFetchTxs = {};
-    let txHeight = 0;
-    for (let hash of Object.keys(txs)) {
-      txHeight = txs[hash].height;
-      if ((txHeight > (this.height - EXTRA_CONFIRMATIONS)) || txHeight == 0 || txHeight == -1) {
-        toFetchTxs[hash] = txs[hash];
-      }
-    }
-
-    let txList = Object.keys(toFetchTxs);
-    let hasNewTxs = txList.length > 0;
+    let cacheTxs = Object.keys(this.txCacheHD).length;
     // next, batch fetching each txid we got
-    let txdatas = await BlueElectrum.multiGetTransactionByTxid(txList);
+    let txdatas = await BlueElectrum.multiGetTransactionByTxid(Object.keys(txs), 20, true, this.txCacheHD);
 
     // now, tricky part. we collect all transactions from inputs (vin), and batch fetch them too.
     // then we combine all this data (we need inputs to see source addresses and amounts)
@@ -288,7 +273,7 @@ export class AbstractHDElectrumWallet extends AbstractHDWallet {
         vinTxids.push(vin.txid);
       }
     }
-    let vintxdatas = await BlueElectrum.multiGetTransactionByTxid(vinTxids);
+    let vintxdatas = await BlueElectrum.multiGetTransactionByTxid(vinTxids, 20, true, this.txCacheHD);
 
     // fetched all transactions from our inputs. now we need to combine it.
     // iterating all _our_ transactions:
@@ -412,7 +397,7 @@ export class AbstractHDElectrumWallet extends AbstractHDWallet {
     }
 
     this._lastTxFetch = +new Date();
-    this.height = currentHeight;
+    let hasNewTxs = Object.keys(this.txCacheHD).length != cacheTxs;
     return hasNewTxs;
   }
 

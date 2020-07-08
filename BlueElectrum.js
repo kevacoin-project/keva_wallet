@@ -356,7 +356,11 @@ module.exports.multiGetHistoryByAddress = async function(addresses, batchsize) {
   return ret;
 };
 
-module.exports.multiGetTransactionByTxid = async function(txids, batchsize, verbose) {
+function txNeedUpdate(tx) {
+  return (!tx || !tx.confirmations || tx.confirmations < 10)
+}
+
+module.exports.multiGetTransactionByTxid = async function(txids, batchsize, verbose, txCache) {
   batchsize = batchsize || 45;
   // this value is fine-tuned so althrough wallets in test suite will occasionally
   // throw 'response too large (over 1,000,000 bytes', test suite will pass
@@ -365,7 +369,15 @@ module.exports.multiGetTransactionByTxid = async function(txids, batchsize, verb
   let ret = {};
   txids = [...new Set(txids)]; // deduplicate just for any case
 
-  let chunks = splitIntoChunks(txids, batchsize);
+  // Filter out those already in cache.
+  let txidsToFetch;
+  if (txCache) {
+    txidsToFetch = txids.filter(t => txNeedUpdate(txCache[t]));
+  } else {
+    txidsToFetch = txids;
+  }
+
+  let chunks = splitIntoChunks(txidsToFetch, batchsize);
   for (let chunk of chunks) {
     let results = [];
 
@@ -408,6 +420,18 @@ module.exports.multiGetTransactionByTxid = async function(txids, batchsize, verb
         hideStatus(toast);
       }
       ret[txdata.param] = txdata.result;
+      if (txCache && txNeedUpdate(txCache[txdata.param])) {
+        txCache[txdata.param] = txdata.result;
+      }
+    }
+  }
+
+  // Fill in those in the cache.
+  if (txCache) {
+    for (let t of txids) {
+      if (!ret[t]) {
+        ret[t] = txCache[t];
+      }
     }
   }
 
