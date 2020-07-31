@@ -757,18 +757,7 @@ export class BlueHeaderDefaultMain extends Component {
             borderBottomColor: BlueApp.settings.brandingColor,
             backgroundColor: '#ffffff',
           }}
-          rightComponent={
-            this.props.onNewWalletPress && (
-              <TouchableOpacity
-                onPress={this.props.onNewWalletPress}
-                style={{
-                  height: 90,
-                }}
-              >
-                <BlueRoundIcon color="#c83f6d" name="plus" />
-              </TouchableOpacity>
-            )
-          }
+          rightComponent={null}
         />
       </SafeAreaView>
     );

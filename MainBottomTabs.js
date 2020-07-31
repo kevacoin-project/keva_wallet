@@ -1,5 +1,6 @@
 import { createAppContainer } from 'react-navigation';
 import { createStackNavigator } from 'react-navigation-stack';
+import { createBottomTabNavigator } from 'react-navigation-tabs';
 
 import Settings from './screen/settings/settings';
 import About from './screen/settings/about';
@@ -44,6 +45,8 @@ import Confirm from './screen/send/confirm';
 import PsbtWithHardwareWallet from './screen/send/psbtWithHardwareWallet';
 import Success from './screen/send/success';
 import Broadcast from './screen/send/broadcast';
+
+const StyleSheet = require('./PlatformStyleSheet');
 
 const ReorderWalletsStackNavigator = createStackNavigator({
   ReorderWallets: {
@@ -246,7 +249,7 @@ const HandleOffchainAndOnChainStackNavigator = createStackNavigator(
   { headerBackTitleVisible: false },
 );
 
-const MainBottomTabs = createStackNavigator(
+const WalletNavigator = createStackNavigator(
   {
     Wallets: {
       screen: WalletsStackNavigator,
@@ -308,4 +311,66 @@ const MainBottomTabs = createStackNavigator(
   },
 );
 
-export default createAppContainer(MainBottomTabs);
+let styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: 'black',
+  },
+  labelStyle: {
+    android: {
+      fontSize: 10,
+      position: 'relative',
+      top: -6
+    }
+  },
+  tabStyle: {
+    android: {
+      backgroundColor: '#fbfbfb'
+    }
+  },
+  style: {
+    android: {
+      backgroundColor: '#fbfbfb',
+      height: 48
+    }
+  }
+});
+
+const MAIN_TABS = {
+  Wallets: {
+    screen: WalletNavigator,
+    path: 'WalletList',
+    navigationOptions: {
+      headerShown: false,
+    },
+  },
+  Settings: {
+    screen: Settings,
+    path: 'Settings',
+    navigationOptions: {
+      headerStyle: {
+        backgroundColor: '#FFFFFF',
+        borderBottomWidth: 0,
+        elevation: 0,
+      },
+      headerTintColor: '#0c2550',
+    },
+  },
+}
+
+const KevaTabNavigator = createBottomTabNavigator(MAIN_TABS, {
+  initialRouteName: 'Wallets',
+  tabBarPosition: 'bottom',
+  lazy: true,
+  tabBarOptions: {
+    activeTintColor: '#e91e63',
+    inactiveTintColor: '#5E5959',
+    showIcon: true,
+    style: styles.style,
+    labelStyle: styles.labelStyle,
+    tabStyle: styles.tabStyle
+  },
+});
+
+
+export default createAppContainer(KevaTabNavigator);
