@@ -42,5 +42,6 @@ const Settings = () => {
 };
 Settings.navigationOptions = {
   ...BlueNavigationStyle,
+  headerShown: false,
 };
 export default Settings;

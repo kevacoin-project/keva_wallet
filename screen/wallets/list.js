@@ -319,7 +319,7 @@ export default class WalletsList extends Component {
           style={{ paddingHorizontal: 16, position: 'relative', right: -6, top: -3 }}
           onPress={() => {
             !BlueApp.getWallets().some(wallet => wallet.type === PlaceholderWallet.type)
-              ? () => this.props.navigation.navigate('AddWallet')
+              ? this.props.navigation.navigate('AddWallet')
               : null
           }}
         >

@@ -89,81 +89,12 @@ const WalletsStackNavigator = createStackNavigator(
     RBFCancel: {
       screen: rbfCancel,
     },
-    Settings: {
-      screen: Settings,
-      path: 'Settings',
-      navigationOptions: {
-        headerStyle: {
-          backgroundColor: '#FFFFFF',
-          borderBottomWidth: 0,
-          elevation: 0,
-        },
-        headerTintColor: '#0c2550',
-      },
-    },
     SelectWallet: {
       screen: SelectWallet,
-    },
-    Currency: {
-      screen: Currency,
-    },
-    About: {
-      screen: About,
-      path: 'About',
-    },
-    ReleaseNotes: {
-      screen: ReleaseNotes,
-      path: 'ReleaseNotes',
-    },
-    Selftest: {
-      screen: Selftest,
-    },
-    Licensing: {
-      screen: Licensing,
-      path: 'Licensing',
     },
     DefaultView: {
       screen: DefaultView,
       path: 'DefaultView',
-    },
-    Language: {
-      screen: Language,
-      path: 'Language',
-    },
-    EncryptStorage: {
-      screen: EncryptStorage,
-      path: 'EncryptStorage',
-    },
-    GeneralSettings: {
-      screen: GeneralSettings,
-      path: 'GeneralSettings',
-    },
-    NetworkSettings: {
-      screen: NetworkSettings,
-      path: 'NetworkSettings',
-    },
-    PlausibleDeniability: {
-      screen: PlausibleDeniability,
-      path: 'PlausibleDeniability',
-    },
-    LightningSettings: {
-      screen: LightningSettings,
-      path: 'LightningSettings',
-    },
-    ElectrumSettings: {
-      screen: ElectrumSettings,
-      path: 'ElectrumSettings',
-    },
-    Broadcast: {
-      screen: Broadcast,
-      navigationOptions: () => ({
-        title: 'Broadcast',
-        headerStyle: {
-          backgroundColor: '#FFFFFF',
-          borderBottomWidth: 0,
-        },
-        headerTintColor: '#0c2550',
-      }),
     },
   },
   {
@@ -311,6 +242,110 @@ const WalletNavigator = createStackNavigator(
   },
 );
 
+const SettingsStackNavigator = createStackNavigator(
+  {
+    Settings: {
+      screen: Settings,
+      path: 'Settings',
+      navigationOptions: {
+        headerStyle: {
+          backgroundColor: '#FFFFFF',
+          borderBottomWidth: 0,
+          elevation: 0,
+        },
+        headerTintColor: '#0c2550',
+      },
+    },
+    SelectWallet: {
+      screen: SelectWallet,
+    },
+    Currency: {
+      screen: Currency,
+    },
+    About: {
+      screen: About,
+      path: 'About',
+    },
+    ReleaseNotes: {
+      screen: ReleaseNotes,
+      path: 'ReleaseNotes',
+    },
+    Selftest: {
+      screen: Selftest,
+    },
+    Licensing: {
+      screen: Licensing,
+      path: 'Licensing',
+    },
+    DefaultView: {
+      screen: DefaultView,
+      path: 'DefaultView',
+    },
+    Language: {
+      screen: Language,
+      path: 'Language',
+    },
+    EncryptStorage: {
+      screen: EncryptStorage,
+      path: 'EncryptStorage',
+    },
+    GeneralSettings: {
+      screen: GeneralSettings,
+      path: 'GeneralSettings',
+    },
+    NetworkSettings: {
+      screen: NetworkSettings,
+      path: 'NetworkSettings',
+    },
+    PlausibleDeniability: {
+      screen: PlausibleDeniability,
+      path: 'PlausibleDeniability',
+    },
+    LightningSettings: {
+      screen: LightningSettings,
+      path: 'LightningSettings',
+    },
+    ElectrumSettings: {
+      screen: ElectrumSettings,
+      path: 'ElectrumSettings',
+    },
+    Broadcast: {
+      screen: Broadcast,
+      navigationOptions: () => ({
+        title: 'Broadcast',
+        headerStyle: {
+          backgroundColor: '#FFFFFF',
+          borderBottomWidth: 0,
+        },
+        headerTintColor: '#0c2550',
+      }),
+    },
+  },
+  {
+    defaultNavigationOptions: {
+      headerBackTitleVisible: false
+    }
+  },
+);
+
+
+const MAIN_TABS = {
+  Wallets: {
+    screen: WalletNavigator,
+    path: 'WalletList',
+    navigationOptions: {
+      headerShown: false,
+    },
+  },
+  Settings: {
+    screen: SettingsStackNavigator,
+    path: 'Settings',
+    navigationOptions: {
+      headerShown: false,
+    },
+  },
+}
+
 let styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -318,7 +353,7 @@ let styles = StyleSheet.create({
   },
   labelStyle: {
     android: {
-      fontSize: 10,
+      fontSize: 11,
       position: 'relative',
       top: -6
     }
@@ -335,28 +370,6 @@ let styles = StyleSheet.create({
     }
   }
 });
-
-const MAIN_TABS = {
-  Wallets: {
-    screen: WalletNavigator,
-    path: 'WalletList',
-    navigationOptions: {
-      headerShown: false,
-    },
-  },
-  Settings: {
-    screen: Settings,
-    path: 'Settings',
-    navigationOptions: {
-      headerStyle: {
-        backgroundColor: '#FFFFFF',
-        borderBottomWidth: 0,
-        elevation: 0,
-      },
-      headerTintColor: '#0c2550',
-    },
-  },
-}
 
 const KevaTabNavigator = createBottomTabNavigator(MAIN_TABS, {
   initialRouteName: 'Wallets',
