@@ -1,3 +1,4 @@
+import React from 'react';
 import { createAppContainer } from 'react-navigation';
 import { createStackNavigator } from 'react-navigation-stack';
 import { createBottomTabNavigator } from 'react-navigation-tabs';
@@ -45,6 +46,8 @@ import Confirm from './screen/send/confirm';
 import PsbtWithHardwareWallet from './screen/send/psbtWithHardwareWallet';
 import Success from './screen/send/success';
 import Broadcast from './screen/send/broadcast';
+
+import Ionicons from 'react-native-vector-icons/Ionicons';
 
 const StyleSheet = require('./PlatformStyleSheet');
 
@@ -366,7 +369,7 @@ let styles = StyleSheet.create({
     android: {
       fontSize: 11,
       position: 'relative',
-      top: -6
+      top: -2
     }
   },
   tabStyle: {
@@ -394,6 +397,21 @@ const KevaTabNavigator = createBottomTabNavigator(MAIN_TABS, {
     labelStyle: styles.labelStyle,
     tabStyle: styles.tabStyle
   },
+  defaultNavigationOptions: ({ navigation }) => ({
+    tabBarIcon: ({ focused, horizontal, tintColor }) => {
+      const { routeName } = navigation.state;
+      let iconName;
+      if (routeName === 'Wallets') {
+        // Sometimes we want to add badges to some icons.
+        // https://reactnavigation.org/docs/4.x/tab-based-navigation/
+        // IconComponent = HomeIconWithBadge;
+        iconName = 'md-wallet';
+      } else if (routeName === 'Settings') {
+        iconName = 'md-settings';
+      }
+      return <Ionicons name={iconName} size={22} color={tintColor} />;
+    },
+  }),
 });
 
 
