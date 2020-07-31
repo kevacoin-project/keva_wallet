@@ -14,7 +14,7 @@ export default class WalletXpub extends Component {
   static navigationOptions = ({ navigation }) => ({
     ...BlueNavigationStyle(navigation, true),
     title: loc.wallets.xpub.title,
-    headerLeft: null,
+    headerLeft: () => null,
   });
 
   constructor(props) {

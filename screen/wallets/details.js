@@ -35,7 +35,7 @@ export default class WalletDetails extends Component {
   static navigationOptions = ({ navigation }) => ({
     ...BlueNavigationStyle(),
     title: loc.wallets.details.title,
-    headerRight: (
+    headerRight: () => (
       <TouchableOpacity
         disabled={navigation.getParam('isLoading') === true}
         style={{ marginHorizontal: 16, justifyContent: 'center', alignItems: 'center' }}

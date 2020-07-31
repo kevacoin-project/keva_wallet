@@ -89,7 +89,7 @@ const PleaseBackup = () => {
 PleaseBackup.navigationOptions = ({ navigation }) => ({
   ...BlueNavigationStyle(navigation, true),
   title: loc.pleasebackup.title,
-  headerLeft: null,
+  headerLeft: () => null,
   headerRight: null,
 });
 

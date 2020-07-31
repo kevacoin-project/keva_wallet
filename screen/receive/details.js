@@ -252,7 +252,7 @@ const ReceiveDetails = () => {
 ReceiveDetails.navigationOptions = ({ navigation }) => ({
   ...BlueNavigationStyle(navigation, true),
   title: loc.receive.header,
-  headerLeft: null,
+  headerLeft: () => null,
 });
 
 export default ReceiveDetails;

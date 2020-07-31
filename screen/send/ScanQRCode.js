@@ -180,7 +180,7 @@ const ScanQRCode = ({
 };
 
 ScanQRCode.navigationOptions = {
-  header: null,
+  headerShown: false,
 };
 ScanQRCode.propTypes = {
   launchedBy: PropTypes.string,

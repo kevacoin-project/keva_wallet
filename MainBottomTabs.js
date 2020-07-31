@@ -1,4 +1,5 @@
-import { createStackNavigator, createAppContainer } from 'react-navigation';
+import { createAppContainer } from 'react-navigation';
+import { createStackNavigator } from 'react-navigation-stack';
 
 import Settings from './screen/settings/settings';
 import About from './screen/settings/about';
@@ -56,7 +57,7 @@ const WalletsStackNavigator = createStackNavigator(
       screen: WalletsList,
       path: 'wallets',
       navigationOptions: {
-        header: null,
+        headerShown: false,
       },
     },
     WalletTransactions: {
@@ -162,7 +163,12 @@ const WalletsStackNavigator = createStackNavigator(
       }),
     },
   },
-  { headerBackTitleVisible: false },
+  {
+    defaultNavigationOptions: {
+      headerBackTitleVisible: false,
+      headerTitle: () => null
+    }
+  },
 );
 
 const CreateTransactionStackNavigator = createStackNavigator({
@@ -214,7 +220,7 @@ const CreateWalletStackNavigator = createStackNavigator({
     swipeEnabled: false,
     gesturesEnabled: false,
     navigationOptions: {
-      header: null,
+      headerShown: false,
     },
   },
 });
@@ -233,7 +239,7 @@ const HandleOffchainAndOnChainStackNavigator = createStackNavigator(
     SendDetails: {
       screen: CreateTransactionStackNavigator,
       navigationOptions: {
-        header: null,
+        headerShown: false,
       },
     },
   },
@@ -246,13 +252,13 @@ const MainBottomTabs = createStackNavigator(
       screen: WalletsStackNavigator,
       path: 'wallets',
       navigationOptions: {
-        header: null,
+        headerShown: false,
       },
     },
     AddWallet: {
       screen: CreateWalletStackNavigator,
       navigationOptions: {
-        header: null,
+        headerShown: false,
       },
     },
     WalletExport: {
@@ -266,13 +272,13 @@ const MainBottomTabs = createStackNavigator(
       routeName: 'SendDetails',
       screen: CreateTransactionStackNavigator,
       navigationOptions: {
-        header: null,
+        headerShown: false,
       },
     },
     SelectWallet: {
       screen: SelectWallet,
       navigationOptions: {
-        headerLeft: null,
+        headerLeft: () => null,
       },
     },
 
@@ -287,13 +293,13 @@ const MainBottomTabs = createStackNavigator(
     ReorderWallets: {
       screen: ReorderWalletsStackNavigator,
       navigationOptions: {
-        header: null,
+        headerShown: false,
       },
     },
     HandleOffchainAndOnChain: {
       screen: HandleOffchainAndOnChainStackNavigator,
       navigationOptions: {
-        header: null,
+        headerShown: false,
       },
     },
   },

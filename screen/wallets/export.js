@@ -15,7 +15,7 @@ export default class WalletExport extends Component {
   static navigationOptions = ({ navigation }) => ({
     ...BlueNavigationStyle(navigation, true),
     title: loc.wallets.export.title,
-    headerLeft: null,
+    headerLeft: () => null,
   });
 
   constructor(props) {
