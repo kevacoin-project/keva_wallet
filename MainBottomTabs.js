@@ -324,6 +324,17 @@ const SettingsStackNavigator = createStackNavigator(
   {
     defaultNavigationOptions: {
       headerBackTitleVisible: false
+    },
+    navigationOptions: ({ navigation }) => {
+      let tabBarVisible = false;
+      let routeName = navigation.state.routes[navigation.state.index].routeName;
+      if (routeName == 'Settings') {
+          tabBarVisible = true;
+      }
+      return {
+        tabBarVisible,
+        headerShown: false,
+      }
     }
   },
 );
