@@ -1,5 +1,5 @@
 import React from 'react';
-import { createAppContainer } from 'react-navigation';
+import { createAppContainer, getActiveChildNavigationOptions } from 'react-navigation';
 import { createStackNavigator } from 'react-navigation-stack';
 import { createBottomTabNavigator } from 'react-navigation-tabs';
 
@@ -104,6 +104,17 @@ const WalletsStackNavigator = createStackNavigator(
     defaultNavigationOptions: {
       headerBackTitleVisible: false,
       headerTitle: () => null
+    },
+    navigationOptions: ({ navigation }) => {
+      let tabBarVisible = false;
+      let routeName = navigation.state.routes[navigation.state.index].routeName;
+      if (routeName == 'Wallets') {
+          tabBarVisible = true;
+      }
+      return {
+        tabBarVisible,
+        headerShown: false,
+      }
     }
   },
 );
@@ -242,6 +253,21 @@ const WalletNavigator = createStackNavigator(
   },
   {
     mode: 'modal',
+    navigationOptions: ({ navigation }) => {
+      let tabBarVisible = false;
+      let routeName = navigation.state.routes[navigation.state.index].routeName;
+      if (routeName == 'Wallets') {
+          tabBarVisible = true;
+      }
+      const childOptions = getActiveChildNavigationOptions(navigation);
+      if (childOptions.tabBarVisible === false) {
+        tabBarVisible = false;
+      }
+      return {
+        tabBarVisible,
+        headerShown: false,
+      }
+    }
   },
 );
 
