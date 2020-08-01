@@ -1740,16 +1740,16 @@ export class WalletsCarousel extends Component {
 
   _renderItem = ({ item, index }) => {
     let scaleValue = new Animated.Value(1.0);
-    let props = { duration: 50 };
-    if (Platform.OS === 'android') {
-      props['useNativeDriver'] = true;
-    }
+    let props = {speed: 1000};
+
     this.onPressedIn = () => {
-      props.toValue = 0.9;
+      props.toValue = 0.98;
+      props.useNativeDriver = true;
       Animated.spring(scaleValue, props).start();
     };
     this.onPressedOut = () => {
       props.toValue = 1.0;
+      props.useNativeDriver = true;
       Animated.spring(scaleValue, props).start();
     };
 
