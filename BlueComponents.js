@@ -408,7 +408,7 @@ export const BlueNavigationStyle = (navigation, withNavigationCloseButton = fals
     color: BlueApp.settings.foregroundColor,
   },
   headerTintColor: BlueApp.settings.foregroundColor,
-  headerRight: withNavigationCloseButton ? (
+  headerRight: () => withNavigationCloseButton ? (
     <TouchableOpacity
       style={{ width: 40, height: 40, padding: 14 }}
       onPress={
@@ -437,7 +437,7 @@ export const BlueCreateTxNavigationStyle = (navigation, withAdvancedOptionsMenuB
     color: BlueApp.settings.foregroundColor,
   },
   headerTintColor: BlueApp.settings.foregroundColor,
-  headerLeft: (
+  headerLeft: () => (
     <TouchableOpacity
       style={{ minWwidth: 40, height: 40, padding: 14 }}
       onPress={() => {
@@ -448,7 +448,7 @@ export const BlueCreateTxNavigationStyle = (navigation, withAdvancedOptionsMenuB
       <Image style={{ alignSelf: 'center' }} source={require('./img/close.png')} />
     </TouchableOpacity>
   ),
-  headerRight: withAdvancedOptionsMenuButton ? (
+  headerRight: () => withAdvancedOptionsMenuButton ? (
     <TouchableOpacity style={{ minWidth: 40, height: 40, padding: 14 }} onPress={advancedOptionsMenuButtonAction}>
       <Icon size={22} name="kebab-horizontal" type="octicon" color={BlueApp.settings.foregroundColor} />
     </TouchableOpacity>
@@ -757,18 +757,7 @@ export class BlueHeaderDefaultMain extends Component {
             borderBottomColor: BlueApp.settings.brandingColor,
             backgroundColor: '#ffffff',
           }}
-          rightComponent={
-            this.props.onNewWalletPress && (
-              <TouchableOpacity
-                onPress={this.props.onNewWalletPress}
-                style={{
-                  height: 90,
-                }}
-              >
-                <BlueRoundIcon color="#c83f6d" name="plus" />
-              </TouchableOpacity>
-            )
-          }
+          rightComponent={null}
         />
       </SafeAreaView>
     );
@@ -1751,16 +1740,16 @@ export class WalletsCarousel extends Component {
 
   _renderItem = ({ item, index }) => {
     let scaleValue = new Animated.Value(1.0);
-    let props = { duration: 50 };
-    if (Platform.OS === 'android') {
-      props['useNativeDriver'] = true;
-    }
+    let props = {speed: 1000};
+
     this.onPressedIn = () => {
-      props.toValue = 0.9;
+      props.toValue = 0.98;
+      props.useNativeDriver = true;
       Animated.spring(scaleValue, props).start();
     };
     this.onPressedOut = () => {
       props.toValue = 1.0;
+      props.useNativeDriver = true;
       Animated.spring(scaleValue, props).start();
     };
 

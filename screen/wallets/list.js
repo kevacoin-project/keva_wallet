@@ -315,11 +315,15 @@ export default class WalletsList extends Component {
     return (
       <View style={{ height: 44, alignItems: 'flex-end', justifyContent: 'center' }}>
         <TouchableOpacity
-          testID="SettingsButton"
+          testID="AddWalletButton"
           style={{ paddingHorizontal: 16, position: 'relative', right: -6, top: -3 }}
-          onPress={() => this.props.navigation.navigate('Settings')}
+          onPress={() => {
+            !BlueApp.getWallets().some(wallet => wallet.type === PlaceholderWallet.type)
+              ? this.props.navigation.navigate('AddWallet')
+              : null
+          }}
         >
-          <BlueRoundIcon size={22} dimmed={true} color="#c83f6d" name="kebab-horizontal"/>
+          <BlueRoundIcon color="#c83f6d" name="plus" />
         </TouchableOpacity>
       </View>
     );
