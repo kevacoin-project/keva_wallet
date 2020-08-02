@@ -12,6 +12,7 @@ import {
   BlueFormLabel,
   BlueTextCentered,
   BlueBigCheckmark,
+  BlueNavigationStyle,
 } from '../../BlueComponents';
 import BlueElectrum from '../../BlueElectrum';
 const bitcoin = require('bitcoinjs-lib');
@@ -93,6 +94,10 @@ export default function Broadcast() {
     </SafeBlueArea>
   );
 }
+
+Broadcast.navigationOptions = ({ }) => ({
+  ...BlueNavigationStyle(),
+});
 
 const styles = StyleSheet.create({
   wrapper: {

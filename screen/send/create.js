@@ -29,13 +29,13 @@ const currency = require('../../currency');
 
 export default class SendCreate extends Component {
   static navigationOptions = ({ navigation }) => ({
-    ...BlueNavigationStyle,
+    ...BlueNavigationStyle(),
     title: loc.send.create.details,
-    headerRight: navigation.state.params.exportTXN ? (
+    headerRight: navigation.state.params.exportTXN ? () => (
       <TouchableOpacity style={{ marginRight: 16 }} onPress={navigation.state.params.exportTXN}>
         <Icon size={22} name="share-alternative" type="entypo" color={BlueApp.settings.foregroundColor} />
       </TouchableOpacity>
-    ) : null,
+    ) : () => null,
   });
 
   constructor(props) {
@@ -98,24 +98,22 @@ export default class SendCreate extends Component {
 
   _renderItem = ({ index, item }) => {
     return (
-      <>
-        <View>
-          <Text style={styles.transactionDetailsTitle}>{loc.send.create.to}</Text>
-          <Text style={styles.transactionDetailsSubtitle}>{item.address}</Text>
-          <Text style={styles.transactionDetailsTitle}>{loc.send.create.amount}</Text>
-          <Text style={styles.transactionDetailsSubtitle}>
-            {item.value === BitcoinUnit.MAX || !item.value
-              ? currency.satoshiToBTC(this.state.wallet.getBalance()) - this.state.fee
-              : currency.satoshiToBTC(item.value)}{' '}
-            {BitcoinUnit.BTC}
-          </Text>
-          {this.state.recipients.length > 1 && (
-            <BlueText style={{ alignSelf: 'flex-end' }}>
-              {index + 1} of {this.state.recipients.length}
-            </BlueText>
-          )}
-        </View>
-      </>
+      <View key={index}>
+        <Text style={styles.transactionDetailsTitle}>{loc.send.create.to}</Text>
+        <Text style={styles.transactionDetailsSubtitle}>{item.address}</Text>
+        <Text style={styles.transactionDetailsTitle}>{loc.send.create.amount}</Text>
+        <Text style={styles.transactionDetailsSubtitle}>
+          {item.value === BitcoinUnit.MAX || !item.value
+            ? currency.satoshiToBTC(this.state.wallet.getBalance()) - this.state.fee
+            : currency.satoshiToBTC(item.value)}{' '}
+          {BitcoinUnit.BTC}
+        </Text>
+        {this.state.recipients.length > 1 && (
+          <BlueText style={{ alignSelf: 'flex-end' }}>
+            {index + 1} of {this.state.recipients.length}
+          </BlueText>
+        )}
+      </View>
     );
   };
 

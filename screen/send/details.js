@@ -791,7 +791,7 @@ export default class SendDetails extends Component {
     let rows = [];
     for (let [index, item] of this.state.addresses.entries()) {
       rows.push(
-        <View style={{ minWidth: width, maxWidth: width, width: width }}>
+        <View style={{ minWidth: width, maxWidth: width, width: width }} key={index}>
           <BlueBitcoinAmount
             isLoading={this.state.isLoading}
             amount={item.amount ? item.amount.toString() : null}
@@ -869,7 +869,7 @@ export default class SendDetails extends Component {
   render() {
     if (this.state.isLoading || typeof this.state.fromWallet === 'undefined') {
       return (
-        <View style={{ flex: 1, paddingTop: 20 }}>
+        <View style={{ flex: 1, paddingTop: 20, backgroundColor: '#fff' }}>
           <BlueLoading />
           <Text style={styles.statusText}>{this.state.loadStatus}</Text>
         </View>
@@ -877,7 +877,7 @@ export default class SendDetails extends Component {
     }
     return (
       <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-        <View style={{ flex: 1, justifyContent: 'space-between' }}>
+        <View style={{ flex: 1, justifyContent: 'space-between', backgroundColor: '#fff' }}>
           <View>
             <KeyboardAvoidingView behavior="position">
               <ScrollView

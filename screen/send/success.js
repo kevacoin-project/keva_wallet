@@ -10,7 +10,7 @@ let loc = require('../../loc');
 export default class Success extends Component {
   static navigationOptions = {
     headerShown: false,
-    gesturesEnabled: false,
+    gestureEnabled: false,
   };
 
   constructor(props) {

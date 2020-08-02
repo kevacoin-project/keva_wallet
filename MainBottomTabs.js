@@ -131,14 +131,7 @@ const CreateTransactionStackNavigator = createStackNavigator({
     screen: PsbtWithHardwareWallet,
   },
   CreateTransaction: {
-    screen: sendCreate,
-    navigationOptions: {
-      headerStyle: {
-        backgroundColor: '#FFFFFF',
-        borderBottomWidth: 0,
-      },
-      headerTintColor: '#0c2550',
-    },
+    screen: sendCreate
   },
   Success: {
     screen: Success,
@@ -339,15 +332,7 @@ const SettingsStackNavigator = createStackNavigator(
       path: 'ElectrumSettings',
     },
     Broadcast: {
-      screen: Broadcast,
-      navigationOptions: () => ({
-        title: 'Broadcast',
-        headerStyle: {
-          backgroundColor: '#FFFFFF',
-          borderBottomWidth: 0,
-        },
-        headerTintColor: '#0c2550',
-      }),
+      screen: Broadcast
     },
   },
   {

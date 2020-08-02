@@ -23,13 +23,14 @@ const SelectWallet = () => {
     setIsLoading(false);
   }, []);
 
-  const renderItem = ({ item }) => {
+  const renderItem = ({ item, index }) => {
     return (
       <TouchableOpacity
         onPress={() => {
           ReactNativeHapticFeedback.trigger('selection', { ignoreAndroidSystemSettings: false });
           onWalletSelect(item);
         }}
+        key={index}
       >
         <View
           shadowOpacity={40 / 100}
