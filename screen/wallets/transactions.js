@@ -67,6 +67,7 @@ export default class WalletTransactions extends Component {
         borderBottomWidth: 0,
         elevation: 0,
         shadowRadius: 0,
+        shadowColor: 'transparent',
       },
       headerTintColor: '#FFFFFF',
     };
