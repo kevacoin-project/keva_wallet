@@ -46,6 +46,7 @@ import Confirm from './screen/send/confirm';
 import PsbtWithHardwareWallet from './screen/send/psbtWithHardwareWallet';
 import Success from './screen/send/success';
 import Broadcast from './screen/send/broadcast';
+import Namespaces from './screen/data/namespaces';
 
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
@@ -353,11 +354,51 @@ const SettingsStackNavigator = createStackNavigator(
   },
 );
 
+const DataStackNavigator = createStackNavigator(
+  {
+    Namespaces: {
+      screen: Namespaces,
+      path: 'Data',
+      navigationOptions: {
+        headerStyle: {
+          backgroundColor: '#FFFFFF',
+          borderBottomWidth: 0,
+          elevation: 0,
+        },
+        headerTintColor: '#0c2550',
+      },
+    },
+  },
+  {
+    defaultNavigationOptions: {
+      headerBackTitleVisible: false
+    },
+    navigationOptions: ({ navigation }) => {
+      let tabBarVisible = false;
+      let routeName = navigation.state.routes[navigation.state.index].routeName;
+      if (routeName == 'Namespaces') {
+          tabBarVisible = true;
+      }
+      return {
+        tabBarVisible,
+        headerShown: false,
+      }
+    }
+  },
+);
+
 
 const MAIN_TABS = {
   Wallets: {
     screen: WalletNavigator,
     path: 'WalletList',
+    navigationOptions: {
+      headerShown: false,
+    },
+  },
+  Data: {
+    screen: DataStackNavigator,
+    path: 'Data',
     navigationOptions: {
       headerShown: false,
     },
@@ -419,6 +460,8 @@ const KevaTabNavigator = createBottomTabNavigator(MAIN_TABS, {
         iconName = 'md-wallet';
       } else if (routeName === 'Settings') {
         iconName = 'md-settings';
+      } else if (routeName === 'Data') {
+        iconName = 'md-filing';
       }
       return <Ionicons name={iconName} size={22} color={tintColor} />;
     },

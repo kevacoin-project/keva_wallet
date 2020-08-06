@@ -7,6 +7,11 @@ import { BitcoinUnit } from '../../models/bitcoinUnits';
 import PropTypes from 'prop-types';
 let loc = require('../../loc');
 
+/**
+ * Screen that indicates the transaction has been successfully
+ * broadcasted, with a "Done" button.
+ */
+
 export default class Success extends Component {
   static navigationOptions = {
     headerShown: false,
