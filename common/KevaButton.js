@@ -23,14 +23,16 @@
 
 // Modified from F8Button.js.
 
-var Image = require('Image');
+import React from 'react';
+import {
+  View,
+  Image,
+  TouchableOpacity,
+  ActivityIndicator,
+  StyleSheet
+} from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
-var React = require('React');
-var StyleSheet = require('StyleSheet');
-var { Text } = require('F8Text');
-var TouchableOpacity = require('TouchableOpacity');
-var ActivityIndicator = require('ActivityIndicator');
-var View = require('View');
+var { Text } = require('./KevaText');
 
 const VOID = () => {}
 const PRIMARY_COLOR = '#ff8274';

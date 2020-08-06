@@ -21,53 +21,42 @@
  *
  */
 
-// Modified from F8Color.js.
+import React from 'react';
+import {Text as ReactNativeText, StyleSheet, Dimensions} from 'react-native';
+import KevaColors from './KevaColors';
 
-const LOCATION_COLORS = {
-  'HERBST': '#00E3AD',
-  'HERBST A': '#00E3AD',
-  'HERBST B': '#00E3AD',
-  'HACKER X': '#4D99EF',
-  'HACKER Y': '#CF72B1',
-  'COWELL': '#6A6AD5',
-  'COWELL C': '#6A6AD5',
-  'FOOD TENT': '#FFCD3B',
-};
-
-function colorForLocation(location) {
-  if (!location) {
-    return 'black';
-  }
-
-  var color = LOCATION_COLORS[location.toUpperCase()];
-  if (!color) {
-    console.warn(`Location '${location}' has no color`);
-    color = 'black';
-  }
-  return color;
+export function Text({style, ...props}) {
+  return <ReactNativeText style={[styles.font, style]} {...props} />;
 }
 
-function colorForTopic(count, index) {
-  const hue = Math.round(360 * index / (count + 1));
-  return `hsl(${hue}, 74%, 65%)`;
+export function Heading1({style, ...props}) {
+  return <ReactNativeText style={[styles.font, styles.h1, style]} {...props} />;
 }
 
-module.exports = {
-  actionText: '#007aff',
-  inactiveText: '#9B9B9B',
-  darkText: '#032250',
-  lightText: '#5e5959',
-  extraLightText: '#aaa',
-  icon: "#7a7a7a",
-  cellBorder: '#EEEEEE',
-  darkBackground: '#183E63',
-  colorForLocation,
-  colorForTopic,
-  inputBorder: '#eee',
-  errColor: '#d9534f',
-  okColor: '#5cb85c',
-  warnColor: '#F0AD4E',
-  arrowIcon: '#bbb',
-  selectColor: '#f25656',
-  backgroundLight: '#fafafa'
-};
+export function Paragraph({style, ...props}) {
+  return <ReactNativeText style={[styles.font, styles.p, style]} {...props} />;
+}
+
+const scale = Dimensions.get('window').width / 375;
+
+function normalize(size) {
+  return Math.round(scale * size);
+}
+
+const styles = StyleSheet.create({
+  font: {
+    fontFamily: undefined,
+  },
+  h1: {
+    fontSize: normalize(24),
+    lineHeight: normalize(27),
+    color: KevaColors.darkText,
+    fontWeight: 'bold',
+    letterSpacing: -1,
+  },
+  p: {
+    fontSize: normalize(15),
+    lineHeight: normalize(23),
+    color: KevaColors.lightText,
+  },
+});
