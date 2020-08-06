@@ -53,7 +53,7 @@ function colorForTopic(count, index) {
 }
 
 module.exports = {
-  actionText: '#007aff',
+  actionText: '#c83f6d',
   inactiveText: '#9B9B9B',
   darkText: '#032250',
   lightText: '#5e5959',

@@ -1,3 +1,7 @@
+import {
+  PixelRatio,
+} from 'react-native';
+
 import Toast from 'react-native-root-toast';
 
 let statusEnabled = true;
@@ -31,3 +35,5 @@ export function showStatus(message, duration=60000) {
         Toast.hide(toast);
     }
   }
+
+  export const THIN_BORDER = 1 / PixelRatio.get();

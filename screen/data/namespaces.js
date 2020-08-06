@@ -54,6 +54,7 @@ let BlueElectrum = require('../../BlueElectrum');
 const StyleSheet = require('../../PlatformStyleSheet');
 const KevaButton = require('../../common/KevaButton');
 const KevaColors = require('../../common/KevaColors');
+const utils = require('../../util');
 
 const ACTIVE_OPACITY = 0.7;
 const CLOSE_ICON = (<Icon name="ios-close-circle-outline" size={36} color="#fff" style={{paddingVertical: 5, paddingHorizontal: 15}} />)
@@ -95,7 +96,7 @@ class Category extends React.Component {
           </View>
           <View style={{flexDirection: 'row', alignItems: 'center'}}>
             <Text style={styles.cardTitleTextSm}>{numberItems}</Text>
-            <Icon name="ios-arrow-forward" size={22} color={KevaColors.arrowIcon} style={{paddingHorizontal: 7}}/>
+            <Icon name="ios-arrow-forward" size={22} color={KevaColors.actionText} style={{paddingHorizontal: 7}}/>
           </View>
         </ElevatedView>
       </TouchableOpacity>
@@ -195,10 +196,23 @@ export default class Namespaces extends React.Component {
         />
         */}
         { this.getSectionModal() }
-        <KevaButton caption={"+ Section"} type='secondary'
-          style={{ paddingTop: 15, paddingHorizontal: 5 }}
-          onPress={this.addSection}
-        />
+        <View style={{paddingTop: 10, paddingLeft: 8, backgroundColor: '#fff', borderBottomWidth: utils.THIN_BORDER, borderColor: KevaColors.cellBorder, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingBottom: 10}}>
+          <TextInput
+            onChangeText={section => this.setState({section: section})}
+            value={this.state.section}
+            placeholder={"Add a new namespace"}
+            multiline={true}
+            underlineColorAndroid='rgba(0,0,0,0)'
+            style={{flex: 1, borderRadius: 4, backgroundColor: '#ececed', paddingTop: 10, paddingBottom: 10, paddingLeft: 7, paddingRight: 36}}
+          />
+          {this.state.saving ?
+            <ActivityIndicator size="small" color={KevaColors.actionText} style={{width: 42, height: 42}}/>
+            :
+            <TouchableOpacity onPress={this.onAddSection}>
+              <Icon name={'md-add-circle'} style={{width: 42, height: 42, color: KevaColors.actionText, paddingVertical: 5, paddingHorizontal: 9, top: 1}} size={28}/>
+            </TouchableOpacity>
+          }
+        </View>
         {
           namespaces &&
           <SortableListView
@@ -279,7 +293,7 @@ var styles = StyleSheet.create({
   cardTitleTextSm: {
     top: -1,
     fontSize: 16,
-    color: '#5e5959'
+    color: KevaColors.actionText
   },
   cardContent: {
     backgroundColor: '#fff',
