@@ -325,11 +325,12 @@ var styles = StyleSheet.create({
     paddingVertical: 10
   },
   modal: {
-    height: 500,
+    height: 800,
     borderTopLeftRadius: 10,
     borderTopRightRadius: 10,
     zIndex: 999999,
     backgroundColor: '#fff',
+    justifyContent: 'flex-start',
   },
   modalHeader: {
     paddingLeft: 15,
