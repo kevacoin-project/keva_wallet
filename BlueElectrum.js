@@ -372,15 +372,15 @@ module.exports.multiGetTransactionByTxid = async function(txids, batchsize, verb
 
   // Filter out those already in cache.
   let txidsToFetch;
+  let cachedTxs = await BlueApp.getMultiTxFromDisk(txids);
   txidsToFetch = txids.filter(async t => {
-    let tx = await BlueApp.getTxFromDisk(t);
+    let tx = cachedTxs[t];
     return txNeedUpdate(tx);
   });
 
   let chunks = splitIntoChunks(txidsToFetch, batchsize);
   for (let chunk of chunks) {
     let results = [];
-
     if (disableBatching) {
       for (let txid of chunk) {
         try {
@@ -411,6 +411,7 @@ module.exports.multiGetTransactionByTxid = async function(txids, batchsize, verb
       hideStatus(toast);
     }
 
+    let txsToSave = [];
     for (let txdata of results) {
       if (txdata.error && txdata.error.code === -32600) {
         // response too large
@@ -420,17 +421,19 @@ module.exports.multiGetTransactionByTxid = async function(txids, batchsize, verb
         hideStatus(toast);
       }
       ret[txdata.param] = txdata.result;
-      let cachedTx = await BlueApp.getTxFromDisk(txdata.param);
-      if (txNeedUpdate(cachedTx)) {
-        await BlueApp.saveTxToDisk(txdata.param, txdata.result);
-      }
+
+      // Tx to save
+      txsToSave.push([txdata.param, txdata.result]);
     }
+
+    // Save the txs to cache.
+    await BlueApp.saveMultiTxToDisk(txsToSave);
   }
 
   // Fill in those in the cache.
   for (let t of txids) {
     if (!ret[t]) {
-      ret[t] = await BlueApp.getTxFromDisk(t);
+      ret[t] = cachedTxs[t];
     }
   }
 

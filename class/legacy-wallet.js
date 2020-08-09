@@ -5,6 +5,7 @@ const bitcoin = require('bitcoinjs-lib');
 const BlueElectrum = require('../BlueElectrum');
 const coinSelectAccumulative = require('coinselect/accumulative');
 const coinSelectSplit = require('coinselect/split');
+let BlueApp = require('../BlueApp');
 
 /**
  *  Has private key and single address like "1ABCD....."
@@ -20,9 +21,11 @@ export class LegacyWallet extends AbstractWallet {
     this._txs_by_internal_ = [];
   }
 
-  clearHistory() {
+  async clearHistory() {
     this._txs_by_external_ = [];
     this._txs_by_internal_ = [];
+    await BlueApp.clearTxs();
+    await BlueApp.saveToDisk();
   }
 
   /**

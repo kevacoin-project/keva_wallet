@@ -447,6 +447,48 @@ export class AppStorage {
     return null;
   }
 
+  splitIntoChunks(arr, chunkSize) {
+    let groups = [];
+    let i;
+    for (i = 0; i < arr.length; i += chunkSize) {
+      groups.push(arr.slice(i, i + chunkSize));
+    }
+    return groups;
+  };
+
+  async getMultiTxFromDisk(txids) {
+    let result = {};
+    let chunks = this.splitIntoChunks(txids, 50);
+    for (ch of chunks) {
+      let data = await AsyncStorage.multiGet(ch);
+      if (data) {
+        for (let d of data) {
+          result[d[0]] = JSON.parse(d[1]);
+        }
+      }
+    }
+    return result;
+  }
+
+  async saveMultiTxToDisk(txs) {
+    let chunks = this.splitIntoChunks(txs, 50);
+    for (ch of chunks) {
+      for (c of ch) {
+        c[1] = JSON.stringify(c[1]);
+      }
+      await AsyncStorage.multiSet(ch);
+    }
+  }
+
+  async clearTxs() {
+    try {
+      const keys = await AsyncStorage.getAllKeys();
+      await AsyncStorage.multiRemove(keys);
+    } catch (error) {
+        console.error('Error clearing app data.');
+    }
+  }
+
   /**
    * For each wallet, fetches balance from remote endpoint.
    * Use getter for a specific wallet to get actual balance.

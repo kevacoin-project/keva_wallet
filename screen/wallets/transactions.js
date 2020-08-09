@@ -193,6 +193,7 @@ export default class WalletTransactions extends Component {
           let end = +new Date();
           console.log(wallet.getLabel(), 'fetch tx took', (end - start) / 1000, 'sec');
         } catch (err) {
+          console.warn(err);
           noErr = false;
           //alert(err.message);
           this.setState({

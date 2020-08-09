@@ -9,7 +9,7 @@ const HDNode = require('bip32');
 const coinSelectAccumulative = require('coinselect/accumulative');
 const coinSelectSplit = require('coinselect/split');
 const reverse = require('buffer-reverse');
-
+let BlueApp = require('../BlueApp');
 
 /**
  * Electrum - means that it utilizes Electrum protocol for blockchain data
@@ -31,7 +31,7 @@ export class AbstractHDElectrumWallet extends AbstractHDWallet {
     this._utxo = [];
   }
 
-  clearHistory() {
+  async clearHistory() {
     this._balances_by_external_index = {};
     this._balances_by_internal_index = {};
 
@@ -39,6 +39,8 @@ export class AbstractHDElectrumWallet extends AbstractHDWallet {
     this._txs_by_internal_index = {};
 
     this._utxo = [];
+    await BlueApp.clearTxs();
+    await BlueApp.saveToDisk();
   }
 
   /**
