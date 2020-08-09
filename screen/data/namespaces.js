@@ -59,7 +59,7 @@ const utils = require('../../util');
 const ACTIVE_OPACITY = 0.7;
 const CLOSE_ICON = (<Icon name="ios-close" size={36} color="#fff" style={{ paddingVertical: 5, paddingHorizontal: 15 }} />)
 
-class Category extends React.Component {
+class Namespace extends React.Component {
 
   constructor(props) {
     super(props);
@@ -72,6 +72,10 @@ class Category extends React.Component {
   onEdit = () => {
     let namespace = this.props.namespace;
     this.props.onEdit(this.props.categoryId, namespace.name);
+  }
+
+  onKey = () => {
+    this.props.navigation.navigate('KeyValues');
   }
 
   render() {
@@ -94,10 +98,12 @@ class Category extends React.Component {
               </TouchableOpacity>
             </View>
           </View>
-          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            <Text style={styles.cardTitleTextSm}>{numberItems}</Text>
-            <Icon name="ios-arrow-forward" size={22} color={KevaColors.actionText} style={{ paddingHorizontal: 7 }} />
-          </View>
+          <TouchableOpacity onPress={this.onKey}>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <Text style={styles.cardTitleTextSm}>{numberItems}</Text>
+              <Icon name="ios-arrow-forward" size={22} color={KevaColors.actionText} style={{ paddingHorizontal: 7 }} />
+            </View>
+          </TouchableOpacity>
         </ElevatedView>
       </TouchableOpacity>
     )
@@ -160,7 +166,7 @@ export default class Namespaces extends React.Component {
             type='secondary'
             loading={this.state.saving}
             style={{ padding: 10, marginTop: 10, marginBottom: 10 }}
-            caption={sectionId ? 'Update' : 'Add'}
+            caption={sectionId ? 'Update' : 'Update'}
             onPress={sectionId ? this.onUpdateSection : this.onAddSection}
           />
         </View>
@@ -220,7 +226,7 @@ export default class Namespaces extends React.Component {
             data={namespaces}
             onChangeOrder={this.onChangeOrder}
             renderRow={(namespace, active) => {
-              return <Category onEdit={this.onSectionEdit} namespace={namespace} active={active} />
+              return <Namespace onEdit={this.onSectionEdit} namespace={namespace} active={active} navigation={navigation} />
             }}
           />
         }

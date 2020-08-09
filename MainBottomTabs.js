@@ -47,6 +47,7 @@ import PsbtWithHardwareWallet from './screen/send/psbtWithHardwareWallet';
 import Success from './screen/send/success';
 import Broadcast from './screen/send/broadcast';
 import Namespaces from './screen/data/namespaces';
+import KeyValues from './screen/data/keyvalues';
 
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
@@ -367,6 +368,9 @@ const DataStackNavigator = createStackNavigator(
         },
         headerTintColor: '#0c2550',
       },
+    },
+    KeyValues: {
+      screen: KeyValues,
     },
   },
   {
