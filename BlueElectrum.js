@@ -8,6 +8,7 @@ let reverse = require('buffer-reverse');
 let BigNumber = require('bignumber.js');
 let loc = require('./loc');
 import { showStatus, hideStatus } from './util';
+let BlueApp = require('./BlueApp');
 
 const storageKey = 'ELECTRUM_PEERS';
 const defaultPeer = { host: 'ec0.kevacoin.org', ssl: '50002' };
@@ -360,7 +361,7 @@ function txNeedUpdate(tx) {
   return (!tx || !tx.confirmations || tx.confirmations < 10)
 }
 
-module.exports.multiGetTransactionByTxid = async function(txids, batchsize, verbose, txCache) {
+module.exports.multiGetTransactionByTxid = async function(txids, batchsize, verbose) {
   batchsize = batchsize || 45;
   // this value is fine-tuned so althrough wallets in test suite will occasionally
   // throw 'response too large (over 1,000,000 bytes', test suite will pass
@@ -371,11 +372,10 @@ module.exports.multiGetTransactionByTxid = async function(txids, batchsize, verb
 
   // Filter out those already in cache.
   let txidsToFetch;
-  if (txCache) {
-    txidsToFetch = txids.filter(t => txNeedUpdate(txCache[t]));
-  } else {
-    txidsToFetch = txids;
-  }
+  txidsToFetch = txids.filter(async t => {
+    let tx = await BlueApp.getTxFromDisk(t);
+    return txNeedUpdate(tx);
+  });
 
   let chunks = splitIntoChunks(txidsToFetch, batchsize);
   for (let chunk of chunks) {
@@ -420,18 +420,17 @@ module.exports.multiGetTransactionByTxid = async function(txids, batchsize, verb
         hideStatus(toast);
       }
       ret[txdata.param] = txdata.result;
-      if (txCache && txNeedUpdate(txCache[txdata.param])) {
-        txCache[txdata.param] = txdata.result;
+      let cachedTx = await BlueApp.getTxFromDisk(txdata.param);
+      if (txNeedUpdate(cachedTx)) {
+        await BlueApp.saveTxToDisk(txdata.param, txdata.result);
       }
     }
   }
 
   // Fill in those in the cache.
-  if (txCache) {
-    for (let t of txids) {
-      if (!ret[t]) {
-        ret[t] = txCache[t];
-      }
+  for (let t of txids) {
+    if (!ret[t]) {
+      ret[t] = await BlueApp.getTxFromDisk(t);
     }
   }
 

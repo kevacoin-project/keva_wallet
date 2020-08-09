@@ -18,13 +18,11 @@ export class LegacyWallet extends AbstractWallet {
     super();
     this._txs_by_external_ = [];
     this._txs_by_internal_ = [];
-    this.txCacheLegacy = {};
   }
 
   clearHistory() {
     this._txs_by_external_ = [];
     this._txs_by_internal_ = [];
-    this.txCacheLegacy = {};
   }
 
   /**
@@ -159,9 +157,8 @@ export class LegacyWallet extends AbstractWallet {
       }
     }
 
-    let cacheTxs = Object.keys(this.txCacheLegacy).length;
     // next, batch fetching each txid we got
-    let txdatas = await BlueElectrum.multiGetTransactionByTxid(Object.keys(txs), 20, true, this.txCacheLegacy);
+    let txdatas = await BlueElectrum.multiGetTransactionByTxid(Object.keys(txs), 20, true);
 
     // now, tricky part. we collect all transactions from inputs (vin), and batch fetch them too.
     // then we combine all this data (we need inputs to see source addresses and amounts)
@@ -172,7 +169,7 @@ export class LegacyWallet extends AbstractWallet {
       }
     }
 
-    let vintxdatas = await BlueElectrum.multiGetTransactionByTxid(vinTxids, 20, true, this.txCacheLegacy);
+    let vintxdatas = await BlueElectrum.multiGetTransactionByTxid(vinTxids, 20, true);
 
     // fetched all transactions from our inputs. now we need to combine it.
     // iterating all _our_ transactions:
@@ -222,8 +219,6 @@ export class LegacyWallet extends AbstractWallet {
     }
 
     this._lastTxFetch = +new Date();
-    let hasNewTxs = Object.keys(this.txCacheLegacy).length != cacheTxs;
-    return hasNewTxs;
   }
 
   getTransactions() {

@@ -29,7 +29,6 @@ export class AbstractHDElectrumWallet extends AbstractHDWallet {
     this._txs_by_internal_index = {};
 
     this._utxo = [];
-    this.txCacheHD = {};
   }
 
   clearHistory() {
@@ -40,7 +39,6 @@ export class AbstractHDElectrumWallet extends AbstractHDWallet {
     this._txs_by_internal_index = {};
 
     this._utxo = [];
-    this.txCacheHD = {};
   }
 
   /**
@@ -261,9 +259,8 @@ export class AbstractHDElectrumWallet extends AbstractHDWallet {
       }
     }
 
-    let cacheTxs = Object.keys(this.txCacheHD).length;
     // next, batch fetching each txid we got
-    let txdatas = await BlueElectrum.multiGetTransactionByTxid(Object.keys(txs), 20, true, this.txCacheHD);
+    let txdatas = await BlueElectrum.multiGetTransactionByTxid(Object.keys(txs), 20, true);
 
     // now, tricky part. we collect all transactions from inputs (vin), and batch fetch them too.
     // then we combine all this data (we need inputs to see source addresses and amounts)
@@ -273,7 +270,7 @@ export class AbstractHDElectrumWallet extends AbstractHDWallet {
         vinTxids.push(vin.txid);
       }
     }
-    let vintxdatas = await BlueElectrum.multiGetTransactionByTxid(vinTxids, 20, true, this.txCacheHD);
+    let vintxdatas = await BlueElectrum.multiGetTransactionByTxid(vinTxids, 20, true);
 
     // fetched all transactions from our inputs. now we need to combine it.
     // iterating all _our_ transactions:
@@ -397,8 +394,6 @@ export class AbstractHDElectrumWallet extends AbstractHDWallet {
     }
 
     this._lastTxFetch = +new Date();
-    let hasNewTxs = Object.keys(this.txCacheHD).length != cacheTxs;
-    return hasNewTxs;
   }
 
   getTransactions() {

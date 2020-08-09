@@ -96,6 +96,28 @@ export class AppStorage {
     }
   }
 
+    /**
+   * Wrapper for storage call. Always use AsyncStorage.
+   * used for cli/tests
+   *
+   * @param key
+   * @param value
+   * @returns {Promise<any>|Promise<any> | Promise<void> | * | Promise | void}
+   */
+  setItemStorage(key, value) {
+    return AsyncStorage.setItem(key, value);
+  }
+
+  /**
+   * Wrapper for storage call. Always use AsyncStorage.
+   *
+   * @param key
+   * @returns {Promise<any>|*}
+   */
+  getItemStorage(key) {
+    return AsyncStorage.getItem(key);
+  }
+
   async setResetOnAppUninstallTo(value) {
     await this.setItem(AppStorage.DELETE_WALLET_AFTER_UNINSTALL, value ? '1' : '');
     try {
@@ -398,7 +420,31 @@ export class AppStorage {
     WatchConnectivity.shared.sendWalletsToWatch();
     DeviceQuickActions.setWallets(this.wallets);
     DeviceQuickActions.setQuickActions();
+
+    // Clean the cache implemented by previous version
+    if (data.txCacheHD) {
+      delete data.txCacheHD;
+    }
+
+    if (data.txCacheLegacy) {
+      delete data.txCacheLegacy;
+    }
+
     return this.setItem('data', JSON.stringify(data));
+  }
+
+  async saveTxToDisk(txid, tx) {
+    if (tx) {
+      await this.setItemStorage(txid, JSON.stringify(tx));
+    }
+  }
+
+  async getTxFromDisk(txid) {
+    let data = await this.getItemStorage(txid);
+    if (data) {
+      return JSON.parse(data);
+    }
+    return null;
   }
 
   /**
