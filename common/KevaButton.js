@@ -35,7 +35,7 @@ import LinearGradient from 'react-native-linear-gradient';
 var { Text } = require('./KevaText');
 
 const VOID = () => {}
-const PRIMARY_COLOR = '#ff8274';
+const PRIMARY_COLOR = '#c83f6d';
 
 class KevaButton extends React.Component {
 

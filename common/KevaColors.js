@@ -53,6 +53,8 @@ function colorForTopic(count, index) {
 }
 
 module.exports = {
+  primaryColor: '#c83f6d',
+  primaryLightColor: '#c83f6daa',
   actionText: '#c83f6d',
   inactiveText: '#9B9B9B',
   darkText: '#032250',
