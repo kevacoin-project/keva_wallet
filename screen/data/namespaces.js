@@ -1,6 +1,7 @@
 import React from 'react';
 import {
   ActivityIndicator,
+  Animated,
   View,
   TextInput,
   Alert,
@@ -41,7 +42,7 @@ import { BitcoinTransaction } from '../../models/bitcoinTransactionInfo';
 import DocumentPicker from 'react-native-document-picker';
 import RNFS from 'react-native-fs';
 import DeeplinkSchemaMatch from '../../class/deeplink-schema-match';
-import SortableListView from 'react-native-sortable-listview'
+import SortableListView from 'react-native-sortable-list'
 import ElevatedView from 'react-native-elevated-view'
 
 const bitcoin = require('bitcoinjs-lib');
@@ -79,33 +80,32 @@ class Namespace extends React.Component {
   }
 
   render() {
-    let namespace = this.props.namespace;
+    const {data, active} = this.props;
+    let namespace = data.data;
     let numberItems = 100;
 
     return (
-      <TouchableOpacity {...this.props.sortHandlers} onPress={() => this.onPress()} activeOpacity={ACTIVE_OPACITY}>
-        <ElevatedView elevation={1} style={styles.cardTitle}>
-          <View style={{ flex: 1, justifyContent: 'space-between', paddingHorizontal: 7, paddingTop: 5 }}>
-            <View style={{ flex: 1 }} >
-              <Text style={styles.cardTitleText}>{namespace.name}</Text>
-            </View>
-            <View style={styles.actionContainer}>
-              <TouchableOpacity onPress={this.onEdit}>
-                <Icon name="ios-create" size={22} style={styles.actionIcon} />
-              </TouchableOpacity>
-              <TouchableOpacity onPress={() => this.props.onShowActions(this.props.categoryId)}>
-                <Icon name="ios-trash" size={22} style={styles.actionIcon} />
-              </TouchableOpacity>
-            </View>
+      <ElevatedView elevation={1} style={styles.cardTitle}>
+        <View style={{ flex: 1, justifyContent: 'space-between', paddingHorizontal: 7, paddingTop: 5 }}>
+          <View style={{ flex: 1 }} >
+            <Text style={styles.cardTitleText}>{namespace.name}</Text>
           </View>
-          <TouchableOpacity onPress={this.onKey}>
-            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <Text style={styles.cardTitleTextSm}>{numberItems}</Text>
-              <Icon name="ios-arrow-forward" size={22} color={KevaColors.actionText} style={{ paddingHorizontal: 7 }} />
-            </View>
-          </TouchableOpacity>
-        </ElevatedView>
-      </TouchableOpacity>
+          <View style={styles.actionContainer}>
+            <TouchableOpacity onPress={this.onEdit}>
+              <Icon name="ios-create" size={22} style={styles.actionIcon} />
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => this.props.onShowActions(this.props.categoryId)}>
+              <Icon name="ios-trash" size={22} style={styles.actionIcon} />
+            </TouchableOpacity>
+          </View>
+        </View>
+        <TouchableOpacity onPress={this.onKey}>
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <Text style={styles.cardTitleTextSm}>{numberItems}</Text>
+            <Icon name="ios-arrow-forward" size={22} color={KevaColors.actionText} style={{ paddingHorizontal: 7 }} />
+          </View>
+        </TouchableOpacity>
+      </ElevatedView>
     )
   }
 
@@ -223,10 +223,11 @@ export default class Namespaces extends React.Component {
           namespaces &&
           <SortableListView
             style={styles.listStyle}
+            contentContainerStyle={{flex: 1}}
             data={namespaces}
             onChangeOrder={this.onChangeOrder}
-            renderRow={(namespace, active) => {
-              return <Namespace onEdit={this.onSectionEdit} namespace={namespace} active={active} navigation={navigation} />
+            renderRow={(data, active) => {
+              return <Namespace onEdit={this.onSectionEdit} data={data} active={active} navigation={navigation} />
             }}
           />
         }
@@ -278,7 +279,8 @@ var styles = StyleSheet.create({
     paddingRight: 5
   },
   listStyle: {
-    paddingTop: 10
+    flex: 1,
+    paddingTop: 10,
   },
   image: {
     width: 90,

@@ -7,7 +7,6 @@ import {
   ListView,
   Image,
   ScrollView,
-  WebView,
   TextInput,
   TouchableOpacity,
   ActivityIndicator,
@@ -27,7 +26,7 @@ const utils = require('../../util');
 
 import Switch from 'react-native-switch-pro';
 import Icon from 'react-native-vector-icons/Ionicons';
-import SortableListView from 'react-native-sortable-listview'
+import SortableListView from 'react-native-sortable-list'
 import Modal from 'react-native-modalbox';
 import ActionSheet from 'react-native-actionsheet';
 import ElevatedView from 'react-native-elevated-view';
@@ -88,30 +87,29 @@ class Item extends React.Component {
   }
 
   render() {
-    let item = this.props.item;
+    let data = this.props.data;
+    let item = data.data;
 
     return (
-      <TouchableOpacity {...this.props.sortHandlers} activeOpacity={ACTIVE_OPACITY}>
-        <ElevatedView elevation={1} style={styles.card}>
-          <View style={{flex:1,paddingHorizontal:10,paddingTop:7}}>
-            <Text style={styles.itemDesc}>{item.name}</Text>
-            <View style={{flexDirection:'row',alignItems:'center',justifyContent:'space-between'}}>
-              <View style={{flexDirection: 'row', alignItems:'center',justifyContent:'flex-start'}}>
-                <TouchableOpacity onPress={this.onEdit}>
-                  <Icon name="ios-create-outline" size={22} style={styles.actionIcon} />
-                </TouchableOpacity>
-                <TouchableOpacity onPress={() => this.props.onDelete(this.props.itemId)}>
-                  <Icon name="ios-trash-outline" size={22} style={styles.actionIcon} />
-                </TouchableOpacity>
-              </View>
-              <View style={{flexDirection: 'row', alignItems:'center',justifyContent:'flex-start'}}>
-                <Text style={{paddingRight:7,fontSize:13,color:KevaColors.lightText}}>Picture</Text>
-                <Switch width={36} height={20} value={item.needPicture} onAsyncPress={this.onSwitch} backgroundActive={KevaColors.actionText}/>
-              </View>
+      <ElevatedView elevation={1} style={styles.card}>
+        <View style={{flex:1,paddingHorizontal:10,paddingTop:7}}>
+          <Text style={styles.itemDesc}>{item.name}</Text>
+          <View style={{flexDirection:'row',alignItems:'center',justifyContent:'space-between'}}>
+            <View style={{flexDirection: 'row', alignItems:'center',justifyContent:'flex-start'}}>
+              <TouchableOpacity onPress={this.onEdit}>
+                <Icon name="ios-create" size={22} style={styles.actionIcon} />
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => this.props.onDelete(this.props.itemId)}>
+                <Icon name="ios-trash" size={22} style={styles.actionIcon} />
+              </TouchableOpacity>
+            </View>
+            <View style={{flexDirection: 'row', alignItems:'center',justifyContent:'flex-start'}}>
+              <Text style={{paddingRight:7,fontSize:13,color:KevaColors.lightText}}>Picture</Text>
+              <Switch width={36} height={20} value={item.needPicture} onAsyncPress={this.onSwitch} backgroundActive={KevaColors.actionText}/>
             </View>
           </View>
-        </ElevatedView>
-      </TouchableOpacity>
+        </View>
+      </ElevatedView>
     )
   }
 }
@@ -314,17 +312,6 @@ export default class KeyValues extends React.Component {
   }
 
   onRowMoved = async (e) => {
-    let {categoryId, propertyId} = this.props.navigation.state.params;
-    try {
-      let checkList = this.props.checklist[propertyId];
-      const checkListId = checkList.id;
-      let itemList = checkList.checkList.data[categoryId];
-      itemList.order.splice(e.to, 0, itemList.order.splice(e.from, 1)[0]);
-      this.props.dispatch(setChecklist(propertyId, checkList));
-      await this.props.dispatch(updateItemOrderAsync(propertyId, checkListId, categoryId, itemList.order));
-    } catch(err) {
-      LOG(err);
-    }
   }
 
   openItemAni = () => {
@@ -367,9 +354,11 @@ export default class KeyValues extends React.Component {
 
   render() {
     let {navigation} = this.props;
-    //let {categoryId, propertyId} = navigation.state.params;
-    //let checkList = this.props.checklist[propertyId];
-    let itemList = {};
+    let itemList = {
+      0: { name: 'First Key' },
+      1: { name: 'Second Key' },
+      2: { name: 'Third Key' },
+    };
     let moveUpY = this.state.aniY.interpolate({
       inputRange: [0, 1],
       outputRange: [0, -(IS_IOS ? HEADER_HEIGHT : KevaHeader.height + 5)],
@@ -405,7 +394,7 @@ export default class KeyValues extends React.Component {
               onChangeText={item => this.setState({item: item})}
               value={this.state.item}
               ref={ref => this._inputRef = ref}
-              placeholder={"Item, e.g. refrigerator, sink"}
+              placeholder={"Enter key"}
               multiline={true}
               underlineColorAndroid='rgba(0,0,0,0)'
               style={{flex: 1, borderRadius: 4, backgroundColor: '#ececed', paddingTop: 5, paddingBottom: 5, paddingLeft: 7, paddingRight: 36}}
@@ -436,17 +425,13 @@ export default class KeyValues extends React.Component {
         />
         */}
         <SortableListView
-          disableAnimatedScrolling
           style={styles.listStyle}
+          contentContainerStyle={{flex: 1}}
           data={itemList}
-          activeOpacity={ACTIVE_OPACITY}
-          sortRowStyle={{transform: [{rotate: '-5deg'}]}}
-          onRowMoved={this.onRowMoved}
-          renderFooter={() => <View style={{height: 100}}/>}
-          renderRow={(key, active) =>
-            <Item key={index} item={row} dispatch={this.props.dispatch} onDelete={this.onDelete}
-                  propertyId={propertyId} checkListId={checkListId} categoryId={categoryId}
-                  itemId={index} onSwitch={this.onItemSwitch} onEdit={this.onItemEdit}
+          onChangeOrder={this.onRowMoved}
+          renderRow={(data, active) =>
+            <Item data={data} dispatch={this.props.dispatch} onDelete={this.onDelete}
+              onEdit={this.onItemEdit}
             />
           }
         />
@@ -482,6 +467,7 @@ var styles = StyleSheet.create({
     }
   },
   listStyle: {
+    flex: 1,
     paddingTop:5,
     borderBottomWidth: 1,
     borderColor: KevaColors.cellBorder,
