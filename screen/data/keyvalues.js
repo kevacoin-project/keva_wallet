@@ -1,4 +1,4 @@
-var React = require('react');
+import React from 'react';
 import {
   Alert,
   Text,
@@ -16,7 +16,8 @@ import {
   UIManager,
   Dimensions,
   Animated,
-  Easing
+  Easing,
+  StatusBar,
 } from 'react-native';
 const StyleSheet = require('../../PlatformStyleSheet');
 const KevaButton = require('../../common/KevaButton');
@@ -24,7 +25,6 @@ const KevaColors = require('../../common/KevaColors');
 const KevaHeader = require('../../common/KevaHeader');
 const utils = require('../../util');
 
-var StatusBar = require('StatusBar');
 import Switch from 'react-native-switch-pro';
 import Icon from 'react-native-vector-icons/Ionicons';
 import SortableListView from 'react-native-sortable-listview'
@@ -106,7 +106,7 @@ class Item extends React.Component {
               </View>
               <View style={{flexDirection: 'row', alignItems:'center',justifyContent:'flex-start'}}>
                 <Text style={{paddingRight:7,fontSize:13,color:KevaColors.lightText}}>Picture</Text>
-                <Switch width={36} height={20} value={item.needPicture} onAsyncPress={this.onSwitch} backgroundActive={KevaColors.actionText()}/>
+                <Switch width={36} height={20} value={item.needPicture} onAsyncPress={this.onSwitch} backgroundActive={KevaColors.actionText}/>
               </View>
             </View>
           </View>
@@ -116,7 +116,7 @@ class Item extends React.Component {
   }
 }
 
-export class ItemList extends React.Component {
+export default class KeyValues extends React.Component {
 
   constructor() {
     super();
@@ -133,7 +133,7 @@ export class ItemList extends React.Component {
 
   static navigationOptions = ({ navigation }) => ({
     tabBarVisible: false,
-    header: null
+    headerShown: false,
   });
 
   componentDidMount() {
@@ -167,7 +167,7 @@ export class ItemList extends React.Component {
          }
          <View style={styles.modalSwitch}>
            <Text style={{paddingRight:10,fontSize:14}}>Picture Required</Text>
-           <Switch value={this.state.needPicture} onAsyncPress={this.onSwitch} backgroundActive={KevaColors.actionText()}/>
+           <Switch value={this.state.needPicture} onAsyncPress={this.onSwitch} backgroundActive={KevaColors.actionText}/>
          </View>
          <Text style={{fontSize: 12, color: KevaColors.lightText, paddingHorizontal: 7}}>
           If enabled, your checker must take a picture of this item.
@@ -203,7 +203,6 @@ export class ItemList extends React.Component {
     }
     this.setState({codeErr: null, saving: true});
     const checkListId = checklist[propertyId].id;
-    let isPremium;
     this.props.dispatch(addItemAsync(propertyId, checkListId, categoryId, this.state.item, this.state.needPicture)).then(checklist => {
       LayoutAnimation.configureNext({
         duration: 300,
@@ -366,19 +365,11 @@ export class ItemList extends React.Component {
     return numItems;
   }
 
-  _isPremium(userInfo, checkList) {
-    if (!userInfo.subLimit) {
-      return false;
-    }
-    return this._getItemCount(checkList) >= userInfo.subLimit.itemLimit;
-  }
-
   render() {
-    let {navigation, userInfo} = this.props;
-    let {categoryId, propertyId} = navigation.state.params;
-    let checkList = this.props.checklist[propertyId];
-    let itemList = checkList.checkList.data[categoryId];
-    const checkListId = checkList.id;
+    let {navigation} = this.props;
+    //let {categoryId, propertyId} = navigation.state.params;
+    //let checkList = this.props.checklist[propertyId];
+    let itemList = {};
     let moveUpY = this.state.aniY.interpolate({
       inputRange: [0, 1],
       outputRange: [0, -(IS_IOS ? HEADER_HEIGHT : KevaHeader.height + 5)],
@@ -393,7 +384,6 @@ export class ItemList extends React.Component {
     let moveUp = {transform: [{translateY: moveUpY}]}
     let moveUpPartial = {transform: [{translateY: moveUpYPartial}]}
     const inputMode = this.state.inputMode;
-    const isPremium = this._isPremium(userInfo, checkList.checkList);
     return (
       <View style={styles.container}>
         <StatusBar
@@ -404,10 +394,9 @@ export class ItemList extends React.Component {
          { this.getItemModal() }
         <View style={styles.topBar}>
           <View style={styles.space} />
-          {!isPremium &&
           <Animated.View style={[{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingBottom: 10, backgroundColor: '#fff'}, moveUpPartial]}>
             <TouchableOpacity onPress={this.closeItemAni}>
-              <Text style={[{color: KevaColors.actionText(), fontSize: 16, textAlign: 'left'}, inputMode && {paddingRight: 5}]}>
+              <Text style={[{color: KevaColors.actionText, fontSize: 16, textAlign: 'left'}, inputMode && {paddingRight: 5}]}>
                 {inputMode ? 'Cancel' : ''}
               </Text>
             </TouchableOpacity>
@@ -419,35 +408,22 @@ export class ItemList extends React.Component {
               placeholder={"Item, e.g. refrigerator, sink"}
               multiline={true}
               underlineColorAndroid='rgba(0,0,0,0)'
-              style={{flex: 1, borderRadius: 4, backgroundColor: '#ececed', paddingTop: 10, paddingBottom: 10, paddingLeft: 7, paddingRight: 36}}
+              style={{flex: 1, borderRadius: 4, backgroundColor: '#ececed', paddingTop: 5, paddingBottom: 5, paddingLeft: 7, paddingRight: 36}}
             />
             {this.state.saving ?
-              <ActivityIndicator size="small" color={KevaColors.actionText()} style={{width: 42, height: 42}}/>
+              <ActivityIndicator size="small" color={KevaColors.actionText} style={{width: 42, height: 42}}/>
               :
               <TouchableOpacity onPress={this.onAddItem}>
-                <Icon name={'md-add-circle'} style={{width: 42, height: 42, color: KevaColors.actionText(), paddingVertical: 5, paddingHorizontal: 9, top: 1}} size={28}/>
+                <Icon name={'md-add-circle'} style={{width: 42, height: 42, color: KevaColors.actionText, paddingVertical: 5, paddingHorizontal: 9, top: 1}} size={28}/>
               </TouchableOpacity>
             }
           </Animated.View>
-          }
-          {!isPremium &&
-            <View style={styles.inputArea}>
-              <View style={{paddingVertical: 10, flexDirection: 'row', justifyContent: 'space-between'}}>
-                <Text style={{paddingRight:10, fontSize:16, color: KevaColors.lightText}}>Checker must take a picture</Text>
-                <Switch value={this.state.needPicture} onAsyncPress={this.onSwitch} backgroundActive={KevaColors.actionText()}/>
-              </View>
+          <View style={styles.inputArea}>
+            <View style={{paddingVertical: 10, flexDirection: 'row', justifyContent: 'space-between'}}>
+              <Text style={{paddingRight:10, fontSize:16, color: KevaColors.lightText}}>Checker must take a picture</Text>
+              <Switch value={this.state.needPicture} onAsyncPress={this.onSwitch} backgroundActive={KevaColors.actionText}/>
             </View>
-          }
-          {isPremium &&
-            <View style={{paddingRight: 10, paddingBottom: 10}}>
-              <Text style={{color: KevaColors.darkText, fontSize: 16, textAlign: 'center', paddingBottom: 5}}>Item Limit Reached</Text>
-              <KevaButton
-                type='secondary'
-                caption='Upgrade to Pro'
-                onPress={() => navigation.navigate('Upgrade')}
-              />
-            </View>
-          }
+          </View>
         </View>
         {/*
         <ActionSheet
@@ -462,14 +438,12 @@ export class ItemList extends React.Component {
         <SortableListView
           disableAnimatedScrolling
           style={styles.listStyle}
-          removeClippedSubviews={false}
-          data={itemList.data}
-          order={itemList.order}
+          data={itemList}
           activeOpacity={ACTIVE_OPACITY}
           sortRowStyle={{transform: [{rotate: '-5deg'}]}}
           onRowMoved={this.onRowMoved}
           renderFooter={() => <View style={{height: 100}}/>}
-          renderRow={(row, section, index, active) =>
+          renderRow={(key, active) =>
             <Item key={index} item={row} dispatch={this.props.dispatch} onDelete={this.onDelete}
                   propertyId={propertyId} checkListId={checkListId} categoryId={categoryId}
                   itemId={index} onSwitch={this.onItemSwitch} onEdit={this.onItemEdit}
@@ -480,7 +454,7 @@ export class ItemList extends React.Component {
           <KevaHeader
            style={styles.navHeader}
            foreground="dark"
-           title={navigation.state.params.title}
+           title={'Key Values'}
            leftItem={{
              icon: require('../../common/img/back.png'),
              layout: 'icon',

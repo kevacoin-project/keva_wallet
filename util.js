@@ -3,6 +3,11 @@ import {
 } from 'react-native';
 
 import Toast from 'react-native-root-toast';
+import { NavigationActions } from 'react-navigation'
+
+export const backAction = NavigationActions.back({
+  key: null
+});
 
 let statusEnabled = true;
 

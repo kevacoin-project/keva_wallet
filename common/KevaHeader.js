@@ -1,15 +1,15 @@
-let React = require('React');
+import React from 'react';
 import {
   StatusBar,
   View,
   Image,
   TouchableOpacity,
   TouchableNativeFeedback,
-  Platform
+  Platform,
+  StyleSheet,
 } from 'react-native';
 
 var { Text } = require('./KevaText');
-var StyleSheet = require('StyleSheet');
 var KevaColors = require('./KevaColors');
 
 const IS_IOS = Platform.OS === 'ios';
@@ -20,7 +20,7 @@ class F8HeaderGeneric extends React.Component {
   render() {
     const {leftItem, title, rightItem, foreground} = this.props;
     const titleColor = foreground === 'dark' ? KevaColors.darkText : 'white';
-    const itemsColor = foreground === 'dark' ? KevaColors.actionText() : 'white';
+    const itemsColor = foreground === 'dark' ? KevaColors.actionText : 'white';
     const content = React.Children.count(this.props.children) === 0
       ? <Text style={[styles.titleText, {color: titleColor}]}>
           {title}
@@ -58,7 +58,7 @@ class ItemWrapper extends React.Component {
 
     let content;
     const {title, icon, layout, onPress, foreground,btnDisable} = item;
-    const tintColor = foreground === 'light' ? 'white' : KevaColors.actionText();
+    const tintColor = foreground === 'light' ? 'white' : KevaColors.actionText;
     if (layout !== 'icon' && title) {
       content = (
         <Text style={[styles.itemText, {color}, btnDisable && {opacity:0.4}]}>
