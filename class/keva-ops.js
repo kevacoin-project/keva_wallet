@@ -182,7 +182,6 @@ export async function createKevaNamespace(wallet, requestedSatPerByte, nsName) {
     script: nsDummyScript
   }];
 
-  console.log(utxos)
   let { inputs, outputs, fee } = coinSelectAccumulative(utxos, targets, requestedSatPerByte);
 
   // inputs and outputs will be undefined if no solution was found
@@ -192,7 +191,7 @@ export async function createKevaNamespace(wallet, requestedSatPerByte, nsName) {
 
   const psbt = new bitcoin.Psbt();
   psbt.setVersion(0x7100); // Kevacoin transaction.
-  let keypairs = {};
+  let keypairs = [];
   for (let i = 0; i < inputs.length; i++) {
     let input = inputs[i];
     const pubkey = wallet._getPubkeyByAddress(input.address);
@@ -212,9 +211,8 @@ export async function createKevaNamespace(wallet, requestedSatPerByte, nsName) {
       redeemScript: p2wpkh.output,
     });
 
-    //let keyPair = bitcoin.ECPair.fromWIF(wallet._getWifForAddress(input.address));
-    //keypairs[i] = keyPair;
-    keypairs[i] = input.wif;
+    let keyPair = bitcoin.ECPair.fromWIF(input.wif);
+    keypairs.push(keyPair);
   }
 
   for (let i = 0; i < outputs.length; i++) {
