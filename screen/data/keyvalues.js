@@ -661,7 +661,7 @@ var styles = StyleSheet.create({
     top: 0,
     right: 0,
     zIndex: 999,
-    backgroundColor: 'blue'
+    backgroundColor: '#fff'
   },
   inputArea: {
     flexDirection: 'column',
