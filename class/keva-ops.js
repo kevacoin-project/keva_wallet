@@ -170,9 +170,7 @@ function getNamespaceCreationScript(nsName, address, txId, n) {
 export async function createKevaNamespace(wallet, requestedSatPerByte, nsName) {
   await wallet.fetchUtxo();
   const utxos = wallet.getUtxo();
-  const namespaceAddress = await wallet.getChangeAddressAsync();
-  // Dummy script for fee calculation.
-  nsName = 'dummy testing namespace.......'
+  const namespaceAddress = await wallet.getAddressAsync();
   const nsDummyScript = getNamespaceCreationScript(nsName, namespaceAddress, DUMMY_TXID, 0);
 
   // Namespace needs at least 0.01 KVA.

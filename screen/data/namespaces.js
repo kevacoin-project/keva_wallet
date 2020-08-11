@@ -233,10 +233,11 @@ export default class Namespaces extends React.Component {
   }
 
   onAddNamespace = async () => {
-    //const wallet = BlueApp.getWallets().find(wallet => wallet.getID() === data.userInfo.url.split('wallet/')[1]);
     const wallets = BlueApp.getWallets();
-    //console.log(wallets[0]);
-    createKevaNamespace(wallets[0], 120, this.state.nsName);
+    if (this.state.nsName && this.state.nsName.length > 0) {
+      return createKevaNamespace(wallets[0], 120, this.state.nsName);
+    }
+    alert('No namespace name!');
   }
 
   render() {
