@@ -30,6 +30,7 @@ import {
   BlueListItem,
   BlueText,
   BlueNavigationStyle,
+  BlueHeaderDefaultSub,
 } from '../../BlueComponents';
 import Slider from '@react-native-community/slider';
 import PropTypes from 'prop-types';
@@ -57,6 +58,7 @@ const StyleSheet = require('../../PlatformStyleSheet');
 const KevaButton = require('../../common/KevaButton');
 const KevaColors = require('../../common/KevaColors');
 const utils = require('../../util');
+import { createKevaNamespace } from '../../class/keva-ops';
 
 const ACTIVE_OPACITY = 0.7;
 const CLOSE_ICON = (<Icon name="ios-close" size={36} color="#fff" style={{ paddingVertical: 5, paddingHorizontal: 15 }} />)
@@ -115,7 +117,7 @@ class Namespace extends React.Component {
     this.props.navigation.navigate('KeyValues');
   }
 
-  componentWillReceiveProps(nextProps) {
+  UNSAFE_componentWillReceiveProps(nextProps) {
     if (this.props.active !== nextProps.active) {
       Animated.timing(this._active, {
         duration: 100,
@@ -171,16 +173,16 @@ export default class Namespaces extends React.Component {
 
   constructor(props) {
     super(props);
-    this.state = { loaded: false, changes: false, section: '', sectionId: null, saving: false };
+    this.state = { loaded: false, changes: false, nsName: '', namespaceId: null, saving: false };
   }
 
   async componentDidMount() {
   }
 
-  onSectionEdit = (sectionId, sectionText) => {
+  onNSNameEdit = (namespaceId, nsName) => {
     this.setState({
-      section: sectionText,
-      sectionId: sectionId,
+      nsName: nsName,
+      sectionId: namespaceId,
       codeErr: null,
       isModalVisible: true
     });
@@ -215,7 +217,7 @@ export default class Namespaces extends React.Component {
             loading={this.state.saving}
             style={{ padding: 10, marginTop: 10, marginBottom: 10 }}
             caption={sectionId ? 'Update' : 'Update'}
-            onPress={sectionId ? this.onUpdateSection : this.onAddSection}
+            onPress={sectionId ? this.onUpdateSection : this.onAddNamespace}
           />
         </View>
       </Modal>
@@ -230,6 +232,13 @@ export default class Namespaces extends React.Component {
     console.log(e);
   }
 
+  onAddNamespace = async () => {
+    //const wallet = BlueApp.getWallets().find(wallet => wallet.getID() === data.userInfo.url.split('wallet/')[1]);
+    const wallets = BlueApp.getWallets();
+    //console.log(wallets[0]);
+    createKevaNamespace(wallets[0], 120, this.state.nsName);
+  }
+
   render() {
     const { dispatch, navigation } = this.props;
     let namespaces = {
@@ -239,6 +248,7 @@ export default class Namespaces extends React.Component {
     };
     return (
       <View style={styles.container}>
+        <BlueHeaderDefaultSub leftText={/*loc.settings.header*/ 'Namespaces'} rightComponent={null} />
         {/*
         <ActionSheet
           ref={ref => this._actionSheet = ref}
@@ -252,8 +262,8 @@ export default class Namespaces extends React.Component {
         {this.getSectionModal()}
         <View style={{ paddingTop: 10, paddingLeft: 8, backgroundColor: '#fff', borderBottomWidth: utils.THIN_BORDER, borderColor: KevaColors.cellBorder, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingBottom: 10 }}>
           <TextInput
-            onChangeText={section => this.setState({ section: section })}
-            value={this.state.section}
+            onChangeText={nsName => this.setState({ nsName: nsName })}
+            value={this.state.nsName}
             placeholder={"Add a new namespace"}
             multiline={true}
             underlineColorAndroid='rgba(0,0,0,0)'
@@ -262,7 +272,7 @@ export default class Namespaces extends React.Component {
           {this.state.saving ?
             <ActivityIndicator size="small" color={KevaColors.actionText} style={{ width: 42, height: 42 }} />
             :
-            <TouchableOpacity onPress={this.onAddSection}>
+            <TouchableOpacity onPress={this.onAddNamespace}>
               <Icon name={'md-add-circle'} style={{ width: 42, height: 42, color: KevaColors.actionText, paddingVertical: 5, paddingHorizontal: 9, top: 1 }} size={28} />
             </TouchableOpacity>
           }
@@ -275,7 +285,7 @@ export default class Namespaces extends React.Component {
             data={namespaces}
             onChangeOrder={this.onChangeOrder}
             renderRow={({data, active}) => {
-              return <Namespace onEdit={this.onSectionEdit} data={data} active={active} navigation={navigation} />
+              return <Namespace onEdit={this.onNSNameEdit} data={data} active={active} navigation={navigation} />
             }}
           />
         }
