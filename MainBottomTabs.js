@@ -1,6 +1,6 @@
 import React from 'react';
 import { createAppContainer, getActiveChildNavigationOptions } from 'react-navigation';
-import { createStackNavigator } from 'react-navigation-stack';
+import { createStackNavigator, TransitionPresets } from 'react-navigation-stack';
 import { createBottomTabNavigator } from 'react-navigation-tabs';
 
 import Settings from './screen/settings/settings';
@@ -105,7 +105,8 @@ const WalletsStackNavigator = createStackNavigator(
   {
     defaultNavigationOptions: {
       headerBackTitleVisible: false,
-      headerTitle: () => null
+      headerTitle: () => null,
+      ...TransitionPresets.SlideFromRightIOS,
     },
     navigationOptions: ({ navigation }) => {
       let tabBarVisible = false;
@@ -339,7 +340,8 @@ const SettingsStackNavigator = createStackNavigator(
   },
   {
     defaultNavigationOptions: {
-      headerBackTitleVisible: false
+      headerBackTitleVisible: false,
+      ...TransitionPresets.SlideFromRightIOS,
     },
     navigationOptions: ({ navigation }) => {
       let tabBarVisible = false;
@@ -375,7 +377,8 @@ const DataStackNavigator = createStackNavigator(
   },
   {
     defaultNavigationOptions: {
-      headerBackTitleVisible: false
+      headerBackTitleVisible: false,
+      ...TransitionPresets.SlideFromRightIOS,
     },
     navigationOptions: ({ navigation }) => {
       let tabBarVisible = false;
@@ -387,7 +390,7 @@ const DataStackNavigator = createStackNavigator(
         tabBarVisible,
         headerShown: false,
       }
-    }
+    },
   },
 );
 

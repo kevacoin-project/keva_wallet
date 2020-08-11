@@ -23,6 +23,10 @@ const KevaButton = require('../../common/KevaButton');
 const KevaColors = require('../../common/KevaColors');
 const KevaHeader = require('../../common/KevaHeader');
 const utils = require('../../util');
+import {
+  BlueNavigationStyle,
+} from '../../BlueComponents';
+const loc = require('../../loc');
 
 import Switch from 'react-native-switch-pro';
 import Icon from 'react-native-vector-icons/Ionicons';
@@ -141,6 +145,7 @@ class Item extends React.Component {
           <View style={{flex:1,paddingHorizontal:10,paddingTop:7}}>
             <Text style={styles.itemDesc}>{item.name}</Text>
             <View style={{flexDirection:'row',alignItems:'center',justifyContent:'space-between'}}>
+              <View></View>
               <View style={{flexDirection: 'row', alignItems:'center',justifyContent:'flex-start'}}>
                 <TouchableOpacity onPress={this.onEdit}>
                   <Icon name="ios-create" size={22} style={styles.actionIcon} />
@@ -148,10 +153,6 @@ class Item extends React.Component {
                 <TouchableOpacity onPress={() => this.props.onDelete(this.props.itemId)}>
                   <Icon name="ios-trash" size={22} style={styles.actionIcon} />
                 </TouchableOpacity>
-              </View>
-              <View style={{flexDirection: 'row', alignItems:'center',justifyContent:'flex-start'}}>
-                <Text style={{paddingRight:7,fontSize:13,color:KevaColors.lightText}}>Picture</Text>
-                <Switch width={36} height={20} value={item.needPicture} onAsyncPress={this.onSwitch} backgroundActive={KevaColors.actionText}/>
               </View>
             </View>
           </View>
@@ -177,8 +178,10 @@ export default class KeyValues extends React.Component {
   }
 
   static navigationOptions = ({ navigation }) => ({
+    ...BlueNavigationStyle(),
+    title: loc.settings.general,
     tabBarVisible: false,
-    headerShown: false,
+    headerShown: true,
   });
 
   componentDidMount() {
@@ -406,61 +409,10 @@ export default class KeyValues extends React.Component {
       1: { name: 'Second Key' },
       2: { name: 'Third Key' },
     };
-    let moveUpY = this.state.aniY.interpolate({
-      inputRange: [0, 1],
-      outputRange: [0, -(IS_IOS ? HEADER_HEIGHT : KevaHeader.height + 5)],
-      extrapolate: 'clamp',
-    });
-    const moveOffset = IS_IOS ? 20 : 15;
-    let moveUpYPartial = this.state.aniY.interpolate({
-      inputRange: [0, 1],
-      outputRange: [0, -HEADER_HEIGHT + moveOffset],
-      extrapolate: 'clamp',
-    });
-    let moveUp = {transform: [{translateY: moveUpY}]}
-    let moveUpPartial = {transform: [{translateY: moveUpYPartial}]}
     const inputMode = this.state.inputMode;
     return (
       <View style={styles.container}>
-        <StatusBar
-          translucent={true}
-          backgroundColor="rgba(0, 0, 0, 0.2)"
-          barStyle="default"
-         />
          { this.getItemModal() }
-        <View style={styles.topBar}>
-          <View style={styles.space} />
-          <Animated.View style={[{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingBottom: 10, backgroundColor: '#fff'}, moveUpPartial]}>
-            <TouchableOpacity onPress={this.closeItemAni}>
-              <Text style={[{color: KevaColors.actionText, fontSize: 16, textAlign: 'left'}, inputMode && {paddingRight: 5}]}>
-                {inputMode ? 'Cancel' : ''}
-              </Text>
-            </TouchableOpacity>
-            <TextInput
-              onFocus={this.openItemAni}
-              onChangeText={item => this.setState({item: item})}
-              value={this.state.item}
-              ref={ref => this._inputRef = ref}
-              placeholder={"Enter key"}
-              multiline={true}
-              underlineColorAndroid='rgba(0,0,0,0)'
-              style={{flex: 1, borderRadius: 4, backgroundColor: '#ececed', paddingTop: 5, paddingBottom: 5, paddingLeft: 7, paddingRight: 36}}
-            />
-            {this.state.saving ?
-              <ActivityIndicator size="small" color={KevaColors.actionText} style={{width: 42, height: 42}}/>
-              :
-              <TouchableOpacity onPress={this.onAddItem}>
-                <Icon name={'md-add-circle'} style={{width: 42, height: 42, color: KevaColors.actionText, paddingVertical: 5, paddingHorizontal: 9, top: 1}} size={28}/>
-              </TouchableOpacity>
-            }
-          </Animated.View>
-          <View style={styles.inputArea}>
-            <View style={{paddingVertical: 10, flexDirection: 'row', justifyContent: 'space-between'}}>
-              <Text style={{paddingRight:10, fontSize:16, color: KevaColors.lightText}}>Checker must take a picture</Text>
-              <Switch value={this.state.needPicture} onAsyncPress={this.onSwitch} backgroundActive={KevaColors.actionText}/>
-            </View>
-          </View>
-        </View>
         {/*
         <ActionSheet
            ref={ref => this._actionDelete = ref}
@@ -482,18 +434,6 @@ export default class KeyValues extends React.Component {
             />
           }
         />
-        <Animated.View style={[styles.navHeaderWarpper, moveUp]}>
-          <KevaHeader
-           style={styles.navHeader}
-           foreground="dark"
-           title={'Key Values'}
-           leftItem={{
-             icon: require('../../common/img/back.png'),
-             layout: 'icon',
-             onPress: () => this.props.navigation.dispatch(utils.backAction)
-           }}
-         />
-       </Animated.View>
       </View>
     );
   }
@@ -504,14 +444,6 @@ var styles = StyleSheet.create({
   container: {
     flex:1,
     backgroundColor:'#fff'
-  },
-  space: {
-    ios: {
-      paddingTop: HEADER_HEIGHT
-    },
-    android: {
-      paddingTop: KevaHeader.height
-    }
   },
   listStyle: {
     flex: 1,
