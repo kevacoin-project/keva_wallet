@@ -164,14 +164,121 @@ function getNamespaceCreationScript(nsName, address, txId, n) {
     bscript.OPS.OP_HASH160,
     baddress.fromBase58Check(address).hash,
     bscript.OPS.OP_EQUAL]);
-  return nsScript;
+  return {nsScript, namespaceId};
 }
 
 export async function createKevaNamespace(wallet, requestedSatPerByte, nsName) {
   await wallet.fetchUtxo();
   const utxos = wallet.getUtxo();
   const namespaceAddress = await wallet.getAddressAsync();
-  const nsDummyScript = getNamespaceCreationScript(nsName, namespaceAddress, DUMMY_TXID, 0);
+  let { nsScript } = getNamespaceCreationScript(nsName, namespaceAddress, DUMMY_TXID, 0);
+
+  // Namespace needs at least 0.01 KVA.
+  const namespaceValue = 1000000;
+  let targets = [{
+    address: namespaceAddress, value: namespaceValue,
+    script: nsScript
+  }];
+
+  let { inputs, outputs, fee } = coinSelectAccumulative(utxos, targets, requestedSatPerByte);
+
+  // inputs and outputs will be undefined if no solution was found
+  if (!inputs || !outputs) {
+    throw new Error('Not enough balance. Try sending smaller amount');
+  }
+
+  const psbt = new bitcoin.Psbt();
+  psbt.setVersion(0x7100); // Kevacoin transaction.
+  let keypairs = [];
+  for (let i = 0; i < inputs.length; i++) {
+    let input = inputs[i];
+    const pubkey = wallet._getPubkeyByAddress(input.address);
+    if (!pubkey) {
+      throw new Error('Failed to get pubKey');
+    }
+    const p2wpkh = bitcoin.payments.p2wpkh({ pubkey });
+    const p2sh = bitcoin.payments.p2sh({ redeem: p2wpkh });
+
+    psbt.addInput({
+      hash: input.txId,
+      index: input.vout,
+      witnessUtxo: {
+        script: p2sh.output,
+        value: input.value,
+      },
+      redeemScript: p2wpkh.output,
+    });
+
+    let keyPair = bitcoin.ECPair.fromWIF(input.wif);
+    keypairs.push(keyPair);
+  }
+
+  let returnNamespaceId;
+  for (let i = 0; i < outputs.length; i++) {
+    let output = outputs[i];
+    if (!output.address) {
+      // Change address.
+      output.address = await wallet.getChangeAddressAsync();
+    }
+
+    if (i == 0) {
+      // The namespace creation script.
+      if (output.value != 1000000) {
+        throw new Error('Namespace creation script has incorrect value.');
+      }
+      const { nsScript, namespaceId } = getNamespaceCreationScript(nsName, namespaceAddress, inputs[0].txId, inputs[0].vout);
+      returnNamespaceId = namespaceId;
+      psbt.addOutput({
+        script: nsScript,
+        value: output.value,
+      });
+    } else {
+      psbt.addOutput({
+        address: output.address,
+        value: output.value,
+      });
+    }
+  }
+
+  for (let i = 0; i < keypairs.length; i++) {
+    psbt.signInput(i, keypairs[i]);
+    if (!psbt.validateSignaturesOfInput(i)) {
+      throw new Error('Invalid signature for input #' + i);
+    }
+  }
+
+  psbt.finalizeAllInputs();
+  let hexTx = psbt.extractTransaction(true).toHex();
+  console.log(returnNamespaceId);
+  console.log(hexTx);
+  return {tx: hexTx, namespaceId: returnNamespaceId};
+}
+
+function getKeyValueUpdateScript(namespaceId, address, key, value) {
+  const keyBuf = Buffer.from(utf8ToHex(key), 'hex');
+  const valueBuf = Buffer.from(utf8ToHex(value), 'hex');
+
+  let bscript = bitcoin.script;
+  let baddress = bitcoin.address;
+  let nsScript = bscript.compile([
+    KEVA_OP_PUT,
+    namespaceId,
+    keyBuf,
+    valueBuf,
+    bscript.OPS.OP_2DROP,
+    bscript.OPS.OP_DROP,
+    bscript.OPS.OP_HASH160,
+    baddress.fromBase58Check(address).hash,
+    bscript.OPS.OP_EQUAL]);
+
+  return nsScript;
+}
+
+export async function updateKeyValue(wallet, requestedSatPerByte, namespaceId, key, value) {
+  await wallet.fetchUtxo();
+  const utxos = wallet.getUtxo();
+  const namespaceAddress = await wallet.getAddressAsync();
+  const nsDummyScript = getKeyValueUpdateScript(namespaceId, namespaceAddress, key, value);
 
   // Namespace needs at least 0.01 KVA.
   const namespaceValue = 1000000;
@@ -218,9 +325,6 @@ export async function createKevaNamespace(wallet, requestedSatPerByte, nsName) {
     if (!output.address) {
       // Change address.
       output.address = await wallet.getChangeAddressAsync();
-      // Should we call nextChangeAddress to move the address?
-      // Otherwise it will be the same!
-      // wallet.nextChangeAddress()
     }
 
     if (i == 0) {
@@ -228,7 +332,7 @@ export async function createKevaNamespace(wallet, requestedSatPerByte, nsName) {
       if (output.value != 1000000) {
         throw new Error('Namespace creation script has incorrect value.');
       }
-      const nsScript = getNamespaceCreationScript(nsName, namespaceAddress, inputs[0].txId, inputs[0].vout);
+      const nsScript = getKeyValueUpdateScript(namespaceId, namespaceAddress, key, value);
       psbt.addOutput({
         script: nsScript,
         value: output.value,
