@@ -49,6 +49,41 @@ class Item extends React.Component {
   constructor(props) {
     super(props);
     this.state = { loading: false, selectedImage: null };
+
+    this._active = new Animated.Value(0);
+    this._style = {
+      ...Platform.select({
+        ios: {
+          transform: [{
+            rotate: this._active.interpolate({
+              inputRange: [0, 1],
+              outputRange: [0, -0.04],
+            }),
+          }],
+          shadowRadius: this._active.interpolate({
+            inputRange: [0, 1],
+            outputRange: [2, 10],
+          }),
+        },
+
+        android: {
+          transform: [{
+            rotate: this._active.interpolate({
+              inputRange: [0, 1],
+              outputRange: [0, -0.04],
+            }),
+          }],
+          elevation: this._active.interpolate({
+            inputRange: [0, 1],
+            outputRange: [2, 6],
+          }),
+        },
+      }),
+      opacity: this._active.interpolate({
+        inputRange: [0, 1],
+        outputRange: [1, 0.7],
+      }),
+    };
   }
 
   onSwitch = cb => {
@@ -86,30 +121,42 @@ class Item extends React.Component {
     }
   }
 
+  componentWillReceiveProps(nextProps) {
+    if (this.props.active !== nextProps.active) {
+      Animated.timing(this._active, {
+        duration: 100,
+        easing: Easing.bounce,
+        toValue: Number(nextProps.active),
+      }).start();
+    }
+  }
+
   render() {
-    let data = this.props.data;
-    let item = data.data;
+    let {data} = this.props;
+    let item = data;
 
     return (
-      <ElevatedView elevation={1} style={styles.card}>
-        <View style={{flex:1,paddingHorizontal:10,paddingTop:7}}>
-          <Text style={styles.itemDesc}>{item.name}</Text>
-          <View style={{flexDirection:'row',alignItems:'center',justifyContent:'space-between'}}>
-            <View style={{flexDirection: 'row', alignItems:'center',justifyContent:'flex-start'}}>
-              <TouchableOpacity onPress={this.onEdit}>
-                <Icon name="ios-create" size={22} style={styles.actionIcon} />
-              </TouchableOpacity>
-              <TouchableOpacity onPress={() => this.props.onDelete(this.props.itemId)}>
-                <Icon name="ios-trash" size={22} style={styles.actionIcon} />
-              </TouchableOpacity>
-            </View>
-            <View style={{flexDirection: 'row', alignItems:'center',justifyContent:'flex-start'}}>
-              <Text style={{paddingRight:7,fontSize:13,color:KevaColors.lightText}}>Picture</Text>
-              <Switch width={36} height={20} value={item.needPicture} onAsyncPress={this.onSwitch} backgroundActive={KevaColors.actionText}/>
+      <Animated.View style={[this._style,]}>
+        <ElevatedView elevation={1} style={styles.card}>
+          <View style={{flex:1,paddingHorizontal:10,paddingTop:7}}>
+            <Text style={styles.itemDesc}>{item.name}</Text>
+            <View style={{flexDirection:'row',alignItems:'center',justifyContent:'space-between'}}>
+              <View style={{flexDirection: 'row', alignItems:'center',justifyContent:'flex-start'}}>
+                <TouchableOpacity onPress={this.onEdit}>
+                  <Icon name="ios-create" size={22} style={styles.actionIcon} />
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => this.props.onDelete(this.props.itemId)}>
+                  <Icon name="ios-trash" size={22} style={styles.actionIcon} />
+                </TouchableOpacity>
+              </View>
+              <View style={{flexDirection: 'row', alignItems:'center',justifyContent:'flex-start'}}>
+                <Text style={{paddingRight:7,fontSize:13,color:KevaColors.lightText}}>Picture</Text>
+                <Switch width={36} height={20} value={item.needPicture} onAsyncPress={this.onSwitch} backgroundActive={KevaColors.actionText}/>
+              </View>
             </View>
           </View>
-        </View>
-      </ElevatedView>
+        </ElevatedView>
+      </Animated.View>
     )
   }
 }
@@ -429,9 +476,9 @@ export default class KeyValues extends React.Component {
           contentContainerStyle={{flex: 1}}
           data={itemList}
           onChangeOrder={this.onRowMoved}
-          renderRow={(data, active) =>
+          renderRow={({data, active}) =>
             <Item data={data} dispatch={this.props.dispatch} onDelete={this.onDelete}
-              onEdit={this.onItemEdit}
+              active={active} onEdit={this.onItemEdit}
             />
           }
         />

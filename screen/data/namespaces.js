@@ -2,6 +2,7 @@ import React from 'react';
 import {
   ActivityIndicator,
   Animated,
+  Easing,
   View,
   TextInput,
   Alert,
@@ -65,6 +66,41 @@ class Namespace extends React.Component {
   constructor(props) {
     super(props);
     this.state = { loading: false, selectedImage: null };
+
+    this._active = new Animated.Value(0);
+    this._style = {
+      ...Platform.select({
+        ios: {
+          transform: [{
+            rotate: this._active.interpolate({
+              inputRange: [0, 1],
+              outputRange: [0, -0.04],
+            }),
+          }],
+          shadowRadius: this._active.interpolate({
+            inputRange: [0, 1],
+            outputRange: [2, 10],
+          }),
+        },
+
+        android: {
+          transform: [{
+            rotate: this._active.interpolate({
+              inputRange: [0, 1],
+              outputRange: [0, -0.04],
+            }),
+          }],
+          elevation: this._active.interpolate({
+            inputRange: [0, 1],
+            outputRange: [2, 6],
+          }),
+        },
+      }),
+      opacity: this._active.interpolate({
+        inputRange: [0, 1],
+        outputRange: [1, 0.7],
+      }),
+    };
   }
 
   onPress() {
@@ -79,33 +115,45 @@ class Namespace extends React.Component {
     this.props.navigation.navigate('KeyValues');
   }
 
+  componentWillReceiveProps(nextProps) {
+    if (this.props.active !== nextProps.active) {
+      Animated.timing(this._active, {
+        duration: 100,
+        easing: Easing.bounce,
+        toValue: Number(nextProps.active),
+      }).start();
+    }
+  }
+
   render() {
-    const {data, active} = this.props;
-    let namespace = data.data;
+    let {data} = this.props;
+    let namespace = data;
     let numberItems = 100;
 
     return (
-      <ElevatedView elevation={1} style={styles.cardTitle}>
-        <View style={{ flex: 1, justifyContent: 'space-between', paddingHorizontal: 7, paddingTop: 5 }}>
-          <View style={{ flex: 1 }} >
-            <Text style={styles.cardTitleText}>{namespace.name}</Text>
+      <Animated.View style={[this._style,]}>
+        <ElevatedView elevation={1} style={styles.cardTitle}>
+          <View style={{ flex: 1, justifyContent: 'space-between', paddingHorizontal: 7, paddingTop: 5 }}>
+            <View style={{ flex: 1 }} >
+              <Text style={styles.cardTitleText}>{namespace.name}</Text>
+            </View>
+            <View style={styles.actionContainer}>
+              <TouchableOpacity onPress={this.onEdit}>
+                <Icon name="ios-create" size={22} style={styles.actionIcon} />
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => this.props.onShowActions(this.props.categoryId)}>
+                <Icon name="ios-trash" size={22} style={styles.actionIcon} />
+              </TouchableOpacity>
+            </View>
           </View>
-          <View style={styles.actionContainer}>
-            <TouchableOpacity onPress={this.onEdit}>
-              <Icon name="ios-create" size={22} style={styles.actionIcon} />
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => this.props.onShowActions(this.props.categoryId)}>
-              <Icon name="ios-trash" size={22} style={styles.actionIcon} />
-            </TouchableOpacity>
-          </View>
-        </View>
-        <TouchableOpacity onPress={this.onKey}>
-          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            <Text style={styles.cardTitleTextSm}>{numberItems}</Text>
-            <Icon name="ios-arrow-forward" size={22} color={KevaColors.actionText} style={{ paddingHorizontal: 7 }} />
-          </View>
-        </TouchableOpacity>
-      </ElevatedView>
+          <TouchableOpacity onPress={this.onKey}>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <Text style={styles.cardTitleTextSm}>{numberItems}</Text>
+              <Icon name="ios-arrow-forward" size={22} color={KevaColors.actionText} style={{ paddingHorizontal: 7 }} />
+            </View>
+          </TouchableOpacity>
+        </ElevatedView>
+      </Animated.View>
     )
   }
 
@@ -226,7 +274,7 @@ export default class Namespaces extends React.Component {
             contentContainerStyle={{flex: 1}}
             data={namespaces}
             onChangeOrder={this.onChangeOrder}
-            renderRow={(data, active) => {
+            renderRow={({data, active}) => {
               return <Namespace onEdit={this.onSectionEdit} data={data} active={active} navigation={navigation} />
             }}
           />
