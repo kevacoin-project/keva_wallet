@@ -1,0 +1,2 @@
+
+export const SET_NAMEPSACES = 'SET_NAMEPSACES'

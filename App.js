@@ -12,6 +12,8 @@ import * as Sentry from '@sentry/react-native';
 import OnAppLaunch from './class/onAppLaunch';
 import DeeplinkSchemaMatch from './class/deeplink-schema-match';
 import BitcoinBIP70TransactionDecode from './bip70/bip70';
+import { Provider } from 'react-redux';
+import { configureStore } from './reducers';
 const A = require('./analytics');
 
 if (process.env.NODE_ENV !== 'development') {
@@ -28,12 +30,16 @@ const BlueApp = require('./BlueApp');
 export default class App extends React.Component {
   navigator = null;
 
-  state = {
-    appState: AppState.currentState,
-    isClipboardContentModalVisible: false,
-    clipboardContentModalAddressType: bitcoinModalString,
-    clipboardContent: '',
-  };
+  constructor() {
+    super();
+    this.state = {
+      appState: AppState.currentState,
+      isClipboardContentModalVisible: false,
+      clipboardContentModalAddressType: bitcoinModalString,
+      clipboardContent: '',
+      store: configureStore(),
+    };
+  }
 
   componentDidMount() {
     Linking.addEventListener('url', this.handleOpenURL);
@@ -217,15 +223,17 @@ export default class App extends React.Component {
 
   render() {
     return (
-      <View style={{ flex: 1 }}>
-        <MainBottomTabs
-          ref={nav => {
-            this.navigator = nav;
-            NavigationService.setTopLevelNavigator(nav);
-          }}
-        />
-        {this.renderClipboardContentModal()}
-      </View>
+      <Provider store={this.state.store}>
+        <View style={{ flex: 1 }}>
+          <MainBottomTabs
+            ref={nav => {
+              this.navigator = nav;
+              NavigationService.setTopLevelNavigator(nav);
+            }}
+          />
+          {this.renderClipboardContentModal()}
+        </View>
+      </Provider>
     );
   }
 }
