@@ -2,6 +2,7 @@ const bitcoin = require('bitcoinjs-lib');
 const base58check = require('bs58check')
 const coinSelectAccumulative = require('coinselect/accumulative');
 const BigNumber = require('bignumber.js');
+let BlueElectrum = require('../BlueElectrum'); // eslint-disable-line
 
 export const KEVA_OP_NAMESPACE = 0xd0;
 export const KEVA_OP_PUT = 0xd1;
@@ -41,6 +42,10 @@ export function hexToNamespace(hexStr) {
   return base58check.encode(decoded);
 }
 
+export function namespaceToHex(nsStr) {
+  return base58check.decode(nsStr);
+}
+
 export function kevaToJson(result) {
   if (result[0] === KEVA_OP_NAMESPACE) {
     return {
@@ -51,14 +56,14 @@ export function kevaToJson(result) {
   } else if (result[0] === KEVA_OP_PUT) {
     return {
       op: 'KEVA_OP_PUT',
-      namespace: hexToNamespace(result[1]),
+      namespaceId: hexToNamespace(result[1]),
       key: hexToUtf8(result[2]),
       value: hexToUtf8(result[3])
     }
   } else if (result[0] === KEVA_OP_DELETE) {
     return {
       op: 'KEVA_OP_DELETE',
-      namespace: hexToNamespace(result[1]),
+      namespaceId: hexToNamespace(result[1]),
       key: hexToUtf8(result[2])
     }
   } else {
@@ -249,8 +254,6 @@ export async function createKevaNamespace(wallet, requestedSatPerByte, nsName) {
 
   psbt.finalizeAllInputs();
   let hexTx = psbt.extractTransaction(true).toHex();
-  console.log(returnNamespaceId);
-  console.log(hexTx);
   return {tx: hexTx, namespaceId: returnNamespaceId};
 }
 
@@ -262,7 +265,7 @@ function getKeyValueUpdateScript(namespaceId, address, key, value) {
   let baddress = bitcoin.address;
   let nsScript = bscript.compile([
     KEVA_OP_PUT,
-    namespaceId,
+    namespaceToHex(namespaceId),
     keyBuf,
     valueBuf,
     bscript.OPS.OP_2DROP,
@@ -274,19 +277,71 @@ function getKeyValueUpdateScript(namespaceId, address, key, value) {
   return nsScript;
 }
 
-export async function updateKeyValue(wallet, requestedSatPerByte, namespaceId, key, value) {
+export async function scanForNamespaces(wallet) {
+  let results = [];
+  const txs = wallet.getTransactions();
+  for (let tx of txs) {
+    for (let vout of tx.outputs) {
+      const keva = parseKeva(vout.scriptPubKey.asm);
+      if (keva) {
+        results.push({
+          tx: tx.txid,
+          n: vout.n,
+          address: vout.scriptPubKey.addresses[0],
+          keva: kevaToJson(keva),
+        });
+      }
+    }
+  }
+  return results;
+}
+
+export async function getNamespaceUtxo(wallet, namespaceId) {
   await wallet.fetchUtxo();
   const utxos = wallet.getUtxo();
+  const results = await scanForNamespaces(wallet);
+  for (let r of results) {
+    if (r.keva.namespaceId === namespaceId) {
+      for (let t of utxos) {
+        if (r.tx == t.txId && r.n == t.vout) {
+          return t;
+        }
+      }
+    }
+  }
+  return null;
+}
+
+function reorderUtxos(utxos, nsUtxo) {
+  let newUtxos = [nsUtxo];
+  for (let t of utxos) {
+    if (t.txId == nsUtxo.txId && t.vout == nsUtxo.vout) {
+      continue;
+    }
+    newUtxos.push(t);
+  }
+  return newUtxos;
+}
+
+export async function updateKeyValue(wallet, requestedSatPerByte, namespaceId, key, value) {
+  let nsUtxo = await getNamespaceUtxo(wallet, namespaceId);
+  if (!nsUtxo) {
+    throw new Error('Cannot update namespace');
+  }
+
   const namespaceAddress = await wallet.getAddressAsync();
-  const nsDummyScript = getKeyValueUpdateScript(namespaceId, namespaceAddress, key, value);
+  const nsScript = getKeyValueUpdateScript(namespaceId, namespaceAddress, key, value);
 
   // Namespace needs at least 0.01 KVA.
   const namespaceValue = 1000000;
   let targets = [{
     address: namespaceAddress, value: namespaceValue,
-    script: nsDummyScript
+    script: nsScript
   }];
 
+  let utxos = wallet.getUtxo();
+  // Move the nsUtxo to the first one, so that it will already be used.
+  utxos = reorderUtxos(utxos, nsUtxo);
   let { inputs, outputs, fee } = coinSelectAccumulative(utxos, targets, requestedSatPerByte);
 
   // inputs and outputs will be undefined if no solution was found
@@ -355,25 +410,5 @@ export async function updateKeyValue(wallet, requestedSatPerByte, namespaceId, k
   psbt.finalizeAllInputs();
   let hexTx = psbt.extractTransaction(true).toHex();
   console.log(hexTx);
-}
-
-
-export async function scanForNamespaces(wallet, namespaceId) {
-  let results = [];
-  const txs = wallet.getTransactions();
-  for (let tx of txs) {
-    for (let vout of tx.outputs) {
-      const keva = parseKeva(vout.scriptPubKey.asm);
-      if (keva) {
-        results.push({
-          tx: tx.txid,
-          n: vout.n,
-          address: vout.scriptPubKey.addresses[0],
-          keva: kevaToJson(keva),
-        });
-      }
-    }
-  }
-  console.log(results)
-  return results;
+  return hexTx;
 }
