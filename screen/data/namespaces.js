@@ -58,7 +58,7 @@ const StyleSheet = require('../../PlatformStyleSheet');
 const KevaButton = require('../../common/KevaButton');
 const KevaColors = require('../../common/KevaColors');
 const utils = require('../../util');
-import { createKevaNamespace } from '../../class/keva-ops';
+import { createKevaNamespace, scanForNamespaces } from '../../class/keva-ops';
 
 const ACTIVE_OPACITY = 0.7;
 const CLOSE_ICON = (<Icon name="ios-close" size={36} color="#fff" style={{ paddingVertical: 5, paddingHorizontal: 15 }} />)
@@ -234,6 +234,8 @@ export default class Namespaces extends React.Component {
 
   onAddNamespace = async () => {
     const wallets = BlueApp.getWallets();
+    return scanForNamespaces(wallets[0]);
+
     if (this.state.nsName && this.state.nsName.length > 0) {
       return createKevaNamespace(wallets[0], 120, this.state.nsName);
     }

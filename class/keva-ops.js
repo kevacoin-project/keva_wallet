@@ -356,3 +356,24 @@ export async function updateKeyValue(wallet, requestedSatPerByte, namespaceId, k
   let hexTx = psbt.extractTransaction(true).toHex();
   console.log(hexTx);
 }
+
+
+export async function scanForNamespaces(wallet, namespaceId) {
+  let results = [];
+  const txs = wallet.getTransactions();
+  for (let tx of txs) {
+    for (let vout of tx.outputs) {
+      const keva = parseKeva(vout.scriptPubKey.asm);
+      if (keva) {
+        results.push({
+          tx: tx.txid,
+          n: vout.n,
+          address: vout.scriptPubKey.addresses[0],
+          keva: kevaToJson(keva),
+        });
+      }
+    }
+  }
+  console.log(results)
+  return results;
+}
