@@ -28,6 +28,8 @@ import {
   BlueNavigationStyle,
 } from '../../BlueComponents';
 const loc = require('../../loc');
+let BlueApp = require('../../BlueApp');
+let BlueElectrum = require('../../BlueElectrum');
 
 import Switch from 'react-native-switch-pro';
 import Icon from 'react-native-vector-icons/Ionicons';
@@ -37,6 +39,7 @@ import ActionSheet from 'react-native-actionsheet';
 import ElevatedView from 'react-native-elevated-view';
 import { connect } from 'react-redux'
 import { setKeyValueList, setKeyValueOrder } from '../../actions'
+import { getKeyValuesFromShortCode } from '../../class/keva-ops';
 
 const CLOSE_ICON    = <Icon name="ios-close" size={42} color={KevaColors.errColor}/>;
 const CLOSE_ICON_MODAL = (<Icon name="ios-close" size={36} color={KevaColors.darkText} style={{paddingVertical: 5, paddingHorizontal: 15}} />)
@@ -186,9 +189,6 @@ class KeyValues extends React.Component {
     tabBarVisible: false,
     headerShown: true,
   });
-
-  componentDidMount() {
-  }
 
   onSwitch = cb => {
     cb(true, value => this.setState({needPicture: value}));
@@ -410,8 +410,21 @@ class KeyValues extends React.Component {
     return numItems;
   }
 
+  async componentDidMount() {
+    let {navigation} = this.props;
+    const namespaceId = navigation.getParam('namespaceId');
+    const shortCode = navigation.getParam('shortCode');
+    if (shortCode) {
+      const wallets = BlueApp.getWallets();
+      const transactions = wallets[0].getTransactions();
+      await getKeyValuesFromShortCode(BlueElectrum, transactions, shortCode.toString());
+    }
+  }
+
   render() {
     let {navigation} = this.props;
+    const namespaceId = navigation.getParam('namespaceId');
+    const shortCode = navigation.getParam('shortCode');
     let itemList = {
       0: { name: 'First Key' },
       1: { name: 'Second Key' },

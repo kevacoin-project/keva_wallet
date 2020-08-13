@@ -137,6 +137,9 @@ export async function getNamespaceDataFromTx(ecl, transactions, txidStart, nsSta
       // Not found in the cache, try to fetch it from the server.
       tx = await ecl.blockchainTransaction_get(txid, true);
     }
+
+    // From transactions, tx.outputs
+    // From server: tx.vout
     const vout = tx.outputs || tx.vout;
     for (let v of vout) {
       let result = parseKeva(v.scriptPubKey.asm);
@@ -480,7 +483,7 @@ async function traverseKeyValues(ecl, address, results) {
                   continue;
               }
               address = v.scriptPubKey.addresses[0];
-              resultJson = kevaToJson(result);
+              let resultJson = kevaToJson(result);
               resultJson.tx = history[i].tx_hash;
               resultJson.n = v.n;
               results.push(resultJson);
@@ -520,6 +523,7 @@ export async function getKeyValuesFromShortCode(ecl, transactions, shortCode) {
       }
   }
   console.log(keyValues);
+  return keyValues;
 }
 
 export async function findMyNamespaces(wallet, ecl) {
@@ -538,6 +542,7 @@ export async function findMyNamespaces(wallet, ecl) {
       const keva = kevaToJson(result);
       const nsId = keva.namespaceId;
       namespaces[nsId] = {
+        id: nsId,
         walletId: wallet.getID(),
         txId: tx.hash,
       }

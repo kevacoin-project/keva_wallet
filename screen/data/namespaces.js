@@ -55,7 +55,7 @@ const bitcoin = require('bitcoinjs-lib');
 const bip21 = require('../../bip21/bip21');
 let BigNumber = require('bignumber.js');
 const { width } = Dimensions.get('window');
-let BlueApp: AppStorage = require('../../BlueApp');
+let BlueApp = require('../../BlueApp');
 let loc = require('../../loc');
 let BlueElectrum = require('../../BlueElectrum');
 const StyleSheet = require('../../PlatformStyleSheet');
@@ -118,7 +118,11 @@ class Namespace extends React.Component {
   }
 
   onKey = () => {
-    this.props.navigation.navigate('KeyValues');
+    let namespace = this.props.data;
+    this.props.navigation.navigate('KeyValues', {
+      namespaceId: namespace.id,
+      shortCode: namespace.shortCode,
+    });
   }
 
   UNSAFE_componentWillReceiveProps(nextProps) {
