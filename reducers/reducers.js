@@ -1,15 +1,28 @@
 import { combineReducers } from 'redux'
 import {
   SET_NAMESPACES,
+  SET_NAMESPACES_ORDER,
 } from '../actions'
 
-function namespaceList(state = [], action) {
+function namespaceList(state = {}, action) {
   switch (action.type) {
     case SET_NAMESPACES:
-      if (!action.namepsaceList) {
+      if (!action.namespaceList) {
+        return {};
+      }
+      return {...action.namespaceList};
+    default:
+      return state;
+  }
+}
+
+function namespaceOrder(state = [], action) {
+  switch (action.type) {
+    case SET_NAMESPACES_ORDER:
+      if (!action.namespaceOrder) {
         return [];
       }
-      return [...action.namespaceList];
+      return [...action.namespaceOrder];
     default:
       return state;
   }
@@ -17,4 +30,5 @@ function namespaceList(state = [], action) {
 
 export const appReducer = combineReducers({
   namespaceList,
+  namespaceOrder,
 });

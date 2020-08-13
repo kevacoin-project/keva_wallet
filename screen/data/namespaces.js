@@ -48,6 +48,8 @@ import DeeplinkSchemaMatch from '../../class/deeplink-schema-match';
 import SortableListView from 'react-native-sortable-list'
 import ElevatedView from 'react-native-elevated-view'
 import { TabView, TabBar } from 'react-native-tab-view';
+import { connect } from 'react-redux'
+import { setNamespaceList, setNamespaceOrder } from '../../actions'
 
 const bitcoin = require('bitcoinjs-lib');
 const bip21 = require('../../bip21/bip21');
@@ -111,8 +113,8 @@ class Namespace extends React.Component {
   }
 
   onEdit = () => {
-    let namespace = this.props.namespace;
-    this.props.onEdit(this.props.categoryId, namespace.name);
+    let namespace = this.props.data;
+    this.props.onEdit(this.props.categoryId, namespace.displayName);
   }
 
   onKey = () => {
@@ -130,10 +132,7 @@ class Namespace extends React.Component {
   }
 
   render() {
-    let {data} = this.props;
-    let namespace = data;
-    let numberItems = 100;
-
+    let namespace = this.props.data;
     return (
       <Animated.View style={[this._style,]}>
         <ElevatedView elevation={1} style={styles.cardTitle}>
@@ -154,7 +153,7 @@ class Namespace extends React.Component {
           </View>
           <TouchableOpacity onPress={this.onKey}>
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <Text style={styles.cardTitleTextSm}>{numberItems}</Text>
+              {/* <Text style={styles.cardTitleTextSm}>{numberItems}</Text> */}
               <Icon name="ios-arrow-forward" size={22} color={KevaColors.actionText} style={{ paddingHorizontal: 7 }} />
             </View>
           </TouchableOpacity>
@@ -168,8 +167,6 @@ class Namespace extends React.Component {
 
 class MyNamespaces extends React.Component {
 
-  state = { isLoading: true, isModalVisible: false };
-
   constructor(props) {
     super(props);
     this.state = {
@@ -177,7 +174,6 @@ class MyNamespaces extends React.Component {
       namespaceId: null, saving: false,
       isLoading: true, isModalVisible: false,
       isRefreshing: false,
-      namespaces: {}
     };
   }
 
@@ -193,7 +189,7 @@ class MyNamespaces extends React.Component {
     });
   }
 
-  getSectionModal() {
+  getNSModal() {
     const sectionId = this.state.sectionId;
     return (
       <Modal style={styles.modal} backdrop={true}
@@ -233,12 +229,17 @@ class MyNamespaces extends React.Component {
     this.setState({ section: '', codeErr: null, isModalVisible: false });
   }
 
-  onChangeOrder = async (e) => {
-    console.log(e);
+  onChangeOrder = async (order) => {
+    console.log(order)
+    this.props.dispatch(setNamespaceOrder(order));
   }
 
   onAddNamespace = async () => {
     const wallets = BlueApp.getWallets();
+    if (this.state.nsName && this.state.nsName.length > 0) {
+      return createKevaNamespace(wallets[0], 120, this.state.nsName);
+    }
+    return;
     return updateKeyValue(wallets[0], 120, 'NZY6DiPFeSXzXYG3UKA5ZdXNMALwB6CzTz', 'John 3:16 Bible', 'For God so loved the world, that he gave his only Son, that whoever believes in him should not perish but have eternal life.');
     return getNamespaceUtxo(wallets[0], 'NZY6DiPFeSXzXYG3UKA5ZdXNMALwB6CzTz');
 
@@ -252,13 +253,13 @@ class MyNamespaces extends React.Component {
   refreshNamespaces = async () => {
     this.setState({isRefreshing: true});
     const wallets = BlueApp.getWallets();
-    const namespaces = await findMyNamespaces(wallets[0]);
-    this.setState({isRefreshing: false, namespaces});
+    const namespaceList = await findMyNamespaces(wallets[0]);
+    this.props.dispatch(setNamespaceList(namespaceList));
+    this.setState({isRefreshing: false});
   }
 
   render() {
-    const { dispatch, navigation } = this.props;
-    let namespaces = this.state.namespaces;
+    const { dispatch, navigation, namespaceList, namespaceOrder } = this.props;
     const canAdd = this.state.nsName && this.state.nsName.length >0;
     return (
       <View style={styles.container}>
@@ -272,7 +273,7 @@ class MyNamespaces extends React.Component {
           onPress={this.onAction}
         />
         */}
-        {this.getSectionModal()}
+        {this.getNSModal()}
         <View style={{ paddingTop: 10, paddingLeft: 8, backgroundColor: '#fff', borderBottomWidth: utils.THIN_BORDER, borderColor: KevaColors.cellBorder, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingBottom: 10 }}>
           <TextInput
             onChangeText={nsName => this.setState({ nsName: nsName })}
@@ -293,11 +294,12 @@ class MyNamespaces extends React.Component {
           }
         </View>
         {
-          namespaces &&
+          namespaceList &&
           <SortableListView
             style={styles.listStyle}
             contentContainerStyle={{flex: 1}}
-            data={namespaces}
+            data={namespaceList}
+            order={namespaceOrder}
             onChangeOrder={this.onChangeOrder}
             refreshControl={
               <RefreshControl onRefresh={() => this.refreshNamespaces()} refreshing={this.state.isRefreshing} />
@@ -313,7 +315,7 @@ class MyNamespaces extends React.Component {
 
 }
 
-export default class Namespaces extends React.Component {
+class Namespaces extends React.Component {
 
   static navigationOptions = ({ navigation }) => ({
     ...BlueNavigationStyle(),
@@ -337,7 +339,7 @@ export default class Namespaces extends React.Component {
   }
 
   render() {
-    const { dispatch, navigation } = this.props;
+    const { dispatch, navigation, namespaceList, namespaceOrder } = this.props;
     return (
       <View style={styles.container}>
         <BlueHeaderDefaultSub leftText={/*loc.settings.header*/ 'Namespaces'} rightComponent={null} />
@@ -346,7 +348,7 @@ export default class Namespaces extends React.Component {
           renderScene={({ route }) => {
             switch (route.key) {
               case 'first':
-                return <MyNamespaces />;
+                return <MyNamespaces dispatch={dispatch} namespaceList={namespaceList} namespaceOrder={namespaceOrder}/>;
               case 'second':
                 return <MyNamespaces />;
             }
@@ -372,6 +374,15 @@ export default class Namespaces extends React.Component {
   }
 
 }
+
+function mapStateToProps(state) {
+  return {
+    namespaceList: state.namespaceList,
+    namespaceOrder: state.namespaceOrder,
+  }
+}
+
+export default NamespacesScreen = connect(mapStateToProps)(Namespaces)
 
 var styles = StyleSheet.create({
   container: {

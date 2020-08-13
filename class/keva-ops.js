@@ -265,6 +265,7 @@ export async function createKevaNamespace(wallet, requestedSatPerByte, nsName) {
 
   psbt.finalizeAllInputs();
   let hexTx = psbt.extractTransaction(true).toHex();
+  console.log(hexTx);
   return {tx: hexTx, namespaceId: returnNamespaceId};
 }
 
