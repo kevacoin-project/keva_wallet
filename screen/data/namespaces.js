@@ -16,6 +16,7 @@ import {
   ScrollView,
   PixelRatio,
   Text,
+  RefreshControl,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import AsyncStorage from '@react-native-community/async-storage';
@@ -59,7 +60,7 @@ const StyleSheet = require('../../PlatformStyleSheet');
 const KevaButton = require('../../common/KevaButton');
 const KevaColors = require('../../common/KevaColors');
 const utils = require('../../util');
-import { createKevaNamespace, updateKeyValue } from '../../class/keva-ops';
+import { createKevaNamespace, updateKeyValue, findMyNamespaces } from '../../class/keva-ops';
 
 const ACTIVE_OPACITY = 0.7;
 const CLOSE_ICON = (<Icon name="ios-close" size={36} color="#fff" style={{ paddingVertical: 5, paddingHorizontal: 15 }} />)
@@ -138,15 +139,17 @@ class Namespace extends React.Component {
         <ElevatedView elevation={1} style={styles.cardTitle}>
           <View style={{ flex: 1, justifyContent: 'space-between', paddingHorizontal: 7, paddingTop: 5 }}>
             <View style={{ flex: 1 }} >
-              <Text style={styles.cardTitleText}>{namespace.name}</Text>
+              <Text style={styles.cardTitleText}>{namespace.displayName}</Text>
             </View>
             <View style={styles.actionContainer}>
               <TouchableOpacity onPress={this.onEdit}>
                 <Icon name="ios-create" size={22} style={styles.actionIcon} />
               </TouchableOpacity>
+              {/*
               <TouchableOpacity onPress={() => this.props.onShowActions(this.props.categoryId)}>
                 <Icon name="ios-trash" size={22} style={styles.actionIcon} />
               </TouchableOpacity>
+              */}
             </View>
           </View>
           <TouchableOpacity onPress={this.onKey}>
@@ -169,7 +172,13 @@ class MyNamespaces extends React.Component {
 
   constructor(props) {
     super(props);
-    this.state = { loaded: false, changes: false, nsName: '', namespaceId: null, saving: false };
+    this.state = {
+      loaded: false, changes: false, nsName: '',
+      namespaceId: null, saving: false,
+      isLoading: true, isModalVisible: false,
+      isRefreshing: false,
+      namespaces: {}
+    };
   }
 
   async componentDidMount() {
@@ -238,16 +247,19 @@ class MyNamespaces extends React.Component {
     if (this.state.nsName && this.state.nsName.length > 0) {
       return createKevaNamespace(wallets[0], 120, this.state.nsName);
     }
-    alert('No namespace name!');
+  }
+
+  refreshNamespaces = async () => {
+    this.setState({isRefreshing: true});
+    const wallets = BlueApp.getWallets();
+    const namespaces = await findMyNamespaces(wallets[0]);
+    this.setState({isRefreshing: false, namespaces});
   }
 
   render() {
     const { dispatch, navigation } = this.props;
-    let namespaces = {
-      0: { name: 'First Namespace' },
-      1: { name: 'Second Namespace' },
-      2: { name: 'Third Namespace' },
-    };
+    let namespaces = this.state.namespaces;
+    const canAdd = this.state.nsName && this.state.nsName.length >0;
     return (
       <View style={styles.container}>
         {/*
@@ -265,7 +277,7 @@ class MyNamespaces extends React.Component {
           <TextInput
             onChangeText={nsName => this.setState({ nsName: nsName })}
             value={this.state.nsName}
-            placeholder={"Add a new namespace"}
+            placeholder={"Name of new namespace"}
             multiline={true}
             underlineColorAndroid='rgba(0,0,0,0)'
             style={{ flex: 1, borderRadius: 4, backgroundColor: '#ececed', paddingTop: 5, paddingBottom: 5, paddingLeft: 7, paddingRight: 36 }}
@@ -273,8 +285,10 @@ class MyNamespaces extends React.Component {
           {this.state.saving ?
             <ActivityIndicator size="small" color={KevaColors.actionText} style={{ width: 42, height: 42 }} />
             :
-            <TouchableOpacity onPress={this.onAddNamespace}>
-              <Icon name={'md-add-circle'} style={{ width: 42, height: 42, color: KevaColors.actionText, paddingVertical: 5, paddingHorizontal: 9, top: 1 }} size={28} />
+            <TouchableOpacity onPress={this.onAddNamespace} disabled={!canAdd}>
+              <Icon name={'md-add-circle'}
+                    style={[styles.addIcon, !canAdd && {color: KevaColors.inactiveText}]}
+                    size={28} />
             </TouchableOpacity>
           }
         </View>
@@ -285,6 +299,9 @@ class MyNamespaces extends React.Component {
             contentContainerStyle={{flex: 1}}
             data={namespaces}
             onChangeOrder={this.onChangeOrder}
+            refreshControl={
+              <RefreshControl onRefresh={() => this.refreshNamespaces()} refreshing={this.state.isRefreshing} />
+            }
             renderRow={({data, active}) => {
               return <Namespace onEdit={this.onNSNameEdit} data={data} active={active} navigation={navigation} />
             }}
@@ -525,9 +542,13 @@ var styles = StyleSheet.create({
     backgroundColor: '#fff',
     height: 50
   },
-  photoIcon: {
-    paddingHorizontal: 10,
-    paddingHorizontal: 7
+  addIcon: {
+    width: 42,
+    height: 42,
+    color: KevaColors.actionText,
+    paddingVertical: 5,
+    paddingHorizontal: 9,
+    top: 1
   },
   action: {
     fontSize: 16,

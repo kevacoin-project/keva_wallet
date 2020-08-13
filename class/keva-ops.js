@@ -46,28 +46,39 @@ export function namespaceToHex(nsStr) {
   return base58check.decode(nsStr);
 }
 
-export function kevaToJson(result) {
+function fixInt(num) {
+  let intVal = parseInt(num, 10);
+  if (intVal.toString(10) != num) {
+      return num;
+  }
+  if (intVal > 2147483647) {
+      return num;
+  }
+  return intVal.toString(16);
+}
+
+function kevaToJson(result) {
   if (result[0] === KEVA_OP_NAMESPACE) {
-    return {
-      op: 'KEVA_OP_NAMESPACE',
-      namespaceId: hexToNamespace(result[1]),
-      displayName: hexToUtf8(result[2])
-    }
+      return {
+          op: 'KEVA_OP_NAMESPACE',
+          namespaceId: hexToNamespace(result[1]),
+          displayName: hexToUtf8(fixInt(result[2]))
+      }
   } else if (result[0] === KEVA_OP_PUT) {
-    return {
-      op: 'KEVA_OP_PUT',
-      namespaceId: hexToNamespace(result[1]),
-      key: hexToUtf8(result[2]),
-      value: hexToUtf8(result[3])
-    }
+      return {
+          op: 'KEVA_OP_PUT',
+          namespaceId: hexToNamespace(result[1]),
+          key: hexToUtf8(fixInt(result[2])),
+          value: hexToUtf8(fixInt(result[3]))
+      }
   } else if (result[0] === KEVA_OP_DELETE) {
-    return {
-      op: 'KEVA_OP_DELETE',
-      namespaceId: hexToNamespace(result[1]),
-      key: hexToUtf8(result[2])
-    }
+      return {
+          op: 'KEVA_OP_DELETE',
+          namespaceId: hexToNamespace(result[1]),
+          key: hexToUtf8(fixInt(result[2]))
+      }
   } else {
-    return null;
+      return null;
   }
 }
 
@@ -411,4 +422,115 @@ export async function updateKeyValue(wallet, requestedSatPerByte, namespaceId, k
   let hexTx = psbt.extractTransaction(true).toHex();
   console.log(hexTx);
   return hexTx;
+}
+
+export async function findNamespaceShortCode(ecl, nsTx) {
+  let result = await getNamespaceDataFromTx(ecl, nsTx);
+  let txid = result.txid;
+  let history = await ecl.blockchainScripthash_getHistory(toScriptHash(result.address));
+  let foundTx = history.find(h => h.tx_hash == txid);
+  let merkle = await ecl.blockchainTransaction_getMerkle(txid, foundTx.height, false);
+  // The first digit is the length of the block height.
+  let strHeight = merkle.block_height.toString();
+  let prefix = strHeight.length;
+  let shortCode = prefix + strHeight + merkle.pos.toString();
+  return shortCode;
+}
+
+export async function getNamespaceFromShortCode(ecl, shortCode) {
+  let prefix = parseInt(shortCode.substring(0, 1));
+  let height = shortCode.substring(1, 1 + prefix);
+  let pos = shortCode.substring(1 + prefix, 2 + prefix);
+  let txHash = await ecl.blockchainTransaction_idFromPos(height, pos);
+  return txHash;
+}
+
+async function traverseKeyValues(ecl, address, results) {
+  let txvouts = {};
+  let stack = [];
+  stack.push(address);
+  while (stack.length > 0) {
+      let address = stack.pop();
+      let history = await ecl.blockchainScripthash_getHistory(toScriptHash(address));
+      for (let i = 0; i < history.length; i++) {
+          // TODO: from cache.
+          let tx = await ecl.blockchainTransaction_get(history[i].tx_hash, true);
+          for (let v of tx.vout) {
+              let txvout = history[i].tx_hash + v.n.toString();
+              if (txvouts[txvout]) {
+                  continue;
+              }
+              let result = parseKeva(v.scriptPubKey.asm);
+              if (!result) {
+                  txvouts[txvout] = 1;
+                  continue;
+              }
+              address = v.scriptPubKey.addresses[0];
+              resultJson = kevaToJson(result);
+              resultJson.tx = history[i].tx_hash;
+              resultJson.n = v.n;
+              results.push(resultJson);
+              txvouts[txvout] = 1;
+              if ((history.length != 1) && (i == history.length - 1)) {
+                  stack.push(address);
+              }
+          }
+      }
+  }
+}
+
+export async function getKeyValuesFromShortCode(ecl, shortCode) {
+  let txid = await getNamespaceFromShortCode(ecl, shortCode);
+  let result = await getNamespaceDataFromTx(ecl, txid);
+  let address = result.address;
+  let results = [];
+  await traverseKeyValues(ecl, address, results);
+  console.log(results);
+  // Merge the results.
+  let keyValues = {};
+  for (let kv of results) {
+      if (kv.op === 'KEVA_OP_PUT') {
+          keyValues[kv.key] = {
+              value: kv.value,
+              tx: kv.tx,
+              n: kv.n
+          }
+      } else if (kv.op === 'KEVA_OP_DELETE') {
+          delete keyValues[kv.key];
+      } else if (kv.op === 'KEVA_OP_NAMESPACE') {
+          keyValues['_KEVA_NS_'] = {
+              value: kv.displayName,
+              tx: kv.tx,
+              n: kv.n
+          }
+      }
+  }
+  console.log(keyValues);
+}
+
+export async function findMyNamespaces(wallet) {
+  await wallet.fetchTransactions();
+  const transactions = wallet.getTransactions();
+  if (transactions.length == 0) {
+    return;
+  }
+  let namespaces = {};
+  for (let tx of transactions) {
+    for (let v of tx.outputs) {
+      let result = parseKeva(v.scriptPubKey.asm);
+      if (!result) {
+          continue;
+      }
+      const keva = kevaToJson(result);
+      console.log(keva)
+      const nsId = keva.namespaceId;
+      namespaces[nsId] = {
+        walletId: wallet.getID(),
+      }
+      if (keva.displayName) {
+        namespaces[nsId].displayName = keva.displayName;
+      }
+    }
+  }
+  return namespaces;
 }
