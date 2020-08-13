@@ -253,8 +253,13 @@ class MyNamespaces extends React.Component {
   refreshNamespaces = async () => {
     this.setState({isRefreshing: true});
     const wallets = BlueApp.getWallets();
-    const namespaceList = await findMyNamespaces(wallets[0]);
-    this.props.dispatch(setNamespaceList(namespaceList));
+    try {
+      const namespaceList = await findMyNamespaces(wallets[0], BlueElectrum);
+      this.props.dispatch(setNamespaceList(namespaceList));
+    } catch (err) {
+      console.error(err);
+      this.setState({isRefreshing: false});
+    }
     this.setState({isRefreshing: false});
   }
 
@@ -348,7 +353,7 @@ class Namespaces extends React.Component {
           renderScene={({ route }) => {
             switch (route.key) {
               case 'first':
-                return <MyNamespaces dispatch={dispatch} namespaceList={namespaceList} namespaceOrder={namespaceOrder}/>;
+                return <MyNamespaces dispatch={dispatch} navigation={navigation} namespaceList={namespaceList} namespaceOrder={namespaceOrder}/>;
               case 'second':
                 return <MyNamespaces />;
             }

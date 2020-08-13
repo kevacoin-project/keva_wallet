@@ -17,6 +17,7 @@ import {
   Animated,
   Easing,
   StatusBar,
+  RefreshControl,
 } from 'react-native';
 const StyleSheet = require('../../PlatformStyleSheet');
 const KevaButton = require('../../common/KevaButton');
@@ -34,6 +35,8 @@ import SortableListView from 'react-native-sortable-list'
 import Modal from 'react-native-modalbox';
 import ActionSheet from 'react-native-actionsheet';
 import ElevatedView from 'react-native-elevated-view';
+import { connect } from 'react-redux'
+import { setKeyValueList, setKeyValueOrder } from '../../actions'
 
 const CLOSE_ICON    = <Icon name="ios-close" size={42} color={KevaColors.errColor}/>;
 const CLOSE_ICON_MODAL = (<Icon name="ios-close" size={36} color={KevaColors.darkText} style={{paddingVertical: 5, paddingHorizontal: 15}} />)
@@ -52,7 +55,7 @@ class Item extends React.Component {
 
   constructor(props) {
     super(props);
-    this.state = { loading: false, selectedImage: null };
+    this.state = { loading: false, selectedImage: null, isRefreshing: false };
 
     this._active = new Animated.Value(0);
     this._style = {
@@ -162,7 +165,7 @@ class Item extends React.Component {
   }
 }
 
-export default class KeyValues extends React.Component {
+class KeyValues extends React.Component {
 
   constructor() {
     super();
@@ -179,7 +182,7 @@ export default class KeyValues extends React.Component {
 
   static navigationOptions = ({ navigation }) => ({
     ...BlueNavigationStyle(),
-    title: loc.settings.general,
+    title: '',
     tabBarVisible: false,
     headerShown: true,
   });
@@ -361,6 +364,11 @@ export default class KeyValues extends React.Component {
     this.modalCode.open();
   }
 
+  refreshKeyValues = async () => {
+    this.setState({isRefreshing: true});
+    this.setState({isRefreshing: false});
+  }
+
   onRowMoved = async (e) => {
   }
 
@@ -428,6 +436,9 @@ export default class KeyValues extends React.Component {
           contentContainerStyle={{flex: 1}}
           data={itemList}
           onChangeOrder={this.onRowMoved}
+          refreshControl={
+            <RefreshControl onRefresh={() => this.refreshKeyValues()} refreshing={this.state.isRefreshing} />
+          }
           renderRow={({data, active}) =>
             <Item data={data} dispatch={this.props.dispatch} onDelete={this.onDelete}
               active={active} onEdit={this.onItemEdit}
@@ -439,6 +450,15 @@ export default class KeyValues extends React.Component {
   }
 
 }
+
+function mapStateToProps(state) {
+  return {
+    keyValueList: state.keyValueList,
+    keyValueOrder: state.keyValueOrder,
+  }
+}
+
+export default KeyValuesScreen = connect(mapStateToProps)(KeyValues);
 
 var styles = StyleSheet.create({
   container: {
@@ -463,14 +483,6 @@ var styles = StyleSheet.create({
   itemDesc: {
     flex: 1,
     fontSize:16
-  },
-  imgContainer: {
-    backgroundColor: '#eae2e2',
-    borderTopLeftRadius: 5,
-    borderBottomLeftRadius: 5,
-    justifyContent: 'center',
-    width: 90,
-    height: 90
   },
   img: {
     width: 90,
@@ -528,39 +540,8 @@ var styles = StyleSheet.create({
     paddingTop: 15,
     paddingBottom: 10
   },
-  overlay: {
-    flex: 1,
-    position: 'absolute',
-    left: 0,
-    top: 0,
-    opacity: 0.4,
-    backgroundColor: KevaColors.darkText,
-    width: 90,
-    height: 90,
-    justifyContent: 'center',
-    alignItems: 'center'
-  },
   activeImg: {
     flex: 1
-  },
-  retake: {
-    height: 60,
-    width: 60,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: utils.THIN_BORDER,
-    borderRadius: 4,
-    marginVertical: 5,
-    marginHorizontal: 10,
-    borderColor: KevaColors.cellBorder,
-    backgroundColor: '#fff'
-  },
-  photoIcon: {
-    paddingHorizontal: 7
-  },
-  retakeTitle: {
-    fontSize: 10,
-    color: KevaColors.lightText
   },
   header: {
     flexDirection: 'row',
@@ -587,29 +568,6 @@ var styles = StyleSheet.create({
     borderBottomColor:KevaColors.cellBorder,
     backgroundColor: 'white'
   },
-  navHeaderWarpper: {
-    position: 'absolute',
-    left: 0,
-    top: 0,
-    right: 0,
-    zIndex: 999,
-    backgroundColor: '#fff'
-  },
-  inputArea: {
-    flexDirection: 'column',
-    justifyContent: 'space-between',
-    paddingTop: 0,
-    paddingBottom: 0,
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    backgroundColor: '#fff',
-    zIndex: -1,
-    borderTopWidth: utils.THIN_BORDER,
-    borderColor: KevaColors.cellBorder,
-    marginHorizontal: 12
-  },
   iconBox: {
     flexDirection: 'row',
     justifyContent: 'center',
@@ -626,20 +584,4 @@ var styles = StyleSheet.create({
     alignItems: 'center',
     margin: 2
   },
-  topBar: {
-    ios: {
-      paddingTop: 10,
-      paddingLeft: 8,
-      backgroundColor: '#fff',
-      borderBottomWidth: utils.THIN_BORDER,
-      borderColor: KevaColors.cellBorder
-    },
-    android: {
-      paddingTop: 10,
-      paddingLeft: 8,
-      backgroundColor: '#fff',
-      borderBottomWidth: utils.THIN_BORDER,
-      borderColor: KevaColors.cellBorder
-    }
-  }
 });
