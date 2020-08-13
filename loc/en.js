@@ -15,7 +15,7 @@ module.exports = {
       'You currently do not have a Kevacoin wallet. In order to fund a Lightning wallet, a Kevacoin wallet needs to be created or imported. Would you like to continue anyway?',
     list: {
       app_name: 'KevaWallet',
-      title: 'wallets',
+      title: 'Wallets',
       header: 'A wallet represents a pair of a secret (private key) and an address' + 'you can share to receive coins.',
       add: 'Add Wallet',
       create_a_wallet: 'Add a wallet',
@@ -183,7 +183,7 @@ module.exports = {
   },
   settings: {
     general: 'General',
-    header: 'settings',
+    header: 'Settings',
     plausible_deniability: 'Plausible deniability',
     storage_not_encrypted: 'Storage: not encrypted',
     storage_encrypted: 'Storage: encrypted',

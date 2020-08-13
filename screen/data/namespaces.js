@@ -46,6 +46,7 @@ import RNFS from 'react-native-fs';
 import DeeplinkSchemaMatch from '../../class/deeplink-schema-match';
 import SortableListView from 'react-native-sortable-list'
 import ElevatedView from 'react-native-elevated-view'
+import { TabView, TabBar } from 'react-native-tab-view';
 
 const bitcoin = require('bitcoinjs-lib');
 const bip21 = require('../../bip21/bip21');
@@ -162,12 +163,7 @@ class Namespace extends React.Component {
 }
 
 
-export default class Namespaces extends React.Component {
-
-  static navigationOptions = ({ navigation }) => ({
-    ...BlueNavigationStyle(),
-    headerShown: false,
-  });
+class MyNamespaces extends React.Component {
 
   state = { isLoading: true, isModalVisible: false };
 
@@ -254,7 +250,6 @@ export default class Namespaces extends React.Component {
     };
     return (
       <View style={styles.container}>
-        <BlueHeaderDefaultSub leftText={/*loc.settings.header*/ 'Namespaces'} rightComponent={null} />
         {/*
         <ActionSheet
           ref={ref => this._actionSheet = ref}
@@ -295,6 +290,66 @@ export default class Namespaces extends React.Component {
             }}
           />
         }
+      </View>
+    );
+  }
+
+}
+
+export default class Namespaces extends React.Component {
+
+  static navigationOptions = ({ navigation }) => ({
+    ...BlueNavigationStyle(),
+    headerShown: false,
+  });
+
+  constructor(props) {
+    super(props);
+    this.state = {
+      loaded: false, changes: false, nsName: '', namespaceId: null, saving: false ,
+      isLoading: true, isModalVisible: false,
+      index: 0,
+      routes: [
+        { key: 'first', title: 'My Namespaces' },
+        { key: 'second', title: 'Others' }
+      ]
+    };
+  }
+
+  async componentDidMount() {
+  }
+
+  render() {
+    const { dispatch, navigation } = this.props;
+    return (
+      <View style={styles.container}>
+        <BlueHeaderDefaultSub leftText={/*loc.settings.header*/ 'Namespaces'} rightComponent={null} />
+        <TabView
+          navigationState={this.state}
+          renderScene={({ route }) => {
+            switch (route.key) {
+              case 'first':
+                return <MyNamespaces />;
+              case 'second':
+                return <MyNamespaces />;
+            }
+          }}
+          onIndexChange={index => this.setState({ index })}
+          initialLayout={{ width: Dimensions.get('window').width }}
+          renderTabBar={props =>
+            <TabBar
+              {...props}
+              renderLabel={({ route, focused }) => (
+                <Text style={{ color: focused ? KevaColors.actionText : KevaColors.inactiveText, margin: 0, fontSize: 16 }}>
+                  {route.title}
+                </Text>
+              )}
+              indicatorStyle={{ backgroundColor: KevaColors.actionText }}
+              labelStyle={{ backgroundColor: '#fff', color: KevaColors.inactiveText }}
+              style={{ backgroundColor: '#fff' }}
+            />
+          }
+        />
       </View>
     );
   }
