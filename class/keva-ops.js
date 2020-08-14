@@ -462,32 +462,41 @@ export async function getNamespaceFromShortCode(ecl, shortCode) {
   return txHash;
 }
 
-async function traverseKeyValues(ecl, address, results) {
-  let txvouts = {};
+async function traverseKeyValues(ecl, address, namespaceId, transactions, results) {
+  let txvoutsDone = {};
   let stack = [];
   stack.push(address);
   while (stack.length > 0) {
       let address = stack.pop();
       let history = await ecl.blockchainScripthash_getHistory(toScriptHash(address));
       for (let i = 0; i < history.length; i++) {
-          // TODO: from cache.
-          let tx = await ecl.blockchainTransaction_get(history[i].tx_hash, true);
-          for (let v of tx.vout) {
+          let tx = transactions.find(t => t.txid == history[i].tx_hash);
+          if (!tx) {
+            // Not found in the cache, try to fetch it from the server.
+            tx = await ecl.blockchainTransaction_get(history[i].tx_hash, true);
+          }
+          // From transactions, tx.outputs
+          // From server: tx.vout
+          const vout = tx.outputs || tx.vout;
+          for (let v of vout) {
               let txvout = history[i].tx_hash + v.n.toString();
-              if (txvouts[txvout]) {
+              if (txvoutsDone[txvout]) {
                   continue;
               }
               let result = parseKeva(v.scriptPubKey.asm);
               if (!result) {
-                  txvouts[txvout] = 1;
+                  txvoutsDone[txvout] = 1;
                   continue;
               }
               address = v.scriptPubKey.addresses[0];
               let resultJson = kevaToJson(result);
+              if (resultJson.namespaceId != namespaceId) {
+                continue;
+              }
               resultJson.tx = history[i].tx_hash;
               resultJson.n = v.n;
               results.push(resultJson);
-              txvouts[txvout] = 1;
+              txvoutsDone[txvout] = 1;
               if ((history.length != 1) && (i == history.length - 1)) {
                   stack.push(address);
               }
@@ -501,7 +510,8 @@ export async function getKeyValuesFromShortCode(ecl, transactions, shortCode) {
   let result = await getNamespaceDataFromTx(ecl, transactions, txid);
   let address = result.address;
   let results = [];
-  await traverseKeyValues(ecl, address, results);
+  const namespaceId = kevaToJson(result.result).namespaceId;
+  await traverseKeyValues(ecl, address, namespaceId, transactions, results);
   // Merge the results.
   let keyValues = [];
   for (let kv of results) {

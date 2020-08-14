@@ -234,7 +234,6 @@ class MyNamespaces extends React.Component {
   }
 
   onChangeOrder = async (order) => {
-    console.log(order)
     this.props.dispatch(setNamespaceOrder(order));
   }
 
@@ -260,6 +259,15 @@ class MyNamespaces extends React.Component {
     try {
       const namespaceList = await findMyNamespaces(wallets[0], BlueElectrum);
       this.props.dispatch(setNamespaceList(namespaceList));
+
+      // Fix the order
+      const namespaceOrder = this.props.namespaceOrder;
+      for (let id of Object.keys(namespaceList)) {
+        if (!namespaceOrder.find(nid => nid == id)) {
+          namespaceOrder.unshift(id);
+        }
+      }
+      this.props.dispatch(setNamespaceOrder(namespaceOrder));
     } catch (err) {
       console.error(err);
       this.setState({isRefreshing: false});
@@ -269,7 +277,8 @@ class MyNamespaces extends React.Component {
 
   render() {
     const { dispatch, navigation, namespaceList, namespaceOrder } = this.props;
-    const canAdd = this.state.nsName && this.state.nsName.length >0;
+    const canAdd = this.state.nsName && this.state.nsName.length > 0;
+
     return (
       <View style={styles.container}>
         {/*

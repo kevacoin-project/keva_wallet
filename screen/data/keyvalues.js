@@ -426,7 +426,7 @@ class KeyValues extends React.Component {
   }
 
   render() {
-    let {navigation, keyValueList, keyValueOrder} = this.props;
+    let {navigation, dispatch, keyValueList, keyValueOrder} = this.props;
     const namespaceId = navigation.getParam('namespaceId');
     const list = keyValueList[namespaceId];
     const order = keyValueOrder[namespaceId];
@@ -444,21 +444,24 @@ class KeyValues extends React.Component {
            onPress={this.onDeleteConfirm}
         />
         */}
-        <SortableListView
-          style={styles.listStyle}
-          contentContainerStyle={{flex: 1}}
-          data={list||[]}
-          order={order}
-          onChangeOrder={this.onRowMoved}
-          refreshControl={
-            <RefreshControl onRefresh={() => this.refreshKeyValues()} refreshing={this.state.isRefreshing} />
-          }
-          renderRow={({data, active}) =>
-            <Item data={data} dispatch={this.props.dispatch} onDelete={this.onDelete}
-              active={active} onEdit={this.onItemEdit}
-            />
-          }
-        />
+        {
+          list &&
+          <SortableListView
+            style={styles.listStyle}
+            contentContainerStyle={{flex: 1}}
+            data={list}
+            order={order}
+            onChangeOrder={this.onRowMoved}
+            refreshControl={
+              <RefreshControl onRefresh={() => this.refreshKeyValues()} refreshing={this.state.isRefreshing} />
+            }
+            renderRow={({data, active}) =>
+              <Item data={data} dispatch={dispatch} onDelete={this.onDelete}
+                active={active} onEdit={this.onItemEdit}
+              />
+            }
+          />
+        }
       </View>
     );
   }
