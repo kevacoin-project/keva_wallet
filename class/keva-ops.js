@@ -506,8 +506,7 @@ async function traverseKeyValues(ecl, address, namespaceId, transactions, result
   }
 }
 
-export async function getKeyValuesFromShortCode(ecl, transactions, shortCode) {
-  let txid = await getNamespaceFromShortCode(ecl, shortCode);
+export async function getKeyValuesFromTxid(ecl, transactions, txid) {
   let result = await getNamespaceDataFromTx(ecl, transactions, txid);
   let address = result.address;
   let results = [];
@@ -536,6 +535,11 @@ export async function getKeyValuesFromShortCode(ecl, transactions, shortCode) {
   }
   keyValues.reverse();
   return keyValues;
+}
+
+export async function getKeyValuesFromShortCode(ecl, transactions, shortCode) {
+  let txid = await getNamespaceFromShortCode(ecl, shortCode);
+  return getKeyValuesFromTxid(ecl, transactions, txid);
 }
 
 export async function findMyNamespaces(wallet, ecl) {

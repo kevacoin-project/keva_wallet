@@ -39,7 +39,7 @@ import ActionSheet from 'react-native-actionsheet';
 import ElevatedView from 'react-native-elevated-view';
 import { connect } from 'react-redux'
 import { setKeyValueList, setKeyValueOrder } from '../../actions'
-import { getKeyValuesFromShortCode } from '../../class/keva-ops';
+import { getKeyValuesFromShortCode, getKeyValuesFromTxid } from '../../class/keva-ops';
 
 const CLOSE_ICON    = <Icon name="ios-close" size={42} color={KevaColors.errColor}/>;
 const CLOSE_ICON_MODAL = (<Icon name="ios-close" size={36} color={KevaColors.darkText} style={{paddingVertical: 5, paddingHorizontal: 15}} />)
@@ -412,10 +412,16 @@ class KeyValues extends React.Component {
     let {navigation, dispatch} = this.props;
     const namespaceId = navigation.getParam('namespaceId');
     const shortCode = navigation.getParam('shortCode');
+    const txid = navigation.getParam('txid');
     if (shortCode) {
       const wallets = BlueApp.getWallets();
       const transactions = wallets[0].getTransactions();
       const keyValues = await getKeyValuesFromShortCode(BlueElectrum, transactions, shortCode.toString());
+      dispatch(setKeyValueList(namespaceId, keyValues));
+    } else if (txid) {
+      const wallets = BlueApp.getWallets();
+      const transactions = wallets[0].getTransactions();
+      const keyValues = await getKeyValuesFromTxid(BlueElectrum, transactions, txid);
       dispatch(setKeyValueList(namespaceId, keyValues));
     }
   }

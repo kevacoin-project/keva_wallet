@@ -6,55 +6,29 @@ import {
   View,
   TextInput,
   Alert,
-  StatusBar,
   TouchableOpacity,
   KeyboardAvoidingView,
   Keyboard,
   TouchableWithoutFeedback,
   Dimensions,
   Platform,
-  ScrollView,
   PixelRatio,
   Text,
   RefreshControl,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
-import AsyncStorage from '@react-native-community/async-storage';
 import {
-  BlueCreateTxNavigationStyle,
-  BlueButton,
-  BlueBitcoinAmount,
-  BlueAddressInput,
-  BlueDismissKeyboardInputAccessory,
-  BlueLoading,
-  BlueUseAllFundsButton,
-  BlueListItem,
-  BlueText,
   BlueNavigationStyle,
   BlueHeaderDefaultSub,
 } from '../../BlueComponents';
-import Slider from '@react-native-community/slider';
-import PropTypes from 'prop-types';
 import Modal from 'react-native-modal';
-import NetworkTransactionFees, { NetworkTransactionFee } from '../../models/networkTransactionFees';
-import BitcoinBIP70TransactionDecode from '../../bip70/bip70';
-import { BitcoinUnit, Chain } from '../../models/bitcoinUnits';
-import { AppStorage, HDSegwitBech32Wallet, LightningCustodianWallet, WatchOnlyWallet } from '../../class';
-import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
-import { BitcoinTransaction } from '../../models/bitcoinTransactionInfo';
-import DocumentPicker from 'react-native-document-picker';
-import RNFS from 'react-native-fs';
-import DeeplinkSchemaMatch from '../../class/deeplink-schema-match';
+import ActionSheet from 'react-native-actionsheet';
 import SortableListView from 'react-native-sortable-list'
 import ElevatedView from 'react-native-elevated-view'
 import { TabView, TabBar } from 'react-native-tab-view';
 import { connect } from 'react-redux'
 import { setNamespaceList, setNamespaceOrder } from '../../actions'
 
-const bitcoin = require('bitcoinjs-lib');
-const bip21 = require('../../bip21/bip21');
-let BigNumber = require('bignumber.js');
-const { width } = Dimensions.get('window');
 let BlueApp = require('../../BlueApp');
 let loc = require('../../loc');
 let BlueElectrum = require('../../BlueElectrum');
@@ -62,9 +36,11 @@ const StyleSheet = require('../../PlatformStyleSheet');
 const KevaButton = require('../../common/KevaButton');
 const KevaColors = require('../../common/KevaColors');
 const utils = require('../../util');
-import { createKevaNamespace, updateKeyValue, findMyNamespaces } from '../../class/keva-ops';
+import {
+  createKevaNamespace, updateKeyValue, findMyNamespaces,
+  setOtherNamespaceOrder, setOtherNamespaceList,
+} from '../../class/keva-ops';
 
-const ACTIVE_OPACITY = 0.7;
 const CLOSE_ICON = (<Icon name="ios-close" size={36} color="#fff" style={{ paddingVertical: 5, paddingHorizontal: 15 }} />)
 
 class Namespace extends React.Component {
@@ -344,6 +320,117 @@ class MyNamespaces extends React.Component {
 
 }
 
+class OtherNamespaces extends React.Component {
+
+  constructor(props) {
+    super(props);
+    this.state = {
+      loaded: false, changes: false, nsName: '',
+      namespaceId: null, saving: false,
+      isLoading: true, isModalVisible: false,
+      isRefreshing: false,
+    };
+  }
+
+  onChangeOrder = async (order) => {
+    this.props.dispatch(setOtherNamespaceOrder(order));
+  }
+
+  fetchOtherNamespaces = async () => {
+    const { dispatch } = this.props;
+    const wallets = BlueApp.getWallets();
+    const namespaceList = await findMyNamespaces(wallets[0], BlueElectrum);
+    dispatch(setNamespaceList(namespaceList));
+
+    // Fix the order
+    const namespaceOrder = this.props.namespaceOrder;
+    for (let id of Object.keys(namespaceList)) {
+      if (!namespaceOrder.find(nid => nid == id)) {
+        namespaceOrder.unshift(id);
+      }
+    }
+    dispatch(setNamespaceOrder(namespaceOrder));
+  }
+
+  async componentDidMount() {
+    try {
+      await this.fetchOtherNamespaces();
+    } catch (err) {
+      // TODO: show status.
+      console.error(err);
+    }
+  }
+
+  refreshNamespaces = async () => {
+    this.setState({isRefreshing: true});
+    try {
+      this.fetchOtherNamespaces();
+    } catch (err) {
+      console.error(err);
+      this.setState({isRefreshing: false});
+    }
+    this.setState({isRefreshing: false});
+  }
+
+  onSearchNamespace =async () => {
+    this.state.nsName;
+  }
+
+  render() {
+    const { navigation, otherNamespaceList, otherNamespaceOrder } = this.props;
+    const canSearch = this.state.nsName && this.state.nsName.length > 0;
+
+    return (
+      <View style={styles.container}>
+        <ActionSheet
+          ref={ref => this._actionSheet = ref}
+          title={'Are you sure you want to delete it?'}
+          options={[loc.general.delete, loc.general.cancel]}
+          cancelButtonIndex={1}
+          destructiveButtonIndex={0}
+          onPress={this.onAction}
+        />
+        <View style={{ paddingTop: 10, paddingLeft: 8, backgroundColor: '#fff', borderBottomWidth: utils.THIN_BORDER, borderColor: KevaColors.cellBorder, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingBottom: 10 }}>
+          <TextInput
+            onChangeText={nsName => this.setState({ nsName: nsName })}
+            value={this.state.nsName}
+            placeholder={"Name of new namespace"}
+            multiline={true}
+            underlineColorAndroid='rgba(0,0,0,0)'
+            style={{ flex: 1, borderRadius: 4, backgroundColor: '#ececed', paddingTop: 5, paddingBottom: 5, paddingLeft: 7, paddingRight: 36 }}
+          />
+          {this.state.saving ?
+            <ActivityIndicator size="small" color={KevaColors.actionText} style={{ width: 42, height: 42 }} />
+            :
+            <TouchableOpacity onPress={this.onSearchNamespace} disabled={!canSearch}>
+              <Icon name={'md-search'}
+                    style={[styles.addIcon, !canSearch && {color: KevaColors.inactiveText}]}
+                    size={25} />
+            </TouchableOpacity>
+          }
+        </View>
+        {
+          otherNamespaceList &&
+          <SortableListView
+            style={styles.listStyle}
+            contentContainerStyle={{flex: 1}}
+            data={otherNamespaceList}
+            order={otherNamespaceOrder}
+            onChangeOrder={this.onChangeOrder}
+            refreshControl={
+              <RefreshControl onRefresh={() => this.refreshNamespaces()} refreshing={this.state.isRefreshing} />
+            }
+            renderRow={({data, active}) => {
+              return <Namespace onEdit={this.onNSNameEdit} data={data} active={active} navigation={navigation} />
+            }}
+          />
+        }
+      </View>
+    );
+  }
+
+}
+
 class Namespaces extends React.Component {
 
   static navigationOptions = ({ navigation }) => ({
@@ -379,7 +466,7 @@ class Namespaces extends React.Component {
               case 'first':
                 return <MyNamespaces dispatch={dispatch} navigation={navigation} namespaceList={namespaceList} namespaceOrder={namespaceOrder}/>;
               case 'second':
-                return <MyNamespaces dispatch={dispatch} navigation={navigation} namespaceList={namespaceList} namespaceOrder={namespaceOrder}/>;
+                return <OtherNamespaces dispatch={dispatch} navigation={navigation} namespaceList={namespaceList} namespaceOrder={namespaceOrder}/>;
             }
           }}
           onIndexChange={index => this.setState({ index })}
@@ -408,6 +495,8 @@ function mapStateToProps(state) {
   return {
     namespaceList: state.namespaceList,
     namespaceOrder: state.namespaceOrder,
+    otherNamespaceList: state.otherNamespaceList,
+    otherNamespaceOrder: state.otherNamespaceOrder,
   }
 }
 

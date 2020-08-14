@@ -8,6 +8,10 @@ module.exports = {
     ok: 'OK',
     bad_network: "Connection error, please try again",
   },
+  general: {
+    cancel: 'Cancel',
+    delete: 'Delete',
+  },
   wallets: {
     select_wallet: 'Select Wallet',
     options: 'options',

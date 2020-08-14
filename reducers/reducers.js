@@ -2,6 +2,8 @@ import { combineReducers } from 'redux'
 import {
   SET_NAMESPACES,
   SET_NAMESPACES_ORDER,
+  SET_OTHER_NAMESPACES,
+  SET_OTHER_NAMESPACES_ORDER,
   SET_KEYVALUE_LIST,
   SET_KEYVALUE_ORDER,
 } from '../actions'
@@ -21,6 +23,30 @@ function namespaceList(state = {}, action) {
 function namespaceOrder(state = [], action) {
   switch (action.type) {
     case SET_NAMESPACES_ORDER:
+      if (!action.namespaceOrder) {
+        return [];
+      }
+      return [...action.namespaceOrder];
+    default:
+      return state;
+  }
+}
+
+function otherNamespaceList(state = {}, action) {
+  switch (action.type) {
+    case SET_OTHER_NAMESPACES:
+      if (!action.namespaceList) {
+        return {};
+      }
+      return {...action.namespaceList};
+    default:
+      return state;
+  }
+}
+
+function otherNamespaceOrder(state = [], action) {
+  switch (action.type) {
+    case SET_OTHER_NAMESPACES_ORDER:
       if (!action.namespaceOrder) {
         return [];
       }
@@ -63,6 +89,8 @@ function keyValueOrder(state = {}, action) {
 export const appReducer = combineReducers({
   namespaceList,
   namespaceOrder,
+  otherNamespaceList,
+  otherNamespaceOrder,
   keyValueList,
   keyValueOrder,
 });
