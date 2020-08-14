@@ -502,27 +502,27 @@ export async function getKeyValuesFromShortCode(ecl, transactions, shortCode) {
   let address = result.address;
   let results = [];
   await traverseKeyValues(ecl, address, results);
-  console.log(results);
   // Merge the results.
-  let keyValues = {};
+  let keyValues = [];
   for (let kv of results) {
       if (kv.op === 'KEVA_OP_PUT') {
-          keyValues[kv.key] = {
-              value: kv.value,
-              tx: kv.tx,
-              n: kv.n
-          }
+        keyValues.push({
+          key: kv.key,
+          value: kv.value,
+          tx: kv.tx,
+          n: kv.n
+        });
       } else if (kv.op === 'KEVA_OP_DELETE') {
-          delete keyValues[kv.key];
+        keyValues = keyValues.filter(e => e.key != kv.key);
       } else if (kv.op === 'KEVA_OP_NAMESPACE') {
-          keyValues['_KEVA_NS_'] = {
-              value: kv.displayName,
-              tx: kv.tx,
-              n: kv.n
-          }
+        keyValues.push({
+          key: '_KEVA_NS_',
+          value: kv.displayName,
+          tx: kv.tx,
+          n: kv.n
+        });
       }
   }
-  console.log(keyValues);
   return keyValues;
 }
 

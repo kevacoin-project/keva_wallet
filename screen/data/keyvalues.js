@@ -149,7 +149,7 @@ class Item extends React.Component {
       <Animated.View style={[this._style,]}>
         <ElevatedView elevation={1} style={styles.card}>
           <View style={{flex:1,paddingHorizontal:10,paddingTop:7}}>
-            <Text style={styles.itemDesc}>{item.name}</Text>
+            <Text style={styles.itemDesc}>{item.key}</Text>
             <View style={{flexDirection:'row',alignItems:'center',justifyContent:'space-between'}}>
               <View></View>
               <View style={{flexDirection: 'row', alignItems:'center',justifyContent:'flex-start'}}>
@@ -369,7 +369,10 @@ class KeyValues extends React.Component {
     this.setState({isRefreshing: false});
   }
 
-  onRowMoved = async (e) => {
+  onRowMoved = async (order) => {
+    let {navigation, dispatch} = this.props;
+    const namespaceId = navigation.getParam('namespaceId');
+    dispatch(setKeyValueOrder(namespaceId, order))
   }
 
   openItemAni = () => {
@@ -411,25 +414,22 @@ class KeyValues extends React.Component {
   }
 
   async componentDidMount() {
-    let {navigation} = this.props;
+    let {navigation, dispatch} = this.props;
     const namespaceId = navigation.getParam('namespaceId');
     const shortCode = navigation.getParam('shortCode');
     if (shortCode) {
       const wallets = BlueApp.getWallets();
       const transactions = wallets[0].getTransactions();
-      await getKeyValuesFromShortCode(BlueElectrum, transactions, shortCode.toString());
+      const keyValues = await getKeyValuesFromShortCode(BlueElectrum, transactions, shortCode.toString());
+      dispatch(setKeyValueList(namespaceId, keyValues));
     }
   }
 
   render() {
-    let {navigation} = this.props;
+    let {navigation, keyValueList, keyValueOrder} = this.props;
     const namespaceId = navigation.getParam('namespaceId');
-    const shortCode = navigation.getParam('shortCode');
-    let itemList = {
-      0: { name: 'First Key' },
-      1: { name: 'Second Key' },
-      2: { name: 'Third Key' },
-    };
+    const list = keyValueList[namespaceId];
+    const order = keyValueOrder[namespaceId];
     const inputMode = this.state.inputMode;
     return (
       <View style={styles.container}>
@@ -447,7 +447,8 @@ class KeyValues extends React.Component {
         <SortableListView
           style={styles.listStyle}
           contentContainerStyle={{flex: 1}}
-          data={itemList}
+          data={list||[]}
+          order={order}
           onChangeOrder={this.onRowMoved}
           refreshControl={
             <RefreshControl onRefresh={() => this.refreshKeyValues()} refreshing={this.state.isRefreshing} />
