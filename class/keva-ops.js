@@ -491,6 +491,7 @@ async function traverseKeyValues(ecl, address, namespaceId, transactions, result
               address = v.scriptPubKey.addresses[0];
               let resultJson = kevaToJson(result);
               if (resultJson.namespaceId != namespaceId) {
+                // TODO: this is imporant - why we are here!!!!!
                 continue;
               }
               resultJson.tx = history[i].tx_hash;
@@ -533,6 +534,7 @@ export async function getKeyValuesFromShortCode(ecl, transactions, shortCode) {
         });
       }
   }
+  keyValues.reverse();
   return keyValues;
 }
 

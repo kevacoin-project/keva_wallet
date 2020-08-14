@@ -364,11 +364,6 @@ class KeyValues extends React.Component {
     this.modalCode.open();
   }
 
-  refreshKeyValues = async () => {
-    this.setState({isRefreshing: true});
-    this.setState({isRefreshing: false});
-  }
-
   onRowMoved = async (order) => {
     let {navigation, dispatch} = this.props;
     const namespaceId = navigation.getParam('namespaceId');
@@ -413,7 +408,7 @@ class KeyValues extends React.Component {
     return numItems;
   }
 
-  async componentDidMount() {
+  fetchKeyValues = async () => {
     let {navigation, dispatch} = this.props;
     const namespaceId = navigation.getParam('namespaceId');
     const shortCode = navigation.getParam('shortCode');
@@ -425,11 +420,22 @@ class KeyValues extends React.Component {
     }
   }
 
+  refreshKeyValues = async () => {
+    this.setState({isRefreshing: true});
+    await this.fetchKeyValues();
+    this.setState({isRefreshing: false});
+  }
+
+  async componentDidMount() {
+    await this.fetchKeyValues();
+  }
+
   render() {
     let {navigation, dispatch, keyValueList, keyValueOrder} = this.props;
     const namespaceId = navigation.getParam('namespaceId');
     const list = keyValueList[namespaceId];
-    const order = keyValueOrder[namespaceId];
+    // TODO: should we support key ordering?
+    //const order = keyValueOrder[namespaceId];
     const inputMode = this.state.inputMode;
     return (
       <View style={styles.container}>
@@ -450,7 +456,7 @@ class KeyValues extends React.Component {
             style={styles.listStyle}
             contentContainerStyle={{flex: 1}}
             data={list}
-            order={order}
+            sortingEnabled={false}
             onChangeOrder={this.onRowMoved}
             refreshControl={
               <RefreshControl onRefresh={() => this.refreshKeyValues()} refreshing={this.state.isRefreshing} />

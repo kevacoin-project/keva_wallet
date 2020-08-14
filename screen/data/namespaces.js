@@ -181,9 +181,6 @@ class MyNamespaces extends React.Component {
     };
   }
 
-  async componentDidMount() {
-  }
-
   onNSNameEdit = (namespaceId, nsName) => {
     this.setState({
       nsName: nsName,
@@ -253,21 +250,35 @@ class MyNamespaces extends React.Component {
     }
   }
 
+  fetchNamespaces = async () => {
+    const { dispatch } = this.props;
+    const wallets = BlueApp.getWallets();
+    const namespaceList = await findMyNamespaces(wallets[0], BlueElectrum);
+    dispatch(setNamespaceList(namespaceList));
+
+    // Fix the order
+    const namespaceOrder = this.props.namespaceOrder;
+    for (let id of Object.keys(namespaceList)) {
+      if (!namespaceOrder.find(nid => nid == id)) {
+        namespaceOrder.unshift(id);
+      }
+    }
+    dispatch(setNamespaceOrder(namespaceOrder));
+  }
+
+  async componentDidMount() {
+    try {
+      await this.fetchNamespaces();
+    } catch (err) {
+      // TODO: show status.
+      console.error(err);
+    }
+  }
+
   refreshNamespaces = async () => {
     this.setState({isRefreshing: true});
-    const wallets = BlueApp.getWallets();
     try {
-      const namespaceList = await findMyNamespaces(wallets[0], BlueElectrum);
-      this.props.dispatch(setNamespaceList(namespaceList));
-
-      // Fix the order
-      const namespaceOrder = this.props.namespaceOrder;
-      for (let id of Object.keys(namespaceList)) {
-        if (!namespaceOrder.find(nid => nid == id)) {
-          namespaceOrder.unshift(id);
-        }
-      }
-      this.props.dispatch(setNamespaceOrder(namespaceOrder));
+      this.fetchNamespaces();
     } catch (err) {
       console.error(err);
       this.setState({isRefreshing: false});
@@ -276,7 +287,7 @@ class MyNamespaces extends React.Component {
   }
 
   render() {
-    const { dispatch, navigation, namespaceList, namespaceOrder } = this.props;
+    const { navigation, namespaceList, namespaceOrder } = this.props;
     const canAdd = this.state.nsName && this.state.nsName.length > 0;
 
     return (
@@ -368,7 +379,7 @@ class Namespaces extends React.Component {
               case 'first':
                 return <MyNamespaces dispatch={dispatch} navigation={navigation} namespaceList={namespaceList} namespaceOrder={namespaceOrder}/>;
               case 'second':
-                return <MyNamespaces />;
+                return <MyNamespaces dispatch={dispatch} navigation={navigation} namespaceList={namespaceList} namespaceOrder={namespaceOrder}/>;
             }
           }}
           onIndexChange={index => this.setState({ index })}
