@@ -576,3 +576,45 @@ export async function findMyNamespaces(wallet, ecl) {
   }
   return namespaces;
 }
+
+export async function findOtherNamespace(wallet, ecl, txidOrShortCode) {
+
+  let txid;
+  if (txidOrShortCode.length > 20) {
+    // It is txid;
+    txid = txidOrShortCode;
+  } else {
+    txid = await getNamespaceFromShortCode(ecl, txidOrShortCode);
+  }
+
+  let namespaces = {};
+  let nsId;
+  const tx = await ecl.blockchainTransaction_get(txid, true);
+  // From transactions, tx.outputs
+  // From server: tx.vout
+  for (let v of tx.vout) {
+    let result = parseKeva(v.scriptPubKey.asm);
+    if (!result) {
+        continue;
+    }
+    const keva = kevaToJson(result);
+    nsId = keva.namespaceId;
+    namespaces[nsId] = {
+      id: nsId,
+      walletId: wallet.getID(),
+      txId: tx.txid,
+    }
+    if (keva.displayName) {
+      namespaces[nsId].displayName = keva.displayName;
+    }
+  }
+
+  if (nsId) {
+    // Find the root txid and short code for each namespace.
+    const transactions = [];
+    const { shortCode, rootTxid } = await findNamespaceShortCode(ecl, transactions, namespaces[nsId].txId);
+    namespaces[nsId].shortCode = shortCode;
+    namespaces[nsId].rootTxid = rootTxid;
+  }
+  return namespaces;
+}

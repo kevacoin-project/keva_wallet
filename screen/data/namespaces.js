@@ -27,7 +27,7 @@ import SortableListView from 'react-native-sortable-list'
 import ElevatedView from 'react-native-elevated-view'
 import { TabView, TabBar } from 'react-native-tab-view';
 import { connect } from 'react-redux'
-import { setNamespaceList, setNamespaceOrder } from '../../actions'
+import { setNamespaceList, setNamespaceOrder, setOtherNamespaceOrder, setOtherNamespaceList, } from '../../actions'
 
 let BlueApp = require('../../BlueApp');
 let loc = require('../../loc');
@@ -38,7 +38,7 @@ const KevaColors = require('../../common/KevaColors');
 const utils = require('../../util');
 import {
   createKevaNamespace, updateKeyValue, findMyNamespaces,
-  setOtherNamespaceOrder, setOtherNamespaceList,
+  findOtherNamespace,
 } from '../../class/keva-ops';
 
 const CLOSE_ICON = (<Icon name="ios-close" size={36} color="#fff" style={{ paddingVertical: 5, paddingHorizontal: 15 }} />)
@@ -113,6 +113,7 @@ class Namespace extends React.Component {
 
   render() {
     let namespace = this.props.data;
+    let canDelete = this.props.canDelete;
     return (
       <Animated.View style={[this._style,]}>
         <ElevatedView elevation={1} style={styles.cardTitle}>
@@ -124,11 +125,11 @@ class Namespace extends React.Component {
               <TouchableOpacity onPress={this.onEdit}>
                 <Icon name="ios-create" size={22} style={styles.actionIcon} />
               </TouchableOpacity>
-              {/*
+              { canDelete &&
               <TouchableOpacity onPress={() => this.props.onShowActions(this.props.categoryId)}>
                 <Icon name="ios-trash" size={22} style={styles.actionIcon} />
               </TouchableOpacity>
-              */}
+              }
             </View>
           </View>
           <TouchableOpacity onPress={this.onKey}>
@@ -338,6 +339,8 @@ class OtherNamespaces extends React.Component {
 
   fetchOtherNamespaces = async () => {
     const { dispatch } = this.props;
+    // TODO: update namespace names.
+    /*
     const wallets = BlueApp.getWallets();
     const namespaceList = await findMyNamespaces(wallets[0], BlueElectrum);
     dispatch(setNamespaceList(namespaceList));
@@ -350,6 +353,7 @@ class OtherNamespaces extends React.Component {
       }
     }
     dispatch(setNamespaceOrder(namespaceOrder));
+    */
   }
 
   async componentDidMount() {
@@ -373,7 +377,23 @@ class OtherNamespaces extends React.Component {
   }
 
   onSearchNamespace =async () => {
-    this.state.nsName;
+    const { dispatch, otherNamespaceOrder } = this.props;
+    try {
+      const wallets = BlueApp.getWallets();
+      const otherNamespaceList = await findOtherNamespace(wallets[0], BlueElectrum, this.state.nsName);
+      dispatch(setOtherNamespaceList(otherNamespaceList));
+
+      // Fix the order
+      for (let id of Object.keys(otherNamespaceList)) {
+        if (!otherNamespaceOrder.find(nid => nid == id)) {
+          otherNamespaceOrder.unshift(id);
+        }
+      }
+      dispatch(setOtherNamespaceOrder(otherNamespaceOrder));
+    } catch (err) {
+      // TODO: show status
+      console.error(err);
+    }
   }
 
   render() {
@@ -394,7 +414,7 @@ class OtherNamespaces extends React.Component {
           <TextInput
             onChangeText={nsName => this.setState({ nsName: nsName })}
             value={this.state.nsName}
-            placeholder={"Name of new namespace"}
+            placeholder={"Namespace short code or tx id"}
             multiline={true}
             underlineColorAndroid='rgba(0,0,0,0)'
             style={{ flex: 1, borderRadius: 4, backgroundColor: '#ececed', paddingTop: 5, paddingBottom: 5, paddingLeft: 7, paddingRight: 36 }}
@@ -421,7 +441,7 @@ class OtherNamespaces extends React.Component {
               <RefreshControl onRefresh={() => this.refreshNamespaces()} refreshing={this.state.isRefreshing} />
             }
             renderRow={({data, active}) => {
-              return <Namespace onEdit={this.onNSNameEdit} data={data} active={active} navigation={navigation} />
+              return <Namespace onEdit={this.onNSNameEdit} data={data} active={active} navigation={navigation} canDelete={true} />
             }}
           />
         }
@@ -455,7 +475,7 @@ class Namespaces extends React.Component {
   }
 
   render() {
-    const { dispatch, navigation, namespaceList, namespaceOrder } = this.props;
+    const { dispatch, navigation, namespaceList, namespaceOrder, otherNamespaceList, otherNamespaceOrder } = this.props;
     return (
       <View style={styles.container}>
         <BlueHeaderDefaultSub leftText={/*loc.settings.header*/ 'Namespaces'} rightComponent={null} />
@@ -466,7 +486,7 @@ class Namespaces extends React.Component {
               case 'first':
                 return <MyNamespaces dispatch={dispatch} navigation={navigation} namespaceList={namespaceList} namespaceOrder={namespaceOrder}/>;
               case 'second':
-                return <OtherNamespaces dispatch={dispatch} navigation={navigation} namespaceList={namespaceList} namespaceOrder={namespaceOrder}/>;
+                return <OtherNamespaces dispatch={dispatch} navigation={navigation} otherNamespaceList={otherNamespaceList} otherNamespaceOrder={otherNamespaceOrder}/>;
             }
           }}
           onIndexChange={index => this.setState({ index })}
