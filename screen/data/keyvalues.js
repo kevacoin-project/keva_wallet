@@ -465,6 +465,7 @@ class KeyValues extends React.Component {
           list &&
           <SortableListView
             style={styles.listStyle}
+            contentContainerStyle={{paddingBottom: 400}}
             data={list}
             sortingEnabled={false}
             onChangeOrder={this.onRowMoved}

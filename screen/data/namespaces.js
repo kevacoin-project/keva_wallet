@@ -304,6 +304,7 @@ class MyNamespaces extends React.Component {
           namespaceList &&
           <SortableListView
             style={styles.listStyle}
+            contentContainerStyle={{paddingBottom: 400}}
             data={namespaceList.namespaces}
             order={namespaceList.order}
             onChangeOrder={this.onChangeOrder}
@@ -435,6 +436,7 @@ class OtherNamespaces extends React.Component {
           otherNamespaceList &&
           <SortableListView
             style={styles.listStyle}
+            contentContainerStyle={{paddingBottom: 400}}
             data={otherNamespaceList.namespaces}
             order={otherNamespaceList.order}
             onChangeOrder={this.onChangeOrder}
