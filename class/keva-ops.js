@@ -516,6 +516,8 @@ export async function getKeyValuesFromTxid(ecl, transactions, txid) {
   let keyValues = [];
   for (let kv of results) {
       if (kv.op === 'KEVA_OP_PUT') {
+        // Remove the existing one.
+        keyValues = keyValues.filter(e => e.key != kv.key);
         keyValues.push({
           key: kv.key,
           value: kv.value,
