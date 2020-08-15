@@ -391,7 +391,7 @@ class OtherNamespaces extends React.Component {
         order.unshift(newId);
       }
       dispatch(setOtherNamespaceList(namespace, order));
-      this.textInput.clear();
+      this.setState({nsName: ''});
     } catch (err) {
       Toast.show('Cannot find namespace');
       console.log(err);
@@ -421,7 +421,6 @@ class OtherNamespaces extends React.Component {
             underlineColorAndroid='rgba(0,0,0,0)'
             returnKeyType='search'
             clearButtonMode='while-editing'
-            ref={input => { this.textInput = input }}
             onSubmitEditing={this.onSearchNamespace}
             style={{ flex: 1, borderRadius: 4, backgroundColor: '#ececed', paddingTop: 5, paddingBottom: 5, paddingLeft: 7, paddingRight: 36 }}
           />
