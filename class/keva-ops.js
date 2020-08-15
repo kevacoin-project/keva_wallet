@@ -580,7 +580,6 @@ export async function findMyNamespaces(wallet, ecl) {
 }
 
 export async function findOtherNamespace(wallet, ecl, txidOrShortCode) {
-  //TODO: make sure to get the rootTxId.
   let txid;
   if (txidOrShortCode.length > 20) {
     // It is txid;
@@ -589,9 +588,16 @@ export async function findOtherNamespace(wallet, ecl, txidOrShortCode) {
     txid = await getNamespaceFromShortCode(ecl, txidOrShortCode);
   }
 
+  const transactions = [];
+  const { shortCode, rootTxid } = await findNamespaceShortCode(ecl, transactions, txid);
+
+  if (!rootTxid) {
+    return null;
+  }
+
   let namespaces = {};
   let nsId;
-  const tx = await ecl.blockchainTransaction_get(txid, true);
+  const tx = await ecl.blockchainTransaction_get(rootTxid, true);
   // From transactions, tx.outputs
   // From server: tx.vout
   for (let v of tx.vout) {
@@ -612,9 +618,6 @@ export async function findOtherNamespace(wallet, ecl, txidOrShortCode) {
   }
 
   if (nsId) {
-    // Find the root txid and short code for each namespace.
-    const transactions = [];
-    const { shortCode, rootTxid } = await findNamespaceShortCode(ecl, transactions, namespaces[nsId].txId);
     namespaces[nsId].shortCode = shortCode;
     namespaces[nsId].rootTxid = rootTxid;
   }

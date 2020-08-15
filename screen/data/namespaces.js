@@ -38,7 +38,8 @@ let BlueElectrum = require('../../BlueElectrum');
 const StyleSheet = require('../../PlatformStyleSheet');
 const KevaButton = require('../../common/KevaButton');
 const KevaColors = require('../../common/KevaColors');
-const utils = require('../../util');
+import { THIN_BORDER } from '../../util';
+import Toast from 'react-native-root-toast';
 import {
   createKevaNamespace, updateKeyValue, findMyNamespaces,
   findOtherNamespace,
@@ -281,12 +282,12 @@ class MyNamespaces extends React.Component {
         />
         */}
         {this.getNSModal()}
-        <View style={{ paddingTop: 10, paddingLeft: 8, backgroundColor: '#fff', borderBottomWidth: utils.THIN_BORDER, borderColor: KevaColors.cellBorder, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingBottom: 10 }}>
+        <View style={{ paddingTop: 10, paddingLeft: 8, backgroundColor: '#fff', borderBottomWidth: THIN_BORDER, borderColor: KevaColors.cellBorder, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingBottom: 10 }}>
           <TextInput
             onChangeText={nsName => this.setState({ nsName: nsName })}
             value={this.state.nsName}
             placeholder={"Name of new namespace"}
-            multiline={true}
+            multiline={false}
             underlineColorAndroid='rgba(0,0,0,0)'
             style={{ flex: 1, borderRadius: 4, backgroundColor: '#ececed', paddingTop: 5, paddingBottom: 5, paddingLeft: 7, paddingRight: 36 }}
           />
@@ -339,22 +340,19 @@ class OtherNamespaces extends React.Component {
   }
 
   fetchOtherNamespaces = async () => {
-    const { dispatch } = this.props;
-    // TODO: update namespace names.
-    /*
-    const wallets = BlueApp.getWallets();
-    const namespaceList = await findMyNamespaces(wallets[0], BlueElectrum);
-    dispatch(setNamespaceList(namespaceList));
-
-    // Fix the order
-    const namespaceOrder = this.props.namespaceOrder;
-    for (let id of Object.keys(namespaceList)) {
-      if (!namespaceOrder.find(nid => nid == id)) {
-        namespaceOrder.unshift(id);
+    const { dispatch, otherNamespaceList } = this.props;
+    try {
+      const order = otherNamespaceList.order;
+      const wallets = BlueApp.getWallets();
+      const namespaces = otherNamespaceList.namespaces;
+      for (let ns of Object.keys(namespaces)) {
+        const namespace = await findOtherNamespace(wallets[0], BlueElectrum, namespaces[ns].rootTxid);
+        dispatch(setOtherNamespaceList(namespace, order));
       }
+    } catch (err) {
+      Toast.show('Cannot find namespace');
+      console.log(err);
     }
-    dispatch(setNamespaceOrder(namespaceOrder));
-    */
   }
 
   async componentDidMount() {
@@ -393,9 +391,10 @@ class OtherNamespaces extends React.Component {
         order.unshift(newId);
       }
       dispatch(setOtherNamespaceList(namespace, order));
+      this.textInput.clear();
     } catch (err) {
-      // TODO: show status
-      console.error(err);
+      Toast.show('Cannot find namespace');
+      console.log(err);
     }
   }
 
@@ -413,13 +412,17 @@ class OtherNamespaces extends React.Component {
           destructiveButtonIndex={0}
           onPress={this.onAction}
         />
-        <View style={{ paddingTop: 10, paddingLeft: 8, backgroundColor: '#fff', borderBottomWidth: utils.THIN_BORDER, borderColor: KevaColors.cellBorder, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingBottom: 10 }}>
+        <View style={{ paddingTop: 10, paddingLeft: 8, backgroundColor: '#fff', borderBottomWidth: THIN_BORDER, borderColor: KevaColors.cellBorder, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingBottom: 10 }}>
           <TextInput
             onChangeText={nsName => this.setState({ nsName: nsName })}
             value={this.state.nsName}
             placeholder={"Namespace short code or tx id"}
-            multiline={true}
+            multiline={false}
             underlineColorAndroid='rgba(0,0,0,0)'
+            returnKeyType='search'
+            clearButtonMode='while-editing'
+            ref={input => { this.textInput = input }}
+            onSubmitEditing={this.onSearchNamespace}
             style={{ flex: 1, borderRadius: 4, backgroundColor: '#ececed', paddingTop: 5, paddingBottom: 5, paddingLeft: 7, paddingRight: 36 }}
           />
           {this.state.saving ?
