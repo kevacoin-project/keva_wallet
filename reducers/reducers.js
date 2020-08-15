@@ -5,82 +5,70 @@ import {
   SET_OTHER_NAMESPACES,
   SET_OTHER_NAMESPACES_ORDER,
   SET_KEYVALUE_LIST,
-  SET_KEYVALUE_ORDER,
 } from '../actions'
 
-function namespaceList(state = {}, action) {
+const initNamespaceList = {namespaces: {}, order: []};
+
+function namespaceList(state = initNamespaceList, action) {
   switch (action.type) {
     case SET_NAMESPACES:
       if (!action.namespaceList) {
-        return {};
+        return {...initNamespaceList};
       }
-      return {...action.namespaceList};
-    default:
-      return state;
-  }
-}
-
-function namespaceOrder(state = [], action) {
-  switch (action.type) {
+      return {
+        namespaces: {...state.namespaces, ...action.namespaceList},
+        order: [...action.order]
+      }
     case SET_NAMESPACES_ORDER:
-      if (!action.namespaceOrder) {
-        return [];
+      if (!action.order) {
+        return state;
       }
-      return [...action.namespaceOrder];
+      return {
+        ...state,
+        order: [...action.order]
+      }
     default:
       return state;
   }
 }
 
-function otherNamespaceList(state = {}, action) {
+const initOtherNamespaceList = {namespaces: {}, order: []};
+
+function otherNamespaceList(state = initOtherNamespaceList, action) {
   switch (action.type) {
     case SET_OTHER_NAMESPACES:
       if (!action.namespaceList) {
-        return {};
+        return {...initOtherNamespaceList};
       }
-      return {...action.namespaceList};
-    default:
-      return state;
-  }
-}
-
-function otherNamespaceOrder(state = [], action) {
-  switch (action.type) {
+      return {
+        namespaces: {...state.namespaces, ...action.namespaceList},
+        order: [...action.order]
+      }
     case SET_OTHER_NAMESPACES_ORDER:
-      if (!action.namespaceOrder) {
-        return [];
+      if (!action.order) {
+        return state;
       }
-      return [...action.namespaceOrder];
+      return {
+        ...state,
+        order: [...action.order]
+      }
     default:
       return state;
   }
 }
 
-function keyValueList(state = {}, action) {
+const initKeyValueList = {keyValues: {}, order: {}};
+
+function keyValueList(state = initKeyValueList, action) {
   switch (action.type) {
     case SET_KEYVALUE_LIST:
       if (action.namespaceId && action.keyValues) {
         return {
-          ...state,
-          [action.namespaceId] : action.keyValues,
-        };
+          keyValues: {...state.keyValues, [action.namespaceId]: action.keyValues},
+          order: {...state.order, [action.namespaceId]: action.order}
+        }
       }
-      return state;
-    default:
-      return state;
-  }
-}
-
-function keyValueOrder(state = {}, action) {
-  switch (action.type) {
-    case SET_KEYVALUE_ORDER:
-      if (action.namespaceId && action.keyValueOrder) {
-        return {
-          ...state,
-          [action.namespaceId] : action.keyValueOrder,
-        };
-      }
-      return state;
+      return {...initKeyValueList};
     default:
       return state;
   }
@@ -88,9 +76,6 @@ function keyValueOrder(state = {}, action) {
 
 export const appReducer = combineReducers({
   namespaceList,
-  namespaceOrder,
   otherNamespaceList,
-  otherNamespaceOrder,
   keyValueList,
-  keyValueOrder,
 });

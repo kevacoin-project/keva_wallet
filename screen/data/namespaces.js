@@ -27,7 +27,10 @@ import SortableListView from 'react-native-sortable-list'
 import ElevatedView from 'react-native-elevated-view'
 import { TabView, TabBar } from 'react-native-tab-view';
 import { connect } from 'react-redux'
-import { setNamespaceList, setNamespaceOrder, setOtherNamespaceOrder, setOtherNamespaceList, } from '../../actions'
+import {
+  setNamespaceList, setOtherNamespaceList,
+  setNamespaceOrder, setOtherNamespaceOrder,
+} from '../../actions'
 
 let BlueApp = require('../../BlueApp');
 let loc = require('../../loc');
@@ -208,7 +211,8 @@ class MyNamespaces extends React.Component {
   }
 
   onChangeOrder = async (order) => {
-    this.props.dispatch(setNamespaceOrder(order));
+    const { dispatch } = this.props;
+    dispatch(setNamespaceOrder(order));
   }
 
   onAddNamespace = async () => {
@@ -230,17 +234,15 @@ class MyNamespaces extends React.Component {
   fetchNamespaces = async () => {
     const { dispatch } = this.props;
     const wallets = BlueApp.getWallets();
-    const namespaceList = await findMyNamespaces(wallets[0], BlueElectrum);
-    dispatch(setNamespaceList(namespaceList));
+    const namespaces = await findMyNamespaces(wallets[0], BlueElectrum);
 
-    // Fix the order
-    const namespaceOrder = this.props.namespaceOrder;
-    for (let id of Object.keys(namespaceList)) {
-      if (!namespaceOrder.find(nid => nid == id)) {
-        namespaceOrder.unshift(id);
+    const order = this.props.namespaceList.order;
+    for (let id of Object.keys(namespaces)) {
+      if (!order.find(nsid => nsid == id)) {
+        order.unshift(id);
       }
     }
-    dispatch(setNamespaceOrder(namespaceOrder));
+    dispatch(setNamespaceList(namespaces, order));
   }
 
   async componentDidMount() {
@@ -264,9 +266,8 @@ class MyNamespaces extends React.Component {
   }
 
   render() {
-    const { navigation, namespaceList, namespaceOrder } = this.props;
+    const { navigation, namespaceList } = this.props;
     const canAdd = this.state.nsName && this.state.nsName.length > 0;
-
     return (
       <View style={styles.container}>
         {/*
@@ -304,8 +305,8 @@ class MyNamespaces extends React.Component {
           <SortableListView
             style={styles.listStyle}
             contentContainerStyle={{flex: 1}}
-            data={namespaceList}
-            order={namespaceOrder}
+            data={namespaceList.namespaces}
+            order={namespaceList.order}
             onChangeOrder={this.onChangeOrder}
             refreshControl={
               <RefreshControl onRefresh={() => this.refreshNamespaces()} refreshing={this.state.isRefreshing} />
@@ -377,19 +378,21 @@ class OtherNamespaces extends React.Component {
   }
 
   onSearchNamespace =async () => {
-    const { dispatch, otherNamespaceOrder } = this.props;
+    const { dispatch, otherNamespaceList } = this.props;
     try {
       const wallets = BlueApp.getWallets();
-      const otherNamespaceList = await findOtherNamespace(wallets[0], BlueElectrum, this.state.nsName);
-      dispatch(setOtherNamespaceList(otherNamespaceList));
+      const namespace = await findOtherNamespace(wallets[0], BlueElectrum, this.state.nsName);
+      if (!namespace) {
+        return;
+      }
+      const newId = Object.keys(namespace)[0];
 
       // Fix the order
-      for (let id of Object.keys(otherNamespaceList)) {
-        if (!otherNamespaceOrder.find(nid => nid == id)) {
-          otherNamespaceOrder.unshift(id);
-        }
+      let order = [...otherNamespaceList.order];
+      if (!order.find(nsid => nsid == newId)) {
+        order.unshift(newId);
       }
-      dispatch(setOtherNamespaceOrder(otherNamespaceOrder));
+      dispatch(setOtherNamespaceList(namespace, order));
     } catch (err) {
       // TODO: show status
       console.error(err);
@@ -397,7 +400,7 @@ class OtherNamespaces extends React.Component {
   }
 
   render() {
-    const { navigation, otherNamespaceList, otherNamespaceOrder } = this.props;
+    const { navigation, otherNamespaceList } = this.props;
     const canSearch = this.state.nsName && this.state.nsName.length > 0;
 
     return (
@@ -434,8 +437,8 @@ class OtherNamespaces extends React.Component {
           <SortableListView
             style={styles.listStyle}
             contentContainerStyle={{flex: 1}}
-            data={otherNamespaceList}
-            order={otherNamespaceOrder}
+            data={otherNamespaceList.namespaces}
+            order={otherNamespaceList.order}
             onChangeOrder={this.onChangeOrder}
             refreshControl={
               <RefreshControl onRefresh={() => this.refreshNamespaces()} refreshing={this.state.isRefreshing} />
@@ -484,9 +487,9 @@ class Namespaces extends React.Component {
           renderScene={({ route }) => {
             switch (route.key) {
               case 'first':
-                return <MyNamespaces dispatch={dispatch} navigation={navigation} namespaceList={namespaceList} namespaceOrder={namespaceOrder}/>;
+                return <MyNamespaces dispatch={dispatch} navigation={navigation} namespaceList={namespaceList} />;
               case 'second':
-                return <OtherNamespaces dispatch={dispatch} navigation={navigation} otherNamespaceList={otherNamespaceList} otherNamespaceOrder={otherNamespaceOrder}/>;
+                return <OtherNamespaces dispatch={dispatch} navigation={navigation} otherNamespaceList={otherNamespaceList} />;
             }
           }}
           onIndexChange={index => this.setState({ index })}

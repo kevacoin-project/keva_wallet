@@ -159,7 +159,7 @@ export async function getNamespaceDataFromTx(ecl, transactions, txidStart, nsSta
 
       let nextns = result[1];
       if (!ns || nextns === ns) {
-        txIds = tx.vin.map(t => t.txid);
+        let txIds = tx.vin.map(t => t.txid);
         let uniqueTxIds = txIds.filter((v, i, a) => a.indexOf(v) === i);
         for (let t of uniqueTxIds) {
           stack.push([t, nextns]);
@@ -578,7 +578,7 @@ export async function findMyNamespaces(wallet, ecl) {
 }
 
 export async function findOtherNamespace(wallet, ecl, txidOrShortCode) {
-
+  //TODO: make sure to get the rootTxId.
   let txid;
   if (txidOrShortCode.length > 20) {
     // It is txid;

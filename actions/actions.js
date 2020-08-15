@@ -6,26 +6,22 @@ export const SET_OTHER_NAMESPACES_ORDER = 'SET_OTHER_NAMESPACES_ORDER';
 export const SET_KEYVALUE_LIST = 'SET_KEYVALUE_LIST';
 export const SET_KEYVALUE_ORDER = 'SET_KEYVALUE_ORDER';
 
-export function setNamespaceList(list) {
-  return { type: SET_NAMESPACES, namespaceList: list }
+export function setNamespaceList(list, order) {
+  return { type: SET_NAMESPACES, namespaceList: list, order }
 }
 
 export function setNamespaceOrder(order) {
-  return { type: SET_NAMESPACES_ORDER, namespaceOrder: order }
+  return { type: SET_NAMESPACES_ORDER, order }
 }
 
-export function setOtherNamespaceList(list) {
-  return { type: SET_OTHER_NAMESPACES, namespaceList: list }
+export function setOtherNamespaceList(list, order) {
+  return { type: SET_OTHER_NAMESPACES, namespaceList: list, order }
 }
 
 export function setOtherNamespaceOrder(order) {
-  return { type: SET_OTHER_NAMESPACES_ORDER, namespaceOrder: order }
+  return { type: SET_OTHER_NAMESPACES_ORDER, order }
 }
 
-export function setKeyValueList(namespaceId, keyValues) {
-  return { type: SET_KEYVALUE_LIST, namespaceId,  keyValues}
-}
-
-export function setKeyValueOrder(namespaceId, keyValueOrder) {
-  return { type: SET_KEYVALUE_ORDER, namespaceId, keyValueOrder }
+export function setKeyValueList(namespaceId, keyValues, order) {
+  return { type: SET_KEYVALUE_LIST, namespaceId,  keyValues, order }
 }

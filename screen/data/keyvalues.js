@@ -38,8 +38,9 @@ import Modal from 'react-native-modalbox';
 import ActionSheet from 'react-native-actionsheet';
 import ElevatedView from 'react-native-elevated-view';
 import { connect } from 'react-redux'
-import { setKeyValueList, setKeyValueOrder } from '../../actions'
+import { setKeyValueList } from '../../actions'
 import { getKeyValuesFromShortCode, getKeyValuesFromTxid } from '../../class/keva-ops';
+import namespaces from './namespaces';
 
 const CLOSE_ICON    = <Icon name="ios-close" size={42} color={KevaColors.errColor}/>;
 const CLOSE_ICON_MODAL = (<Icon name="ios-close" size={36} color={KevaColors.darkText} style={{paddingVertical: 5, paddingHorizontal: 15}} />)
@@ -409,20 +410,25 @@ class KeyValues extends React.Component {
   }
 
   fetchKeyValues = async () => {
-    let {navigation, dispatch} = this.props;
+    let {navigation, dispatch, keyValueList} = this.props;
     const namespaceId = navigation.getParam('namespaceId');
     const shortCode = navigation.getParam('shortCode');
     const txid = navigation.getParam('txid');
+    let keyValues;
     if (shortCode) {
       const wallets = BlueApp.getWallets();
       const transactions = wallets[0].getTransactions();
-      const keyValues = await getKeyValuesFromShortCode(BlueElectrum, transactions, shortCode.toString());
-      dispatch(setKeyValueList(namespaceId, keyValues));
+      keyValues = await getKeyValuesFromShortCode(BlueElectrum, transactions, shortCode.toString());
     } else if (txid) {
       const wallets = BlueApp.getWallets();
       const transactions = wallets[0].getTransactions();
-      const keyValues = await getKeyValuesFromTxid(BlueElectrum, transactions, txid);
-      dispatch(setKeyValueList(namespaceId, keyValues));
+      keyValues = await getKeyValuesFromTxid(BlueElectrum, transactions, txid);
+    }
+
+    if (keyValues) {
+      // TODO: add order.
+      let order = keyValueList.order[namespaceId] || [];
+      dispatch(setKeyValueList(namespaceId, keyValues, order));
     }
   }
 
@@ -437,11 +443,10 @@ class KeyValues extends React.Component {
   }
 
   render() {
-    let {navigation, dispatch, keyValueList, keyValueOrder} = this.props;
+    let {navigation, dispatch, keyValueList} = this.props;
     const namespaceId = navigation.getParam('namespaceId');
-    const list = keyValueList[namespaceId];
-    // TODO: should we support key ordering?
-    //const order = keyValueOrder[namespaceId];
+    const list = keyValueList.keyValues[namespaceId];
+    const order = keyValueList.order[namespaceId];
     const inputMode = this.state.inputMode;
     return (
       <View style={styles.container}>
@@ -483,7 +488,6 @@ class KeyValues extends React.Component {
 function mapStateToProps(state) {
   return {
     keyValueList: state.keyValueList,
-    keyValueOrder: state.keyValueOrder,
   }
 }
 
