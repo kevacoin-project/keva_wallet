@@ -496,7 +496,7 @@ export default KeyValuesScreen = connect(mapStateToProps)(KeyValues);
 var styles = StyleSheet.create({
   container: {
     flex:1,
-    backgroundColor:'#fff'
+    backgroundColor: '#f8f8f8',
   },
   listStyle: {
     flex: 1,
