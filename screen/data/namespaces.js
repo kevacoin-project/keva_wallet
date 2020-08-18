@@ -7,9 +7,6 @@ import {
   TextInput,
   Alert,
   TouchableOpacity,
-  KeyboardAvoidingView,
-  Keyboard,
-  TouchableWithoutFeedback,
   Dimensions,
   Platform,
   PixelRatio,
@@ -20,6 +17,7 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import {
   BlueNavigationStyle,
   BlueHeaderDefaultSub,
+  BlueLoading,
 } from '../../BlueComponents';
 import Modal from 'react-native-modal';
 import ActionSheet from 'react-native-actionsheet';
@@ -40,6 +38,8 @@ const KevaButton = require('../../common/KevaButton');
 const KevaColors = require('../../common/KevaColors');
 import { THIN_BORDER } from '../../util';
 import Toast from 'react-native-root-toast';
+import StepModal from "../../common/StepModalWizard";
+
 import {
   createKevaNamespace, updateKeyValue, findMyNamespaces,
   findOtherNamespace,
@@ -158,6 +158,8 @@ class MyNamespaces extends React.Component {
       loaded: false, changes: false, nsName: '',
       namespaceId: null, saving: false,
       isLoading: true, isModalVisible: false,
+      showNSCreationModal: false,
+      currentPage: 0,
       isRefreshing: false,
     };
   }
@@ -216,19 +218,59 @@ class MyNamespaces extends React.Component {
     dispatch(setNamespaceOrder(order));
   }
 
+  NSCreationFinish = () => {
+    return this.setState({showNSCreationModal: false});
+  }
+
+  NSCreationCancel = () => {
+    return this.setState({showNSCreationModal: false});
+  }
+
+  NSCreationNext = () => {
+    console.log('JWU onNext')
+    return this.setState({
+      currentPage: this.state.currentPage + 1
+    });
+  }
+
+  getNSCreationModal = () => {
+    if (!this.state.showNSCreationModal) {
+      return null;
+    }
+
+    let createNSPage = (
+      <View style={{height: 300}}>
+        <Text>{"Creating Namespace ..."}</Text>
+        <BlueLoading />
+      </View>
+    );
+
+    let confirmPage = (
+      <View style={{height: 300}}>
+        <Text>Please confirm</Text>
+      </View>
+    );
+
+    return (
+      <View>
+        <StepModal
+          currentPage={this.state.currentPage}
+          stepComponents={[createNSPage, confirmPage]}
+          onFinish={this.NSCreationFinish}
+          onNext={this.NSCreationNext}
+          onCancel={this.NSCreationCancel}/>
+      </View>
+    );
+  }
+
   onAddNamespace = async () => {
     const wallets = BlueApp.getWallets();
     if (this.state.nsName && this.state.nsName.length > 0) {
-      return createKevaNamespace(wallets[0], 120, this.state.nsName);
-    }
-    return;
-    return updateKeyValue(wallets[0], 120, 'NZY6DiPFeSXzXYG3UKA5ZdXNMALwB6CzTz', 'John 3:16 Bible', 'For God so loved the world, that he gave his only Son, that whoever believes in him should not perish but have eternal life.');
-    return getNamespaceUtxo(wallets[0], 'NZY6DiPFeSXzXYG3UKA5ZdXNMALwB6CzTz');
-
-    return scanForNamespaces(wallets[0]);
-
-    if (this.state.nsName && this.state.nsName.length > 0) {
-      return createKevaNamespace(wallets[0], 120, this.state.nsName);
+      this.setState({showNSCreationModal: true, currentPage: 0}, () => {
+        setTimeout(async () => {
+          await createKevaNamespace(wallets[0], 120, this.state.nsName);
+        }, 800);
+      });
     }
   }
 
@@ -282,6 +324,7 @@ class MyNamespaces extends React.Component {
         />
         */}
         {this.getNSModal()}
+        {this.getNSCreationModal()}
         <View style={{ paddingTop: 10, paddingLeft: 8, backgroundColor: '#fff', borderBottomWidth: THIN_BORDER, borderColor: KevaColors.cellBorder, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingBottom: 10 }}>
           <TextInput
             onChangeText={nsName => this.setState({ nsName: nsName })}
