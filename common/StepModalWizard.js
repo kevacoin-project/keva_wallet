@@ -127,9 +127,9 @@ export default class StepModal extends Component {
               style={{ flexDirection: "row", justifyContent: "space-between", paddingVertical: 16 }}
             >
               {
-                (showSkip && this.isLastStep())
+                this.isLastStep()
                   ? <View />
-                  : this._renderSkipButton()
+                  : (showSkip && this._renderSkipButton())
               }
 
               {

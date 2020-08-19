@@ -18,6 +18,7 @@ import {
   BlueNavigationStyle,
   BlueHeaderDefaultSub,
   BlueLoading,
+  BlueBigCheckmark,
 } from '../../BlueComponents';
 import Modal from 'react-native-modal';
 import ActionSheet from 'react-native-actionsheet';
@@ -41,7 +42,7 @@ import Toast from 'react-native-root-toast';
 import StepModal from "../../common/StepModalWizard";
 
 import {
-  createKevaNamespace, updateKeyValue, findMyNamespaces,
+  createKevaNamespace, findMyNamespaces,
   findOtherNamespace,
 } from '../../class/keva-ops';
 
@@ -238,35 +239,36 @@ class MyNamespaces extends React.Component {
     }
 
     let createNSPage = (
-      <View style={{height: 300}}>
-        <Text>{"Creating Namespace ..."}</Text>
-        <BlueLoading />
+      <View style={styles.modalNS}>
+        <Text style={styles.modalText}>{"Creating Transaction ..."}</Text>
+        <BlueLoading style={{paddingTop: 30}}/>
       </View>
     );
 
     let confirmPage = (
-      <View style={{height: 300}}>
-        <Text>Please confirm, fee: {this.state.fee}</Text>
+      <View style={styles.modalNS}>
+        <Text style={styles.modalText}>{"Transaction fee:  "}
+          <Text style={styles.modalFee}>{this.state.fee + ' KVA'}</Text>
+        </Text>
         <KevaButton
           type='secondary'
-          style={{margin:10, marginTop: 20}}
+          style={{margin:10, marginTop: 40}}
           caption={'Confirm'}
           onPress={async () => {
             this.setState({currentPage: 2, isBroadcasting: true});
             try {
               await BlueElectrum.ping();
               await BlueElectrum.waitTillConnected();
-              //let result = await BlueElectrum.broadcast(this.namespaceTx);
-              let result = await BlueElectrum.broadcast("0234243423");
+              let result = await BlueElectrum.broadcast(this.namespaceTx);
               if (result.code) {
                 // Error.
                 return this.setState({
                   isBroadcasting: false,
-                  broadcastErr: result.message
+                  broadcastErr: result.message,
                 });
               }
               console.log(result)
-              this.setState({isBroadcasting: false});
+              this.setState({isBroadcasting: false, showSkip: false});
             } catch (err) {
               this.setState({isBroadcasting: false});
               console.warn(err);
@@ -276,30 +278,47 @@ class MyNamespaces extends React.Component {
       </View>
     );
 
-    let broadcastPage = (
-      <View style={{height: 300}}>
-        {
-          this.state.isBroadcasting && (
-            <>
-              <Text>{"Broadcasting Transaction ..."}</Text>
-              <BlueLoading />
-            </>
-          )
-        }
-        {
-          this.state.broadcastErr ? (
-            <>
-              <Text>{"Error message"}</Text>
-              <Text>{this.state.broadcastErr}</Text>
-            </>
-          ) : (
-            <>
-              <Text>{"Done"}</Text>
-            </>
-          )
-        }
-      </View>
-    );
+    let broadcastPage;
+    if (this.state.isBroadcasting) {
+      broadcastPage = (
+        <View style={styles.modalNS}>
+          <Text style={styles.modalText}>{"Broadcasting Transaction ..."}</Text>
+          <BlueLoading style={{paddingTop: 30}}/>
+        </View>
+      );
+    } else if (this.state.broadcastErr) {
+      broadcastPage = (
+        <View style={styles.modalNS}>
+          <Text style={[styles.modalText, {color: KevaColors.errColor, fontWeight: 'bold'}]}>{"Error"}</Text>
+          <Text style={styles.modalErr}>{this.state.broadcastErr}</Text>
+          <KevaButton
+            type='secondary'
+            style={{margin:10, marginTop: 30}}
+            caption={'Cancel'}
+            onPress={async () => {
+              this.setState({showNSCreationModal: false});
+            }}
+          />
+        </View>
+      );
+    } else {
+      broadcastPage = (
+        <View style={styles.modalNS}>
+          <BlueBigCheckmark style={{marginHorizontal: 50}}/>
+          <KevaButton
+            type='secondary'
+            style={{margin:10, marginTop: 30}}
+            caption={'Done'}
+            onPress={async () => {
+              this.setState({
+                showNSCreationModal: false,
+                nsName: '',
+              });
+            }}
+          />
+        </View>
+      );
+    }
 
     return (
       <View>
@@ -318,10 +337,18 @@ class MyNamespaces extends React.Component {
   onAddNamespace = async () => {
     const wallets = BlueApp.getWallets();
     if (this.state.nsName && this.state.nsName.length > 0) {
-      this.setState({showNSCreationModal: true, currentPage: 0}, () => {
+      this.setState({
+        showNSCreationModal: true,
+        currentPage: 0,
+        showSkip: true,
+        broadcastErr: null,
+        isBroadcasting: false,
+        fee: 0,
+      }, () => {
         setTimeout(async () => {
-          const {tx, namespaceId, fee} = await createKevaNamespace(wallets[0], 120, this.state.nsName);
-          this.setState({showNSCreationModal: true, currentPage: 1, fee});
+          const { tx, namespaceId, fee } = await createKevaNamespace(wallets[0], 120, this.state.nsName);
+          let feeKVA = fee / 100000000;
+          this.setState({ showNSCreationModal: true, currentPage: 1, fee: feeKVA });
           this.namespaceTx = tx;
         }, 800);
       });
@@ -817,5 +844,22 @@ var styles = StyleSheet.create({
     height: 90,
     justifyContent: 'center',
     alignItems: 'center'
+  },
+  modalNS: {
+    height: 300,
+    alignSelf: 'center',
+    justifyContent: 'flex-start'
+  },
+  modalText: {
+    fontSize: 18,
+    color: KevaColors.lightText,
+  },
+  modalFee: {
+    fontSize: 18,
+    color: KevaColors.statusColor,
+  },
+  modalErr: {
+    fontSize: 16,
+    marginTop: 20,
   }
 });

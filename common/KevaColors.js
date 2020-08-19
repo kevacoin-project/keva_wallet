@@ -69,6 +69,7 @@ module.exports = {
   errColor: '#d9534f',
   okColor: '#5cb85c',
   warnColor: '#F0AD4E',
+  statusColor: '#37c0a1',
   arrowIcon: '#bbb',
   selectColor: '#f25656',
   backgroundLight: '#fafafa'
