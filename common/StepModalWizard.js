@@ -27,6 +27,7 @@ import Modal from "react-native-modal";
 import Carousel from "react-native-snap-carousel";
 
 import PageControl from "react-native-page-control";
+import KevaColors from "./KevaColors";
 
 const { width } = Dimensions.get("window")
 
@@ -97,7 +98,7 @@ export default class StepModal extends Component {
             return onCancel && onCancel();
           }}
         >
-          <Text style={{ color: "grey", fontSize: 16 }}>
+          <Text style={{ color: KevaColors.actionText, fontSize: 16 }}>
             {"Cancel"}
           </Text>
         </TouchableOpacity>
@@ -114,7 +115,7 @@ export default class StepModal extends Component {
   }
 
   render() {
-    let stepComponents = this.props.stepComponents;
+    let {stepComponents, showSteps, showNext, showSkip} = this.props;
 
     return (
       <View>
@@ -123,18 +124,18 @@ export default class StepModal extends Component {
             style={customStyles.modal}
           >
             <View
-              style={{ flexDirection: "row", justifyContent: "space-between", padding: 16 }}
+              style={{ flexDirection: "row", justifyContent: "space-between", paddingVertical: 16 }}
             >
               {
-                this.isLastStep()
+                (showSkip && this.isLastStep())
                   ? <View />
                   : this._renderSkipButton()
               }
 
               {
-                this.isLastStep()
+                showNext && (this.isLastStep()
                   ? this._renderFinishButton()
-                  : this._renderNextButton()
+                  : this._renderNextButton())
               }
             </View>
             <View
@@ -153,18 +154,22 @@ export default class StepModal extends Component {
                 sliderWidth={width / 1.2}
                 ref={ref => (this.carousel = ref)}
                 onSnapToItem={this.changeIndex}
+                scrollEnabled={false}
               />
-              <PageControl
-                numberOfPages={stepComponents.length}
-                currentPage={this.props.currentPage}
-                hidesForSinglePage
-                pageIndicatorTintColor="#d3d3d3"
-                currentPageIndicatorTintColor="#60BCA5"
-                indicatorStyle={{ borderRadius: 7 }}
-                currentIndicatorStyle={{ borderRadius: 5 }}
-                indicatorSize={{ width: 13, height: 13 }}
-                onPageIndicatorPress={this.onItemTap}
-              />
+              {
+                showSteps &&
+                <PageControl
+                  numberOfPages={stepComponents.length}
+                  currentPage={this.props.currentPage}
+                  hidesForSinglePage
+                  pageIndicatorTintColor="#d3d3d3"
+                  currentPageIndicatorTintColor="#60BCA5"
+                  indicatorStyle={{ borderRadius: 7 }}
+                  currentIndicatorStyle={{ borderRadius: 5 }}
+                  indicatorSize={{ width: 13, height: 13 }}
+                  onPageIndicatorPress={this.onItemTap}
+                />
+              }
             </View>
           </View>
         </Modal>

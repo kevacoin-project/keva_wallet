@@ -227,7 +227,6 @@ class MyNamespaces extends React.Component {
   }
 
   NSCreationNext = () => {
-    console.log('JWU onNext')
     return this.setState({
       currentPage: this.state.currentPage + 1
     });
@@ -247,15 +246,68 @@ class MyNamespaces extends React.Component {
 
     let confirmPage = (
       <View style={{height: 300}}>
-        <Text>Please confirm</Text>
+        <Text>Please confirm, fee: {this.state.fee}</Text>
+        <KevaButton
+          type='secondary'
+          style={{margin:10, marginTop: 20}}
+          caption={'Confirm'}
+          onPress={async () => {
+            this.setState({currentPage: 2, isBroadcasting: true});
+            try {
+              await BlueElectrum.ping();
+              await BlueElectrum.waitTillConnected();
+              //let result = await BlueElectrum.broadcast(this.namespaceTx);
+              let result = await BlueElectrum.broadcast("0234243423");
+              if (result.code) {
+                // Error.
+                return this.setState({
+                  isBroadcasting: false,
+                  broadcastErr: result.message
+                });
+              }
+              console.log(result)
+              this.setState({isBroadcasting: false});
+            } catch (err) {
+              this.setState({isBroadcasting: false});
+              console.warn(err);
+            }
+          }}
+        />
+      </View>
+    );
+
+    let broadcastPage = (
+      <View style={{height: 300}}>
+        {
+          this.state.isBroadcasting && (
+            <>
+              <Text>{"Broadcasting Transaction ..."}</Text>
+              <BlueLoading />
+            </>
+          )
+        }
+        {
+          this.state.broadcastErr ? (
+            <>
+              <Text>{"Error message"}</Text>
+              <Text>{this.state.broadcastErr}</Text>
+            </>
+          ) : (
+            <>
+              <Text>{"Done"}</Text>
+            </>
+          )
+        }
       </View>
     );
 
     return (
       <View>
         <StepModal
+          showNext={false}
+          showSkip={this.state.showSkip}
           currentPage={this.state.currentPage}
-          stepComponents={[createNSPage, confirmPage]}
+          stepComponents={[createNSPage, confirmPage, broadcastPage]}
           onFinish={this.NSCreationFinish}
           onNext={this.NSCreationNext}
           onCancel={this.NSCreationCancel}/>
@@ -268,7 +320,9 @@ class MyNamespaces extends React.Component {
     if (this.state.nsName && this.state.nsName.length > 0) {
       this.setState({showNSCreationModal: true, currentPage: 0}, () => {
         setTimeout(async () => {
-          await createKevaNamespace(wallets[0], 120, this.state.nsName);
+          const {tx, namespaceId, fee} = await createKevaNamespace(wallets[0], 120, this.state.nsName);
+          this.setState({showNSCreationModal: true, currentPage: 1, fee});
+          this.namespaceTx = tx;
         }, 800);
       });
     }
