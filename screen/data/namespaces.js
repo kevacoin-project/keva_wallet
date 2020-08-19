@@ -14,6 +14,7 @@ import {
   RefreshControl,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
+import FAIcon from 'react-native-vector-icons/FontAwesome';
 import {
   BlueNavigationStyle,
   BlueHeaderDefaultSub,
@@ -46,7 +47,8 @@ import {
   findOtherNamespace,
 } from '../../class/keva-ops';
 
-const CLOSE_ICON = (<Icon name="ios-close" size={36} color="#fff" style={{ paddingVertical: 5, paddingHorizontal: 15 }} />)
+const CLOSE_ICON = (<Icon name="ios-close" size={36} color={KevaColors.primaryLightColor} style={{ paddingVertical: 5, paddingHorizontal: 15 }} />)
+const COPY_ICON = (<Icon name="ios-copy" size={22} color={KevaColors.extraLightText} style={{ paddingVertical: 5, paddingHorizontal: 5 }} />)
 
 class Namespace extends React.Component {
 
@@ -93,9 +95,9 @@ class Namespace extends React.Component {
   onPress() {
   }
 
-  onEdit = () => {
+  onInfo = () => {
     let namespace = this.props.data;
-    this.props.onEdit(this.props.categoryId, namespace.displayName);
+    this.props.onInfo(namespace);
   }
 
   onKey = () => {
@@ -127,12 +129,12 @@ class Namespace extends React.Component {
               <Text style={styles.cardTitleText}>{namespace.displayName}</Text>
             </View>
             <View style={styles.actionContainer}>
-              <TouchableOpacity onPress={this.onEdit}>
-                <Icon name="ios-create" size={22} style={styles.actionIcon} />
+              <TouchableOpacity onPress={this.onInfo}>
+                <FAIcon name="info-circle" size={20} style={styles.actionIcon} />
               </TouchableOpacity>
               { canDelete &&
               <TouchableOpacity onPress={() => this.props.onShowActions(this.props.categoryId)}>
-                <Icon name="ios-trash" size={22} style={styles.actionIcon} />
+                <Icon name="ios-trash" size={20} style={styles.actionIcon} />
               </TouchableOpacity>
               }
             </View>
@@ -165,46 +167,68 @@ class MyNamespaces extends React.Component {
     };
   }
 
-  onNSNameEdit = (namespaceId, nsName) => {
+  onNSInfo = (nsData) => {
     this.setState({
-      nsName: nsName,
-      sectionId: namespaceId,
+      nsData: nsData,
       codeErr: null,
       isModalVisible: true
     });
   }
 
   getNSModal() {
-    const sectionId = this.state.sectionId;
+    const nsData = this.state.nsData;
+    if (!nsData) {
+      return null;
+    }
+
+    const titleStyle ={
+      fontSize: 17,
+      fontWeight: '700',
+      marginTop: 15,
+      marginBottom: 0,
+      color: KevaColors.lightText,
+    };
+    const contentStyle ={
+      fontSize: 16,
+      color: KevaColors.lightText,
+      paddingTop: 5,
+    };
+    const container = {
+      flexDirection: 'column',
+      justifyContent: 'flex-start',
+    }
     return (
       <Modal style={styles.modal} backdrop={true}
         swipeDirection="down"
         onSwipeComplete={this.closeModal}
-        isVisible={this.state.isModalVisible} coverScreen>
+        isVisible={this.state.isModalVisible}>
         <View style={styles.modalHeader}>
-          <Text style={{ alignSelf: 'center', fontSize: 18, color: '#fff' }}>Namespace Name</Text>
+          <View/>
           <TouchableOpacity onPress={this.closeModal}>
             {CLOSE_ICON}
           </TouchableOpacity>
         </View>
-        <View style={{ paddingVertical: 25 }}>
-          <TextInput autoFocus
-            style={styles.sectionInput}
-            onChangeText={section => this.setState({ section: section })}
-            value={this.state.section}
-          />
-          {this.state.codeErr &&
-            <View style={styles.codeErr}>
-              <Text style={styles.codeErrText}>{this.state.codeErr}</Text>
-            </View>
-          }
-          <KevaButton
-            type='secondary'
-            loading={this.state.saving}
-            style={{ padding: 10, marginTop: 10, marginBottom: 10 }}
-            caption={sectionId ? 'Update' : 'Update'}
-            onPress={sectionId ? this.onUpdateSection : this.onAddNamespace}
-          />
+        <View style={{ paddingVertical: 5, marginHorizontal: 10}}>
+          <Text style={titleStyle}>{'Name'}</Text>
+          <Text style={contentStyle}>{nsData.displayName}</Text>
+
+          <Text style={titleStyle}>{'Id'}</Text>
+          <View style={container}>
+            <Text style={contentStyle}>{nsData.id}</Text>
+          </View>
+          {COPY_ICON}
+
+          <Text style={titleStyle}>{'Short Code'}</Text>
+          <View style={container}>
+            <Text style={contentStyle}>{nsData.shortCode}</Text>
+            {COPY_ICON}
+          </View>
+
+          <Text style={titleStyle}>{'Tx Id'}</Text>
+          <View style={container}>
+            <Text style={contentStyle}>{nsData.txId}</Text>
+            {COPY_ICON}
+          </View>
         </View>
       </Modal>
     )
@@ -437,7 +461,7 @@ class MyNamespaces extends React.Component {
               <RefreshControl onRefresh={() => this.refreshNamespaces()} refreshing={this.state.isRefreshing} />
             }
             renderRow={({data, active}) => {
-              return <Namespace onEdit={this.onNSNameEdit} data={data} active={active} navigation={navigation} />
+              return <Namespace onInfo={this.onNSInfo} data={data} active={active} navigation={navigation} />
             }}
           />
         }
@@ -570,7 +594,7 @@ class OtherNamespaces extends React.Component {
               <RefreshControl onRefresh={() => this.refreshNamespaces()} refreshing={this.state.isRefreshing} />
             }
             renderRow={({data, active}) => {
-              return <Namespace onEdit={this.onNSNameEdit} data={data} active={active} navigation={navigation} canDelete={true} />
+              return <Namespace onInfo={this.onNSInfo} data={data} active={active} navigation={navigation} canDelete={true} />
             }}
           />
         }
@@ -753,7 +777,8 @@ var styles = StyleSheet.create({
   },
   actionContainer: {
     flexDirection: 'row',
-    justifyContent: 'flex-end'
+    justifyContent: 'flex-end',
+    marginHorizontal: 20,
   },
   actionIcon: {
     color: KevaColors.arrowIcon,
@@ -761,13 +786,10 @@ var styles = StyleSheet.create({
     paddingVertical: 10
   },
   modal: {
-    height: 800,
-    borderTopLeftRadius: 10,
-    borderTopRightRadius: 10,
-    zIndex: 999999,
+    height: 300,
+    borderRadius: 10,
     backgroundColor: '#fff',
     justifyContent: 'flex-start',
-    margin: 0,
   },
   modalHeader: {
     paddingLeft: 15,
@@ -775,7 +797,6 @@ var styles = StyleSheet.create({
     borderTopRightRadius: 10,
     flexDirection: 'row',
     justifyContent: 'space-between',
-    backgroundColor: KevaColors.primaryLightColor,
   },
   sectionInput: {
     borderWidth: 1,
