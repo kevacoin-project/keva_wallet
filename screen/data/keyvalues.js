@@ -188,7 +188,18 @@ class KeyValues extends React.Component {
     ...BlueNavigationStyle(),
     title: '',
     tabBarVisible: false,
-    headerShown: true,
+    headerRight: () => (
+      <TouchableOpacity
+        style={{ marginHorizontal: 16, minWidth: 150, justifyContent: 'center', alignItems: 'flex-end' }}
+        onPress={() =>
+          navigation.navigate('AddKeyValue', {
+            wallet: navigation.state.params.wallet,
+          })
+        }
+      >
+        <Icon name="ios-add-circle" type="octicon" size={30} color={KevaColors.actionText} />
+      </TouchableOpacity>
+    ),
   });
 
   onSwitch = cb => {
