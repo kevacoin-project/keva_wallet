@@ -193,7 +193,8 @@ class KeyValues extends React.Component {
         style={{ marginHorizontal: 16, minWidth: 150, justifyContent: 'center', alignItems: 'flex-end' }}
         onPress={() =>
           navigation.navigate('AddKeyValue', {
-            wallet: navigation.state.params.wallet,
+            walletId: navigation.state.params.walletId,
+            namespaceId: navigation.state.params.namespaceId,
           })
         }
       >
@@ -425,14 +426,19 @@ class KeyValues extends React.Component {
     const namespaceId = navigation.getParam('namespaceId');
     const shortCode = navigation.getParam('shortCode');
     const txid = navigation.getParam('txid');
+    const walletId = navigation.getParam('walletId');
     let keyValues;
+    const wallets = BlueApp.getWallets();
+    this.wallet = wallets.find(w => w.getID() == walletId);
+    if (!this.wallet) {
+      //TODO: error message.
+      return;
+    }
     if (shortCode) {
-      const wallets = BlueApp.getWallets();
-      const transactions = wallets[0].getTransactions();
+      const transactions = this.wallet.getTransactions();
       keyValues = await getKeyValuesFromShortCode(BlueElectrum, transactions, shortCode.toString());
     } else if (txid) {
-      const wallets = BlueApp.getWallets();
-      const transactions = wallets[0].getTransactions();
+      const transactions = this.wallet.getTransactions();
       keyValues = await getKeyValuesFromTxid(BlueElectrum, transactions, txid);
     }
 
@@ -457,8 +463,6 @@ class KeyValues extends React.Component {
     let {navigation, dispatch, keyValueList} = this.props;
     const namespaceId = navigation.getParam('namespaceId');
     const list = keyValueList.keyValues[namespaceId];
-    const order = keyValueList.order[namespaceId];
-    const inputMode = this.state.inputMode;
     return (
       <View style={styles.container}>
          { this.getItemModal() }

@@ -431,7 +431,7 @@ export async function updateKeyValue(wallet, requestedSatPerByte, namespaceId, k
   psbt.finalizeAllInputs();
   let hexTx = psbt.extractTransaction(true).toHex();
   console.log(hexTx);
-  return hexTx;
+  return {tx: hexTx, fee};
 }
 
 // nsTx: any tx that contains namespace operation.

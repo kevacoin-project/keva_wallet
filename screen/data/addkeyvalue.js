@@ -19,6 +19,7 @@ import {
   StatusBar,
   RefreshControl,
 } from 'react-native';
+import Toast from 'react-native-root-toast';
 const StyleSheet = require('../../PlatformStyleSheet');
 const KevaButton = require('../../common/KevaButton');
 const KevaColors = require('../../common/KevaColors');
@@ -26,6 +27,8 @@ const KevaHeader = require('../../common/KevaHeader');
 const utils = require('../../util');
 import {
   BlueNavigationStyle,
+  BlueLoading,
+  BlueBigCheckmark,
 } from '../../BlueComponents';
 const loc = require('../../loc');
 let BlueApp = require('../../BlueApp');
@@ -39,8 +42,9 @@ import ActionSheet from 'react-native-actionsheet';
 import ElevatedView from 'react-native-elevated-view';
 import { connect } from 'react-redux'
 import { setKeyValueList } from '../../actions'
-import { getKeyValuesFromShortCode, getKeyValuesFromTxid } from '../../class/keva-ops';
-import FloatTextInput from '../../common/FloatTextInput'
+import { updateKeyValue } from '../../class/keva-ops';
+import FloatTextInput from '../../common/FloatTextInput';
+import StepModal from "../../common/StepModalWizard";
 
 const CLOSE_ICON    = <Icon name="ios-close" size={42} color={KevaColors.errColor}/>;
 const CLOSE_ICON_MODAL = (<Icon name="ios-close" size={36} color={KevaColors.darkText} style={{paddingVertical: 5, paddingHorizontal: 15}} />)
@@ -57,6 +61,9 @@ class AddKeyValue extends React.Component {
       loaded: false,
       changes: false,
       saving: false,
+      key: '',
+      value: '',
+      showKeyValueModal: false,
     };
   }
 
@@ -67,11 +74,7 @@ class AddKeyValue extends React.Component {
     headerRight: () => (
       <TouchableOpacity
         style={{ marginHorizontal: 16, minWidth: 150, justifyContent: 'center', alignItems: 'flex-end' }}
-        onPress={() =>
-          navigation.navigate('AddKeyValue', {
-            wallet: navigation.state.params.wallet,
-          })
-        }
+        onPress={navigation.state.params.onPress}
       >
         <Text style={{color: KevaColors.actionText, fontSize: 16}}>Save</Text>
       </TouchableOpacity>
@@ -79,23 +82,180 @@ class AddKeyValue extends React.Component {
   });
 
   async componentDidMount() {
+    this.props.navigation.setParams({
+      onPress: this.onSave,
+      headerRight: () => (
+        <TouchableOpacity
+          style={{ marginHorizontal: 16, minWidth: 150, justifyContent: 'center', alignItems: 'flex-end' }}
+          onPress={navigation.state.params.onPress}
+        >
+          <Text style={{color: KevaColors.actionText, fontSize: 16}}>Save</Text>
+        </TouchableOpacity>
+      ),
+    });
+  }
+
+  onSave = async () => {
+    const {namespaceId, walletId} = this.props.navigation.state.params;
+    const {key, value} = this.state;
+    if (key.length == 0 || value.length == 0) {
+      Toast.show('Key and value must be set');
+      return;
+    }
+    const wallets = BlueApp.getWallets();
+    this.wallet = wallets.find(w => w.getID() == walletId);
+    if (!this.wallet) {
+      Toast.show('Cannot find wallet');
+      return;
+    }
+
+    this.setState({
+      showKeyValueModal: true,
+      currentPage: 0,
+      showSkip: true,
+      broadcastErr: null,
+      isBroadcasting: false,
+      fee: 0,
+    }, () => {
+      setTimeout(async () => {
+        const { tx, fee } = await updateKeyValue(this.wallet, 120, namespaceId, key, value);
+        let feeKVA = fee / 100000000;
+        this.setState({ showKeyValueModal: true, currentPage: 1, fee: feeKVA });
+        this.namespaceTx = tx;
+      }, 800);
+    });
+  }
+
+  KeyValueCreationFinish = () => {
+    return this.setState({showKeyValueModal: false});
+  }
+
+  KeyValueCreationCancel = () => {
+    return this.setState({showKeyValueModal: false});
+  }
+
+  KeyValueCreationNext = () => {
+    return this.setState({
+      currentPage: this.state.currentPage + 1
+    });
+  }
+
+  getKeyValueModal = () => {
+    if (!this.state.showKeyValueModal) {
+      return null;
+    }
+
+    let createNSPage = (
+      <View style={styles.modalNS}>
+        <Text style={styles.modalText}>{"Creating Transaction ..."}</Text>
+        <BlueLoading style={{paddingTop: 30}}/>
+      </View>
+    );
+
+    let confirmPage = (
+      <View style={styles.modalNS}>
+        <Text style={styles.modalText}>{"Transaction fee:  "}
+          <Text style={styles.modalFee}>{this.state.fee + ' KVA'}</Text>
+        </Text>
+        <KevaButton
+          type='secondary'
+          style={{margin:10, marginTop: 40}}
+          caption={'Confirm'}
+          onPress={async () => {
+            this.setState({currentPage: 2, isBroadcasting: true});
+            try {
+              await BlueElectrum.ping();
+              await BlueElectrum.waitTillConnected();
+              let result = await BlueElectrum.broadcast(this.namespaceTx);
+              if (result.code) {
+                // Error.
+                return this.setState({
+                  isBroadcasting: false,
+                  broadcastErr: result.message,
+                });
+              }
+              console.log(result)
+              this.setState({isBroadcasting: false, showSkip: false});
+            } catch (err) {
+              this.setState({isBroadcasting: false});
+              console.warn(err);
+            }
+          }}
+        />
+      </View>
+    );
+
+    let broadcastPage;
+    if (this.state.isBroadcasting) {
+      broadcastPage = (
+        <View style={styles.modalNS}>
+          <Text style={styles.modalText}>{"Broadcasting Transaction ..."}</Text>
+          <BlueLoading style={{paddingTop: 30}}/>
+        </View>
+      );
+    } else if (this.state.broadcastErr) {
+      broadcastPage = (
+        <View style={styles.modalNS}>
+          <Text style={[styles.modalText, {color: KevaColors.errColor, fontWeight: 'bold'}]}>{"Error"}</Text>
+          <Text style={styles.modalErr}>{this.state.broadcastErr}</Text>
+          <KevaButton
+            type='secondary'
+            style={{margin:10, marginTop: 30}}
+            caption={'Cancel'}
+            onPress={async () => {
+              this.setState({showKeyValueModal: false});
+            }}
+          />
+        </View>
+      );
+    } else {
+      broadcastPage = (
+        <View style={styles.modalNS}>
+          <BlueBigCheckmark style={{marginHorizontal: 50}}/>
+          <KevaButton
+            type='secondary'
+            style={{margin:10, marginTop: 30}}
+            caption={'Done'}
+            onPress={async () => {
+              this.setState({
+                showKeyValueModal: false,
+                nsName: '',
+              });
+            }}
+          />
+        </View>
+      );
+    }
+
+    return (
+      <View>
+        <StepModal
+          showNext={false}
+          showSkip={this.state.showSkip}
+          currentPage={this.state.currentPage}
+          stepComponents={[createNSPage, confirmPage, broadcastPage]}
+          onFinish={this.KeyValueCreationFinish}
+          onNext={this.KeyValueCreationNext}
+          onCancel={this.KeyValueCreationCancel}/>
+      </View>
+    );
   }
 
   render() {
     let {navigation, dispatch} = this.props;
     return (
       <View style={styles.container}>
-        {/* this.getItemModal() */}
+        {this.getKeyValueModal()}
         <View style={styles.inputKey}>
           <FloatTextInput
             noBorder
             autoCorrect={false}
-            value={''}
+            value={this.state.key}
             underlineColorAndroid='rgba(0,0,0,0)'
             style={{fontSize:15,flex:1}}
             placeholder={'Key'}
             clearButtonMode="while-editing"
-            onChangeTextValue={() => {}}
+            onChangeTextValue={key => {this.setState({key})}}
           />
         </View>
         <View style={styles.inputValue}>
@@ -103,12 +263,12 @@ class AddKeyValue extends React.Component {
             multiline={true}
             noBorder
             autoCorrect={false}
-            value={''}
+            value={this.state.value}
             underlineColorAndroid='rgba(0,0,0,0)'
             style={{fontSize:15,flex:1}}
             placeholder={'Value'}
             clearButtonMode="while-editing"
-            onChangeTextValue={() => {}}
+            onChangeTextValue={value => {this.setState({value})}}
           />
         </View>
       </View>
@@ -145,5 +305,22 @@ var styles = StyleSheet.create({
     borderColor: KevaColors.cellBorder,
     backgroundColor: '#fff',
     paddingHorizontal: 10
-  }
+  },
+  modalNS: {
+    height: 300,
+    alignSelf: 'center',
+    justifyContent: 'flex-start'
+  },
+  modalText: {
+    fontSize: 18,
+    color: KevaColors.lightText,
+  },
+  modalFee: {
+    fontSize: 18,
+    color: KevaColors.statusColor,
+  },
+  modalErr: {
+    fontSize: 16,
+    marginTop: 20,
+  },
 });

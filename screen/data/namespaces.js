@@ -105,6 +105,7 @@ class Namespace extends React.Component {
     this.props.navigation.navigate('KeyValues', {
       namespaceId: namespace.id,
       shortCode: namespace.shortCode,
+      walletId: namespace.walletId,
     });
   }
 
