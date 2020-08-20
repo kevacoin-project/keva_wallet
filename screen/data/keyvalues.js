@@ -2,9 +2,7 @@ import React from 'react';
 import {
   Alert,
   Text,
-  Button,
   View,
-  ListView,
   Image,
   ScrollView,
   TextInput,
@@ -12,8 +10,6 @@ import {
   ActivityIndicator,
   Keyboard,
   LayoutAnimation,
-  UIManager,
-  Dimensions,
   Animated,
   Easing,
   StatusBar,
@@ -22,7 +18,6 @@ import {
 const StyleSheet = require('../../PlatformStyleSheet');
 const KevaButton = require('../../common/KevaButton');
 const KevaColors = require('../../common/KevaColors');
-const KevaHeader = require('../../common/KevaHeader');
 const utils = require('../../util');
 import {
   BlueNavigationStyle,
@@ -31,10 +26,9 @@ const loc = require('../../loc');
 let BlueApp = require('../../BlueApp');
 let BlueElectrum = require('../../BlueElectrum');
 
-import Switch from 'react-native-switch-pro';
 import Icon from 'react-native-vector-icons/Ionicons';
 import SortableListView from 'react-native-sortable-list'
-import Modal from 'react-native-modalbox';
+import Modal from 'react-native-modal';
 import ActionSheet from 'react-native-actionsheet';
 import ElevatedView from 'react-native-elevated-view';
 import { connect } from 'react-redux'
@@ -73,25 +67,27 @@ class Item extends React.Component {
   }
 
   render() {
-    let {data} = this.props;
+    let {data, onShow} = this.props;
     let item = data;
 
     return (
       <ElevatedView elevation={1} style={styles.card}>
-        <View style={{flex:1,paddingHorizontal:10,paddingTop:2}}>
-          <View style={{flexDirection:'row',alignItems:'center',justifyContent:'space-between'}}>
-            <Text style={styles.keyDesc} numberOfLines={1} ellipsizeMode="tail">{item.key}</Text>
-            <View style={{flexDirection: 'row', alignItems:'center',justifyContent:'flex-start'}}>
-              <TouchableOpacity onPress={this.onEdit}>
-                <Icon name="ios-create" size={22} style={styles.actionIcon} />
-              </TouchableOpacity>
-              <TouchableOpacity onPress={() => this.props.onDelete(this.props.itemId)}>
-                <Icon name="ios-trash" size={22} style={styles.actionIcon} />
-              </TouchableOpacity>
+        <TouchableOpacity onPress={() => onShow(item.key, item.value)}>
+          <View style={{flex:1,paddingHorizontal:10,paddingTop:2}}>
+            <View style={{flexDirection:'row',alignItems:'center',justifyContent:'space-between'}}>
+              <Text style={styles.keyDesc} numberOfLines={1} ellipsizeMode="tail">{item.key}</Text>
+              <View style={{flexDirection: 'row', alignItems:'center',justifyContent:'flex-start'}}>
+                <TouchableOpacity onPress={this.onEdit}>
+                  <Icon name="ios-create" size={22} style={styles.actionIcon} />
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => this.props.onDelete(this.props.itemId)}>
+                  <Icon name="ios-trash" size={22} style={styles.actionIcon} />
+                </TouchableOpacity>
+              </View>
             </View>
+            <Text style={styles.valueDesc} numberOfLines={3} ellipsizeMode="tail">{item.value}</Text>
           </View>
-          <Text style={styles.valueDesc} numberOfLines={3} ellipsizeMode="tail">{item.value}</Text>
-        </View>
+        </TouchableOpacity>
       </ElevatedView>
     )
   }
@@ -103,11 +99,7 @@ class KeyValues extends React.Component {
     super();
     this.state = {
       loaded: false,
-      changes: false,
-      saving: false,
-      item: '',
-      needPicture: true,
-      inputMode: false
+      isModalVisible: false,
     };
   }
 
@@ -206,6 +198,59 @@ class KeyValues extends React.Component {
     await this.fetchKeyValues();
   }
 
+  closeModal = () => {
+    this.setState({
+      isModalVisible: false,
+      key: null,
+      value: null,
+    });
+  }
+
+  getNSModal() {
+    const {key, value, isModalVisible} = this.state;
+    if (!key || !value) {
+      return null;
+    }
+
+    const titleStyle ={
+      fontSize: 17,
+      fontWeight: '700',
+      marginTop: 15,
+      marginBottom: 0,
+      color: KevaColors.lightText,
+    };
+    const contentStyle ={
+      fontSize: 16,
+      color: KevaColors.lightText,
+      paddingTop: 5,
+    };
+    return (
+      <Modal style={styles.modal}
+        backdrop={true}
+        swipeDirection="down"
+        onSwipeComplete={this.closeModal}
+        isVisible={isModalVisible}>
+        <View style={styles.modalHeader}>
+          <View/>
+          <TouchableOpacity onPress={this.closeModal}>
+            {CLOSE_ICON}
+          </TouchableOpacity>
+        </View>
+        <View style={{ paddingVertical: 5, marginHorizontal: 10}}>
+          <Text style={titleStyle}>{key}</Text>
+          <Text style={contentStyle}>{value}</Text>
+        </View>
+      </Modal>
+    )
+  }
+
+  onShow = (key, value) => {
+    this.setState({
+      isModalVisible: true,
+      key, value
+    });
+  }
+
   render() {
     let {navigation, dispatch, keyValueList} = this.props;
     const namespaceId = navigation.getParam('namespaceId');
@@ -222,6 +267,7 @@ class KeyValues extends React.Component {
            onPress={this.onDeleteConfirm}
         />
         */}
+        {this.getNSModal()}
         {
           list &&
           <SortableListView
@@ -235,6 +281,7 @@ class KeyValues extends React.Component {
             }
             renderRow={({data, active}) =>
               <Item data={data} dispatch={dispatch} onDelete={this.onDelete}
+                onShow={this.onShow}
                 active={active} navigation={navigation}
               />
             }
@@ -272,7 +319,6 @@ var styles = StyleSheet.create({
     backgroundColor:'#fff',
     borderRadius:5,
     marginVertical:3,
-    flexDirection: 'row'
   },
   keyDesc: {
     flex: 1,
@@ -291,8 +337,7 @@ var styles = StyleSheet.create({
   },
   modal: {
     height:500,
-    borderTopLeftRadius:10,
-    borderTopRightRadius:10,
+    borderRadius:10,
     backgroundColor: KevaColors.backgroundLight,
     zIndex:999999
   },
