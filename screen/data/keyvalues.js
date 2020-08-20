@@ -40,7 +40,6 @@ import ElevatedView from 'react-native-elevated-view';
 import { connect } from 'react-redux'
 import { setKeyValueList } from '../../actions'
 import { getKeyValuesFromShortCode, getKeyValuesFromTxid } from '../../class/keva-ops';
-import namespaces from './namespaces';
 
 const CLOSE_ICON    = <Icon name="ios-close" size={42} color={KevaColors.errColor}/>;
 const CLOSE_ICON_MODAL = (<Icon name="ios-close" size={36} color={KevaColors.darkText} style={{paddingVertical: 5, paddingHorizontal: 15}} />)
@@ -48,57 +47,11 @@ const CHECK_ICON    = <Icon name="ios-checkmark" size={42} color={KevaColors.okC
 const LIBRARY_ICON  = <Icon name="ios-images" size={30} color={KevaColors.icon}/>;
 const CAMERA_ICON   = <Icon name="ios-camera" size={30} color={KevaColors.icon}/>;
 
-const ACTIVE_OPACITY = 0.7;
-const IMAGE_SIZE = 1200;
-
-const HEADER_HEIGHT = 64;
-
-const IS_IOS = utils.IS_IOS;
-
 class Item extends React.Component {
 
   constructor(props) {
     super(props);
     this.state = { loading: false, selectedImage: null, isRefreshing: false };
-
-    this._active = new Animated.Value(0);
-    this._style = {
-      ...Platform.select({
-        ios: {
-          transform: [{
-            rotate: this._active.interpolate({
-              inputRange: [0, 1],
-              outputRange: [0, -0.04],
-            }),
-          }],
-          shadowRadius: this._active.interpolate({
-            inputRange: [0, 1],
-            outputRange: [2, 10],
-          }),
-        },
-
-        android: {
-          transform: [{
-            rotate: this._active.interpolate({
-              inputRange: [0, 1],
-              outputRange: [0, -0.04],
-            }),
-          }],
-          elevation: this._active.interpolate({
-            inputRange: [0, 1],
-            outputRange: [2, 6],
-          }),
-        },
-      }),
-      opacity: this._active.interpolate({
-        inputRange: [0, 1],
-        outputRange: [1, 0.7],
-      }),
-    };
-  }
-
-  onSwitch = cb => {
-    this.props.onSwitch(this.props.itemId, cb);
   }
 
   onEdit = () => {
@@ -119,39 +72,27 @@ class Item extends React.Component {
     }
   }
 
-  UNSAFE_componentWillReceiveProps(nextProps) {
-    if (this.props.active !== nextProps.active) {
-      Animated.timing(this._active, {
-        duration: 100,
-        easing: Easing.bounce,
-        toValue: Number(nextProps.active),
-      }).start();
-    }
-  }
-
   render() {
     let {data} = this.props;
     let item = data;
 
     return (
-      <Animated.View style={[this._style,]}>
-        <ElevatedView elevation={1} style={styles.card}>
-          <View style={{flex:1,paddingHorizontal:10,paddingTop:2}}>
-            <View style={{flexDirection:'row',alignItems:'center',justifyContent:'space-between'}}>
-              <Text style={styles.keyDesc} numberOfLines={1} ellipsizeMode="tail">{item.key}</Text>
-              <View style={{flexDirection: 'row', alignItems:'center',justifyContent:'flex-start'}}>
-                <TouchableOpacity onPress={this.onEdit}>
-                  <Icon name="ios-create" size={22} style={styles.actionIcon} />
-                </TouchableOpacity>
-                <TouchableOpacity onPress={() => this.props.onDelete(this.props.itemId)}>
-                  <Icon name="ios-trash" size={22} style={styles.actionIcon} />
-                </TouchableOpacity>
-              </View>
+      <ElevatedView elevation={1} style={styles.card}>
+        <View style={{flex:1,paddingHorizontal:10,paddingTop:2}}>
+          <View style={{flexDirection:'row',alignItems:'center',justifyContent:'space-between'}}>
+            <Text style={styles.keyDesc} numberOfLines={1} ellipsizeMode="tail">{item.key}</Text>
+            <View style={{flexDirection: 'row', alignItems:'center',justifyContent:'flex-start'}}>
+              <TouchableOpacity onPress={this.onEdit}>
+                <Icon name="ios-create" size={22} style={styles.actionIcon} />
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => this.props.onDelete(this.props.itemId)}>
+                <Icon name="ios-trash" size={22} style={styles.actionIcon} />
+              </TouchableOpacity>
             </View>
-            <Text style={styles.valueDesc} numberOfLines={3} ellipsizeMode="tail">{item.value}</Text>
           </View>
-        </ElevatedView>
-      </Animated.View>
+          <Text style={styles.valueDesc} numberOfLines={3} ellipsizeMode="tail">{item.value}</Text>
+        </View>
+      </ElevatedView>
     )
   }
 }
@@ -166,7 +107,6 @@ class KeyValues extends React.Component {
       saving: false,
       item: '',
       needPicture: true,
-      aniY: new Animated.Value(0),
       inputMode: false
     };
   }
@@ -189,10 +129,6 @@ class KeyValues extends React.Component {
       </TouchableOpacity>
     ),
   });
-
-  onSwitch = cb => {
-    cb(true, value => this.setState({needPicture: value}));
-  }
 
   onDelete = itemId => {
     this._itemId = itemId;
@@ -230,44 +166,6 @@ class KeyValues extends React.Component {
     let {navigation, dispatch} = this.props;
     const namespaceId = navigation.getParam('namespaceId');
     dispatch(setKeyValueOrder(namespaceId, order))
-  }
-
-  openItemAni = () => {
-    LayoutAnimation.configureNext({
-      duration: 100,
-      update: {type: LayoutAnimation.Types.easeInEaseOut}
-    });
-    this.setState({inputMode: true});
-    Animated.timing(this.state.aniY, {
-      toValue: 1,
-      duration: 200,
-      easing: Easing.inOut(Easing.linear),
-      useNativeDriver: true
-    }).start();
-  }
-
-  closeItemAni = () => {
-    LayoutAnimation.configureNext({
-      duration: 100,
-      update: {type: LayoutAnimation.Types.easeInEaseOut}
-    });
-    this.setState({inputMode: false});
-    this._inputRef && this._inputRef.blur();
-    this._inputRef && this._inputRef.clear();
-    Animated.timing(this.state.aniY, {
-      toValue: 0,
-      duration: 200,
-      easing: Easing.inOut(Easing.linear),
-      useNativeDriver: true
-    }).start();
-  }
-
-  _getItemCount(checkList) {
-    let numItems = 0;
-    checkList.order.forEach(categoryId => {
-      numItems += checkList.data[categoryId].order.length;
-    });
-    return numItems;
   }
 
   fetchKeyValues = async () => {
@@ -386,12 +284,6 @@ var styles = StyleSheet.create({
     marginBottom: 10,
     color: KevaColors.lightText
   },
-  img: {
-    width: 90,
-    height: 90,
-    borderTopLeftRadius: 5,
-    borderBottomLeftRadius: 5
-  },
   actionIcon: {
     color: KevaColors.icon,
     paddingHorizontal: 15,
@@ -415,17 +307,6 @@ var styles = StyleSheet.create({
     borderBottomWidth: utils.THIN_BORDER,
     borderColor: KevaColors.cellBorder
   },
-  itemInput: {
-    borderWidth: 1,
-    borderRadius: 4,
-    borderColor: KevaColors.cellBorder,
-    paddingTop: 10,
-    paddingBottom: 10,
-    paddingHorizontal: 7,
-    marginHorizontal: 7,
-    fontSize: 16,
-    backgroundColor: '#fff'
-  },
   codeErr: {
     marginTop: 10,
     marginHorizontal: 7,
@@ -442,19 +323,6 @@ var styles = StyleSheet.create({
     paddingTop: 15,
     paddingBottom: 10
   },
-  activeImg: {
-    flex: 1
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 5,
-    borderBottomWidth: utils.THIN_BORDER,
-    borderColor: KevaColors.cellBorder,
-    backgroundColor: '#fff',
-    height: 50
-  },
   action: {
     fontSize: 17,
     paddingVertical: 10
@@ -464,26 +332,5 @@ var styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 7,
     color: KevaColors.inactiveText
-  },
-  navHeader: {
-    borderBottomWidth:utils.THIN_BORDER,
-    borderBottomColor:KevaColors.cellBorder,
-    backgroundColor: 'white'
-  },
-  iconBox: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    height: 90,
-    width: 90
-  },
-  iconBtn: {
-    height: 40,
-    width: 40,
-    backgroundColor: '#fff',
-    borderRadius: 40,
-    justifyContent: 'center',
-    alignItems: 'center',
-    margin: 2
   },
 });
