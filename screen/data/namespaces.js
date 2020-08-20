@@ -685,10 +685,16 @@ class Namespaces extends React.Component {
 
           <Text style={titleStyle}>{'Short Code'}</Text>
           <View style={container}>
-            <Text style={contentStyle}>{nsData.shortCode}</Text>
-            <TouchableOpacity onPress={() => {this.copyString(nsData.shortCode)}}>
-              {COPY_ICON}
-            </TouchableOpacity>
+            {nsData.shortCode ?
+              <>
+                <Text style={contentStyle}>{nsData.shortCode}</Text>
+                <TouchableOpacity onPress={() => {this.copyString(nsData.shortCode)}}>
+                  {COPY_ICON}
+                </TouchableOpacity>
+              </>
+              :
+              <Text style={contentStyle}>{loc.general.unconfirmed}</Text>
+            }
           </View>
 
           <Text style={titleStyle}>{'Tx Id'}</Text>

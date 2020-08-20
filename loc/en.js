@@ -12,6 +12,7 @@ module.exports = {
     cancel: 'Cancel',
     delete: 'Delete',
     copiedToClipboard: 'Copied to clipboard',
+    unconfirmed: 'Unconfirmed',
   },
   wallets: {
     select_wallet: 'Select Wallet',

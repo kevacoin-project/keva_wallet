@@ -566,6 +566,10 @@ export async function findNamespaceShortCode(ecl, transctions, nsTx) {
   let history = await ecl.blockchainScripthash_getHistory(toScriptHash(result.address));
   let foundTx = history.find(h => h.tx_hash == txid);
   if (foundTx) {
+    if (foundTx.height <= 0) {
+      // Still in mempool.
+      return { rootTxidL: txid };
+    }
     let merkle = await ecl.blockchainTransaction_getMerkle(txid, foundTx.height, false);
     if (merkle) {
       // The first digit is the length of the block height.
@@ -575,7 +579,7 @@ export async function findNamespaceShortCode(ecl, transctions, nsTx) {
       return { shortCode, rootTxid: txid };
     }
   }
-  return { rootTxidL: txid }
+  return { rootTxidL: txid };
 }
 
 export async function getNamespaceFromShortCode(ecl, shortCode) {
