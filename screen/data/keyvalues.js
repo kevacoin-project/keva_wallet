@@ -30,16 +30,11 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import SortableListView from 'react-native-sortable-list'
 import Modal from 'react-native-modal';
 import ActionSheet from 'react-native-actionsheet';
-import ElevatedView from 'react-native-elevated-view';
 import { connect } from 'react-redux'
 import { setKeyValueList } from '../../actions'
-import { getKeyValuesFromShortCode, getKeyValuesFromTxid } from '../../class/keva-ops';
+import { getKeyValuesFromShortCode, getKeyValuesFromTxid, deleteKeyValue } from '../../class/keva-ops';
 
 const CLOSE_ICON    = <Icon name="ios-close" size={42} color={KevaColors.errColor}/>;
-const CLOSE_ICON_MODAL = (<Icon name="ios-close" size={36} color={KevaColors.darkText} style={{paddingVertical: 5, paddingHorizontal: 15}} />)
-const CHECK_ICON    = <Icon name="ios-checkmark" size={42} color={KevaColors.okColor}/>;
-const LIBRARY_ICON  = <Icon name="ios-images" size={30} color={KevaColors.icon}/>;
-const CAMERA_ICON   = <Icon name="ios-camera" size={30} color={KevaColors.icon}/>;
 
 class Item extends React.Component {
 
@@ -67,8 +62,10 @@ class Item extends React.Component {
   }
 
   render() {
-    let {data, onShow} = this.props;
+    let {data, onShow, namespaceId} = this.props;
     let item = data;
+    console.log('JWU ------ item')
+    console.log(item)
 
     return (
       <View style={styles.card}>
@@ -80,7 +77,7 @@ class Item extends React.Component {
                 <TouchableOpacity onPress={this.onEdit}>
                   <Icon name="ios-create" size={22} style={styles.actionIcon} />
                 </TouchableOpacity>
-                <TouchableOpacity onPress={() => this.props.onDelete(this.props.itemId)}>
+                <TouchableOpacity onPress={() => this.props.onDelete(namespaceId, item.key)}>
                   <Icon name="ios-trash" size={22} style={styles.actionIcon} />
                 </TouchableOpacity>
               </View>
@@ -100,6 +97,8 @@ class KeyValues extends React.Component {
     this.state = {
       loaded: false,
       isModalVisible: false,
+      currentPage: 0,
+      showDeleteModal: false,
     };
   }
 
@@ -122,35 +121,34 @@ class KeyValues extends React.Component {
     ),
   });
 
-  onDelete = itemId => {
-    this._itemId = itemId;
+  onDelete = (namespaceId, key) => {
+    this._namespaceId = namespaceId;
+    this._key = key;
     this._actionDelete.show();
   }
 
-  deleteItem(itemId) {
-    const navigation = this.props.navigation;
-    const propertyId = navigation.state.params.propertyId;
-    let categoryId = navigation.state.params.categoryId;
-    const checkListId = this.props.checklist[propertyId].id;
-    this.props.dispatch(deleteItemAsync(propertyId, checkListId, categoryId, itemId)).then(checklist => {
-      LayoutAnimation.configureNext({
-        duration: 200,
-        update: {type: LayoutAnimation.Types.easeInEaseOut}
-      });
-      this.props.dispatch(setChecklist(propertyId, checklist));
-    })
-    .then(() => {
-      this.props.dispatch(getPropertiesAsync());
-    })
-    .catch(err => {
-      console.log(err);
-      utils.showToast('Failed to delete. Check network connection.')
+  deleteItem = async (namespaceId, key) => {
+    const wallets = BlueApp.getWallets();
+    this.setState({
+      showDeleteModal: true,
+      currentPage: 0,
+      showSkip: true,
+      broadcastErr: null,
+      isBroadcasting: false,
+      fee: 0,
+    }, () => {
+      setTimeout(async () => {
+        const { tx, fee } = await deleteKeyValue(wallets[0], 120, namespaceId, key);
+        let feeKVA = fee / 100000000;
+        this.setState({ showDeleteModal: true, currentPage: 1, fee: feeKVA });
+        this.deleteKeyTx = tx;
+      }, 800);
     });
   }
 
   onDeleteConfirm = index => {
-    if (index === 0 && this._itemId) {
-      this.deleteItem(this._itemId);
+    if (index === 0 && this._namespaceId && this._key) {
+      this.deleteItem(this._namespaceId, this._key);
     }
   }
 
@@ -206,7 +204,7 @@ class KeyValues extends React.Component {
     });
   }
 
-  getNSModal() {
+  getKeyValueModal() {
     const {key, value, isModalVisible} = this.state;
     if (!key || !value) {
       return null;
@@ -245,6 +243,121 @@ class KeyValues extends React.Component {
     )
   }
 
+  keyDeleteFinish = () => {
+    return this.setState({showDeleteModal: false});
+  }
+
+  keyDeleteCancel = () => {
+    return this.setState({showDeleteModal: false});
+  }
+
+  keyDeleteNext = () => {
+    return this.setState({
+      currentPage: this.state.currentPage + 1
+    });
+  }
+
+  getDeleteModal = () => {
+    if (!this.state.showDeleteModal) {
+      return null;
+    }
+
+    let deleteKeyPage = (
+      <View style={styles.modalDelete}>
+        <Text style={styles.modalText}>{"Creating Transaction ..."}</Text>
+        <BlueLoading style={{paddingTop: 30}}/>
+      </View>
+    );
+
+    let confirmPage = (
+      <View style={styles.modalDelete}>
+        <Text style={styles.modalText}>{"Transaction fee:  "}
+          <Text style={styles.modalFee}>{this.state.fee + ' KVA'}</Text>
+        </Text>
+        <KevaButton
+          type='secondary'
+          style={{margin:10, marginTop: 40}}
+          caption={'Confirm'}
+          onPress={async () => {
+            this.setState({currentPage: 2, isBroadcasting: true});
+            try {
+              await BlueElectrum.ping();
+              await BlueElectrum.waitTillConnected();
+              let result = await BlueElectrum.broadcast(this.deleteKeyTx);
+              if (result.code) {
+                // Error.
+                return this.setState({
+                  isBroadcasting: false,
+                  broadcastErr: result.message,
+                });
+              }
+              console.log(result)
+              this.setState({isBroadcasting: false, showSkip: false});
+            } catch (err) {
+              this.setState({isBroadcasting: false});
+              console.warn(err);
+            }
+          }}
+        />
+      </View>
+    );
+
+    let broadcastPage;
+    if (this.state.isBroadcasting) {
+      broadcastPage = (
+        <View style={styles.modalDelete}>
+          <Text style={styles.modalText}>{"Broadcasting Transaction ..."}</Text>
+          <BlueLoading style={{paddingTop: 30}}/>
+        </View>
+      );
+    } else if (this.state.broadcastErr) {
+      broadcastPage = (
+        <View style={styles.modalDelete}>
+          <Text style={[styles.modalText, {color: KevaColors.errColor, fontWeight: 'bold'}]}>{"Error"}</Text>
+          <Text style={styles.modalErr}>{this.state.broadcastErr}</Text>
+          <KevaButton
+            type='secondary'
+            style={{margin:10, marginTop: 30}}
+            caption={'Cancel'}
+            onPress={async () => {
+              this.setState({showDeleteModal: false});
+            }}
+          />
+        </View>
+      );
+    } else {
+      broadcastPage = (
+        <View style={styles.modalDelete}>
+          <BlueBigCheckmark style={{marginHorizontal: 50}}/>
+          <KevaButton
+            type='secondary'
+            style={{margin:10, marginTop: 30}}
+            caption={'Done'}
+            onPress={async () => {
+              this.setState({
+                showDeleteModal: false,
+                nsName: '',
+              });
+            }}
+          />
+        </View>
+      );
+    }
+
+    return (
+      <View>
+        <StepModal
+          showNext={false}
+          showSkip={this.state.showSkip}
+          currentPage={this.state.currentPage}
+          stepComponents={[deleteKeyPage, confirmPage, broadcastPage]}
+          onFinish={this.NSCreationFinish}
+          onNext={this.NSCreationNext}
+          onCancel={this.NSCreationCancel}/>
+      </View>
+    );
+  }
+
   onShow = (key, value) => {
     this.setState({
       isModalVisible: true,
@@ -254,21 +367,21 @@ class KeyValues extends React.Component {
 
   render() {
     let {navigation, dispatch, keyValueList} = this.props;
+    console.log('JWU keyValueList $$$$$$$$$$$$$')
+    console.log(JSON.stringify(keyValueList))
     const namespaceId = navigation.getParam('namespaceId');
     const list = keyValueList.keyValues[namespaceId];
     return (
       <View style={styles.container}>
-        {/*
         <ActionSheet
            ref={ref => this._actionDelete = ref}
-           title={'Are you sure you want to delete it?'}
-           options={[Lang.general.delete, Lang.general.cancel]}
+           title={'Delete this key?'}
+           options={[loc.general.delete, loc.general.cancel]}
            cancelButtonIndex={1}
            destructiveButtonIndex={0}
            onPress={this.onDeleteConfirm}
         />
-        */}
-        {this.getNSModal()}
+        {this.getKeyValueModal()}
         {
           list &&
           <SortableListView
@@ -282,7 +395,7 @@ class KeyValues extends React.Component {
             }
             renderRow={({data, active}) =>
               <Item data={data} dispatch={dispatch} onDelete={this.onDelete}
-                onShow={this.onShow}
+                onShow={this.onShow} namespaceId={namespaceId}
                 active={active} navigation={navigation}
               />
             }
@@ -353,6 +466,23 @@ var styles = StyleSheet.create({
     borderBottomWidth: utils.THIN_BORDER,
     borderColor: KevaColors.cellBorder,
     marginHorizontal: 20,
+  },
+  modalDelete: {
+    height: 300,
+    alignSelf: 'center',
+    justifyContent: 'flex-start'
+  },
+  modalText: {
+    fontSize: 18,
+    color: KevaColors.lightText,
+  },
+  modalFee: {
+    fontSize: 18,
+    color: KevaColors.statusColor,
+  },
+  modalErr: {
+    fontSize: 16,
+    marginTop: 20,
   },
   codeErr: {
     marginTop: 10,

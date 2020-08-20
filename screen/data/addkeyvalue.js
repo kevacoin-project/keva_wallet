@@ -46,12 +46,6 @@ import { updateKeyValue } from '../../class/keva-ops';
 import FloatTextInput from '../../common/FloatTextInput';
 import StepModal from "../../common/StepModalWizard";
 
-const CLOSE_ICON    = <Icon name="ios-close" size={42} color={KevaColors.errColor}/>;
-const CLOSE_ICON_MODAL = (<Icon name="ios-close" size={36} color={KevaColors.darkText} style={{paddingVertical: 5, paddingHorizontal: 15}} />)
-const CHECK_ICON    = <Icon name="ios-checkmark" size={42} color={KevaColors.okColor}/>;
-const LIBRARY_ICON  = <Icon name="ios-images" size={30} color={KevaColors.icon}/>;
-const CAMERA_ICON   = <Icon name="ios-camera" size={30} color={KevaColors.icon}/>;
-
 
 class AddKeyValue extends React.Component {
 

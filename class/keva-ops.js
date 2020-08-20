@@ -298,6 +298,23 @@ function getKeyValueUpdateScript(namespaceId, address, key, value) {
   return nsScript;
 }
 
+function getKeyValueDeleteScript(namespaceId, address, key) {
+  const keyBuf = Buffer.from(utf8ToHex(key), 'hex');
+
+  let bscript = bitcoin.script;
+  let baddress = bitcoin.address;
+  let nsScript = bscript.compile([
+    KEVA_OP_DELETE,
+    namespaceToHex(namespaceId),
+    keyBuf,
+    bscript.OPS.OP_2DROP,
+    bscript.OPS.OP_HASH160,
+    baddress.fromBase58Check(address).hash,
+    bscript.OPS.OP_EQUAL]);
+
+  return nsScript;
+}
+
 export function getNonNamespaceUxtos(transactions, utxos) {
   let nonNSutxos = [];
   for (let u of utxos) {
@@ -364,7 +381,7 @@ function reorderUtxos(utxos, nsUtxo) {
 export async function updateKeyValue(wallet, requestedSatPerByte, namespaceId, key, value) {
   let nsUtxo = await getNamespaceUtxo(wallet, namespaceId);
   if (!nsUtxo) {
-    throw new Error('Cannot update namespace');
+    throw new Error('Cannot update key value');
   }
 
   const namespaceAddress = await wallet.getAddressAsync();
@@ -423,7 +440,97 @@ export async function updateKeyValue(wallet, requestedSatPerByte, namespaceId, k
     if (i == 0) {
       // The namespace creation script.
       if (output.value != 1000000) {
-        throw new Error('Namespace creation script has incorrect value.');
+        throw new Error('Key update script has incorrect value.');
+      }
+      const nsScript = getKeyValueUpdateScript(namespaceId, namespaceAddress, key, value);
+      psbt.addOutput({
+        script: nsScript,
+        value: output.value,
+      });
+    } else {
+      psbt.addOutput({
+        address: output.address,
+        value: output.value,
+      });
+    }
+  }
+
+  for (let i = 0; i < keypairs.length; i++) {
+    psbt.signInput(i, keypairs[i]);
+    if (!psbt.validateSignaturesOfInput(i)) {
+      throw new Error('Invalid signature for input #' + i);
+    }
+  }
+
+  psbt.finalizeAllInputs();
+  let hexTx = psbt.extractTransaction(true).toHex();
+  console.log(hexTx);
+  return {tx: hexTx, fee};
+}
+
+export async function deleteKeyValue(wallet, requestedSatPerByte, namespaceId, key) {
+  let nsUtxo = await getNamespaceUtxo(wallet, namespaceId);
+  if (!nsUtxo) {
+    throw new Error('Cannot delete key value');
+  }
+
+  const namespaceAddress = await wallet.getAddressAsync();
+  const nsScript = getKeyValueDeleteScript(namespaceId, namespaceAddress, key);
+
+  // Namespace needs at least 0.01 KVA.
+  const namespaceValue = 1000000;
+  let targets = [{
+    address: namespaceAddress, value: namespaceValue,
+    script: nsScript
+  }];
+
+  let utxos = wallet.getUtxo();
+  // Move the nsUtxo to the first one, so that it will always be used.
+  utxos = reorderUtxos(utxos, nsUtxo);
+  let { inputs, outputs, fee } = coinSelectAccumulative(utxos, targets, requestedSatPerByte);
+
+  // inputs and outputs will be undefined if no solution was found
+  if (!inputs || !outputs) {
+    throw new Error('Not enough balance. Try sending smaller amount');
+  }
+
+  const psbt = new bitcoin.Psbt();
+  psbt.setVersion(0x7100); // Kevacoin transaction.
+  let keypairs = [];
+  for (let i = 0; i < inputs.length; i++) {
+    let input = inputs[i];
+    const pubkey = wallet._getPubkeyByAddress(input.address);
+    if (!pubkey) {
+      throw new Error('Failed to get pubKey');
+    }
+    const p2wpkh = bitcoin.payments.p2wpkh({ pubkey });
+    const p2sh = bitcoin.payments.p2sh({ redeem: p2wpkh });
+
+    psbt.addInput({
+      hash: input.txId,
+      index: input.vout,
+      witnessUtxo: {
+        script: p2sh.output,
+        value: input.value,
+      },
+      redeemScript: p2wpkh.output,
+    });
+
+    let keyPair = bitcoin.ECPair.fromWIF(input.wif);
+    keypairs.push(keyPair);
+  }
+
+  for (let i = 0; i < outputs.length; i++) {
+    let output = outputs[i];
+    if (!output.address) {
+      // Change address.
+      output.address = await wallet.getChangeAddressAsync();
+    }
+
+    if (i == 0) {
+      // The namespace creation script.
+      if (output.value != 1000000) {
+        throw new Error('Key deletion script has incorrect value.');
       }
       const nsScript = getKeyValueUpdateScript(namespaceId, namespaceAddress, key, value);
       psbt.addOutput({
