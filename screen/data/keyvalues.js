@@ -215,18 +215,19 @@ class KeyValues extends React.Component {
     const titleStyle ={
       fontSize: 17,
       fontWeight: '700',
-      marginTop: 15,
-      marginBottom: 0,
+      marginBottom: 5,
       color: KevaColors.lightText,
     };
     const contentStyle ={
       fontSize: 16,
       color: KevaColors.lightText,
       paddingTop: 5,
+      lineHeight: 25,
     };
     return (
       <Modal style={styles.modal}
         backdrop={true}
+        coverScreen
         swipeDirection="down"
         onSwipeComplete={this.closeModal}
         isVisible={isModalVisible}>
@@ -336,21 +337,22 @@ var styles = StyleSheet.create({
     paddingVertical: 7
   },
   modal: {
-    height:500,
     borderRadius:10,
     backgroundColor: KevaColors.backgroundLight,
-    zIndex:999999
+    zIndex:999999,
+    flexDirection: 'column',
+    justifyContent: 'flex-start',
+    margin: 0,
   },
   modalHeader: {
-    paddingLeft: 15,
     borderTopLeftRadius:10,
     borderTopRightRadius:10,
     flexDirection:'row',
     justifyContent:'space-between',
     backgroundColor: KevaColors.background,
-    overflow: 'hidden',
     borderBottomWidth: utils.THIN_BORDER,
-    borderColor: KevaColors.cellBorder
+    borderColor: KevaColors.cellBorder,
+    marginHorizontal: 20,
   },
   codeErr: {
     marginTop: 10,
@@ -359,14 +361,6 @@ var styles = StyleSheet.create({
   },
   codeErrText: {
     color: KevaColors.errColor
-  },
-  modalSwitch: {
-    flexDirection: 'row',
-    alignItems:'center',
-    justifyContent:'flex-start',
-    paddingHorizontal: 7,
-    paddingTop: 15,
-    paddingBottom: 10
   },
   action: {
     fontSize: 17,
