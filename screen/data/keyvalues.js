@@ -136,10 +136,9 @@ class Item extends React.Component {
     return (
       <Animated.View style={[this._style,]}>
         <ElevatedView elevation={1} style={styles.card}>
-          <View style={{flex:1,paddingHorizontal:10,paddingTop:7}}>
-            <Text style={styles.itemDesc}>{item.key}</Text>
+          <View style={{flex:1,paddingHorizontal:10,paddingTop:2}}>
             <View style={{flexDirection:'row',alignItems:'center',justifyContent:'space-between'}}>
-              <View></View>
+              <Text style={styles.keyDesc} numberOfLines={1} ellipsizeMode="tail">{item.key}</Text>
               <View style={{flexDirection: 'row', alignItems:'center',justifyContent:'flex-start'}}>
                 <TouchableOpacity onPress={this.onEdit}>
                   <Icon name="ios-create" size={22} style={styles.actionIcon} />
@@ -149,6 +148,7 @@ class Item extends React.Component {
                 </TouchableOpacity>
               </View>
             </View>
+            <Text style={styles.valueDesc} numberOfLines={3} ellipsizeMode="tail">{item.value}</Text>
           </View>
         </ElevatedView>
       </Animated.View>
@@ -369,16 +369,22 @@ var styles = StyleSheet.create({
     backgroundColor: KevaColors.background
   },
   card: {
-    marginLeft:10,
-    marginRight:10,
+    marginLeft:8,
+    marginRight:8,
     backgroundColor:'#fff',
     borderRadius:5,
-    marginVertical:7,
+    marginVertical:3,
     flexDirection: 'row'
   },
-  itemDesc: {
+  keyDesc: {
     flex: 1,
     fontSize:16
+  },
+  valueDesc: {
+    flex: 1,
+    fontSize:15,
+    marginBottom: 10,
+    color: KevaColors.lightText
   },
   img: {
     width: 90,
