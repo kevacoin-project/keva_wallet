@@ -24,6 +24,7 @@ import {
 import Modal from 'react-native-modal';
 import ActionSheet from 'react-native-actionsheet';
 import SortableListView from 'react-native-sortable-list'
+import {Picker} from '@react-native-community/picker';
 import ElevatedView from 'react-native-elevated-view'
 import { TabView, TabBar } from 'react-native-tab-view';
 import { connect } from 'react-redux'
@@ -164,6 +165,7 @@ class MyNamespaces extends React.Component {
       namespaceId: null, saving: false,
       isLoading: true, isModalVisible: false,
       showNSCreationModal: false,
+      walletId: null,
       currentPage: 0,
       isRefreshing: false,
       createTransactionErr: null,
@@ -193,6 +195,47 @@ class MyNamespaces extends React.Component {
     if (!this.state.showNSCreationModal) {
       return null;
     }
+
+    const wallets = BlueApp.getWallets();
+    const walletList = wallets.map((w, i) => {
+      return <Picker.Item key={i} label={w.getLabel()} value={w.getID()} />
+    })
+
+    const wallet = wallets.find(w => w.getID() == this.state.walletId);
+
+    let selectWalletPage = (
+      <View style={styles.modalNS}>
+        <Text style={[styles.modalText, {textAlign: 'center', marginBottom: 20, color: KevaColors.darkText}]}>{"Choose a Wallet"}</Text>
+        <Picker
+          selectedValue={this.state.walletId}
+          style={{height: 50, width: 270, color: KevaColors.lightText}}
+          onValueChange={(walletId, i) => this.setState({walletId: walletId})
+          }>
+          { walletList }
+        </Picker>
+        <Text style={[styles.modalFee, {textAlign: 'center', marginTop: 5}]}>{wallet.getBalance()/100000000 + ' KVA'}</Text>
+        <KevaButton
+          type='secondary'
+          style={{margin:10, marginTop: 40}}
+          caption={'Next'}
+          onPress={async () => {
+            try {
+              const wallet = wallets.find(w => w.getID() == this.state.walletId);
+              if (!wallet) {
+                throw new Error('Wallet not found.');
+              }
+              this.setState({ showNSCreationModal: true, currentPage: 1 });
+              const { tx, namespaceId, fee } = await createKevaNamespace(wallet, 120, this.state.nsName);
+              let feeKVA = fee / 100000000;
+              this.setState({ showNSCreationModal: true, currentPage: 2, fee: feeKVA });
+              this.namespaceTx = tx;
+            } catch (err) {
+              this.setState({createTransactionErr: err.message});
+            }
+          }}
+        />
+      </View>
+    );
 
     let createNSPage = (
       <View style={styles.modalNS}>
@@ -229,7 +272,7 @@ class MyNamespaces extends React.Component {
           style={{margin:10, marginTop: 40}}
           caption={'Confirm'}
           onPress={async () => {
-            this.setState({currentPage: 2, isBroadcasting: true});
+            this.setState({currentPage: 3, isBroadcasting: true});
             try {
               await BlueElectrum.ping();
               await BlueElectrum.waitTillConnected();
@@ -300,7 +343,7 @@ class MyNamespaces extends React.Component {
           showNext={false}
           showSkip={this.state.showSkip}
           currentPage={this.state.currentPage}
-          stepComponents={[createNSPage, confirmPage, broadcastPage]}
+          stepComponents={[selectWalletPage, createNSPage, confirmPage, broadcastPage]}
           onFinish={this.NSCreationFinish}
           onNext={this.NSCreationNext}
           onCancel={this.NSCreationCancel}/>
@@ -308,8 +351,12 @@ class MyNamespaces extends React.Component {
     );
   }
 
-  onAddNamespace = async () => {
+  onAddNamespace = () => {
     const wallets = BlueApp.getWallets();
+    if (wallets.length == 0) {
+      return Toast.show('No wallet available');
+    }
+
     if (this.state.nsName && this.state.nsName.length > 0) {
       this.setState({
         showNSCreationModal: true,
@@ -319,17 +366,7 @@ class MyNamespaces extends React.Component {
         isBroadcasting: false,
         fee: 0,
         createTransactionErr: null,
-      }, () => {
-        setTimeout(async () => {
-          try {
-            const { tx, namespaceId, fee } = await createKevaNamespace(wallets[0], 120, this.state.nsName);
-            let feeKVA = fee / 100000000;
-            this.setState({ showNSCreationModal: true, currentPage: 1, fee: feeKVA });
-            this.namespaceTx = tx;
-          } catch (err) {
-            this.setState({createTransactionErr: err.message});
-          }
-        }, 800);
+        walletId: wallets[0].getID(),
       });
     }
   }
@@ -876,7 +913,7 @@ var styles = StyleSheet.create({
   modalNS: {
     height: 300,
     alignSelf: 'center',
-    justifyContent: 'flex-start'
+    justifyContent: 'flex-start',
   },
   modalText: {
     fontSize: 18,

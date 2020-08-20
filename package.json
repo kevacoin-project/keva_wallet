@@ -67,6 +67,7 @@
     "@react-native-community/blur": "3.4.1",
     "@react-native-community/masked-view": "^0.1.10",
     "@react-native-community/netinfo": "^5.9.6",
+    "@react-native-community/picker": "^1.6.6",
     "@react-native-community/slider": "2.0.8",
     "@react-native-community/viewpager": "4.0.0",
     "@redux-offline/redux-offline": "2.6.0-native.0",
