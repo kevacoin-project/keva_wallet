@@ -532,7 +532,7 @@ export async function deleteKeyValue(wallet, requestedSatPerByte, namespaceId, k
       if (output.value != 1000000) {
         throw new Error('Key deletion script has incorrect value.');
       }
-      const nsScript = getKeyValueUpdateScript(namespaceId, namespaceAddress, key, value);
+      const nsScript = getKeyValueDeleteScript(namespaceId, namespaceAddress, key);
       psbt.addOutput({
         script: nsScript,
         value: output.value,
