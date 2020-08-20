@@ -181,7 +181,7 @@ class KeyValues extends React.Component {
     const wallets = BlueApp.getWallets();
     this.wallet = wallets.find(w => w.getID() == walletId);
     if (!this.wallet) {
-      //TODO: error message.
+      Toast.show('Wallet not found');
       return;
     }
     if (shortCode) {
@@ -193,16 +193,19 @@ class KeyValues extends React.Component {
     }
 
     if (keyValues) {
-      // TODO: add order.
       let order = keyValueList.order[namespaceId] || [];
       dispatch(setKeyValueList(namespaceId, keyValues, order));
     }
   }
 
   refreshKeyValues = async () => {
-    this.setState({isRefreshing: true});
-    await this.fetchKeyValues();
-    this.setState({isRefreshing: false});
+    try {
+      this.setState({isRefreshing: true});
+      await this.fetchKeyValues();
+      this.setState({isRefreshing: false});
+    } catch (err) {
+      Toast.show('Failed to fetch key values');
+    }
   }
 
   async componentDidMount() {

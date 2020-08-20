@@ -703,7 +703,7 @@ export async function findMyNamespaces(wallet, ecl) {
   return namespaces;
 }
 
-export async function findOtherNamespace(wallet, ecl, txidOrShortCode) {
+export async function findOtherNamespace(ecl, txidOrShortCode) {
   let txid;
   if (txidOrShortCode.length > 20) {
     // It is txid;
@@ -733,7 +733,6 @@ export async function findOtherNamespace(wallet, ecl, txidOrShortCode) {
     nsId = keva.namespaceId;
     namespaces[nsId] = {
       id: nsId,
-      walletId: wallet.getID(),
       txId: tx.txid,
     }
     if (keva.displayName) {

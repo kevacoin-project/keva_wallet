@@ -374,7 +374,11 @@ class MyNamespaces extends React.Component {
   fetchNamespaces = async () => {
     const { dispatch } = this.props;
     const wallets = BlueApp.getWallets();
-    const namespaces = await findMyNamespaces(wallets[0], BlueElectrum);
+    let namespaces = {};
+    for (let w of wallets) {
+      const ns = await findMyNamespaces(w, BlueElectrum);
+      namespaces = {...namespaces, ...ns};
+    }
 
     const order = this.props.namespaceList.order;
     for (let id of Object.keys(namespaces)) {
@@ -397,7 +401,7 @@ class MyNamespaces extends React.Component {
   refreshNamespaces = async () => {
     this.setState({isRefreshing: true});
     try {
-      this.fetchNamespaces();
+      await this.fetchNamespaces();
     } catch (err) {
       console.error(err);
       this.setState({isRefreshing: false});
@@ -482,10 +486,9 @@ class OtherNamespaces extends React.Component {
     const { dispatch, otherNamespaceList } = this.props;
     try {
       const order = otherNamespaceList.order;
-      const wallets = BlueApp.getWallets();
       const namespaces = otherNamespaceList.namespaces;
       for (let ns of Object.keys(namespaces)) {
-        const namespace = await findOtherNamespace(wallets[0], BlueElectrum, namespaces[ns].rootTxid);
+        const namespace = await findOtherNamespace(BlueElectrum, namespaces[ns].rootTxid);
         dispatch(setOtherNamespaceList(namespace, order));
       }
     } catch (err) {
@@ -518,7 +521,7 @@ class OtherNamespaces extends React.Component {
     const { dispatch, otherNamespaceList } = this.props;
     try {
       const wallets = BlueApp.getWallets();
-      const namespace = await findOtherNamespace(wallets[0], BlueElectrum, this.state.nsName);
+      const namespace = await findOtherNamespace(BlueElectrum, this.state.nsName);
       if (!namespace) {
         return;
       }
