@@ -298,6 +298,23 @@ function getKeyValueUpdateScript(namespaceId, address, key, value) {
   return nsScript;
 }
 
+export function getNonNamespaceUxtos(transactions, utxos) {
+  let nonNSutxos = [];
+  for (let u of utxos) {
+    const tx = transactions.find(t => t.txid == u.txId);
+    if (!tx) {
+      continue;
+    }
+    const v = tx.outputs[u.vout];
+    let result = parseKeva(v.scriptPubKey.asm);
+    let isNSTx = !!result;
+    if (!isNSTx) {
+      nonNSutxos.push(u);
+    }
+  }
+  return nonNSutxos;
+}
+
 export async function scanForNamespaces(wallet) {
   let results = [];
   const txs = wallet.getTransactions();
@@ -361,7 +378,7 @@ export async function updateKeyValue(wallet, requestedSatPerByte, namespaceId, k
   }];
 
   let utxos = wallet.getUtxo();
-  // Move the nsUtxo to the first one, so that it will already be used.
+  // Move the nsUtxo to the first one, so that it will always be used.
   utxos = reorderUtxos(utxos, nsUtxo);
   let { inputs, outputs, fee } = coinSelectAccumulative(utxos, targets, requestedSatPerByte);
 
