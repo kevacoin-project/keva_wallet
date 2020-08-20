@@ -59,6 +59,7 @@ class AddKeyValue extends React.Component {
       value: '',
       showKeyValueModal: false,
       valueOnly: false,
+      createTransactionErr: null,
     };
   }
 
@@ -112,12 +113,17 @@ class AddKeyValue extends React.Component {
       broadcastErr: null,
       isBroadcasting: false,
       fee: 0,
+      createTransactionErr: null,
     }, () => {
       setTimeout(async () => {
-        const { tx, fee } = await updateKeyValue(this.wallet, 120, namespaceId, key, value);
-        let feeKVA = fee / 100000000;
-        this.setState({ showKeyValueModal: true, currentPage: 1, fee: feeKVA });
-        this.namespaceTx = tx;
+        try {
+          const { tx, fee } = await updateKeyValue(this.wallet, 120, namespaceId, key, value);
+          let feeKVA = fee / 100000000;
+          this.setState({ showKeyValueModal: true, currentPage: 1, fee: feeKVA });
+          this.namespaceTx = tx;
+        } catch (err) {
+          this.setState({createTransactionErr: err.message});
+        }
       }, 800);
     });
   }
@@ -143,8 +149,26 @@ class AddKeyValue extends React.Component {
 
     let createNSPage = (
       <View style={styles.modalNS}>
-        <Text style={styles.modalText}>{"Creating Transaction ..."}</Text>
-        <BlueLoading style={{paddingTop: 30}}/>
+        {
+          this.state.createTransactionErr ?
+            <>
+              <Text style={[styles.modalText, {color: KevaColors.errColor, fontWeight: 'bold'}]}>{"Error"}</Text>
+              <Text style={styles.modalErr}>{this.state.createTransactionErr}</Text>
+              <KevaButton
+                type='secondary'
+                style={{margin:10, marginTop: 30}}
+                caption={'Cancel'}
+                onPress={async () => {
+                  this.setState({showKeyValueModal: false, createTransactionErr: null});
+                }}
+              />
+            </>
+          :
+            <>
+              <Text style={styles.modalText}>{"Creating Transaction ..."}</Text>
+              <BlueLoading style={{paddingTop: 30}}/>
+            </>
+        }
       </View>
     );
 

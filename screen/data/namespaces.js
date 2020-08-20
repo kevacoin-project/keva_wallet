@@ -166,6 +166,7 @@ class MyNamespaces extends React.Component {
       showNSCreationModal: false,
       currentPage: 0,
       isRefreshing: false,
+      createTransactionErr: null,
     };
   }
 
@@ -195,8 +196,26 @@ class MyNamespaces extends React.Component {
 
     let createNSPage = (
       <View style={styles.modalNS}>
-        <Text style={styles.modalText}>{"Creating Transaction ..."}</Text>
-        <BlueLoading style={{paddingTop: 30}}/>
+        {
+          this.state.createTransactionErr ?
+            <>
+              <Text style={[styles.modalText, {color: KevaColors.errColor, fontWeight: 'bold'}]}>{"Error"}</Text>
+              <Text style={styles.modalErr}>{this.state.createTransactionErr}</Text>
+              <KevaButton
+                type='secondary'
+                style={{margin:10, marginTop: 30}}
+                caption={'Cancel'}
+                onPress={async () => {
+                  this.setState({showNSCreationModal: false, createTransactionErr: null});
+                }}
+              />
+            </>
+          :
+            <>
+              <Text style={styles.modalText}>{"Creating Transaction ..."}</Text>
+              <BlueLoading style={{paddingTop: 30}}/>
+            </>
+        }
       </View>
     );
 
@@ -299,12 +318,17 @@ class MyNamespaces extends React.Component {
         broadcastErr: null,
         isBroadcasting: false,
         fee: 0,
+        createTransactionErr: null,
       }, () => {
         setTimeout(async () => {
-          const { tx, namespaceId, fee } = await createKevaNamespace(wallets[0], 120, this.state.nsName);
-          let feeKVA = fee / 100000000;
-          this.setState({ showNSCreationModal: true, currentPage: 1, fee: feeKVA });
-          this.namespaceTx = tx;
+          try {
+            const { tx, namespaceId, fee } = await createKevaNamespace(wallets[0], 120, this.state.nsName);
+            let feeKVA = fee / 100000000;
+            this.setState({ showNSCreationModal: true, currentPage: 1, fee: feeKVA });
+            this.namespaceTx = tx;
+          } catch (err) {
+            this.setState({createTransactionErr: err.message});
+          }
         }, 800);
       });
     }
@@ -328,7 +352,7 @@ class MyNamespaces extends React.Component {
     try {
       await this.fetchNamespaces();
     } catch (err) {
-      // TODO: show status.
+      Toast.show('Cannot fetch namespaces');
       console.error(err);
     }
   }
@@ -437,7 +461,7 @@ class OtherNamespaces extends React.Component {
     try {
       await this.fetchOtherNamespaces();
     } catch (err) {
-      // TODO: show status.
+      Toast.show('Cannot fetch namespaces');
       console.error(err);
     }
   }

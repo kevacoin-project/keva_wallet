@@ -21,6 +21,8 @@ const KevaColors = require('../../common/KevaColors');
 const utils = require('../../util');
 import {
   BlueNavigationStyle,
+  BlueLoading,
+  BlueBigCheckmark,
 } from '../../BlueComponents';
 const loc = require('../../loc');
 let BlueApp = require('../../BlueApp');
@@ -33,6 +35,8 @@ import ActionSheet from 'react-native-actionsheet';
 import { connect } from 'react-redux'
 import { setKeyValueList } from '../../actions'
 import { getKeyValuesFromShortCode, getKeyValuesFromTxid, deleteKeyValue } from '../../class/keva-ops';
+import Toast from 'react-native-root-toast';
+import StepModal from "../../common/StepModalWizard";
 
 const CLOSE_ICON    = <Icon name="ios-close" size={42} color={KevaColors.errColor}/>;
 
@@ -64,8 +68,6 @@ class Item extends React.Component {
   render() {
     let {data, onShow, namespaceId} = this.props;
     let item = data;
-    console.log('JWU ------ item')
-    console.log(item)
 
     return (
       <View style={styles.card}>
@@ -128,20 +130,31 @@ class KeyValues extends React.Component {
   }
 
   deleteItem = async (namespaceId, key) => {
+    const walletId = this.props.navigation.getParam('walletId');
     const wallets = BlueApp.getWallets();
+    this.wallet = wallets.find(w => w.getID() == walletId);
+    if (!this.wallet) {
+      Toast.show('Cannot find the wallet');
+      return;
+    }
     this.setState({
       showDeleteModal: true,
       currentPage: 0,
       showSkip: true,
       broadcastErr: null,
       isBroadcasting: false,
+      createTransactionErr: null,
       fee: 0,
     }, () => {
       setTimeout(async () => {
-        const { tx, fee } = await deleteKeyValue(wallets[0], 120, namespaceId, key);
-        let feeKVA = fee / 100000000;
-        this.setState({ showDeleteModal: true, currentPage: 1, fee: feeKVA });
-        this.deleteKeyTx = tx;
+        try {
+          const { tx, fee } = await deleteKeyValue(wallets[0], 120, namespaceId, key);
+          let feeKVA = fee / 100000000;
+          this.setState({ showDeleteModal: true, currentPage: 1, fee: feeKVA });
+          this.deleteKeyTx = tx;
+        } catch (err) {
+          this.setState({createTransactionErr: err.message});
+        }
       }, 800);
     });
   }
@@ -264,8 +277,26 @@ class KeyValues extends React.Component {
 
     let deleteKeyPage = (
       <View style={styles.modalDelete}>
-        <Text style={styles.modalText}>{"Creating Transaction ..."}</Text>
-        <BlueLoading style={{paddingTop: 30}}/>
+        {
+          this.state.createTransactionErr ?
+            <>
+              <Text style={[styles.modalText, {color: KevaColors.errColor, fontWeight: 'bold'}]}>{"Error"}</Text>
+              <Text style={styles.modalErr}>{this.state.createTransactionErr}</Text>
+              <KevaButton
+                type='secondary'
+                style={{margin:10, marginTop: 30}}
+                caption={'Cancel'}
+                onPress={async () => {
+                  this.setState({showDeleteModal: false, createTransactionErr: null});
+                }}
+              />
+            </>
+          :
+            <>
+              <Text style={styles.modalText}>{"Creating Transaction ..."}</Text>
+              <BlueLoading style={{paddingTop: 30}}/>
+            </>
+        }
       </View>
     );
 
@@ -351,9 +382,9 @@ class KeyValues extends React.Component {
           showSkip={this.state.showSkip}
           currentPage={this.state.currentPage}
           stepComponents={[deleteKeyPage, confirmPage, broadcastPage]}
-          onFinish={this.NSCreationFinish}
-          onNext={this.NSCreationNext}
-          onCancel={this.NSCreationCancel}/>
+          onFinish={this.keyDeleteFinish}
+          onNext={this.keyDeleteNext}
+          onCancel={this.keyDeleteCancel}/>
       </View>
     );
   }
@@ -367,8 +398,6 @@ class KeyValues extends React.Component {
 
   render() {
     let {navigation, dispatch, keyValueList} = this.props;
-    console.log('JWU keyValueList $$$$$$$$$$$$$')
-    console.log(JSON.stringify(keyValueList))
     const namespaceId = navigation.getParam('namespaceId');
     const list = keyValueList.keyValues[namespaceId];
     return (
@@ -381,6 +410,7 @@ class KeyValues extends React.Component {
            destructiveButtonIndex={0}
            onPress={this.onDeleteConfirm}
         />
+        {this.getDeleteModal()}
         {this.getKeyValueModal()}
         {
           list &&
