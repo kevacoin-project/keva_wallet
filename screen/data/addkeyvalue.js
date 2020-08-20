@@ -64,6 +64,7 @@ class AddKeyValue extends React.Component {
       key: '',
       value: '',
       showKeyValueModal: false,
+      valueOnly: false,
     };
   }
 
@@ -82,17 +83,18 @@ class AddKeyValue extends React.Component {
   });
 
   async componentDidMount() {
+    const {namespaceId, walletId, key, value} = this.props.navigation.state.params;
+    if (key && key.length > 0 && value && value.length > 0) {
+      this.setState({
+        key,
+        value,
+        valueOnly: true
+      });
+    }
     this.props.navigation.setParams({
-      onPress: this.onSave,
-      headerRight: () => (
-        <TouchableOpacity
-          style={{ marginHorizontal: 16, minWidth: 150, justifyContent: 'center', alignItems: 'flex-end' }}
-          onPress={navigation.state.params.onPress}
-        >
-          <Text style={{color: KevaColors.actionText, fontSize: 16}}>Save</Text>
-        </TouchableOpacity>
-      ),
+      onPress: this.onSave
     });
+
   }
 
   onSave = async () => {
@@ -248,6 +250,7 @@ class AddKeyValue extends React.Component {
         {this.getKeyValueModal()}
         <View style={styles.inputKey}>
           <FloatTextInput
+            editable={!this.state.valueOnly}
             noBorder
             autoCorrect={false}
             value={this.state.key}

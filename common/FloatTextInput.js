@@ -101,7 +101,8 @@ export default class FloatLabelTextField extends Component {
   }
 
   render() {
-    const { multiline } = this.props;
+    const { multiline, editable } = this.props;
+    const disabled = editable === false;
     return (
       <View style={styles.container}>
         <View style={styles.viewContainer}>
@@ -114,7 +115,7 @@ export default class FloatLabelTextField extends Component {
               <TextInput {...this.props}
                 ref='input'
                 underlineColorAndroid="transparent"
-                style={multiline ? styles.multiValueText : styles.valueText}
+                style={[multiline ? styles.multiValueText : styles.valueText, disabled && {color: KevaColors.inactiveText}]}
                 defaultValue={this.props.defaultValue}
                 value={this.state.text}
                 maxLength={this.props.maxLength}

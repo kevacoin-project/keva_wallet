@@ -102,27 +102,14 @@ class Item extends React.Component {
   }
 
   onEdit = () => {
-    let item = this.props.item;
-    this.props.onEdit(this.props.itemId, item.name, item.needPicture);
-  }
-
-  async onSelected(close) {
-    const response = this.state.selectedImage;
-    if (!response) {
-      return close && close();
-    }
-    let image = response.uri;
-    try {
-      if (response.width > IMAGE_SIZE || response.height > IMAGE_SIZE) {
-        let resizedImage = await ImageResizer.createResizedImage(image, IMAGE_SIZE, IMAGE_SIZE, 'JPEG', 90);
-        image = resizedImage.uri;
-      }
-      const size = await utils.getImageSize(image);
-      this.onPicture(image, size);
-      close && close();
-    } catch (err) {
-      LOG(err);
-    }
+    const {navigation, data} = this.props;
+    const {walletId, namespaceId} = navigation.state.params;
+    navigation.navigate('AddKeyValue', {
+      walletId,
+      namespaceId,
+      key: data.key,
+      value: data.value,
+    })
   }
 
   onClose(close) {
@@ -207,116 +194,6 @@ class KeyValues extends React.Component {
     cb(true, value => this.setState({needPicture: value}));
   }
 
-  getItemModal() {
-    const itemId = this.state.itemId;
-    return (
-      <Modal style={styles.modal} backdrop={true} ref={ref => {this.modalCode = ref}} coverScreen backButtonClose>
-        <View style={styles.modalHeader}>
-          <Text style={{alignSelf:'center',fontSize:20,color:KevaColors.darkText,justifyContent:'center'}}>Item</Text>
-          <TouchableOpacity onPress={this.closeModal}>
-             {CLOSE_ICON_MODAL}
-          </TouchableOpacity>
-        </View>
-        <View style={{paddingVertical: 25}}>
-         <TextInput autoFocus style={styles.itemInput}
-           underlineColorAndroid='transparent'
-           onChangeText={item => this.setState({item: item})}
-           multiline numberOfLines={3}
-           value={this.state.item}
-         />
-         { this.state.codeErr &&
-           <View style={styles.codeErr}>
-            <Text style={styles.codeErrText}>{this.state.codeErr}</Text>
-           </View>
-         }
-         <View style={styles.modalSwitch}>
-           <Text style={{paddingRight:10,fontSize:14}}>Picture Required</Text>
-           <Switch value={this.state.needPicture} onAsyncPress={this.onSwitch} backgroundActive={KevaColors.actionText}/>
-         </View>
-         <Text style={{fontSize: 12, color: KevaColors.lightText, paddingHorizontal: 7}}>
-          If enabled, your checker must take a picture of this item.
-         </Text>
-         <KevaButton
-           type='secondary'
-           loading={this.state.saving}
-           style={{margin:10, marginTop: 20}}
-           caption={itemId ? 'Update' : 'Add'}
-           onPress={itemId ? this.onUpdateItem: this.onAddItem}
-         />
-        </View>
-      </Modal>
-    )
-  }
-
-  closeModal = () => {
-    this.modalCode.close();
-    this.setState({item: '', codeErr: null})
-  }
-
-  addItem = () => {
-    this.setState({item: '', itemId: null, codeErr: null})
-    this.modalCode.open();
-  }
-
-  onAddItem = () => {
-    const {navigation, userInfo, checklist} = this.props;
-    const propertyId = navigation.state.params.propertyId;
-    const categoryId = navigation.state.params.categoryId;
-    if (this.state.item.length === 0) {
-      return this.setState({codeErr: 'Item must have description.'})
-    }
-    this.setState({codeErr: null, saving: true});
-    const checkListId = checklist[propertyId].id;
-    this.props.dispatch(addItemAsync(propertyId, checkListId, categoryId, this.state.item, this.state.needPicture)).then(checklist => {
-      LayoutAnimation.configureNext({
-        duration: 300,
-        update: {type: LayoutAnimation.Types.easeInEaseOut}
-      });
-      this.props.dispatch(setChecklist(propertyId, checklist));
-      isPremium = this._isPremium(userInfo, checklist.checkList);
-      this.closeModal();
-    })
-    .then(() => {
-      return this.props.dispatch(getPropertiesAsync());
-    })
-    .catch(err => {
-      console.log(err);
-      utils.showToast('Failed to add. Check network connection.')
-    })
-    .then(() => {
-      this.setState({saving: false});
-      utils.showToast('Item Added');
-      if (isPremium) {
-        this.closeItemAni();
-      }
-    })
-  }
-
-  onUpdateItem = () => {
-    const navigation = this.props.navigation;
-    const propertyId = navigation.state.params.propertyId;
-    const categoryId = navigation.state.params.categoryId;
-    if (this.state.item.length === 0) {
-      return this.setState({codeErr: 'Item must have description.'})
-    }
-    this.setState({codeErr: null, saving: true});
-    const checkListId = this.props.checklist[propertyId].id;
-    this.props.dispatch(updateItemAsync(propertyId, checkListId, categoryId, this.state.itemId, this.state.item, this.state.needPicture)).then(checklist => {
-      this.props.dispatch(setChecklist(propertyId, checklist));
-      this.closeModal();
-    })
-    .then(() => {
-      this.props.dispatch(getPropertiesAsync());
-    })
-    .catch(err => {
-      console.log(err);
-      utils.showToast('Failed to update. Check network connection.')
-    })
-    .then(() => {
-      this.setState({saving: false});
-    })
-  }
-
   onDelete = itemId => {
     this._itemId = itemId;
     this._actionDelete.show();
@@ -347,34 +224,6 @@ class KeyValues extends React.Component {
     if (index === 0 && this._itemId) {
       this.deleteItem(this._itemId);
     }
-  }
-
-  onItemSwitch = (itemId, cb) => {
-    const navigation = this.props.navigation;
-    const categoryId = navigation.state.params.categoryId;
-    const propertyId = navigation.state.params.propertyId;
-    const checkListId = this.props.checklist[propertyId].id;
-    cb(true, value => {
-      this.props.dispatch(updateItemAsync(propertyId, checkListId, categoryId, itemId, null, value)).then(checklist => {
-        this.props.dispatch(setChecklist(propertyId, checklist));
-      })
-      .then(() => {
-        this.props.dispatch(getPropertiesAsync());
-      })
-      .catch(err => {
-        console.log(err);
-        utils.showToast('Failed to update. Check network connection.');
-      });
-    });
-  }
-
-  onItemEdit = (itemId, itemText, needPicture) => {
-    this.setState({
-      item: itemText,
-      itemId: itemId,
-      codeErr: null, needPicture: needPicture
-    });
-    this.modalCode.open();
   }
 
   onRowMoved = async (order) => {
@@ -465,7 +314,6 @@ class KeyValues extends React.Component {
     const list = keyValueList.keyValues[namespaceId];
     return (
       <View style={styles.container}>
-         { this.getItemModal() }
         {/*
         <ActionSheet
            ref={ref => this._actionDelete = ref}
@@ -489,7 +337,7 @@ class KeyValues extends React.Component {
             }
             renderRow={({data, active}) =>
               <Item data={data} dispatch={dispatch} onDelete={this.onDelete}
-                active={active} onEdit={this.onItemEdit}
+                active={active} navigation={navigation}
               />
             }
           />
