@@ -12,6 +12,7 @@ import {
   PixelRatio,
   Text,
   RefreshControl,
+  Clipboard,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import FAIcon from 'react-native-vector-icons/FontAwesome';
@@ -166,78 +167,6 @@ class MyNamespaces extends React.Component {
       currentPage: 0,
       isRefreshing: false,
     };
-  }
-
-  onNSInfo = (nsData) => {
-    this.setState({
-      nsData: nsData,
-      codeErr: null,
-      isModalVisible: true
-    });
-  }
-
-  getNSModal() {
-    const nsData = this.state.nsData;
-    if (!nsData) {
-      return null;
-    }
-
-    const titleStyle ={
-      fontSize: 17,
-      fontWeight: '700',
-      marginTop: 15,
-      marginBottom: 0,
-      color: KevaColors.darkText,
-    };
-    const contentStyle ={
-      fontSize: 16,
-      color: KevaColors.lightText,
-      paddingTop: 5,
-    };
-    const container = {
-      flexDirection: 'column',
-      justifyContent: 'flex-start',
-    }
-    return (
-      <Modal style={styles.modalShow} backdrop={true}
-        swipeDirection="down"
-        coverScreen
-        onSwipeComplete={this.closeModal}
-        isVisible={this.state.isModalVisible}>
-        <View style={styles.modalHeader}>
-          <View/>
-          <TouchableOpacity onPress={this.closeModal}>
-            {CLOSE_ICON}
-          </TouchableOpacity>
-        </View>
-        <View style={{ paddingVertical: 5, marginHorizontal: 10}}>
-          <Text style={titleStyle}>{'Name'}</Text>
-          <Text style={contentStyle}>{nsData.displayName}</Text>
-
-          <Text style={titleStyle}>{'Id'}</Text>
-          <View style={container}>
-            <Text style={contentStyle}>{nsData.id}</Text>
-          </View>
-          {COPY_ICON}
-
-          <Text style={titleStyle}>{'Short Code'}</Text>
-          <View style={container}>
-            <Text style={contentStyle}>{nsData.shortCode}</Text>
-            {COPY_ICON}
-          </View>
-
-          <Text style={titleStyle}>{'Tx Id'}</Text>
-          <View style={container}>
-            <Text style={contentStyle}>{nsData.txId}</Text>
-            {COPY_ICON}
-          </View>
-        </View>
-      </Modal>
-    )
-  }
-
-  closeModal = () => {
-    this.setState({ section: '', codeErr: null, isModalVisible: false });
   }
 
   onChangeOrder = async (order) => {
@@ -416,7 +345,7 @@ class MyNamespaces extends React.Component {
   }
 
   render() {
-    const { navigation, namespaceList } = this.props;
+    const { navigation, namespaceList, onInfo } = this.props;
     const canAdd = this.state.nsName && this.state.nsName.length > 0;
     return (
       <View style={styles.container}>
@@ -430,7 +359,6 @@ class MyNamespaces extends React.Component {
           onPress={this.onAction}
         />
         */}
-        {this.getNSModal()}
         {this.getNSCreationModal()}
         <View style={styles.inputContainer}>
           <TextInput
@@ -463,7 +391,7 @@ class MyNamespaces extends React.Component {
               <RefreshControl onRefresh={() => this.refreshNamespaces()} refreshing={this.state.isRefreshing} />
             }
             renderRow={({data, active}) => {
-              return <Namespace onInfo={this.onNSInfo} data={data} active={active} navigation={navigation} />
+              return <Namespace onInfo={onInfo} data={data} active={active} navigation={navigation} />
             }}
           />
         }
@@ -549,7 +477,7 @@ class OtherNamespaces extends React.Component {
   }
 
   render() {
-    const { navigation, otherNamespaceList } = this.props;
+    const { navigation, otherNamespaceList, onInfo } = this.props;
     const canSearch = this.state.nsName && this.state.nsName.length > 0;
 
     return (
@@ -596,7 +524,7 @@ class OtherNamespaces extends React.Component {
               <RefreshControl onRefresh={() => this.refreshNamespaces()} refreshing={this.state.isRefreshing} />
             }
             renderRow={({data, active}) => {
-              return <Namespace onInfo={this.onNSInfo} data={data} active={active} navigation={navigation} canDelete={true} />
+              return <Namespace onInfo={onInfo} data={data} active={active} navigation={navigation} canDelete={true} />
             }}
           />
         }
@@ -629,6 +557,92 @@ class Namespaces extends React.Component {
   async componentDidMount() {
   }
 
+  onNSInfo = (nsData) => {
+    this.setState({
+      nsData: nsData,
+      codeErr: null,
+      isModalVisible: true
+    });
+  }
+
+  copyString = (str) => {
+    Clipboard.setString(str);
+    Toast.show(loc.general.copiedToClipboard, {
+      position: Toast.positions.TOP,
+      backgroundColor: "#53DD6C",
+    });
+  }
+
+  getNSModal() {
+    const nsData = this.state.nsData;
+    if (!nsData) {
+      return null;
+    }
+
+    const titleStyle ={
+      fontSize: 17,
+      fontWeight: '700',
+      marginTop: 15,
+      marginBottom: 0,
+      color: KevaColors.darkText,
+    };
+    const contentStyle ={
+      fontSize: 16,
+      color: KevaColors.lightText,
+      paddingTop: 5,
+    };
+    const container = {
+      flexDirection: 'column',
+      justifyContent: 'flex-start',
+    }
+    return (
+      <Modal style={styles.modalShow} backdrop={true}
+        swipeDirection="down"
+        coverScreen={false}
+        onSwipeComplete={this.closeModal}
+        isVisible={this.state.isModalVisible}>
+        <View style={styles.modalHeader}>
+          <View/>
+          <TouchableOpacity onPress={this.closeModal}>
+            {CLOSE_ICON}
+          </TouchableOpacity>
+        </View>
+        <View style={{ paddingVertical: 5, marginHorizontal: 10}}>
+          <Text style={titleStyle}>{'Name'}</Text>
+          <Text style={contentStyle}>{nsData.displayName}</Text>
+
+          <Text style={titleStyle}>{'Id'}</Text>
+          <View style={container}>
+            <Text style={contentStyle}>{nsData.id}</Text>
+            <TouchableOpacity onPress={() => {this.copyString(nsData.id)}}>
+              {COPY_ICON}
+            </TouchableOpacity>
+          </View>
+
+          <Text style={titleStyle}>{'Short Code'}</Text>
+          <View style={container}>
+            <Text style={contentStyle}>{nsData.shortCode}</Text>
+            <TouchableOpacity onPress={() => {this.copyString(nsData.shortCode)}}>
+              {COPY_ICON}
+            </TouchableOpacity>
+          </View>
+
+          <Text style={titleStyle}>{'Tx Id'}</Text>
+          <View style={container}>
+            <Text style={contentStyle}>{nsData.txId}</Text>
+            <TouchableOpacity onPress={() => {this.copyString(nsData.txId)}}>
+              {COPY_ICON}
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+    )
+  }
+
+  closeModal = () => {
+    this.setState({ codeErr: null, isModalVisible: false });
+  }
+
   render() {
     const { dispatch, navigation, namespaceList, otherNamespaceList } = this.props;
     const labelStyle = focused => ({
@@ -638,14 +652,15 @@ class Namespaces extends React.Component {
     });
     return (
       <View style={styles.container}>
+        {this.getNSModal()}
         <TabView
           navigationState={this.state}
           renderScene={({ route }) => {
             switch (route.key) {
               case 'first':
-                return <MyNamespaces dispatch={dispatch} navigation={navigation} namespaceList={namespaceList} />;
+                return <MyNamespaces dispatch={dispatch} navigation={navigation} namespaceList={namespaceList} onInfo={this.onNSInfo}/>;
               case 'second':
-                return <OtherNamespaces dispatch={dispatch} navigation={navigation} otherNamespaceList={otherNamespaceList} />;
+                return <OtherNamespaces dispatch={dispatch} navigation={navigation} otherNamespaceList={otherNamespaceList} onInfo={this.onNSInfo}/>;
             }
           }}
           onIndexChange={index => this.setState({ index })}

@@ -11,6 +11,7 @@ module.exports = {
   general: {
     cancel: 'Cancel',
     delete: 'Delete',
+    copiedToClipboard: 'Copied to clipboard',
   },
   wallets: {
     select_wallet: 'Select Wallet',

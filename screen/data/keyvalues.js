@@ -71,7 +71,7 @@ class Item extends React.Component {
     let item = data;
 
     return (
-      <ElevatedView elevation={1} style={styles.card}>
+      <View style={styles.card}>
         <TouchableOpacity onPress={() => onShow(item.key, item.value)}>
           <View style={{flex:1,paddingHorizontal:10,paddingTop:2}}>
             <View style={{flexDirection:'row',alignItems:'center',justifyContent:'space-between'}}>
@@ -88,7 +88,7 @@ class Item extends React.Component {
             <Text style={styles.valueDesc} numberOfLines={3} ellipsizeMode="tail">{item.value}</Text>
           </View>
         </TouchableOpacity>
-      </ElevatedView>
+      </View>
     )
   }
 }
@@ -315,11 +315,11 @@ var styles = StyleSheet.create({
     backgroundColor: KevaColors.background
   },
   card: {
-    marginLeft:8,
-    marginRight:8,
     backgroundColor:'#fff',
-    borderRadius:5,
     marginVertical:3,
+    borderTopWidth: utils.THIN_BORDER,
+    borderBottomWidth: utils.THIN_BORDER,
+    borderColor: KevaColors.cellBorder,
   },
   keyDesc: {
     flex: 1,
