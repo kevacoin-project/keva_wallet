@@ -17,7 +17,6 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import FAIcon from 'react-native-vector-icons/FontAwesome';
 import {
   BlueNavigationStyle,
-  BlueHeaderDefaultSub,
   BlueLoading,
   BlueBigCheckmark,
 } from '../../BlueComponents';
@@ -48,7 +47,9 @@ import {
 } from '../../class/keva-ops';
 
 const CLOSE_ICON = (<Icon name="ios-close" size={36} color={KevaColors.primaryLightColor} style={{ paddingVertical: 5, paddingHorizontal: 15 }} />)
-const COPY_ICON = (<Icon name="ios-copy" size={22} color={KevaColors.extraLightText} style={{ paddingVertical: 5, paddingHorizontal: 5 }} />)
+const COPY_ICON = (<Icon name="ios-copy" size={22} color={KevaColors.extraLightText}
+                         style={{ paddingVertical: 5, paddingHorizontal: 5, position: 'relative', left: -3 }}
+                  />)
 
 class Namespace extends React.Component {
 
@@ -123,11 +124,11 @@ class Namespace extends React.Component {
     let namespace = this.props.data;
     let canDelete = this.props.canDelete;
     return (
-      <Animated.View style={[this._style,]}>
+      <Animated.View style={this._style}>
         <ElevatedView elevation={1} style={styles.cardTitle}>
-          <View style={{ flex: 1, justifyContent: 'space-between', paddingHorizontal: 7, paddingTop: 5 }}>
+          <View style={{ flex: 1, justifyContent: 'space-between', paddingHorizontal: 7, paddingTop: 10 }}>
             <View style={{ flex: 1 }} >
-              <Text style={styles.cardTitleText}>{namespace.displayName}</Text>
+              <Text style={styles.cardTitleText} numberOfLines={1} ellipsizeMode="tail">{namespace.displayName}</Text>
             </View>
             <View style={styles.actionContainer}>
               <TouchableOpacity onPress={this.onInfo}>
@@ -142,8 +143,7 @@ class Namespace extends React.Component {
           </View>
           <TouchableOpacity onPress={this.onKey}>
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              {/* <Text style={styles.cardTitleTextSm}>{numberItems}</Text> */}
-              <Icon name="ios-arrow-forward" size={22} color={KevaColors.actionText} style={{ paddingHorizontal: 7 }} />
+              <Icon name="ios-arrow-forward" size={24} color={KevaColors.actionText} style={{ padding: 12 }} />
             </View>
           </TouchableOpacity>
         </ElevatedView>
@@ -187,7 +187,7 @@ class MyNamespaces extends React.Component {
       fontWeight: '700',
       marginTop: 15,
       marginBottom: 0,
-      color: KevaColors.lightText,
+      color: KevaColors.darkText,
     };
     const contentStyle ={
       fontSize: 16,
@@ -199,8 +199,9 @@ class MyNamespaces extends React.Component {
       justifyContent: 'flex-start',
     }
     return (
-      <Modal style={styles.modal} backdrop={true}
+      <Modal style={styles.modalShow} backdrop={true}
         swipeDirection="down"
+        coverScreen
         onSwipeComplete={this.closeModal}
         isVisible={this.state.isModalVisible}>
         <View style={styles.modalHeader}>
@@ -431,14 +432,14 @@ class MyNamespaces extends React.Component {
         */}
         {this.getNSModal()}
         {this.getNSCreationModal()}
-        <View style={{ paddingTop: 10, paddingLeft: 8, backgroundColor: '#fff', borderBottomWidth: THIN_BORDER, borderColor: KevaColors.cellBorder, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingBottom: 10 }}>
+        <View style={styles.inputContainer}>
           <TextInput
             onChangeText={nsName => this.setState({ nsName: nsName })}
             value={this.state.nsName}
             placeholder={"Name of new namespace"}
             multiline={false}
             underlineColorAndroid='rgba(0,0,0,0)'
-            style={{ flex: 1, borderRadius: 4, backgroundColor: '#ececed', paddingTop: 5, paddingBottom: 5, paddingLeft: 7, paddingRight: 36 }}
+            style={styles.textInput}
           />
           {this.state.saving ?
             <ActivityIndicator size="small" color={KevaColors.actionText} style={{ width: 42, height: 42 }} />
@@ -561,7 +562,7 @@ class OtherNamespaces extends React.Component {
           destructiveButtonIndex={0}
           onPress={this.onAction}
         />
-        <View style={{ paddingTop: 10, paddingLeft: 8, backgroundColor: '#fff', borderBottomWidth: THIN_BORDER, borderColor: KevaColors.cellBorder, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingBottom: 10 }}>
+        <View style={styles.inputContainer}>
           <TextInput
             onChangeText={nsName => this.setState({ nsName: nsName })}
             value={this.state.nsName}
@@ -571,7 +572,7 @@ class OtherNamespaces extends React.Component {
             returnKeyType='search'
             clearButtonMode='while-editing'
             onSubmitEditing={this.onSearchNamespace}
-            style={{ flex: 1, borderRadius: 4, backgroundColor: '#ececed', paddingTop: 5, paddingBottom: 5, paddingLeft: 7, paddingRight: 36 }}
+            style={styles.textInput}
           />
           {this.state.saving ?
             <ActivityIndicator size="small" color={KevaColors.actionText} style={{ width: 42, height: 42 }} />
@@ -629,10 +630,14 @@ class Namespaces extends React.Component {
   }
 
   render() {
-    const { dispatch, navigation, namespaceList, namespaceOrder, otherNamespaceList, otherNamespaceOrder } = this.props;
+    const { dispatch, navigation, namespaceList, otherNamespaceList } = this.props;
+    const labelStyle = focused => ({
+      color: focused ? KevaColors.actionText : KevaColors.inactiveText,
+      margin: 0,
+      fontSize: 16,
+    });
     return (
       <View style={styles.container}>
-        <BlueHeaderDefaultSub leftText={/*loc.settings.header*/ 'Namespaces'} rightComponent={null} />
         <TabView
           navigationState={this.state}
           renderScene={({ route }) => {
@@ -649,7 +654,7 @@ class Namespaces extends React.Component {
             <TabBar
               {...props}
               renderLabel={({ route, focused }) => (
-                <Text style={{ color: focused ? KevaColors.actionText : KevaColors.inactiveText, margin: 0, fontSize: 16 }}>
+                <Text style={labelStyle(focused)}>
                   {route.title}
                 </Text>
               )}
@@ -694,14 +699,6 @@ var styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 10
   },
-  schduleAndDetail: {
-    flex: 1,
-    left: 15
-  },
-  schedule: {
-    color: KevaColors.actionText,
-    fontSize: 17
-  },
   detail: {
     color: '#5E5959',
     fontSize: 13,
@@ -719,11 +716,7 @@ var styles = StyleSheet.create({
   },
   listStyle: {
     flex: 1,
-    paddingTop: 10,
-  },
-  image: {
-    width: 90,
-    height: 90,
+    paddingTop: 5,
   },
   cardTitle: {
     flexDirection: 'row',
@@ -731,16 +724,11 @@ var styles = StyleSheet.create({
     marginHorizontal: 7,
     backgroundColor: '#fff',
     borderRadius: 5,
-    marginVertical: 7
+    marginVertical: 4
   },
   cardTitleText: {
     fontSize: 16,
-    color: '#5e5959'
-  },
-  cardTitleTextSm: {
-    top: -1,
-    fontSize: 16,
-    color: KevaColors.actionText
+    color: KevaColors.darkText,
   },
   cardContent: {
     backgroundColor: '#fff',
@@ -752,34 +740,11 @@ var styles = StyleSheet.create({
     alignItems: 'center',
     padding: 5
   },
-  itemDesc: {
-    flex: 1,
-    paddingLeft: 5
-  },
-  imgContainer: {
-    backgroundColor: '#eae2e2',
-    borderTopLeftRadius: 5,
-    borderBottomLeftRadius: 5,
-    overflow: 'hidden'
-  },
-  img: {
-    height: 90,
-    width: 90,
-  },
-  addBlock: {
-    marginTop: 0,
-    borderRadius: 8,
-    marginBottom: 20,
-    backgroundColor: '#fc8274',
-    padding: 5,
-    paddingVertical: 7,
-    marginLeft: 20,
-    marginRight: 20
-  },
   actionContainer: {
     flexDirection: 'row',
     justifyContent: 'flex-end',
     marginHorizontal: 20,
+    marginTop: 10
   },
   actionIcon: {
     color: KevaColors.arrowIcon,
@@ -792,21 +757,18 @@ var styles = StyleSheet.create({
     backgroundColor: '#fff',
     justifyContent: 'flex-start',
   },
+  modalShow: {
+    borderRadius: 10,
+    backgroundColor: '#fff',
+    justifyContent: 'flex-start',
+    margin: 0,
+  },
   modalHeader: {
     paddingLeft: 15,
     borderTopLeftRadius: 10,
     borderTopRightRadius: 10,
     flexDirection: 'row',
     justifyContent: 'space-between',
-  },
-  sectionInput: {
-    borderWidth: 1,
-    borderRadius: 4,
-    borderColor: KevaColors.inputBorder,
-    paddingVertical: 10,
-    paddingHorizontal: 15,
-    marginHorizontal: 10,
-    fontSize: 16
   },
   codeErr: {
     marginTop: 20,
@@ -816,21 +778,26 @@ var styles = StyleSheet.create({
   codeErrText: {
     color: KevaColors.errColor
   },
-  retake: {
-    height: 60,
-    width: 60,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderRadius: 4,
-    marginVertical: 10,
-    marginHorizontal: 10,
+  inputContainer: {
+    paddingVertical: 7,
+    paddingLeft: 8,
+    backgroundColor: '#fff',
+    borderBottomWidth: THIN_BORDER,
     borderColor: KevaColors.cellBorder,
-    backgroundColor: '#fff'
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
-  retakeTitle: {
-    fontSize: 10,
-    color: KevaColors.lightText
+  textInput:
+  {
+    flex: 1,
+    borderRadius: 4,
+    backgroundColor: '#ececed',
+    paddingTop: 5,
+    paddingBottom: 5,
+    paddingLeft: 7,
+    paddingRight: 36,
+    fontSize: 15,
   },
   header: {
     flexDirection: 'row',

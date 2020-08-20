@@ -57,7 +57,7 @@ module.exports = {
   primaryLightColor: '#c83f6daa',
   actionText: '#c83f6d',
   inactiveText: '#9B9B9B',
-  darkText: '#032250',
+  darkText: '#0c2550',
   lightText: '#5e5959',
   extraLightText: '#aaa',
   icon: "#7a7a7a",
