@@ -2,6 +2,7 @@ import React from 'react';
 import {
   PixelRatio,
   Dimensions,
+  View,
 } from 'react-native';
 
 import Toast from 'react-native-root-toast';
@@ -51,3 +52,5 @@ export function showStatus(message, duration=60000) {
   }
 
   export const SCREEN_WIDTH = Dimensions.get('window').width;
+
+  export const ModalHandle = <View style={{height: 6, width: 40, marginVertical: 10, borderRadius: 3, backgroundColor: '#ccc', alignSelf: 'center'}}/>;

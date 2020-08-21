@@ -42,7 +42,7 @@ let BlueElectrum = require('../../BlueElectrum');
 const StyleSheet = require('../../PlatformStyleSheet');
 const KevaButton = require('../../common/KevaButton');
 const KevaColors = require('../../common/KevaColors');
-import { THIN_BORDER, SCREEN_WIDTH, getOverlaySpinner } from '../../util';
+import { THIN_BORDER, SCREEN_WIDTH, getOverlaySpinner, ModalHandle } from '../../util';
 import Toast from 'react-native-root-toast';
 import StepModal from "../../common/StepModalWizard";
 
@@ -781,10 +781,7 @@ class Namespaces extends React.Component {
         onSwipeComplete={this.closeModal}
         isVisible={this.state.isModalVisible}>
         <View style={styles.modalHeader}>
-          <View/>
-          <TouchableOpacity onPress={this.closeModal}>
-            {CLOSE_ICON}
-          </TouchableOpacity>
+          {ModalHandle}
         </View>
         <View style={{ paddingVertical: 5, marginHorizontal: 10}}>
           <Text style={titleStyle}>{'Name'}</Text>
@@ -980,7 +977,7 @@ var styles = StyleSheet.create({
     borderTopLeftRadius: 10,
     borderTopRightRadius: 10,
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'center',
   },
   codeErr: {
     marginTop: 20,
