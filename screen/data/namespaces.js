@@ -13,6 +13,8 @@ import {
   Text,
   RefreshControl,
   Clipboard,
+  LayoutAnimation,
+  Keyboard,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import FAIcon from 'react-native-vector-icons/FontAwesome';
@@ -31,6 +33,7 @@ import { connect } from 'react-redux'
 import {
   setNamespaceList, setOtherNamespaceList,
   setNamespaceOrder, setOtherNamespaceOrder,
+  deleteOtherNamespace
 } from '../../actions'
 
 let BlueApp = require('../../BlueApp');
@@ -39,7 +42,7 @@ let BlueElectrum = require('../../BlueElectrum');
 const StyleSheet = require('../../PlatformStyleSheet');
 const KevaButton = require('../../common/KevaButton');
 const KevaColors = require('../../common/KevaColors');
-import { THIN_BORDER } from '../../util';
+import { THIN_BORDER, getOverlaySpinner } from '../../util';
 import Toast from 'react-native-root-toast';
 import StepModal from "../../common/StepModalWizard";
 
@@ -124,7 +127,7 @@ class Namespace extends React.Component {
 
   render() {
     let namespace = this.props.data;
-    let canDelete = this.props.canDelete;
+    const {canDelete, onDelete} = this.props;
     return (
       <Animated.View style={this._style}>
         <ElevatedView elevation={1} style={styles.cardTitle}>
@@ -137,7 +140,7 @@ class Namespace extends React.Component {
                 <FAIcon name="info-circle" size={20} style={styles.actionIcon} />
               </TouchableOpacity>
               { canDelete &&
-              <TouchableOpacity onPress={() => this.props.onShowActions(this.props.categoryId)}>
+              <TouchableOpacity onPress={() => onDelete(namespace.id)}>
                 <Icon name="ios-trash" size={20} style={styles.actionIcon} />
               </TouchableOpacity>
               }
@@ -414,16 +417,6 @@ class MyNamespaces extends React.Component {
     const canAdd = this.state.nsName && this.state.nsName.length > 0;
     return (
       <View style={styles.container}>
-        {/*
-        <ActionSheet
-          ref={ref => this._actionSheet = ref}
-          title={'Are you sure you want to delete it?'}
-          options={[Lang.general.delete, Lang.general.cancel]}
-          cancelButtonIndex={1}
-          destructiveButtonIndex={0}
-          onPress={this.onAction}
-        />
-        */}
         {this.getNSCreationModal()}
         <View style={styles.inputContainer}>
           <TextInput
@@ -518,9 +511,10 @@ class OtherNamespaces extends React.Component {
   }
 
   onSearchNamespace =async () => {
-    const { dispatch, otherNamespaceList } = this.props;
+    const { dispatch, otherNamespaceList, onSpin } = this.props;
     try {
-      const wallets = BlueApp.getWallets();
+      Keyboard.dismiss();
+      onSpin(true);
       const namespace = await findOtherNamespace(BlueElectrum, this.state.nsName);
       if (!namespace) {
         return;
@@ -534,10 +528,28 @@ class OtherNamespaces extends React.Component {
       }
       dispatch(setOtherNamespaceList(namespace, order));
       this.setState({nsName: ''});
+      setTimeout(() => onSpin(false), 500);
     } catch (err) {
+      onSpin(false);
       Toast.show('Cannot find namespace');
       console.log(err);
     }
+  }
+
+  onDeleteConfirm = index => {
+    const {dispatch} = this.props;
+    if (index === 0 && this._namespaceId) {
+      LayoutAnimation.configureNext({
+        duration: 300,
+        update: {type: LayoutAnimation.Types.easeInEaseOut}
+      });
+      dispatch(deleteOtherNamespace(this._namespaceId));
+    }
+  }
+
+  onDelete = namespaceId => {
+    this._namespaceId = namespaceId;
+    this._actionDelete.show();
   }
 
   render() {
@@ -547,12 +559,12 @@ class OtherNamespaces extends React.Component {
     return (
       <View style={styles.container}>
         <ActionSheet
-          ref={ref => this._actionSheet = ref}
-          title={'Are you sure you want to delete it?'}
+          ref={ref => this._actionDelete = ref}
+          title={'Delete the namespace?'}
           options={[loc.general.delete, loc.general.cancel]}
           cancelButtonIndex={1}
           destructiveButtonIndex={0}
-          onPress={this.onAction}
+          onPress={this.onDeleteConfirm}
         />
         <View style={styles.inputContainer}>
           <TextInput
@@ -588,7 +600,7 @@ class OtherNamespaces extends React.Component {
               <RefreshControl onRefresh={() => this.refreshNamespaces()} refreshing={this.state.isRefreshing} />
             }
             renderRow={({data, active}) => {
-              return <Namespace onInfo={onInfo} data={data} active={active} navigation={navigation} canDelete={true} />
+              return <Namespace onInfo={onInfo} onDelete={this.onDelete} data={data} active={active} navigation={navigation} canDelete={true} />
             }}
           />
         }
@@ -610,6 +622,7 @@ class Namespaces extends React.Component {
     this.state = {
       loaded: false, changes: false, nsName: '', namespaceId: null, saving: false ,
       isLoading: true, isModalVisible: false,
+      spinning: false,
       index: 0,
       routes: [
         { key: 'first', title: 'My Namespaces' },
@@ -713,6 +726,10 @@ class Namespaces extends React.Component {
     this.setState({ codeErr: null, isModalVisible: false });
   }
 
+  onSpin = (spinning) => {
+    this.setState({spinning});
+  }
+
   render() {
     const { dispatch, navigation, namespaceList, otherNamespaceList } = this.props;
     const labelStyle = focused => ({
@@ -723,6 +740,7 @@ class Namespaces extends React.Component {
     return (
       <View style={styles.container}>
         {this.getNSModal()}
+        {getOverlaySpinner(this.state.spinning)}
         <TabView
           navigationState={this.state}
           renderScene={({ route }) => {
@@ -730,7 +748,7 @@ class Namespaces extends React.Component {
               case 'first':
                 return <MyNamespaces dispatch={dispatch} navigation={navigation} namespaceList={namespaceList} onInfo={this.onNSInfo}/>;
               case 'second':
-                return <OtherNamespaces dispatch={dispatch} navigation={navigation} otherNamespaceList={otherNamespaceList} onInfo={this.onNSInfo}/>;
+                return <OtherNamespaces dispatch={dispatch} navigation={navigation} otherNamespaceList={otherNamespaceList} onInfo={this.onNSInfo} onSpin={this.onSpin}/>;
             }
           }}
           onIndexChange={index => this.setState({ index })}

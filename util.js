@@ -1,9 +1,11 @@
+import React from 'react';
 import {
   PixelRatio,
 } from 'react-native';
 
 import Toast from 'react-native-root-toast';
 import { NavigationActions } from 'react-navigation'
+import OverlaySpinner from 'react-native-loading-spinner-overlay'
 
 export const backAction = NavigationActions.back({
   key: null
@@ -42,3 +44,7 @@ export function showStatus(message, duration=60000) {
   }
 
   export const THIN_BORDER = 1 / PixelRatio.get();
+
+  export function getOverlaySpinner(visible) {
+    return <OverlaySpinner visible={visible} textContent={''} color={"#ff8274"} overlayColor={'rgba(255,255,255,0.75)'}/>
+  }

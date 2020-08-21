@@ -3,6 +3,7 @@ import {
   SET_NAMESPACES,
   SET_NAMESPACES_ORDER,
   SET_OTHER_NAMESPACES,
+  DELETE_OTHER_NAMESPACE,
   SET_OTHER_NAMESPACES_ORDER,
   SET_KEYVALUE_LIST,
 } from '../actions'
@@ -51,6 +52,16 @@ function otherNamespaceList(state = initOtherNamespaceList, action) {
       return {
         ...state,
         order: [...action.order]
+      }
+    case DELETE_OTHER_NAMESPACE:
+      if (!action.namespaceId) {
+        return state;
+      }
+      let resultNamespaces = {...state.namespaces};
+      delete resultNamespaces[action.namespaceId];
+      return {
+        namespaces: resultNamespaces,
+        order: state.order.filter(id => id != action.namespaceId),
       }
     default:
       return state;

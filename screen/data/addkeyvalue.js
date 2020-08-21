@@ -4,16 +4,12 @@ import {
   Text,
   Button,
   View,
-  ListView,
-  Image,
   ScrollView,
   TextInput,
   TouchableOpacity,
   ActivityIndicator,
   Keyboard,
   LayoutAnimation,
-  UIManager,
-  Dimensions,
   Animated,
   Easing,
   StatusBar,
@@ -23,7 +19,6 @@ import Toast from 'react-native-root-toast';
 const StyleSheet = require('../../PlatformStyleSheet');
 const KevaButton = require('../../common/KevaButton');
 const KevaColors = require('../../common/KevaColors');
-const KevaHeader = require('../../common/KevaHeader');
 const utils = require('../../util');
 import {
   BlueNavigationStyle,
@@ -34,12 +29,6 @@ const loc = require('../../loc');
 let BlueApp = require('../../BlueApp');
 let BlueElectrum = require('../../BlueElectrum');
 
-import Switch from 'react-native-switch-pro';
-import Icon from 'react-native-vector-icons/Ionicons';
-import SortableListView from 'react-native-sortable-list'
-import Modal from 'react-native-modalbox';
-import ActionSheet from 'react-native-actionsheet';
-import ElevatedView from 'react-native-elevated-view';
 import { connect } from 'react-redux'
 import { setKeyValueList } from '../../actions'
 import { updateKeyValue } from '../../class/keva-ops';
