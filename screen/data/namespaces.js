@@ -290,9 +290,10 @@ class MyNamespaces extends React.Component {
                   broadcastErr: result.message,
                 });
               }
+              this.setState({isBroadcasting: false, showSkip: false});
+              this.closeItemAni();
               await BlueApp.saveToDisk();
               await this.refreshNamespaces(this.state.walletId);
-              this.setState({isBroadcasting: false, showSkip: false});
             } catch (err) {
               this.setState({isBroadcasting: false});
               console.warn(err);
