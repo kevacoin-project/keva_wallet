@@ -12,7 +12,6 @@ import {
   LayoutAnimation,
   Animated,
   Easing,
-  StatusBar,
   RefreshControl,
 } from 'react-native';
 import Toast from 'react-native-root-toast';
@@ -111,6 +110,7 @@ class AddKeyValue extends React.Component {
           this.setState({ showKeyValueModal: true, currentPage: 1, fee: feeKVA });
           this.namespaceTx = tx;
         } catch (err) {
+          console.warn(err);
           this.setState({createTransactionErr: err.message});
         }
       }, 800);
@@ -230,7 +230,9 @@ class AddKeyValue extends React.Component {
                 showKeyValueModal: false,
                 nsName: '',
               });
-              this.props.navigation.goBack();
+              setTimeout(() => {
+                this.props.navigation.goBack();
+              }, 600);
             }}
           />
         </View>

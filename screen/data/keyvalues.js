@@ -3,7 +3,6 @@ import {
   Alert,
   Text,
   View,
-  Image,
   ScrollView,
   TextInput,
   TouchableOpacity,
@@ -13,7 +12,6 @@ import {
   LayoutAnimation,
   Animated,
   Easing,
-  StatusBar,
   RefreshControl,
 } from 'react-native';
 const StyleSheet = require('../../PlatformStyleSheet');
@@ -390,8 +388,8 @@ class KeyValues extends React.Component {
             onPress={async () => {
               this.setState({
                 showDeleteModal: false,
-                nsName: '',
               });
+              await this.refreshKeyValues();
             }}
           />
         </View>
