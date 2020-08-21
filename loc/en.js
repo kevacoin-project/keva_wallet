@@ -14,6 +14,11 @@ module.exports = {
     copiedToClipboard: 'Copied to clipboard',
     unconfirmed: 'Unconfirmed',
   },
+  namespaces: {
+    no_data: "No Data",
+    click_add_btn: "Enter name in the text field and click the 'add' button to create your first namespace",
+    explain: "A namespace is a data container where you can add key-value pairs"
+  },
   wallets: {
     select_wallet: 'Select Wallet',
     options: 'options',

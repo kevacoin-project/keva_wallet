@@ -491,6 +491,24 @@ class MyNamespaces extends React.Component {
             }}
           />
         }
+        {
+          !namespaceList &&
+          <View style={styles.emptyMessageContainer}>
+            <Text style={[styles.emptyMessage, { marginBottom: 20, fontSize: 24 }]}>
+              {loc.namespaces.no_data}
+            </Text>
+            <Text style={[styles.emptyMessage, { marginBottom: 7 }]}>
+              {loc.namespaces.click_add_btn}
+            </Text>
+            <Icon name={'md-add-circle'}
+              style={[styles.addIcon, !canAdd && {color: KevaColors.inactiveText}]}
+              size={28} />
+            <Text style={[styles.emptyMessage, styles.help, {marginTop: 10}]}>
+              {loc.namespaces.explain}
+            </Text>
+          </View>
+        }
+
       </View>
     );
   }
@@ -998,5 +1016,22 @@ var styles = StyleSheet.create({
   modalErr: {
     fontSize: 16,
     marginTop: 20,
-  }
+  },
+  emptyMessageContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+  emptyMessage: {
+    fontSize: 18,
+    color: KevaColors.inactiveText,
+    textAlign: 'center',
+  },
+  help: {
+    fontSize: 16,
+    alignSelf: 'center',
+    textAlign: 'center',
+    lineHeight: 24,
+    paddingHorizontal: 20
+  },
 });
