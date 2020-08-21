@@ -159,7 +159,10 @@ export async function getNamespaceDataFromTx(ecl, transactions, txidStart, nsSta
 
       let nextns = result[1];
       if (!ns || nextns === ns) {
-        let txIds = tx.vin.map(t => t.txid);
+        // From transactions, tx.inputs
+        // From server: tx.vin
+        const vin = tx.inputs || tx.vin;
+        let txIds = vin.map(t => t.txid);
         let uniqueTxIds = txIds.filter((v, i, a) => a.indexOf(v) === i);
         for (let t of uniqueTxIds) {
           stack.push([t, nextns]);
