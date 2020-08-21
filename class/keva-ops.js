@@ -676,6 +676,7 @@ export async function getKeyValuesFromShortCode(ecl, transactions, shortCode) {
 }
 
 export async function findMyNamespaces(wallet, ecl) {
+  await wallet.fetchBalance();
   await wallet.fetchTransactions();
   const transactions = wallet.getTransactions();
   if (transactions.length == 0) {
