@@ -191,6 +191,8 @@ class KeyValues extends React.Component {
     this.wallet = wallets.find(w => w.getID() == walletId);
     let transactions = [];
     if (this.wallet) {
+      await this.wallet.fetchBalance();
+      await this.wallet.fetchTransactions();
       transactions = this.wallet.getTransactions();
     }
     if (shortCode) {
@@ -441,7 +443,7 @@ class KeyValues extends React.Component {
   render() {
     let {navigation, dispatch, keyValueList} = this.props;
     const namespaceId = navigation.getParam('namespaceId');
-    const list = keyValueList.keyValues[namespaceId];
+    const list = keyValueList.keyValues[namespaceId] || [];
     return (
       <View style={styles.container}>
         <ActionSheet
