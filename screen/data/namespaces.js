@@ -452,7 +452,7 @@ class MyNamespaces extends React.Component {
         <View style={styles.inputContainer}>
           <TouchableOpacity onPress={this.closeItemAni}>
             <Text style={[{color: KevaColors.actionText, fontSize: 16, textAlign: 'left'}, inputMode && {paddingRight: 5}]}>
-              {inputMode ? 'Cancel' : ''}
+              {inputMode ? loc.general.cancel : ''}
             </Text>
           </TouchableOpacity>
           <TextInput
@@ -460,7 +460,7 @@ class MyNamespaces extends React.Component {
             ref={ref => this._inputRef = ref}
             onChangeText={nsName => this.setState({ nsName: nsName })}
             value={this.state.nsName}
-            placeholder={"Name of new namespace"}
+            placeholder={loc.namespaces.namespace_name}
             multiline={false}
             underlineColorAndroid='rgba(0,0,0,0)'
             style={styles.textInput}
@@ -501,14 +501,13 @@ class MyNamespaces extends React.Component {
               {loc.namespaces.click_add_btn}
             </Text>
             <Icon name={'md-add-circle'}
-              style={[styles.addIcon, !canAdd && {color: KevaColors.inactiveText}]}
+              style={[styles.addIcon, {color: KevaColors.inactiveText}]}
               size={28} />
             <Text style={[styles.emptyMessage, styles.help, {marginTop: 10}]}>
               {loc.namespaces.explain}
             </Text>
           </View>
         }
-
       </View>
     );
   }
@@ -524,6 +523,7 @@ class OtherNamespaces extends React.Component {
       namespaceId: null, saving: false,
       isLoading: true, isModalVisible: false,
       isRefreshing: false,
+      inputMode: false,
     };
   }
 
@@ -608,9 +608,28 @@ class OtherNamespaces extends React.Component {
     this._actionDelete.show();
   }
 
+  openItemAni = () => {
+    LayoutAnimation.configureNext({
+      duration: 100,
+      update: {type: LayoutAnimation.Types.easeInEaseOut}
+    });
+    this.setState({inputMode: true});
+  }
+
+  closeItemAni = () => {
+    LayoutAnimation.configureNext({
+      duration: 100,
+      update: {type: LayoutAnimation.Types.easeInEaseOut}
+    });
+    this.setState({inputMode: false, nsName: ''});
+    this._inputRef && this._inputRef.blur();
+    this._inputRef && this._inputRef.clear();
+  }
+
   render() {
     const { navigation, otherNamespaceList, onInfo } = this.props;
     const canSearch = this.state.nsName && this.state.nsName.length > 0;
+    const inputMode = this.state.inputMode;
 
     return (
       <View style={styles.container}>
@@ -623,10 +642,17 @@ class OtherNamespaces extends React.Component {
           onPress={this.onDeleteConfirm}
         />
         <View style={styles.inputContainer}>
+          <TouchableOpacity onPress={this.closeItemAni}>
+            <Text style={[{color: KevaColors.actionText, fontSize: 16, textAlign: 'left'}, inputMode && {paddingRight: 5}]}>
+              {inputMode ? loc.general.cancel : ''}
+            </Text>
+          </TouchableOpacity>
           <TextInput
+            onFocus={this.openItemAni}
+            ref={ref => this._inputRef = ref}
             onChangeText={nsName => this.setState({ nsName: nsName })}
             value={this.state.nsName}
-            placeholder={"Shortcode (e.g. 5570511) or Tx Id"}
+            placeholder={loc.namespaces.shortcode_id}
             multiline={false}
             underlineColorAndroid='rgba(0,0,0,0)'
             returnKeyType='search'
@@ -660,6 +686,26 @@ class OtherNamespaces extends React.Component {
             }}
           />
         }
+        {
+          !otherNamespaceList &&
+          <View style={styles.emptyMessageContainer}>
+            <Text style={[styles.emptyMessage, { marginBottom: 20, fontSize: 24 }]}>
+              {loc.namespaces.no_data}
+            </Text>
+            <Text style={[styles.emptyMessage, { marginBottom: 7 }]}>
+              {loc.namespaces.click_search_btn}
+            </Text>
+            <Icon name={'md-search'}
+              style={[styles.addIcon, {color: KevaColors.inactiveText}]}
+              size={28} />
+            <Text style={[styles.emptyMessage, styles.help, {marginTop: 10}]}>
+              {loc.namespaces.explain_tx}
+            </Text>
+            <Text style={[styles.emptyMessage, styles.help, {marginTop: 10}]}>
+              {loc.namespaces.explain_ns}
+            </Text>
+          </View>
+        }
       </View>
     );
   }
@@ -681,8 +727,8 @@ class Namespaces extends React.Component {
       spinning: false,
       index: 0,
       routes: [
-        { key: 'first', title: 'My Data' },
-        { key: 'second', title: 'Others' }
+        { key: 'first', title: loc.namespaces.my_data },
+        { key: 'second', title: loc.namespaces.others }
       ]
     };
   }

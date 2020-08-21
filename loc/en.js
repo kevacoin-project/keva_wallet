@@ -13,11 +13,22 @@ module.exports = {
     delete: 'Delete',
     copiedToClipboard: 'Copied to clipboard',
     unconfirmed: 'Unconfirmed',
+    label_wallets: 'Wallets',
+    label_data: 'Data',
+    label_settings: 'Settings',
+    language_restart: 'After selecting a new language, restarting the app is required for the change to take effect.',
   },
   namespaces: {
+    my_data: "My Data",
+    others: "Others",
+    namespace_name: "name of namespace",
+    shortcode_id: "Shortcode or Tx Id",
     no_data: "No Data",
-    click_add_btn: "Enter name in the text field and click the 'add' button to create your first namespace",
-    explain: "A namespace is a data container where you can add key-value pairs"
+    click_add_btn: "Enter name and click the 'add' button to create your first namespace",
+    click_search_btn: "Enter namespace shortcode (e.g. 5570511) and click the 'search' button to see other namespaces",
+    explain: "A namespace is a data container where you can add key-value pairs",
+    explain_tx: "You can also enter any transaction Id related to a namespace. Use 'kevacoin-cli keva_filter' to find the namespace transaction Id.",
+    explain_ns: "Namespace Id is not supported on mobile app.",
   },
   wallets: {
     select_wallet: 'Select Wallet',
@@ -194,6 +205,7 @@ module.exports = {
   },
   settings: {
     general: 'General',
+    security: 'Security',
     header: 'Settings',
     plausible_deniability: 'Plausible deniability',
     storage_not_encrypted: 'Storage: not encrypted',
@@ -207,8 +219,10 @@ module.exports = {
     lightning_settings_explain:
       'To connect to your own LND node please install LndHub' +
       " and put its URL here in settings. Leave blank to use KevaWallet's LNDHub (lndhub.io). Wallets created after saving changes will connect to the specified LNDHub.",
+    network: 'Network',
     electrum_settings: 'Electrum Settings',
     electrum_settings_explain: 'Set to blank to use default',
+    electrum_restart: 'Your changes have been saved successfully. Restart may be required for changes to take effect.',
     save: 'Save',
     about: 'About',
     language: 'Language',

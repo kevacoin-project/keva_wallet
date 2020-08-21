@@ -1,4 +1,7 @@
 import React from 'react';
+import {
+  Text,
+} from 'react-native';
 import { createAppContainer, getActiveChildNavigationOptions } from 'react-navigation';
 import { createStackNavigator, TransitionPresets } from 'react-navigation-stack';
 import { createBottomTabNavigator } from 'react-navigation-tabs';
@@ -51,6 +54,7 @@ import KeyValues from './screen/data/keyvalues';
 import AddKeyValue from './screen/data/addkeyvalue';
 
 import Ionicons from 'react-native-vector-icons/Ionicons';
+let loc = require('./loc');
 
 const StyleSheet = require('./PlatformStyleSheet');
 
@@ -474,7 +478,19 @@ const KevaTabNavigator = createBottomTabNavigator(MAIN_TABS, {
       } else if (routeName === 'Data') {
         iconName = 'md-filing';
       }
-      return <Ionicons name={iconName} size={22} color={tintColor} />;
+      return <Ionicons name={iconName} size={22} color={tintColor}/>;
+    },
+    tabBarLabel: ({tintColor}) => {
+      const { routeName } = navigation.state;
+      let label;
+      if (routeName === 'Wallets') {
+        label = loc.general.label_wallets;
+      } else if (routeName === 'Settings') {
+        label = loc.general.label_settings;
+      } else if (routeName === 'Data') {
+        label = loc.general.label_data;
+      }
+      return <Text style={{fontSize: 12, alignSelf: 'center', color: tintColor, position: 'relative', top: -2}}>{label}</Text>;
     },
   }),
 });
