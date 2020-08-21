@@ -632,3 +632,20 @@ function txhexToElectrumTransaction(txhex) {
   }
   return ret;
 }
+
+
+module.exports.blockchainTransaction_get = async function(tx_hash, verbose) {
+  return await mainClient.blockchainTransaction_get(tx_hash, verbose);
+}
+
+module.exports.blockchainScripthash_getHistory = async function(scriptHash) {
+  return await mainClient.blockchainScripthash_getHistory(scriptHash);
+}
+
+module.exports.blockchainTransaction_getMerkle = async function(txid, height, merkel) {
+  return await mainClient.blockchainTransaction_getMerkle(txid, height, merkel);
+}
+
+module.exports.blockchainTransaction_idFromPos = async function(height, pos) {
+  return await mainClient.blockchainTransaction_idFromPos(height, pos);
+}

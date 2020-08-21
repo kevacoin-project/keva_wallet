@@ -3,6 +3,7 @@ import { FlatList } from 'react-native';
 import { BlueLoading, BlueText, SafeBlueArea, BlueListItem, BlueCard, BlueNavigationStyle } from '../../BlueComponents';
 import PropTypes from 'prop-types';
 import { Icon } from 'react-native-elements';
+import KevaColors from '../../common/KevaColors';
 let loc = require('../../loc');
 
 export default class Language extends Component {
@@ -19,8 +20,8 @@ export default class Language extends Component {
       availableLanguages: [
         { label: 'English', value: 'en' },
         { label: 'Afrikaans (AFR)', value: 'zar_afr' },
-        { label: 'Chinese (ZH)', value: 'zh_cn' },
-        { label: 'Chinese (TW)', value: 'zh_tw' },
+        { label: '简体中文 (ZH)', value: 'zh_cn' },
+        { label: '繁体中文 (TW)', value: 'zh_tw' },
         { label: 'Croatian (HR)', value: 'hr_hr' },
         { label: 'Česky (CZ)', value: 'cs_cz' },
         { label: 'Danish (DK)', value: 'da_dk' },
@@ -87,7 +88,7 @@ export default class Language extends Component {
           renderItem={this.renderItem}
         />
         <BlueCard>
-          <BlueText>When selecting a new language, restarting BlueWallet may be required for the change to take effect.</BlueText>
+          <BlueText style={{color: KevaColors.actionText}}>{loc.general.language_restart}</BlueText>
         </BlueCard>
       </SafeBlueArea>
     );

@@ -27,6 +27,11 @@ const BlueApp = require('../../BlueApp');
 const loc = require('../../loc');
 const currency = require('../../currency');
 
+/**
+ * This screen shows the detail of the transaction, with the title "Details". It should really
+ * be called "details".
+ */
+
 export default class SendCreate extends Component {
   static navigationOptions = ({ navigation }) => ({
     ...BlueNavigationStyle(),

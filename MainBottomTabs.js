@@ -1,6 +1,9 @@
 import React from 'react';
+import {
+  Text,
+} from 'react-native';
 import { createAppContainer, getActiveChildNavigationOptions } from 'react-navigation';
-import { createStackNavigator } from 'react-navigation-stack';
+import { createStackNavigator, TransitionPresets } from 'react-navigation-stack';
 import { createBottomTabNavigator } from 'react-navigation-tabs';
 
 import Settings from './screen/settings/settings';
@@ -46,8 +49,12 @@ import Confirm from './screen/send/confirm';
 import PsbtWithHardwareWallet from './screen/send/psbtWithHardwareWallet';
 import Success from './screen/send/success';
 import Broadcast from './screen/send/broadcast';
+import Namespaces from './screen/data/namespaces';
+import KeyValues from './screen/data/keyvalues';
+import AddKeyValue from './screen/data/addkeyvalue';
 
 import Ionicons from 'react-native-vector-icons/Ionicons';
+let loc = require('./loc');
 
 const StyleSheet = require('./PlatformStyleSheet');
 
@@ -103,7 +110,8 @@ const WalletsStackNavigator = createStackNavigator(
   {
     defaultNavigationOptions: {
       headerBackTitleVisible: false,
-      headerTitle: () => null
+      headerTitle: () => null,
+      ...TransitionPresets.SlideFromRightIOS,
     },
     navigationOptions: ({ navigation }) => {
       let tabBarVisible = false;
@@ -337,7 +345,8 @@ const SettingsStackNavigator = createStackNavigator(
   },
   {
     defaultNavigationOptions: {
-      headerBackTitleVisible: false
+      headerBackTitleVisible: false,
+      ...TransitionPresets.SlideFromRightIOS,
     },
     navigationOptions: ({ navigation }) => {
       let tabBarVisible = false;
@@ -353,11 +362,58 @@ const SettingsStackNavigator = createStackNavigator(
   },
 );
 
+const DataStackNavigator = createStackNavigator(
+  {
+    Namespaces: {
+      screen: Namespaces,
+      path: 'Data',
+      navigationOptions: {
+        headerStyle: {
+          backgroundColor: '#FFFFFF',
+          borderBottomWidth: 0,
+          elevation: 0,
+        },
+        headerTintColor: '#0c2550',
+      },
+    },
+    KeyValues: {
+      screen: KeyValues,
+    },
+    AddKeyValue: {
+      screen: AddKeyValue,
+    },
+  },
+  {
+    defaultNavigationOptions: {
+      headerBackTitleVisible: false,
+      ...TransitionPresets.SlideFromRightIOS,
+    },
+    navigationOptions: ({ navigation }) => {
+      let tabBarVisible = false;
+      let routeName = navigation.state.routes[navigation.state.index].routeName;
+      if (routeName == 'Namespaces') {
+          tabBarVisible = true;
+      }
+      return {
+        tabBarVisible,
+        headerShown: false,
+      }
+    },
+  },
+);
+
 
 const MAIN_TABS = {
   Wallets: {
     screen: WalletNavigator,
     path: 'WalletList',
+    navigationOptions: {
+      headerShown: false,
+    },
+  },
+  Data: {
+    screen: DataStackNavigator,
+    path: 'Data',
     navigationOptions: {
       headerShown: false,
     },
@@ -419,8 +475,22 @@ const KevaTabNavigator = createBottomTabNavigator(MAIN_TABS, {
         iconName = 'md-wallet';
       } else if (routeName === 'Settings') {
         iconName = 'md-settings';
+      } else if (routeName === 'Data') {
+        iconName = 'md-filing';
       }
-      return <Ionicons name={iconName} size={22} color={tintColor} />;
+      return <Ionicons name={iconName} size={22} color={tintColor}/>;
+    },
+    tabBarLabel: ({tintColor}) => {
+      const { routeName } = navigation.state;
+      let label;
+      if (routeName === 'Wallets') {
+        label = loc.general.label_wallets;
+      } else if (routeName === 'Settings') {
+        label = loc.general.label_settings;
+      } else if (routeName === 'Data') {
+        label = loc.general.label_data;
+      }
+      return <Text style={{fontSize: 12, alignSelf: 'center', color: tintColor, position: 'relative', top: -2}}>{label}</Text>;
     },
   }),
 });

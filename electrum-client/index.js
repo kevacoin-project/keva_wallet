@@ -156,6 +156,9 @@ class ElectrumClient extends Client {
   blockchainTransaction_getMerkle(tx_hash, height) {
     return this.request('blockchain.transaction.get_merkle', [tx_hash, height]);
   }
+  blockchainTransaction_idFromPos(height, txPos, merkle){
+    return this.request('blockchain.transaction.id_from_pos', [height, txPos, merkle || false])
+  }
   mempool_getFeeHistogram() {
     return this.request('mempool.get_fee_histogram', []);
   }

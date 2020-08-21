@@ -25,6 +25,11 @@ let Bignumber = require('bignumber.js');
 /** @type {AppStorage} */
 const BlueApp = require('../../BlueApp');
 
+/**
+ * Confirmation screen, showing a button "Send Now" to broadcast the
+ * transaction.
+ */
+
 export default class Confirm extends Component {
   static navigationOptions = () => ({
     ...BlueNavigationStyle(null, false),

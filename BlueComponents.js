@@ -700,7 +700,7 @@ export class BlueHeaderDefaultSub extends Component {
               adjustsFontSizeToFit
               style={{
                 fontWeight: 'bold',
-                fontSize: 30,
+                fontSize: 28,
                 color: BlueApp.settings.foregroundColor,
               }}
             >
@@ -743,7 +743,7 @@ export class BlueHeaderDefaultMain extends Component {
             text: this.props.leftText,
             style: {
               fontWeight: 'bold',
-              fontSize: 34,
+              fontSize: 28,
               color: BlueApp.settings.foregroundColor,
             },
           }}

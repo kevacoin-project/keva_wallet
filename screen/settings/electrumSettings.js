@@ -70,14 +70,14 @@ export default class ElectrumSettings extends Component {
           await AsyncStorage.setItem(AppStorage.ELECTRUM_HOST, '');
           await AsyncStorage.setItem(AppStorage.ELECTRUM_TCP_PORT, '');
           await AsyncStorage.setItem(AppStorage.ELECTRUM_SSL_PORT, '');
-          alert('Your changes have been saved successfully. Restart may be required for changes to take effect.');
+          alert(loc.settings.electrum_restart);
         } else if (!(await BlueElectrum.testConnection(host, port, sslPort))) {
           alert("Can't connect to provided Electrum server");
         } else {
           await AsyncStorage.setItem(AppStorage.ELECTRUM_HOST, host);
           await AsyncStorage.setItem(AppStorage.ELECTRUM_TCP_PORT, port);
           await AsyncStorage.setItem(AppStorage.ELECTRUM_SSL_PORT, sslPort);
-          alert('Your changes have been saved successfully. Restart may be required for changes to take effect.');
+          alert(loc.settings.electrum_restart);
         }
       } catch (_) {}
       this.setState({ isLoading: false });

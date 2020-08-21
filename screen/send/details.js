@@ -49,6 +49,12 @@ let BlueApp: AppStorage = require('../../BlueApp');
 let loc = require('../../loc');
 let BlueElectrum = require('../../BlueElectrum');
 
+/**
+ * The screen that allows user to enter the amount of KVA to send, the address etc.
+ * It also creates the transaction.
+ * It should really be called "create" screen.
+ */
+
 const btcAddressRx = /^[a-zA-Z0-9]{26,35}$/;
 
 export default class SendDetails extends Component {
