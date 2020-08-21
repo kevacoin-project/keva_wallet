@@ -690,7 +690,7 @@ export async function findMyNamespaces(wallet, ecl) {
       }
       const keva = kevaToJson(result);
       const nsId = keva.namespaceId;
-      namespaces[nsId] = {
+      namespaces[nsId] = namespaces[nsId] || {
         id: nsId,
         walletId: wallet.getID(),
         txId: tx.hash,
@@ -738,7 +738,7 @@ export async function findOtherNamespace(ecl, txidOrShortCode) {
     }
     const keva = kevaToJson(result);
     nsId = keva.namespaceId;
-    namespaces[nsId] = {
+    namespaces[nsId] = namespaces[nsId] || {
       id: nsId,
       txId: tx.txid,
     }
