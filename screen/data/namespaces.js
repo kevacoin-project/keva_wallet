@@ -42,7 +42,7 @@ let BlueElectrum = require('../../BlueElectrum');
 const StyleSheet = require('../../PlatformStyleSheet');
 const KevaButton = require('../../common/KevaButton');
 const KevaColors = require('../../common/KevaColors');
-import { THIN_BORDER, getOverlaySpinner } from '../../util';
+import { THIN_BORDER, SCREEN_WIDTH, getOverlaySpinner } from '../../util';
 import Toast from 'react-native-root-toast';
 import StepModal from "../../common/StepModalWizard";
 
@@ -213,7 +213,7 @@ class MyNamespaces extends React.Component {
         <Text style={[styles.modalText, {textAlign: 'center', marginBottom: 20, color: KevaColors.darkText}]}>{"Choose a Wallet"}</Text>
         <Picker
           selectedValue={this.state.walletId}
-          style={{height: 50, width: 270, color: KevaColors.lightText}}
+          style={{height: 80, width: SCREEN_WIDTH*0.8, color: KevaColors.lightText}}
           onValueChange={(walletId, i) => this.setState({walletId: walletId})
           }>
           { walletList }
