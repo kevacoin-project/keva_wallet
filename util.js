@@ -1,6 +1,7 @@
 import React from 'react';
 import {
   PixelRatio,
+  Dimensions,
 } from 'react-native';
 
 import Toast from 'react-native-root-toast';
@@ -48,3 +49,5 @@ export function showStatus(message, duration=60000) {
   export function getOverlaySpinner(visible) {
     return <OverlaySpinner visible={visible} textContent={''} color={"#ff8274"} overlayColor={'rgba(255,255,255,0.75)'}/>
   }
+
+  export const SCREEN_WIDTH = Dimensions.get('window').width;

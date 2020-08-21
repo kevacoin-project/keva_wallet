@@ -437,7 +437,7 @@ class MyNamespaces extends React.Component {
       duration: 100,
       update: {type: LayoutAnimation.Types.easeInEaseOut}
     });
-    this.setState({inputMode: false});
+    this.setState({inputMode: false, nsName: ''});
     this._inputRef && this._inputRef.blur();
     this._inputRef && this._inputRef.clear();
   }
