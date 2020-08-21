@@ -174,6 +174,7 @@ class MyNamespaces extends React.Component {
       currentPage: 0,
       isRefreshing: false,
       createTransactionErr: null,
+      inputMode: false,
     };
   }
 
@@ -423,14 +424,40 @@ class MyNamespaces extends React.Component {
     this.setState({isRefreshing: false});
   }
 
+  openItemAni = () => {
+    LayoutAnimation.configureNext({
+      duration: 100,
+      update: {type: LayoutAnimation.Types.easeInEaseOut}
+    });
+    this.setState({inputMode: true});
+  }
+
+  closeItemAni = () => {
+    LayoutAnimation.configureNext({
+      duration: 100,
+      update: {type: LayoutAnimation.Types.easeInEaseOut}
+    });
+    this.setState({inputMode: false});
+    this._inputRef && this._inputRef.blur();
+    this._inputRef && this._inputRef.clear();
+  }
+
   render() {
     const { navigation, namespaceList, onInfo } = this.props;
     const canAdd = this.state.nsName && this.state.nsName.length > 0;
+    const inputMode = this.state.inputMode;
     return (
       <View style={styles.container}>
         {this.getNSCreationModal()}
         <View style={styles.inputContainer}>
+          <TouchableOpacity onPress={this.closeItemAni}>
+            <Text style={[{color: KevaColors.actionText, fontSize: 16, textAlign: 'left'}, inputMode && {paddingRight: 5}]}>
+              {inputMode ? 'Cancel' : ''}
+            </Text>
+          </TouchableOpacity>
           <TextInput
+            onFocus={this.openItemAni}
+            ref={ref => this._inputRef = ref}
             onChangeText={nsName => this.setState({ nsName: nsName })}
             value={this.state.nsName}
             placeholder={"Name of new namespace"}
