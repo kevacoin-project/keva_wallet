@@ -134,6 +134,7 @@ class Namespace extends React.Component {
     return (
       <Animated.View style={this._style}>
         <ElevatedView elevation={1} style={styles.cardTitle}>
+          <View style={{borderWidth: THIN_BORDER, borderColor: '#aaa', borderRadius: 2, width: 4, height: 48, marginLeft: 5 }}/>
           <View style={{ flex: 1, justifyContent: 'space-between', paddingHorizontal: 7, paddingTop: 10 }}>
             <View style={{ flex: 1 }} >
               <Text style={styles.cardTitleText} numberOfLines={1} ellipsizeMode="tail">{namespace.displayName}</Text>
