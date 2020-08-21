@@ -207,12 +207,22 @@ class KeyValues extends React.Component {
     }
   }
 
+  getCurrentWallet = () => {
+    const walletId = this.props.navigation.getParam('walletId');
+    const wallets = BlueApp.getWallets();
+    const wallet = wallets.find(w => w.getID() == walletId);
+    return wallet;
+  }
+
   async componentDidMount() {
     await this.fetchKeyValues();
     this.subs = [
       this.props.navigation.addListener('willFocus', async () => {
         try {
           this.setState({isRefreshing: true});
+          const wallet = this.getCurrentWallet();
+          await wallet.fetchBalance();
+          await wallet.fetchTransactions();
           await this.fetchKeyValues();
           this.setState({isRefreshing: false});
         } catch (err) {

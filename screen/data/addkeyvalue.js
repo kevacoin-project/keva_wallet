@@ -183,7 +183,7 @@ class AddKeyValue extends React.Component {
                   broadcastErr: result.message,
                 });
               }
-              console.log(result)
+              await BlueApp.saveToDisk();
               this.setState({isBroadcasting: false, showSkip: false});
             } catch (err) {
               this.setState({isBroadcasting: false});
@@ -230,9 +230,7 @@ class AddKeyValue extends React.Component {
                 showKeyValueModal: false,
                 nsName: '',
               });
-              setTimeout(() => {
-                this.props.navigation.goBack();
-              }, 600);
+              this.props.navigation.goBack();
             }}
           />
         </View>
