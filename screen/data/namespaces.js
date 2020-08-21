@@ -287,7 +287,8 @@ class MyNamespaces extends React.Component {
                   broadcastErr: result.message,
                 });
               }
-              console.log(result)
+              await BlueApp.saveToDisk();
+              await this.refreshNamespaces(this.state.walletId);
               this.setState({isBroadcasting: false, showSkip: false});
             } catch (err) {
               this.setState({isBroadcasting: false});
@@ -401,9 +402,17 @@ class MyNamespaces extends React.Component {
     }
   }
 
-  refreshNamespaces = async () => {
+  refreshNamespaces = async (walletId) => {
     this.setState({isRefreshing: true});
     try {
+      if (walletId) {
+        const wallets = BlueApp.getWallets();
+        const wallet = wallets.find(w => w.getID() == walletId);
+        if (wallet) {
+          await wallet.fetchBalance();
+          await wallet.fetchTransactions();
+        }
+      }
       await this.fetchNamespaces();
     } catch (err) {
       console.error(err);

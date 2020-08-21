@@ -197,12 +197,18 @@ class KeyValues extends React.Component {
     }
   }
 
-  refreshKeyValues = async () => {
+  refreshKeyValues = async (additionalFetch) => {
     try {
       this.setState({isRefreshing: true});
+      if (additionalFetch) {
+        const wallet = this.getCurrentWallet();
+        await wallet.fetchBalance();
+        await wallet.fetchTransactions();
+      }
       await this.fetchKeyValues();
       this.setState({isRefreshing: false});
     } catch (err) {
+      this.setState({isRefreshing: false});
       Toast.show('Failed to fetch key values');
     }
   }
@@ -353,7 +359,7 @@ class KeyValues extends React.Component {
                   broadcastErr: result.message,
                 });
               }
-              console.log(result)
+              await BlueApp.saveToDisk();
               this.setState({isBroadcasting: false, showSkip: false});
             } catch (err) {
               this.setState({isBroadcasting: false});
@@ -399,7 +405,7 @@ class KeyValues extends React.Component {
               this.setState({
                 showDeleteModal: false,
               });
-              await this.refreshKeyValues();
+              await this.refreshKeyValues(true);
             }}
           />
         </View>
