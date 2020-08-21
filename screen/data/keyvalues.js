@@ -210,6 +210,21 @@ class KeyValues extends React.Component {
 
   async componentDidMount() {
     await this.fetchKeyValues();
+    this.subs = [
+      this.props.navigation.addListener('willFocus', async () => {
+        try {
+          this.setState({isRefreshing: true});
+          await this.fetchKeyValues();
+          this.setState({isRefreshing: false});
+        } catch (err) {
+          this.setState({isRefreshing: false});
+        }
+      }),
+    ];
+  }
+
+  componentWillUnmount () {
+    this.subs.forEach(sub => sub.remove());
   }
 
   closeModal = () => {

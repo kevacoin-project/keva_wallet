@@ -230,6 +230,7 @@ class AddKeyValue extends React.Component {
                 showKeyValueModal: false,
                 nsName: '',
               });
+              this.props.navigation.goBack();
             }}
           />
         </View>
