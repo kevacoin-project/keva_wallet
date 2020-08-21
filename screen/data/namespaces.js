@@ -774,7 +774,14 @@ class Namespaces extends React.Component {
               )}
               indicatorStyle={{ backgroundColor: KevaColors.actionText }}
               labelStyle={{ backgroundColor: '#fff', color: KevaColors.inactiveText }}
-              style={{ backgroundColor: '#fff' }}
+              style={{
+                backgroundColor: '#fff', shadowOpacity: 0, shadowOffset: { height: 0, width: 0 },
+                shadowColor: 'transparent',
+                shadowOpacity: 0,
+                elevation: 0,
+                borderBottomWidth: THIN_BORDER,
+                borderBottomColor: KevaColors.actionText,
+              }}
             />
           }
         />
