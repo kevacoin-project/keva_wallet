@@ -189,15 +189,13 @@ class KeyValues extends React.Component {
     let keyValues;
     const wallets = BlueApp.getWallets();
     this.wallet = wallets.find(w => w.getID() == walletId);
-    if (!this.wallet) {
-      Toast.show('Wallet not found');
-      return;
+    let transactions = [];
+    if (this.wallet) {
+      transactions = this.wallet.getTransactions();
     }
     if (shortCode) {
-      const transactions = this.wallet.getTransactions();
       keyValues = await getKeyValuesFromShortCode(BlueElectrum, transactions, shortCode.toString());
     } else if (txid) {
-      const transactions = this.wallet.getTransactions();
       keyValues = await getKeyValuesFromTxid(BlueElectrum, transactions, txid);
     }
 

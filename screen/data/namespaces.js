@@ -581,7 +581,7 @@ class OtherNamespaces extends React.Component {
           <TextInput
             onChangeText={nsName => this.setState({ nsName: nsName })}
             value={this.state.nsName}
-            placeholder={"Namespace short code or tx id"}
+            placeholder={"Shortcode (e.g. 5570511) or Tx Id"}
             multiline={false}
             underlineColorAndroid='rgba(0,0,0,0)'
             returnKeyType='search'
