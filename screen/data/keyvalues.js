@@ -7,6 +7,7 @@ import {
   ScrollView,
   TextInput,
   TouchableOpacity,
+  TouchableWithoutFeedback,
   ActivityIndicator,
   Keyboard,
   LayoutAnimation,
@@ -266,9 +267,13 @@ class KeyValues extends React.Component {
             {CLOSE_ICON}
           </TouchableOpacity>
         </View>
-        <View style={{ paddingVertical: 5, marginHorizontal: 10}}>
+        <View style={{ paddingVertical: 5, marginHorizontal: 10, maxHeight:"90%"}}>
           <Text style={titleStyle}>{key}</Text>
-          <Text style={contentStyle}>{value}</Text>
+          <ScrollView style={{flexGrow:0}}>
+            <TouchableWithoutFeedback>
+              <Text style={contentStyle}>{value}</Text>
+            </TouchableWithoutFeedback>
+          </ScrollView>
         </View>
       </Modal>
     )
