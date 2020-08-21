@@ -65,8 +65,9 @@ class Item extends React.Component {
   }
 
   render() {
-    let {data, onShow, namespaceId} = this.props;
+    let {data, onShow, namespaceId, navigation} = this.props;
     let item = data;
+    const {isOther} = navigation.state.params;
 
     return (
       <View style={styles.card}>
@@ -75,12 +76,21 @@ class Item extends React.Component {
             <View style={{flexDirection:'row',alignItems:'center',justifyContent:'space-between'}}>
               <Text style={styles.keyDesc} numberOfLines={1} ellipsizeMode="tail">{item.key}</Text>
               <View style={{flexDirection: 'row', alignItems:'center',justifyContent:'flex-start'}}>
-                <TouchableOpacity onPress={this.onEdit}>
-                  <Icon name="ios-create" size={22} style={styles.actionIcon} />
-                </TouchableOpacity>
-                <TouchableOpacity onPress={() => this.props.onDelete(namespaceId, item.key)}>
-                  <Icon name="ios-trash" size={22} style={styles.actionIcon} />
-                </TouchableOpacity>
+                {
+                  !isOther &&
+                  <TouchableOpacity onPress={this.onEdit}>
+                    <Icon name="ios-create" size={22} style={styles.actionIcon} />
+                  </TouchableOpacity>
+                }
+                {
+                  !isOther &&
+                  <TouchableOpacity onPress={() => this.props.onDelete(namespaceId, item.key)}>
+                    <Icon name="ios-trash" size={22} style={styles.actionIcon} />
+                  </TouchableOpacity>
+                }
+                {
+                  isOther && <View style={{height: 40}}/>
+                }
               </View>
             </View>
             <Text style={styles.valueDesc} numberOfLines={3} ellipsizeMode="tail">{item.value}</Text>
@@ -107,7 +117,7 @@ class KeyValues extends React.Component {
     ...BlueNavigationStyle(),
     title: '',
     tabBarVisible: false,
-    headerRight: () => (
+    headerRight: () => (!navigation.state.params.isOther &&
       <TouchableOpacity
         style={{ marginHorizontal: 16, minWidth: 150, justifyContent: 'center', alignItems: 'flex-end' }}
         onPress={() =>

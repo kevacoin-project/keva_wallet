@@ -108,10 +108,12 @@ class Namespace extends React.Component {
 
   onKey = () => {
     let namespace = this.props.data;
+    let isOther = this.props.isOther;
     this.props.navigation.navigate('KeyValues', {
       namespaceId: namespace.id,
       shortCode: namespace.shortCode,
       walletId: namespace.walletId,
+      isOther,
     });
   }
 
@@ -609,7 +611,7 @@ class OtherNamespaces extends React.Component {
               <RefreshControl onRefresh={() => this.refreshNamespaces()} refreshing={this.state.isRefreshing} />
             }
             renderRow={({data, active}) => {
-              return <Namespace onInfo={onInfo} onDelete={this.onDelete} data={data} active={active} navigation={navigation} canDelete={true} />
+              return <Namespace onInfo={onInfo} onDelete={this.onDelete} data={data} active={active} navigation={navigation} canDelete={true} isOther={true}/>
             }}
           />
         }
@@ -634,7 +636,7 @@ class Namespaces extends React.Component {
       spinning: false,
       index: 0,
       routes: [
-        { key: 'first', title: 'My Namespaces' },
+        { key: 'first', title: 'My Data' },
         { key: 'second', title: 'Others' }
       ]
     };
