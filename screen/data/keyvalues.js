@@ -92,7 +92,11 @@ class Item extends React.Component {
                 }
               </View>
             </View>
-            <Text style={styles.timestamp}>{timeConverter(item.time) + '     ' + loc.namespaces.height + ': ' + item.height}</Text>
+            {(item.height > 0) ?
+              <Text style={styles.timestamp}>{timeConverter(item.time) + '     ' + loc.namespaces.height + ': ' + item.height}</Text>
+              :
+              <Text style={styles.timestamp}>{loc.general.unconfirmed}</Text>
+            }
             <Text style={styles.valueDesc} numberOfLines={3} ellipsizeMode="tail">{item.value}</Text>
           </View>
         </TouchableOpacity>
