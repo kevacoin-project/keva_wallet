@@ -36,8 +36,7 @@ import { setKeyValueList } from '../../actions'
 import { getKeyValuesFromShortCode, getKeyValuesFromTxid, deleteKeyValue } from '../../class/keva-ops';
 import Toast from 'react-native-root-toast';
 import StepModal from "../../common/StepModalWizard";
-
-const CLOSE_ICON    = <Icon name="ios-close" size={42} color={KevaColors.errColor}/>;
+import { timeConverter } from "../../util";
 
 class Item extends React.Component {
 
@@ -93,6 +92,7 @@ class Item extends React.Component {
                 }
               </View>
             </View>
+            <Text style={styles.timestamp}>{timeConverter(item.time) + '     ' + loc.namespaces.height + ': ' + item.height}</Text>
             <Text style={styles.valueDesc} numberOfLines={3} ellipsizeMode="tail">{item.value}</Text>
           </View>
         </TouchableOpacity>
@@ -575,4 +575,10 @@ var styles = StyleSheet.create({
     paddingHorizontal: 7,
     color: KevaColors.inactiveText
   },
+  timestamp: {
+    color: KevaColors.extraLightText,
+    fontSize: 13,
+    position: 'relative',
+    top: -5,
+  }
 });

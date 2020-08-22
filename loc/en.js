@@ -19,6 +19,7 @@ module.exports = {
     language_restart: 'After selecting a new language, restarting the app is required for the change to take effect.',
   },
   namespaces: {
+    height: "block",
     my_data: "My Data",
     others: "Others",
     namespace_name: "name of namespace",
@@ -29,6 +30,9 @@ module.exports = {
     explain: "A namespace is a data container where you can add key-value pairs",
     explain_tx: "You can also enter any transaction Id related to a namespace. Use 'kevacoin-cli keva_filter' to find the namespace transaction Id.",
     explain_ns: "Namespace Id is not supported on mobile app.",
+    namespace_creation_err: 'Cannot create namespace. Please wait a few minutes until your last change is confirmed in the blockchain.',
+    update_key_err: 'Cannot update or add key-value. Please wait a few minutes until your last change is confirmed in the blockchain.',
+    delete_key_err: 'Cannot dete key. Please wait a few minutes until your last change is confirmed in the blockchain.',
   },
   wallets: {
     select_wallet: 'Select Wallet',

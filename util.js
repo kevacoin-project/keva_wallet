@@ -54,3 +54,15 @@ export function showStatus(message, duration=60000) {
   export const SCREEN_WIDTH = Dimensions.get('window').width;
 
   export const ModalHandle = <View style={{height: 6, width: 40, marginVertical: 10, borderRadius: 3, backgroundColor: '#ccc', alignSelf: 'center'}}/>;
+
+  export function timeConverter(UNIX_timestamp) {
+    let a = new Date(UNIX_timestamp * 1000);
+    let year = a.getFullYear();
+    let month = a.getMonth() + 1;
+    let date = a.getDate();
+    let hour = a.getHours();
+    let min = a.getMinutes() < 10 ? '0' + a.getMinutes() : a.getMinutes();
+    let sec = a.getSeconds() < 10 ? '0' + a.getSeconds() : a.getSeconds();
+    let timeStr = year + '-' + month + '-' + date + ' ' + hour + ':' + min + ':' + sec ;
+    return timeStr;
+  }

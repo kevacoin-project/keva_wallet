@@ -19,6 +19,7 @@ module.exports = {
     language_restart: '选择新语言后，需要重新启动应用程序才能使更改生效',
   },
   namespaces: {
+    height: "区块",
     my_data: "我的数据",
     others: "其他",
     namespace_name: "命名空间名称",
@@ -29,6 +30,9 @@ module.exports = {
     explain: "名称空间是一个数据容器，您可以在其中添加键值对",
     explain_tx: "您还可以输入与名称空间相关的任何事务ID. 使用'kevacoin-cli keva_filter'查找名称空间事务ID.",
     explain_ns: "移动应用程序不支持命名空间ID",
+    namespace_creation_err: '无法创建名称空间. 请等待几分钟，直到您的最后一次更改在区块链中得到确认.',
+    update_key_err: '无法更新或添加键值.请等待几分钟，直到您的最后一次更改在区块链中得到确认.',
+    delete_key_err: '无法删除键值.请等待几分钟，直到您的最后一次更改在区块链中得到确认.',
   },
   wallets: {
     select_wallet: '选择钱包',

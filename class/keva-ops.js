@@ -1,8 +1,7 @@
 const bitcoin = require('bitcoinjs-lib');
 const base58check = require('bs58check')
 const coinSelectAccumulative = require('coinselect/accumulative');
-const BigNumber = require('bignumber.js');
-let BlueElectrum = require('../BlueElectrum'); // eslint-disable-line
+let loc = require('../loc');
 
 export const KEVA_OP_NAMESPACE = 0xd0;
 export const KEVA_OP_PUT = 0xd1;
@@ -384,7 +383,7 @@ function reorderUtxos(utxos, nsUtxo) {
 export async function updateKeyValue(wallet, requestedSatPerByte, namespaceId, key, value) {
   let nsUtxo = await getNamespaceUtxo(wallet, namespaceId);
   if (!nsUtxo) {
-    throw new Error('Cannot update key value');
+    throw new Error(loc.namespaces.update_key_err);
   }
 
   const namespaceAddress = await wallet.getAddressAsync();
@@ -474,7 +473,7 @@ export async function updateKeyValue(wallet, requestedSatPerByte, namespaceId, k
 export async function deleteKeyValue(wallet, requestedSatPerByte, namespaceId, key) {
   let nsUtxo = await getNamespaceUtxo(wallet, namespaceId);
   if (!nsUtxo) {
-    throw new Error('Cannot delete key value');
+    throw new Error(loc.namespaces.delete_key_err);
   }
 
   const namespaceAddress = await wallet.getAddressAsync();
@@ -626,7 +625,9 @@ async function traverseKeyValues(ecl, address, namespaceId, transactions, result
                 continue;
               }
               resultJson.tx = history[i].tx_hash;
+              resultJson.height = history[i].height;
               resultJson.n = v.n;
+              resultJson.time = tx.time;
               results.push(resultJson);
               txvoutsDone[txvout] = 1;
               if ((history.length != 1) && (i == history.length - 1)) {
@@ -653,7 +654,9 @@ export async function getKeyValuesFromTxid(ecl, transactions, txid) {
           key: kv.key,
           value: kv.value,
           tx: kv.tx,
-          n: kv.n
+          n: kv.n,
+          height: kv.height,
+          time: kv.time,
         });
       } else if (kv.op === 'KEVA_OP_DELETE') {
         keyValues = keyValues.filter(e => e.key != kv.key);
@@ -662,7 +665,9 @@ export async function getKeyValuesFromTxid(ecl, transactions, txid) {
           key: '_KEVA_NS_',
           value: kv.displayName,
           tx: kv.tx,
-          n: kv.n
+          n: kv.n,
+          height: kv.height,
+          time: kv.time,
         });
       }
   }
