@@ -523,7 +523,7 @@ var styles = StyleSheet.create({
     color: KevaColors.lightText
   },
   actionIcon: {
-    color: KevaColors.icon,
+    color: KevaColors.arrowIcon,
     paddingHorizontal: 15,
     paddingVertical: 7
   },

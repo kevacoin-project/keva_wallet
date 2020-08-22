@@ -17,7 +17,6 @@ import {
   Keyboard,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
-import FAIcon from 'react-native-vector-icons/FontAwesome';
 import {
   BlueNavigationStyle,
   BlueLoading,
@@ -133,14 +132,14 @@ class Namespace extends React.Component {
     return (
       <Animated.View style={this._style}>
         <ElevatedView elevation={1} style={styles.cardTitle}>
-          <View style={{borderWidth: THIN_BORDER, borderColor: '#aaa', borderRadius: 2, width: 3, height: 40, marginLeft: 5 }}/>
+          <View style={{borderWidth: THIN_BORDER, borderColor: '#aaa', borderRadius: 2, width: 3, height: 32, marginLeft: 5 }}/>
           <View style={{ flex: 1, justifyContent: 'space-between', paddingHorizontal: 7, paddingTop: 10 }}>
             <View style={{ flex: 1 }} >
               <Text style={styles.cardTitleText} numberOfLines={1} ellipsizeMode="tail">{namespace.displayName}</Text>
             </View>
             <View style={styles.actionContainer}>
               <TouchableOpacity onPress={this.onInfo}>
-                <FAIcon name="info-circle" size={20} style={styles.actionIcon} />
+                <Icon name="ios-information-circle-outline" size={20} style={styles.actionIcon} />
               </TouchableOpacity>
               { canDelete &&
               <TouchableOpacity onPress={() => onDelete(namespace.id)}>
