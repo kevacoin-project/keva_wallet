@@ -235,7 +235,11 @@ class KeyValues extends React.Component {
   }
 
   async componentDidMount() {
-    await refreshKeyValues();
+    try {
+      await this.refreshKeyValues();
+    } catch (err) {
+      Toast.show("Cannot fetch key-values");
+    }
     this.subs = [
       this.props.navigation.addListener('willFocus', async () => {
         try {

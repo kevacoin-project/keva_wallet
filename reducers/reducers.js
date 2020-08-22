@@ -78,6 +78,16 @@ function keyValueList(state = initKeyValueList, action) {
           keyValues: {...state.keyValues, [action.namespaceId]: action.keyValues},
           order: {...state.order, [action.namespaceId]: action.order}
         }
+      } else if (action.namespaceId && !action.keyValues) {
+        // Delete the key values for the given namespace.
+        let resultkeyValues = {...state.keyValues};
+        delete resultkeyValues[action.namespaceId];
+        let resultOrder = {...state.order};
+        delete resultOrder[action.namespaceId];
+        return {
+          keyValues: resultkeyValues,
+          order: resultOrder,
+        }
       }
       return {...initKeyValueList};
     default:

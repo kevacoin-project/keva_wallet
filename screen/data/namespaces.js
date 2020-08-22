@@ -32,7 +32,7 @@ import { connect } from 'react-redux'
 import {
   setNamespaceList, setOtherNamespaceList,
   setNamespaceOrder, setOtherNamespaceOrder,
-  deleteOtherNamespace
+  deleteOtherNamespace, setKeyValueList,
 } from '../../actions'
 
 let BlueApp = require('../../BlueApp');
@@ -599,6 +599,7 @@ class OtherNamespaces extends React.Component {
         update: {type: LayoutAnimation.Types.easeInEaseOut}
       });
       dispatch(deleteOtherNamespace(this._namespaceId));
+      dispatch(setKeyValueList(this._namespaceId));
     }
   }
 
