@@ -51,7 +51,6 @@ import {
   findOtherNamespace,
 } from '../../class/keva-ops';
 
-const CLOSE_ICON = (<Icon name="ios-close" size={36} color={KevaColors.primaryLightColor} style={{ paddingVertical: 5, paddingHorizontal: 15 }} />)
 const COPY_ICON = (<Icon name="ios-copy" size={22} color={KevaColors.extraLightText}
                          style={{ paddingVertical: 5, paddingHorizontal: 5, position: 'relative', left: -3 }}
                   />)
@@ -134,7 +133,7 @@ class Namespace extends React.Component {
     return (
       <Animated.View style={this._style}>
         <ElevatedView elevation={1} style={styles.cardTitle}>
-          <View style={{borderWidth: THIN_BORDER, borderColor: '#aaa', borderRadius: 2, width: 4, height: 40, marginLeft: 5 }}/>
+          <View style={{borderWidth: THIN_BORDER, borderColor: '#aaa', borderRadius: 2, width: 3, height: 40, marginLeft: 5 }}/>
           <View style={{ flex: 1, justifyContent: 'space-between', paddingHorizontal: 7, paddingTop: 10 }}>
             <View style={{ flex: 1 }} >
               <Text style={styles.cardTitleText} numberOfLines={1} ellipsizeMode="tail">{namespace.displayName}</Text>
@@ -937,6 +936,7 @@ var styles = StyleSheet.create({
   cardTitleText: {
     fontSize: 16,
     color: KevaColors.darkText,
+    paddingHorizontal: 5,
   },
   cardContent: {
     backgroundColor: '#fff',
@@ -952,7 +952,7 @@ var styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'flex-end',
     marginHorizontal: 20,
-    marginTop: 10
+    marginTop: 5
   },
   actionIcon: {
     color: KevaColors.arrowIcon,
