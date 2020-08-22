@@ -1062,7 +1062,8 @@ var styles = StyleSheet.create({
   emptyMessageContainer: {
     flex: 1,
     justifyContent: 'center',
-    alignItems: 'center'
+    alignItems: 'center',
+    paddingHorizontal: 5,
   },
   emptyMessage: {
     fontSize: 18,
