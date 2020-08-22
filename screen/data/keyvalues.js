@@ -235,7 +235,7 @@ class KeyValues extends React.Component {
   }
 
   async componentDidMount() {
-    await this.fetchKeyValues();
+    await refreshKeyValues();
     this.subs = [
       this.props.navigation.addListener('willFocus', async () => {
         try {
