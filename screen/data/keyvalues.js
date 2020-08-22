@@ -93,7 +93,7 @@ class Item extends React.Component {
               </View>
             </View>
             {(item.height > 0) ?
-              <Text style={styles.timestamp}>{timeConverter(item.time) + '     ' + loc.namespaces.height + ': ' + item.height}</Text>
+              <Text style={styles.timestamp}>{timeConverter(item.time) + '     ' + loc.namespaces.height + ' ' + item.height}</Text>
               :
               <Text style={styles.timestamp}>{loc.general.unconfirmed}</Text>
             }
