@@ -38,7 +38,8 @@ import NavigationService from '../../NavigationService';
 import HandoffSettings from '../../class/handoff';
 import Handoff from 'react-native-handoff';
 import ActionSheet from '../ActionSheet';
-import { showStatus, hideStatus, enableStatus } from '../../util';
+import { showStatus, hideStatus, enableStatus, THIN_BORDER } from '../../util';
+import KevaColors from '../../common/KevaColors';
 /** @type {AppStorage} */
 let BlueApp = require('../../BlueApp');
 let loc = require('../../loc');
@@ -716,12 +717,22 @@ export default class WalletTransactions extends Component {
           style={{
             flexDirection: 'row',
             alignSelf: 'center',
-            backgroundColor: 'transparent',
+            backgroundColor: '#fff',
             position: 'absolute',
             bottom: 30,
             borderRadius: 30,
             minHeight: 48,
             overflow: 'hidden',
+            borderWidth: THIN_BORDER,
+            borderColor: KevaColors.cellBorder,
+            shadowColor: "#000",
+            shadowOffset: {
+              width: 0,
+              height: 6,
+            },
+            shadowOpacity: 0.37,
+            shadowRadius: 7.49,
+            elevation: 10,
           }}
         >
           {(() => {

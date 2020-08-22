@@ -1193,7 +1193,7 @@ export class BlueReceiveButtonIcon extends Component {
           style={{
             flex: 1,
             minWidth: 130,
-            backgroundColor: BlueApp.settings.buttonBackgroundColor,
+            backgroundColor: '#fff',
           }}
         >
           <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
@@ -1208,11 +1208,11 @@ export class BlueReceiveButtonIcon extends Component {
                 marginBottom: -11,
               }}
             >
-              <Icon {...this.props} name="arrow-down" size={16} type="font-awesome" color={BlueApp.settings.buttonAlternativeTextColor} />
+              <Icon {...this.props} name="arrow-down" size={16} type="font-awesome" color={BlueApp.settings.incomingForegroundColor} />
             </View>
             <Text
               style={{
-                color: BlueApp.settings.buttonAlternativeTextColor,
+                color: BlueApp.settings.incomingForegroundColor,
                 fontSize: (isIpad && 10) || 16,
                 fontWeight: '500',
                 left: 5,
@@ -1236,7 +1236,7 @@ export class BlueSendButtonIcon extends Component {
           style={{
             flex: 1,
             minWidth: 130,
-            backgroundColor: BlueApp.settings.buttonBackgroundColor,
+            backgroundColor: '#fff',
             alignItems: 'center',
           }}
         >
@@ -1251,11 +1251,11 @@ export class BlueSendButtonIcon extends Component {
                 marginBottom: 11,
               }}
             >
-              <Icon {...this.props} name="arrow-down" size={16} type="font-awesome" color={BlueApp.settings.buttonAlternativeTextColor} />
+              <Icon {...this.props} name="arrow-down" size={16} type="font-awesome" color={BlueApp.settings.outgoingForegroundColor} />
             </View>
             <Text
               style={{
-                color: BlueApp.settings.buttonAlternativeTextColor,
+                color: BlueApp.settings.outgoingForegroundColor,
                 fontSize: (isIpad && 10) || 16,
                 fontWeight: '500',
                 backgroundColor: 'transparent',
