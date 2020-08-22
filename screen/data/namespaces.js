@@ -479,7 +479,7 @@ class MyNamespaces extends React.Component {
           }
         </View>
         {
-          namespaceList &&
+          namespaceList.order.length > 0 ?
           <SortableListView
             style={styles.listStyle}
             contentContainerStyle={{paddingBottom: 400}}
@@ -493,9 +493,7 @@ class MyNamespaces extends React.Component {
               return <Namespace onInfo={onInfo} data={data} active={active} navigation={navigation} />
             }}
           />
-        }
-        {
-          !namespaceList &&
+          :
           <View style={styles.emptyMessageContainer}>
             <Text style={[styles.emptyMessage, { marginBottom: 20, fontSize: 24 }]}>
               {loc.namespaces.no_data}
@@ -674,7 +672,7 @@ class OtherNamespaces extends React.Component {
           }
         </View>
         {
-          otherNamespaceList &&
+          otherNamespaceList.order.length > 0 ?
           <SortableListView
             style={styles.listStyle}
             contentContainerStyle={{paddingBottom: 400}}
@@ -688,9 +686,7 @@ class OtherNamespaces extends React.Component {
               return <Namespace onInfo={onInfo} onDelete={this.onDelete} data={data} active={active} navigation={navigation} canDelete={true} isOther={true}/>
             }}
           />
-        }
-        {
-          !otherNamespaceList &&
+          :
           <View style={styles.emptyMessageContainer}>
             <Text style={[styles.emptyMessage, { marginBottom: 20, fontSize: 24 }]}>
               {loc.namespaces.no_data}
