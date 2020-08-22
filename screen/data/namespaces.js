@@ -41,7 +41,7 @@ let BlueElectrum = require('../../BlueElectrum');
 const StyleSheet = require('../../PlatformStyleSheet');
 const KevaButton = require('../../common/KevaButton');
 const KevaColors = require('../../common/KevaColors');
-import { THIN_BORDER, SCREEN_WIDTH, getOverlaySpinner, ModalHandle } from '../../util';
+import { THIN_BORDER, SCREEN_WIDTH, ModalHandle } from '../../util';
 import Toast from 'react-native-root-toast';
 import StepModal from "../../common/StepModalWizard";
 
@@ -566,10 +566,10 @@ class OtherNamespaces extends React.Component {
   }
 
   onSearchNamespace =async () => {
-    const { dispatch, otherNamespaceList, onSpin } = this.props;
+    const { dispatch, otherNamespaceList } = this.props;
     try {
       Keyboard.dismiss();
-      onSpin(true);
+      this.setState({isRefreshing: true});
       const namespace = await findOtherNamespace(BlueElectrum, this.state.nsName);
       if (!namespace) {
         return;
@@ -582,10 +582,10 @@ class OtherNamespaces extends React.Component {
         order.unshift(newId);
       }
       dispatch(setOtherNamespaceList(namespace, order));
-      this.setState({nsName: ''});
-      setTimeout(() => onSpin(false), 500);
+      this.setState({nsName: '', isRefreshing: false});
+      this.closeItemAni();
     } catch (err) {
-      onSpin(false);
+      this.setState({isRefreshing: false});
       Toast.show('Cannot find namespace');
       console.log(err);
     }
@@ -630,6 +630,7 @@ class OtherNamespaces extends React.Component {
     const { navigation, otherNamespaceList, onInfo } = this.props;
     const canSearch = this.state.nsName && this.state.nsName.length > 0;
     const inputMode = this.state.inputMode;
+    const isEmpty = otherNamespaceList.order.length == 0;
 
     return (
       <View style={styles.container}>
@@ -670,22 +671,20 @@ class OtherNamespaces extends React.Component {
             </TouchableOpacity>
           }
         </View>
-        {
-          otherNamespaceList.order.length > 0 ?
-          <SortableListView
-            style={styles.listStyle}
-            contentContainerStyle={{paddingBottom: 400}}
-            data={otherNamespaceList.namespaces}
-            order={otherNamespaceList.order}
-            onChangeOrder={this.onChangeOrder}
-            refreshControl={
-              <RefreshControl onRefresh={() => this.refreshNamespaces()} refreshing={this.state.isRefreshing} />
-            }
-            renderRow={({data, active}) => {
-              return <Namespace onInfo={onInfo} onDelete={this.onDelete} data={data} active={active} navigation={navigation} canDelete={true} isOther={true}/>
-            }}
-          />
-          :
+        <SortableListView
+          style={[styles.listStyle, isEmpty && {flex: 0}]}
+          contentContainerStyle={(!isEmpty) && {paddingBottom: 400}}
+          data={otherNamespaceList.namespaces}
+          order={otherNamespaceList.order}
+          onChangeOrder={this.onChangeOrder}
+          refreshControl={
+            <RefreshControl onRefresh={() => this.refreshNamespaces()} refreshing={this.state.isRefreshing} />
+          }
+          renderRow={({data, active}) => {
+            return <Namespace onInfo={onInfo} onDelete={this.onDelete} data={data} active={active} navigation={navigation} canDelete={true} isOther={true}/>
+          }}
+        />
+        {otherNamespaceList.order.length == 0 &&
           <View style={styles.emptyMessageContainer}>
             <Text style={[styles.emptyMessage, { marginBottom: 20, fontSize: 24 }]}>
               {loc.namespaces.no_data}
@@ -823,10 +822,6 @@ class Namespaces extends React.Component {
     this.setState({ codeErr: null, isModalVisible: false });
   }
 
-  onSpin = (spinning) => {
-    this.setState({spinning});
-  }
-
   render() {
     const { dispatch, navigation, namespaceList, otherNamespaceList } = this.props;
     const labelStyle = focused => ({
@@ -837,7 +832,6 @@ class Namespaces extends React.Component {
     return (
       <View style={styles.container}>
         {this.getNSModal()}
-        {getOverlaySpinner(this.state.spinning)}
         <TabView
           navigationState={this.state}
           renderScene={({ route }) => {
@@ -845,7 +839,7 @@ class Namespaces extends React.Component {
               case 'first':
                 return <MyNamespaces dispatch={dispatch} navigation={navigation} namespaceList={namespaceList} onInfo={this.onNSInfo}/>;
               case 'second':
-                return <OtherNamespaces dispatch={dispatch} navigation={navigation} otherNamespaceList={otherNamespaceList} onInfo={this.onNSInfo} onSpin={this.onSpin}/>;
+                return <OtherNamespaces dispatch={dispatch} navigation={navigation} otherNamespaceList={otherNamespaceList} onInfo={this.onNSInfo} />;
             }
           }}
           onIndexChange={index => this.setState({ index })}
@@ -1029,18 +1023,6 @@ var styles = StyleSheet.create({
     fontSize: 16,
     color: KevaColors.actionText,
     paddingVertical: 10
-  },
-  overlay: {
-    flex: 1,
-    position: 'absolute',
-    left: 0,
-    top: 0,
-    opacity: 0.4,
-    backgroundColor: 'black',
-    width: 90,
-    height: 90,
-    justifyContent: 'center',
-    alignItems: 'center'
   },
   modalNS: {
     height: 300,
