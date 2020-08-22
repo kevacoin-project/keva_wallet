@@ -1740,18 +1740,27 @@ export class WalletsCarousel extends Component {
   walletsCarousel = React.createRef();
 
   _renderItem = ({ item, index }) => {
-    let scaleValue = new Animated.Value(1.0);
-    let props = {speed: 1000};
+
+    let scaleAnimation = new Animated.Value(1.0);
+    const tension  = 40;
+    const friction = 7;
 
     this.onPressedIn = () => {
-      props.toValue = 0.98;
-      props.useNativeDriver = true;
-      Animated.spring(scaleValue, props).start();
+      Animated.spring(scaleAnimation, {
+        toValue: 0.92,
+        tension,
+        friction,
+        useNativeDriver: true,
+      }).start();
     };
+
     this.onPressedOut = () => {
-      props.toValue = 1.0;
-      props.useNativeDriver = true;
-      Animated.spring(scaleValue, props).start();
+      Animated.spring(scaleAnimation, {
+        toValue: 1.0,
+        tension,
+        friction,
+        useNativeDriver: true,
+      }).start();
     };
 
     if (!item) {
@@ -1769,7 +1778,7 @@ export class WalletsCarousel extends Component {
     if (item.type === PlaceholderWallet.type) {
       return (
         <Animated.View
-          style={{ paddingRight: 10, marginVertical: 17, transform: [{ scale: scaleValue }] }}
+          style={{ paddingRight: 10, marginVertical: 17, transform: [{ scale: scaleAnimation }] }}
           shadowOpacity={40 / 100}
           shadowOffset={{ width: 0, height: 0 }}
           shadowRadius={5}
@@ -1779,9 +1788,9 @@ export class WalletsCarousel extends Component {
             onPressOut={item.getIsFailure() ? this.onPressedOut : null}
             onPress={() => {
               if (item.getIsFailure()) {
-                this.onPressedOut();
+                //this.onPressedOut();
                 this.props.onPress(index);
-                this.onPressedOut();
+                //this.onPressedOut();
               }
             }}
           >
@@ -1841,7 +1850,7 @@ export class WalletsCarousel extends Component {
     } else {
       return (
         <Animated.View
-          style={{ paddingRight: 10, marginVertical: 17, transform: [{ scale: scaleValue }] }}
+          style={{ paddingRight: 10, marginVertical: 17, transform: [{ scale: scaleAnimation }] }}
           shadowOpacity={40 / 100}
           shadowOffset={{ width: 0, height: 0 }}
           shadowRadius={5}
@@ -1852,9 +1861,9 @@ export class WalletsCarousel extends Component {
             onPressOut={this.onPressedOut}
             onLongPress={this.props.handleLongPress}
             onPress={() => {
-              this.onPressedOut();
+              //this.onPressedOut();
               this.props.onPress(index);
-              this.onPressedOut();
+              //this.onPressedOut();
             }}
           >
             <LinearGradient
