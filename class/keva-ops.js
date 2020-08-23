@@ -45,6 +45,19 @@ export function namespaceToHex(nsStr) {
   return base58check.decode(nsStr);
 }
 
+function reverseHex(strHex) {
+  if ((strHex.length % 2) != 0) {
+    strHex = '0' + strHex;
+  }
+  const result = [];
+  let len = strHex.length - 2;
+  while (len >= 0) {
+    result.push(strHex.substr(len, 2));
+    len -= 2;
+  }
+  return result.join('');
+}
+
 function fixInt(num) {
   let intVal = parseInt(num, 10);
   if (intVal.toString(10) != num) {
@@ -53,7 +66,7 @@ function fixInt(num) {
   if (intVal > 2147483647) {
       return num;
   }
-  return intVal.toString(16);
+  return reverseHex(intVal.toString(16));
 }
 
 function kevaToJson(result) {
