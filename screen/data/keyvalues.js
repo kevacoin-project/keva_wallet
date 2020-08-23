@@ -298,7 +298,15 @@ class KeyValues extends React.Component {
         onSwipeComplete={this.closeModal}
         isVisible={isModalVisible}>
         <View style={styles.modalHeader}>
+          <TouchableOpacity onPress={this.closeModal}>
+            <Text style={{color: KevaColors.actionText, fontSize: 16, paddingVertical: 5}}>
+              {loc.general.close}
+            </Text>
+          </TouchableOpacity>
           {utils.ModalHandle}
+          <Text style={{color: '#fff', fontSize: 16}}>
+              {loc.general.close}
+          </Text>
         </View>
         <View style={{ paddingVertical: 5, marginHorizontal: 10, maxHeight:"90%"}}>
           <Text style={titleStyle}>{key}</Text>
@@ -546,13 +554,13 @@ var styles = StyleSheet.create({
     marginTop: 20,
   },
   modalHeader: {
-    borderTopLeftRadius:10,
-    borderTopRightRadius:10,
-    flexDirection:'row',
-    justifyContent:'center',
-    backgroundColor: KevaColors.background,
-    marginHorizontal: 20,
-    paddingVertical: 5
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderTopLeftRadius: 10,
+    borderTopRightRadius: 10,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
   modalDelete: {
     height: 300,

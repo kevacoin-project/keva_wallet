@@ -785,10 +785,18 @@ class Namespaces extends React.Component {
         onSwipeComplete={this.closeModal}
         isVisible={this.state.isModalVisible}>
         <View style={styles.modalHeader}>
+          <TouchableOpacity onPress={this.closeModal}>
+            <Text style={{color: KevaColors.actionText, fontSize: 16, paddingVertical: 5}}>
+              {loc.general.close}
+            </Text>
+          </TouchableOpacity>
           {ModalHandle}
+          <Text style={{color: '#fff', fontSize: 16}}>
+              {loc.general.close}
+          </Text>
         </View>
-        <View style={{ paddingVertical: 5, marginHorizontal: 10}}>
-          <Text style={titleStyle}>{'Name'}</Text>
+        <View style={{ marginHorizontal: 10}}>
+          <Text style={[titleStyle, {marginTop: 5}]}>{'Name'}</Text>
           <Text style={contentStyle}>{nsData.displayName}</Text>
 
           <Text style={titleStyle}>{'Id'}</Text>
@@ -975,11 +983,13 @@ var styles = StyleSheet.create({
     marginTop: 20,
   },
   modalHeader: {
-    paddingLeft: 15,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
     borderTopLeftRadius: 10,
     borderTopRightRadius: 10,
     flexDirection: 'row',
-    justifyContent: 'center',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
   codeErr: {
     marginTop: 20,

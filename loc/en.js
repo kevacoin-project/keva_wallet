@@ -11,6 +11,7 @@ module.exports = {
   general: {
     cancel: 'Cancel',
     delete: 'Delete',
+    close: 'Close',
     copiedToClipboard: 'Copied to clipboard',
     unconfirmed: 'Unconfirmed',
     label_wallets: 'Wallets',
