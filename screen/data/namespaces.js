@@ -34,6 +34,7 @@ import {
   setNamespaceOrder, setOtherNamespaceOrder,
   deleteOtherNamespace, setKeyValueList,
 } from '../../actions'
+import { HDSegwitP2SHWallet,  } from '../../class';
 
 let BlueApp = require('../../BlueApp');
 let loc = require('../../loc');
@@ -229,6 +230,10 @@ class MyNamespaces extends React.Component {
               const wallet = wallets.find(w => w.getID() == this.state.walletId);
               if (!wallet) {
                 throw new Error('Wallet not found.');
+              }
+              // Make sure it is not single address wallet.
+              if (wallet.type != HDSegwitP2SHWallet.type) {
+                return alert(loc.namespaces.multiaddress_wallet);
               }
               this.setState({ showNSCreationModal: true, currentPage: 1 });
               const { tx, namespaceId, fee } = await createKevaNamespace(wallet, 120, this.state.nsName);

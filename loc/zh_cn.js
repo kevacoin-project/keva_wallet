@@ -33,6 +33,7 @@ module.exports = {
     namespace_creation_err: '无法创建名称空间. 请等待几分钟，直到您的最后一次更改在区块链中得到确认.',
     update_key_err: '无法更新或添加键值.请等待几分钟，直到您的最后一次更改在区块链中得到确认.',
     delete_key_err: '无法删除键值.请等待几分钟，直到您的最后一次更改在区块链中得到确认.',
+    multiaddress_wallet: '仅支持多地址钱包.',
   },
   wallets: {
     select_wallet: '选择钱包',

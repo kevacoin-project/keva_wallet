@@ -33,6 +33,7 @@ module.exports = {
     namespace_creation_err: 'Cannot create namespace. Please wait a few minutes until your last change is confirmed in the blockchain.',
     update_key_err: 'Cannot update or add key-value. Please wait a few minutes until your last change is confirmed in the blockchain.',
     delete_key_err: 'Cannot dete key. Please wait a few minutes until your last change is confirmed in the blockchain.',
+    multiaddress_wallet: 'Only multiple-address wallet is supported.',
   },
   wallets: {
     select_wallet: 'Select Wallet',
