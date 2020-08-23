@@ -127,6 +127,7 @@
     "react-native-modalbox": "^2.0.0",
     "react-native-obscure": "1.2.1",
     "react-native-page-control": "^1.1.2",
+    "react-native-picker-select": "^8.0.0",
     "react-native-popup-menu-android": "1.0.3",
     "react-native-privacy-snapshot": "git+https://github.com/BlueWallet/react-native-privacy-snapshot.git",
     "react-native-prompt-android": "git+https://github.com/marcosrdz/react-native-prompt-android.git",

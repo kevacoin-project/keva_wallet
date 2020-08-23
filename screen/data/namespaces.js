@@ -25,7 +25,7 @@ import {
 import Modal from 'react-native-modal';
 import ActionSheet from 'react-native-actionsheet';
 import SortableListView from 'react-native-sortable-list'
-import {Picker} from '@react-native-community/picker';
+import RNPickerSelect from 'react-native-picker-select';
 import ElevatedView from 'react-native-elevated-view'
 import { TabView, TabBar } from 'react-native-tab-view';
 import { connect } from 'react-redux'
@@ -206,7 +206,7 @@ class MyNamespaces extends React.Component {
 
     const wallets = BlueApp.getWallets();
     const walletList = wallets.map((w, i) => {
-      return <Picker.Item key={i} label={w.getLabel()} value={w.getID()} />
+      return { label: w.getLabel(), value: w.getID() }
     })
 
     const wallet = wallets.find(w => w.getID() == this.state.walletId);
@@ -214,14 +214,18 @@ class MyNamespaces extends React.Component {
     let selectWalletPage = (
       <View style={styles.modalNS}>
         <Text style={[styles.modalText, {textAlign: 'center', marginBottom: 20, color: KevaColors.darkText}]}>{"Choose a Wallet"}</Text>
-        <Picker
-          selectedValue={this.state.walletId}
-          style={{height: 80, width: SCREEN_WIDTH*0.8, color: KevaColors.lightText}}
-          onValueChange={(walletId, i) => this.setState({walletId: walletId})
-          }>
-          { walletList }
-        </Picker>
-        <Text style={[styles.modalFee, {textAlign: 'center', marginTop: 5}]}>{wallet.getBalance()/100000000 + ' KVA'}</Text>
+        <RNPickerSelect
+          value={this.state.walletId}
+          useNativeAndroidPickerStyle={false}
+          style={{
+            inputAndroid: styles.inputAndroid,
+            inputIOS: styles.inputIOS,
+          }}
+          onValueChange={(walletId, i) => this.setState({walletId: walletId})}
+          items={walletList}
+          Icon={() => <Icon name="ios-arrow-down" size={24} color={KevaColors.actionText} style={{ padding: 12 }} />}
+        />
+        <Text style={[styles.modalFee, {textAlign: 'center', marginTop: 10}]}>{wallet.getBalance()/100000000 + ' KVA'}</Text>
         <KevaButton
           type='secondary'
           style={{margin:10, marginTop: 40}}
@@ -1077,5 +1081,23 @@ var styles = StyleSheet.create({
     textAlign: 'center',
     lineHeight: 24,
     paddingHorizontal: 20
+  },
+  inputAndroid: {
+    width: SCREEN_WIDTH*0.8,
+    color: KevaColors.lightText,
+    textAlign: 'center',
+    fontSize: 16,
+    borderWidth: THIN_BORDER,
+    borderColor: KevaColors.lightText,
+    borderRadius: 4
+  },
+  inputIOS: {
+    width: SCREEN_WIDTH*0.8,
+    color: KevaColors.lightText,
+    textAlign: 'center',
+    fontSize: 16,
+    borderWidth: THIN_BORDER,
+    borderColor: KevaColors.lightText,
+    borderRadius: 4
   },
 });
