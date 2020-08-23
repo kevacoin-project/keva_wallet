@@ -507,6 +507,7 @@ export async function deleteKeyValue(wallet, requestedSatPerByte, namespaceId, k
   }];
 
   let utxos = wallet.getUtxo();
+  const transactions = wallet.getTransactions();
   let nonNamespaceUtxos = getNonNamespaceUxtos(transactions, utxos);
   // Move the nsUtxo to the first one, so that it will always be used.
   nonNamespaceUtxos.unshift(nsUtxo);
