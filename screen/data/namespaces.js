@@ -415,6 +415,7 @@ class MyNamespaces extends React.Component {
   refreshNamespaces = async (walletId) => {
     this.setState({isRefreshing: true});
     try {
+      await BlueElectrum.ping();
       if (walletId) {
         const wallets = BlueApp.getWallets();
         const wallet = wallets.find(w => w.getID() == walletId);

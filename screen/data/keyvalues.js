@@ -215,6 +215,7 @@ class KeyValues extends React.Component {
   refreshKeyValues = async (additionalFetch) => {
     try {
       this.setState({isRefreshing: true});
+      await BlueElectrum.ping();
       if (additionalFetch) {
         const wallet = this.getCurrentWallet();
         await wallet.fetchBalance();
