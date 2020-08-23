@@ -26,6 +26,7 @@ import {
 const loc = require('../../loc');
 let BlueApp = require('../../BlueApp');
 let BlueElectrum = require('../../BlueElectrum');
+import { FALLBACK_DATA_PER_BYTE_FEE } from '../../models/networkTransactionFees';
 
 import Icon from 'react-native-vector-icons/Ionicons';
 import SortableListView from 'react-native-sortable-list'
@@ -161,7 +162,7 @@ class KeyValues extends React.Component {
     }, () => {
       setTimeout(async () => {
         try {
-          const { tx, fee } = await deleteKeyValue(wallets[0], 120, namespaceId, key);
+          const { tx, fee } = await deleteKeyValue(wallets[0], FALLBACK_DATA_PER_BYTE_FEE, namespaceId, key);
           let feeKVA = fee / 100000000;
           this.setState({ showDeleteModal: true, currentPage: 1, fee: feeKVA });
           this.deleteKeyTx = tx;

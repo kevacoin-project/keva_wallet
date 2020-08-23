@@ -21,6 +21,8 @@ const FALLBACK_FAST_FEE     = 0.02;
 const FALLBACK_MEDIUMN_FEE  = 0.01;
 const FALLBACK_SLOW_FEE     = 0.005;
 
+export const FALLBACK_DATA_PER_BYTE_FEE = 2000;
+
 export default class NetworkTransactionFees {
   static recommendedFees() {
     return new Promise(async (resolve, reject) => {

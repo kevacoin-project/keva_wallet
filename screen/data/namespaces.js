@@ -35,6 +35,7 @@ import {
   deleteOtherNamespace, setKeyValueList,
 } from '../../actions'
 import { HDSegwitP2SHWallet,  } from '../../class';
+import { FALLBACK_DATA_PER_BYTE_FEE } from '../../models/networkTransactionFees';
 
 let BlueApp = require('../../BlueApp');
 let loc = require('../../loc');
@@ -236,7 +237,7 @@ class MyNamespaces extends React.Component {
                 return alert(loc.namespaces.multiaddress_wallet);
               }
               this.setState({ showNSCreationModal: true, currentPage: 1 });
-              const { tx, namespaceId, fee } = await createKevaNamespace(wallet, 120, this.state.nsName);
+              const { tx, namespaceId, fee } = await createKevaNamespace(wallet, FALLBACK_DATA_PER_BYTE_FEE, this.state.nsName);
               let feeKVA = fee / 100000000;
               this.setState({ showNSCreationModal: true, currentPage: 2, fee: feeKVA });
               this.namespaceTx = tx;

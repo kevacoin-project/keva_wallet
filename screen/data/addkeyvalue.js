@@ -1,18 +1,8 @@
 import React from 'react';
 import {
-  Alert,
   Text,
-  Button,
   View,
-  ScrollView,
-  TextInput,
   TouchableOpacity,
-  ActivityIndicator,
-  Keyboard,
-  LayoutAnimation,
-  Animated,
-  Easing,
-  RefreshControl,
 } from 'react-native';
 import Toast from 'react-native-root-toast';
 const StyleSheet = require('../../PlatformStyleSheet');
@@ -27,9 +17,9 @@ import {
 const loc = require('../../loc');
 let BlueApp = require('../../BlueApp');
 let BlueElectrum = require('../../BlueElectrum');
+import { FALLBACK_DATA_PER_BYTE_FEE } from '../../models/networkTransactionFees';
 
 import { connect } from 'react-redux'
-import { setKeyValueList } from '../../actions'
 import { updateKeyValue } from '../../class/keva-ops';
 import FloatTextInput from '../../common/FloatTextInput';
 import StepModal from "../../common/StepModalWizard";
@@ -105,7 +95,7 @@ class AddKeyValue extends React.Component {
     }, () => {
       setTimeout(async () => {
         try {
-          const { tx, fee } = await updateKeyValue(this.wallet, 120, namespaceId, key, value);
+          const { tx, fee } = await updateKeyValue(this.wallet, FALLBACK_DATA_PER_BYTE_FEE, namespaceId, key, value);
           let feeKVA = fee / 100000000;
           this.setState({ showKeyValueModal: true, currentPage: 1, fee: feeKVA });
           this.namespaceTx = tx;
