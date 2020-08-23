@@ -259,7 +259,9 @@ class KeyValues extends React.Component {
   }
 
   componentWillUnmount () {
-    this.subs.forEach(sub => sub.remove());
+    if (this.subs) {
+      this.subs.forEach(sub => sub.remove());
+    }
   }
 
   closeModal = () => {
