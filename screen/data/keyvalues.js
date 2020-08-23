@@ -538,7 +538,9 @@ var styles = StyleSheet.create({
     zIndex:999999,
     flexDirection: 'column',
     justifyContent: 'flex-start',
-    margin: 0,
+    marginHorizontal: 0,
+    marginBottom: 0,
+    marginTop: 20,
   },
   modalHeader: {
     borderTopLeftRadius:10,

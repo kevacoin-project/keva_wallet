@@ -969,7 +969,9 @@ var styles = StyleSheet.create({
     borderRadius: 10,
     backgroundColor: '#fff',
     justifyContent: 'flex-start',
-    margin: 0,
+    marginHorizontal: 0,
+    marginBottom: 0,
+    marginTop: 20,
   },
   modalHeader: {
     paddingLeft: 15,
