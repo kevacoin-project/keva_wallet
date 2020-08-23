@@ -230,7 +230,7 @@ const styles = StyleSheet.create({
     paddingVertical: IS_IOS ? null : 0
   },
   multiValueText: {
-    height: 115,
+    height: 185,
     textAlignVertical: 'top',
     fontSize: 16,
     color: KevaColors.darkText,
