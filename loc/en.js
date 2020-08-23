@@ -35,6 +35,8 @@ module.exports = {
     update_key_err: 'Cannot update or add key-value. Please wait a few minutes until your last change is confirmed in the blockchain.',
     delete_key_err: 'Cannot dete key. Please wait a few minutes until your last change is confirmed in the blockchain.',
     multiaddress_wallet: 'Only multiple-address wallet is supported.',
+    creating_tx: 'Creating Transaction ...',
+    please_wait: 'This will take about 10 seconds.',
   },
   wallets: {
     select_wallet: 'Select Wallet',

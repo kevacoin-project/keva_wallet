@@ -35,6 +35,8 @@ module.exports = {
     update_key_err: '无法更新或添加键值.请等待几分钟，直到您的最后一次更改在区块链中得到确认.',
     delete_key_err: '无法删除键值.请等待几分钟，直到您的最后一次更改在区块链中得到确认.',
     multiaddress_wallet: '仅支持多地址钱包.',
+    creating_tx: '创建交易 ...',
+    please_wait: '大约需要10秒钟, 请稍候',
   },
   wallets: {
     select_wallet: '选择钱包',

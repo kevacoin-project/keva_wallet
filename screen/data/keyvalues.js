@@ -357,7 +357,8 @@ class KeyValues extends React.Component {
             </>
           :
             <>
-              <Text style={styles.modalText}>{"Creating Transaction ..."}</Text>
+              <Text style={[styles.modalText, {alignSelf: 'center', color: KevaColors.darkText}]}>{loc.namespaces.creating_tx}</Text>
+              <Text style={styles.waitText}>{loc.namespaces.please_wait}</Text>
               <BlueLoading style={{paddingTop: 30}}/>
             </>
         }
@@ -570,6 +571,11 @@ var styles = StyleSheet.create({
   modalText: {
     fontSize: 18,
     color: KevaColors.lightText,
+  },
+  waitText: {
+    fontSize: 16,
+    color: KevaColors.lightText,
+    paddingTop: 10,
   },
   modalFee: {
     fontSize: 18,
