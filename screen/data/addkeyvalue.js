@@ -300,7 +300,7 @@ var styles = StyleSheet.create({
     paddingHorizontal: 10
   },
   inputValue: {
-    height:145,
+    height:245,
     marginTop: 10,
     borderWidth: utils.THIN_BORDER,
     borderColor: KevaColors.cellBorder,
