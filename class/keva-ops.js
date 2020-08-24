@@ -61,10 +61,24 @@ function reverseHex(strHex) {
 function fixInt(num) {
   let intVal = parseInt(num, 10);
   if (intVal.toString(10) != num) {
-      return num;
+    return num;
   }
   if (intVal > 2147483647) {
-      return num;
+    return num;
+  }
+  if (intVal < 0) {
+    // See set_vch method in script.h in bitcoin code.
+    let scriptNum = (-intVal).toString(16);
+    const numLen = scriptNum.length;
+    if (numLen == 2) {
+      intVal = -intVal + 0x80;
+    } else if (numLen <= 4) {
+      intVal = -intVal + 0x8000;
+    } else if (numLen <= 6) {
+      intVal = -intVal + 0x800000;
+    } else if (numLen <= 8) {
+      intVal = -intVal + 0x80000000;
+    }
   }
   return reverseHex(intVal.toString(16));
 }
@@ -95,7 +109,7 @@ function kevaToJson(result) {
 }
 
 export function parseKevaPut(asm) {
-  let re = /^OP_KEVA_PUT\s([0-9A-Fa-f]+)\s([0-9A-Fa-f]+)\s([0-9A-Fa-f]+)/;
+  let re = /^OP_KEVA_PUT\s([0-9A-Fa-f]+)\s(-?[0-9A-Fa-f]+)\s(-?[0-9A-Fa-f]+)/;
   let match = asm.match(re);
   if (!match || match.length !== 4) {
     return null;
@@ -104,7 +118,7 @@ export function parseKevaPut(asm) {
 }
 
 export function parseKevaDelete(asm) {
-  let re = /^OP_KEVA_DELETE\s([0-9A-Fa-f]+)\s([0-9A-Fa-f]+)/;
+  let re = /^OP_KEVA_DELETE\s([0-9A-Fa-f]+)\s(-?[0-9A-Fa-f]+)/;
   let match = asm.match(re);
   if (!match || match.length !== 3) {
     return null;
@@ -113,7 +127,7 @@ export function parseKevaDelete(asm) {
 }
 
 export function parseKevaNamespace(asm) {
-  let re = /^OP_KEVA_NAMESPACE\s([0-9A-Fa-f]+)\s([0-9A-Fa-f]+)/;
+  let re = /^OP_KEVA_NAMESPACE\s([0-9A-Fa-f]+)\s(-?[0-9A-Fa-f]+)/;
   let match = asm.match(re);
   if (!match || match.length !== 3) {
     return null;
