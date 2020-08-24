@@ -27,7 +27,7 @@ module.exports = {
     shortcode_id: "短码或交易Id",
     no_data: "无数据",
     click_add_btn: "输入名称，然后单击“添加”按钮以创建您的第一个名称空间",
-    click_search_btn: "输入名称空间短代码（例如5570511），然后单击“搜索”按钮以查看其他名称空间",
+    click_search_btn: "输入名称空间短代码（例如5577271），然后单击“搜索”按钮以查看其他名称空间",
     explain: "名称空间是一个数据容器，您可以在其中添加键值对",
     explain_tx: "您还可以输入与名称空间相关的任何事务ID. 使用'kevacoin-cli keva_filter'查找名称空间事务ID.",
     explain_ns: "移动应用程序不支持命名空间ID",
