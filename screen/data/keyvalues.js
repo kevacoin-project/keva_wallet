@@ -237,6 +237,11 @@ class KeyValues extends React.Component {
   }
 
   async componentDidMount() {
+    try {
+      await this.refreshKeyValues();
+    } catch (err) {
+      Toast.show("Cannot fetch key-values");
+    }
     this.subs = [
       this.props.navigation.addListener('willFocus', async () => {
         try {
@@ -251,11 +256,6 @@ class KeyValues extends React.Component {
         }
       }),
     ];
-    try {
-      await this.refreshKeyValues();
-    } catch (err) {
-      Toast.show("Cannot fetch key-values");
-    }
   }
 
   componentWillUnmount () {
