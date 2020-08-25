@@ -666,9 +666,7 @@ async function traverseKeyValues(ecl, address, namespaceId, transactions, result
               resultJson.time = tx.time;
               results.push(resultJson);
               txvoutsDone[txvout] = 1;
-              if ((history.length != 1) && (i == history.length - 1)) {
-                  stack.push(address);
-              }
+              stack.push(address);
           }
       }
   }
