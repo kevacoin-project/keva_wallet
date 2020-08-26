@@ -629,15 +629,31 @@ export async function getNamespaceFromShortCode(ecl, shortCode) {
 }
 
 const VERBOSE = true;
+const RELOAD_HEIGHT = 5;
 
 // Address is the root address, i.e. the address that is involved in
 // namespace creation.
-async function traverseKeyValues(ecl, address, namespaceId, transactions, results) {
+async function traverseKeyValues(ecl, address, namespaceId, transactions, results, currentkeyValueList) {
   let txvoutsDone = {};
   let stack = [];
   let resultMap = {};
   let txChild = {};
   let firstTx;
+
+  // Caching
+  let cacheAddress;
+  let rescanPos;
+  if (currentkeyValueList && currentkeyValueList.length > 0) {
+    if (currentkeyValueList.length > RELOAD_HEIGHT) {
+      cacheAddress = currentkeyValueList[RELOAD_HEIGHT].address;
+      rescanPos = RELOAD_HEIGHT;
+    } else {
+      RELOAD_HEIGHT = currentkeyValueList.length - 1;
+      cacheAddress = currentkeyValueList[currentkeyValueList.length - 1].address;
+    }
+  }
+
+  address = cacheAddress || address;
   stack.push(address);
   while (stack.length > 0) {
     let address = stack.pop();
@@ -670,6 +686,7 @@ async function traverseKeyValues(ecl, address, namespaceId, transactions, result
         resultJson.height = history[i].height;
         resultJson.n = v.n;
         resultJson.time = tx.time;
+        resultJson.address = address;
         resultMap[resultJson.tx] = resultJson;
         const vins = tx.inputs || tx.vin;
         let hasParent = false;
@@ -701,14 +718,29 @@ async function traverseKeyValues(ecl, address, namespaceId, transactions, result
     results.push(resultMap[nextTx]);
     nextTx = txChild[nextTx];
   }
+
+  if (!cacheAddress) {
+    return;
+  }
+
+  // Merge the current one and cached one.
+  for (let m = 0; m <= rescanPos; m++) {
+    let foundIndex = results.findIndex(r => r.tx == currentkeyValueList[m]);
+    if (foundIndex >= 0) {
+      results.splice(foundIndex, 1);
+    }
+  }
+  for (let i = rescanPos; i < currentkeyValueList.length; i++) {
+    results.push(currentkeyValueList[i]);
+  }
 }
 
-export async function getKeyValuesFromTxid(ecl, transactions, txid) {
+export async function getKeyValuesFromTxid(ecl, transactions, txid, keyValueList) {
   let result = await getNamespaceDataFromTx(ecl, transactions, txid);
   let address = result.address;
   let results = [];
   const namespaceId = kevaToJson(result.result).namespaceId;
-  await traverseKeyValues(ecl, address, namespaceId, transactions, results);
+  await traverseKeyValues(ecl, address, namespaceId, transactions, results, keyValueList);
   // Merge the results.
   let keyValues = [];
   for (let kv of results) {
@@ -722,6 +754,7 @@ export async function getKeyValuesFromTxid(ecl, transactions, txid) {
           n: kv.n,
           height: kv.height,
           time: kv.time,
+          address: kv.address,
         });
       } else if (kv.op === 'KEVA_OP_DELETE') {
         keyValues = keyValues.filter(e => e.key != kv.key);
@@ -733,6 +766,7 @@ export async function getKeyValuesFromTxid(ecl, transactions, txid) {
           n: kv.n,
           height: kv.height,
           time: kv.time,
+          address: kv.address,
         });
       }
   }
@@ -740,9 +774,9 @@ export async function getKeyValuesFromTxid(ecl, transactions, txid) {
   return keyValues;
 }
 
-export async function getKeyValuesFromShortCode(ecl, transactions, shortCode) {
+export async function getKeyValuesFromShortCode(ecl, transactions, shortCode, keyValueList) {
   let txid = await getNamespaceFromShortCode(ecl, shortCode);
-  return getKeyValuesFromTxid(ecl, transactions, txid);
+  return getKeyValuesFromTxid(ecl, transactions, txid, keyValueList);
 }
 
 export async function findMyNamespaces(wallet, ecl) {

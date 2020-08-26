@@ -193,9 +193,9 @@ class KeyValues extends React.Component {
       transactions = this.wallet.getTransactions();
     }
     if (shortCode) {
-      keyValues = await getKeyValuesFromShortCode(BlueElectrum, transactions, shortCode.toString());
+      keyValues = await getKeyValuesFromShortCode(BlueElectrum, transactions, shortCode.toString(), keyValueList.keyValues[namespaceId]);
     } else if (txid) {
-      keyValues = await getKeyValuesFromTxid(BlueElectrum, transactions, txid);
+      keyValues = await getKeyValuesFromTxid(BlueElectrum, transactions, txid, keyValueList.keyValues[namespaceId]);
     }
 
     if (keyValues) {
@@ -217,6 +217,7 @@ class KeyValues extends React.Component {
       this.setState({isRefreshing: false});
     } catch (err) {
       this.setState({isRefreshing: false});
+      console.warn(err);
       Toast.show('Failed to fetch key values');
     }
   }
@@ -244,6 +245,7 @@ class KeyValues extends React.Component {
           await this.fetchKeyValues();
           this.setState({isRefreshing: false});
         } catch (err) {
+          console.warn(err)
           this.setState({isRefreshing: false});
         }
       }),
