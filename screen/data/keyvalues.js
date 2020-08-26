@@ -1,18 +1,11 @@
 import React from 'react';
 import {
-  Alert,
   Text,
   View,
   ScrollView,
-  TextInput,
   TouchableOpacity,
   TouchableWithoutFeedback,
-  ActivityIndicator,
-  Keyboard,
-  LayoutAnimation,
-  Animated,
-  Easing,
-  RefreshControl,
+  FlatList,
 } from 'react-native';
 const StyleSheet = require('../../PlatformStyleSheet');
 const KevaButton = require('../../common/KevaButton');
@@ -29,7 +22,6 @@ let BlueElectrum = require('../../BlueElectrum');
 import { FALLBACK_DATA_PER_BYTE_FEE } from '../../models/networkTransactionFees';
 
 import Icon from 'react-native-vector-icons/Ionicons';
-import SortableListView from 'react-native-sortable-list'
 import Modal from 'react-native-modal';
 import ActionSheet from 'react-native-actionsheet';
 import { connect } from 'react-redux'
@@ -65,8 +57,7 @@ class Item extends React.Component {
   }
 
   render() {
-    let {data, onShow, namespaceId, navigation} = this.props;
-    let item = data;
+    let {item, onShow, namespaceId, navigation} = this.props;
     const {isOther} = navigation.state.params;
 
     return (
@@ -115,6 +106,7 @@ class KeyValues extends React.Component {
       isModalVisible: false,
       currentPage: 0,
       showDeleteModal: false,
+      isRefreshing: false,
     };
   }
 
@@ -479,19 +471,16 @@ class KeyValues extends React.Component {
         {this.getKeyValueModal()}
         {
           list &&
-          <SortableListView
+          <FlatList
             style={styles.listStyle}
             contentContainerStyle={{paddingBottom: 400}}
             data={list}
-            sortingEnabled={false}
-            onChangeOrder={this.onRowMoved}
-            refreshControl={
-              <RefreshControl onRefresh={() => this.refreshKeyValues()} refreshing={this.state.isRefreshing} />
-            }
-            renderRow={({data, active}) =>
-              <Item data={data} dispatch={dispatch} onDelete={this.onDelete}
+            onRefresh={() => this.refreshKeyValues()}
+            refreshing={this.state.isRefreshing}
+            renderItem={({item, index}) =>
+              <Item item={item} key={index} dispatch={dispatch} onDelete={this.onDelete}
                 onShow={this.onShow} namespaceId={namespaceId}
-                active={active} navigation={navigation}
+                navigation={navigation}
               />
             }
           />
