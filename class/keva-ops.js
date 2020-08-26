@@ -628,47 +628,78 @@ export async function getNamespaceFromShortCode(ecl, shortCode) {
   return txHash;
 }
 
+const VERBOSE = true;
+
+// Address is the root address, i.e. the address that is involved in
+// namespace creation.
 async function traverseKeyValues(ecl, address, namespaceId, transactions, results) {
   let txvoutsDone = {};
   let stack = [];
+  let resultMap = {};
+  let txChild = {};
+  let firstTx;
   stack.push(address);
   while (stack.length > 0) {
-      let address = stack.pop();
-      let history = await ecl.blockchainScripthash_getHistory(toScriptHash(address));
-      for (let i = 0; i < history.length; i++) {
-          let tx = transactions.find(t => t.txid == history[i].tx_hash);
-          if (!tx) {
-            // Not found in the cache, try to fetch it from the server.
-            tx = await ecl.blockchainTransaction_get(history[i].tx_hash, true);
-          }
-          // From transactions, tx.outputs
-          // From server: tx.vout
-          const vout = tx.outputs || tx.vout;
-          for (let v of vout) {
-              let txvout = history[i].tx_hash + v.n.toString();
-              if (txvoutsDone[txvout]) {
-                  continue;
-              }
-              let result = parseKeva(v.scriptPubKey.asm);
-              if (!result) {
-                  txvoutsDone[txvout] = 1;
-                  continue;
-              }
-              address = v.scriptPubKey.addresses[0];
-              let resultJson = kevaToJson(result);
-              if (resultJson.namespaceId != namespaceId) {
-                // TODO: this is imporant - why we are here!!!!!
-                continue;
-              }
-              resultJson.tx = history[i].tx_hash;
-              resultJson.height = history[i].height;
-              resultJson.n = v.n;
-              resultJson.time = tx.time;
-              results.push(resultJson);
-              txvoutsDone[txvout] = 1;
-              stack.push(address);
-          }
+    let address = stack.pop();
+    let history = await ecl.blockchainScripthash_getHistory(toScriptHash(address));
+    for (let i = 0; i < history.length; i++) {
+      let tx = transactions.find(t => t.txid == history[i].tx_hash);
+      if (!tx) {
+        // Not found in the cache, try to fetch it from the server.
+        tx = await ecl.blockchainTransaction_get(history[i].tx_hash, VERBOSE);
       }
+      // From transactions, tx.outputs
+      // From server: tx.vout
+      const vout = tx.outputs || tx.vout;
+      for (let v of vout) {
+        let txvout = history[i].tx_hash + v.n.toString();
+        if (txvoutsDone[txvout]) {
+          continue;
+        }
+        let result = parseKeva(v.scriptPubKey.asm);
+        if (!result) {
+          txvoutsDone[txvout] = 1;
+          continue;
+        }
+        address = v.scriptPubKey.addresses[0];
+        let resultJson = kevaToJson(result);
+        if (resultJson.namespaceId != namespaceId) {
+          continue;
+        }
+        resultJson.tx = history[i].tx_hash;
+        resultJson.height = history[i].height;
+        resultJson.n = v.n;
+        resultJson.time = tx.time;
+        resultMap[resultJson.tx] = resultJson;
+        const vins = tx.inputs || tx.vin;
+        let hasParent = false;
+        for (let vin of vins) {
+          if (resultMap[vin.txid]) {
+            txChild[vin.txid] = resultJson.tx;
+            hasParent = true;
+            break;
+          }
+        }
+
+        if (!hasParent) {
+          firstTx = resultJson.tx;
+        }
+
+        txvoutsDone[txvout] = 1;
+        stack.push(address);
+      }
+    }
+  }
+
+  //Sort the result according to txChild.
+  if (!firstTx) {
+    return;
+  }
+  results.push(resultMap[firstTx]);
+  let nextTx = txChild[firstTx];
+  while (nextTx) {
+    results.push(resultMap[nextTx]);
+    nextTx = txChild[nextTx];
   }
 }
 
