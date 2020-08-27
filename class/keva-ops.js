@@ -660,17 +660,15 @@ async function traverseKeyValues(ecl, address, namespaceId, transactions, curren
   while (stack.length > 0) {
     let address = stack.pop();
     let history = await ecl.blockchainScripthash_getHistory(toScriptHash(address));
-    for (let i = 0; i < history.length; i++) {
-      let tx = transactions.find(t => t.txid == history[i].tx_hash);
-      if (!tx) {
-        // Not found in the cache, try to fetch it from the server.
-        tx = await ecl.blockchainTransaction_get(history[i].tx_hash, VERBOSE);
-      }
+    let txsToFetch = history.map(h => h.tx_hash);
+    let txs = await ecl.blockchainTransaction_getBatch(txsToFetch, VERBOSE);
+    for (let i = 0; i < txs.length; i++) {
+      let tx = txs[i].result;
       // From transactions, tx.outputs
       // From server: tx.vout
       const vout = tx.outputs || tx.vout;
       for (let v of vout) {
-        let txvout = history[i].tx_hash + v.n.toString();
+        let txvout = tx.txid + v.n.toString();
         if (txvoutsDone[txvout]) {
           continue;
         }
@@ -684,8 +682,9 @@ async function traverseKeyValues(ecl, address, namespaceId, transactions, curren
         if (resultJson.namespaceId != namespaceId) {
           continue;
         }
-        resultJson.tx = history[i].tx_hash;
-        resultJson.height = history[i].height;
+        resultJson.tx = tx.txid;
+        let h = history.find(h => h.tx_hash == tx.txid);
+        resultJson.height = h.height;
         resultJson.n = v.n;
         resultJson.time = tx.time;
         resultJson.address = address;

@@ -638,6 +638,10 @@ module.exports.blockchainTransaction_get = async function(tx_hash, verbose) {
   return await mainClient.blockchainTransaction_get(tx_hash, verbose);
 }
 
+module.exports.blockchainTransaction_getBatch = async function(tx_hash, verbose) {
+  return await mainClient.blockchainTransaction_getBatch(tx_hash, verbose);
+}
+
 module.exports.blockchainScripthash_getHistory = async function(scriptHash) {
   return await mainClient.blockchainScripthash_getHistory(scriptHash);
 }
