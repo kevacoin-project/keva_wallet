@@ -107,6 +107,7 @@ class KeyValues extends React.Component {
       currentPage: 0,
       showDeleteModal: false,
       isRefreshing: false,
+      scanningHeight: 0,
     };
   }
 
@@ -177,6 +178,10 @@ class KeyValues extends React.Component {
     dispatch(setKeyValueOrder(namespaceId, order))
   }
 
+  progressCallback = (scanningHeight) => {
+    this.setState({scanningHeight});
+  }
+
   fetchKeyValues = async () => {
     let {navigation, dispatch, keyValueList} = this.props;
     const namespaceId = navigation.getParam('namespaceId');
@@ -192,10 +197,16 @@ class KeyValues extends React.Component {
       await this.wallet.fetchTransactions();
       transactions = this.wallet.getTransactions();
     }
+
+    let kvList = keyValueList.keyValues[namespaceId];
+    let cb;
+    if (!kvList || kvList.length == 0) {
+      cb = this.progressCallback;
+    }
     if (shortCode) {
-      keyValues = await getKeyValuesFromShortCode(BlueElectrum, transactions, shortCode.toString(), keyValueList.keyValues[namespaceId]);
+      keyValues = await getKeyValuesFromShortCode(BlueElectrum, transactions, shortCode.toString(), kvList, cb);
     } else if (txid) {
-      keyValues = await getKeyValuesFromTxid(BlueElectrum, transactions, txid, keyValueList.keyValues[namespaceId]);
+      keyValues = await getKeyValuesFromTxid(BlueElectrum, transactions, txid, kvList, cb);
     }
 
     if (keyValues) {
@@ -471,6 +482,10 @@ class KeyValues extends React.Component {
         />
         {this.getDeleteModal()}
         {this.getKeyValueModal()}
+        {
+          (list.length == 0) &&
+          <Text style={{paddingTop: 20, alignSelf: 'center', color: KevaColors.okColor, fontSize: 16}}>{loc.namespaces.scanning_block} {this.state.scanningHeight} ...</Text>
+        }
         {
           list &&
           <FlatList

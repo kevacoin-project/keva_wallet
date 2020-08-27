@@ -633,7 +633,7 @@ const RELOAD_HEIGHT = 5;
 
 // Address is the root address, i.e. the address that is involved in
 // namespace creation.
-async function traverseKeyValues(ecl, address, namespaceId, transactions, currentkeyValueList) {
+async function traverseKeyValues(ecl, address, namespaceId, transactions, currentkeyValueList, cb) {
   let results = [];
   let txvoutsDone = {};
   let stack = [];
@@ -690,6 +690,10 @@ async function traverseKeyValues(ecl, address, namespaceId, transactions, curren
         resultJson.time = tx.time;
         resultJson.address = address;
         resultMap[resultJson.tx + resultJson.n] = resultJson;
+        if (cb) {
+          // Report progress.
+          cb(resultJson.height);
+        }
         const vins = tx.inputs || tx.vin;
         let hasParent = false;
         let parents = [];
@@ -760,11 +764,11 @@ async function traverseKeyValues(ecl, address, namespaceId, transactions, curren
   return origResults.concat(results);
 }
 
-export async function getKeyValuesFromTxid(ecl, transactions, txid, keyValueList) {
+export async function getKeyValuesFromTxid(ecl, transactions, txid, keyValueList, cb) {
   let result = await getNamespaceDataFromTx(ecl, transactions, txid);
   let address = result.address;
   const namespaceId = kevaToJson(result.result).namespaceId;
-  let results = await traverseKeyValues(ecl, address, namespaceId, transactions, keyValueList);
+  let results = await traverseKeyValues(ecl, address, namespaceId, transactions, keyValueList, cb);
   // Merge the results.
   let keyValues = [];
   for (let kv of results) {
@@ -789,9 +793,9 @@ export async function getKeyValuesFromTxid(ecl, transactions, txid, keyValueList
   return keyValues;
 }
 
-export async function getKeyValuesFromShortCode(ecl, transactions, shortCode, keyValueList) {
+export async function getKeyValuesFromShortCode(ecl, transactions, shortCode, keyValueList, cb) {
   let txid = await getNamespaceFromShortCode(ecl, shortCode);
-  return getKeyValuesFromTxid(ecl, transactions, txid, keyValueList);
+  return getKeyValuesFromTxid(ecl, transactions, txid, keyValueList, cb);
 }
 
 export async function findMyNamespaces(wallet, ecl) {
