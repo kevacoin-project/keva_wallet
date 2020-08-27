@@ -633,28 +633,30 @@ const RELOAD_HEIGHT = 5;
 
 // Address is the root address, i.e. the address that is involved in
 // namespace creation.
-async function traverseKeyValues(ecl, address, namespaceId, transactions, results, currentkeyValueList) {
+async function traverseKeyValues(ecl, address, namespaceId, transactions, currentkeyValueList) {
+  let results = [];
   let txvoutsDone = {};
   let stack = [];
   let resultMap = {};
   let txChild = {};
-  let firstTx;
 
   // Caching
   let cacheAddress;
   let rescanPos;
+
   if (currentkeyValueList && currentkeyValueList.length > 0) {
     if (currentkeyValueList.length > RELOAD_HEIGHT) {
-      cacheAddress = currentkeyValueList[RELOAD_HEIGHT].address;
       rescanPos = RELOAD_HEIGHT;
+      cacheAddress = currentkeyValueList[RELOAD_HEIGHT].address;
     } else {
-      RELOAD_HEIGHT = currentkeyValueList.length - 1;
-      cacheAddress = currentkeyValueList[currentkeyValueList.length - 1].address;
+      rescanPos = currentkeyValueList.length - 1;
+      cacheAddress = currentkeyValueList[rescanPos].address;
     }
   }
 
   address = cacheAddress || address;
   stack.push(address);
+  let missingParens = {};
   while (stack.length > 0) {
     let address = stack.pop();
     let history = await ecl.blockchainScripthash_getHistory(toScriptHash(address));
@@ -687,19 +689,21 @@ async function traverseKeyValues(ecl, address, namespaceId, transactions, result
         resultJson.n = v.n;
         resultJson.time = tx.time;
         resultJson.address = address;
-        resultMap[resultJson.tx] = resultJson;
+        resultMap[resultJson.tx + resultJson.n] = resultJson;
         const vins = tx.inputs || tx.vin;
         let hasParent = false;
+        let parents = [];
         for (let vin of vins) {
-          if (resultMap[vin.txid]) {
-            txChild[vin.txid] = resultJson.tx;
+          parents.push(vin.txid + vin.vout);
+          if (resultMap[vin.txid + vin.vout]) {
+            txChild[vin.txid + vin.vout] = resultJson.tx + resultJson.n;
             hasParent = true;
             break;
           }
         }
 
         if (!hasParent) {
-          firstTx = resultJson.tx;
+          missingParens[resultJson.tx + resultJson.n] = parents;
         }
 
         txvoutsDone[txvout] = 1;
@@ -709,18 +713,37 @@ async function traverseKeyValues(ecl, address, namespaceId, transactions, result
   }
 
   //Sort the result according to txChild.
-  if (!firstTx) {
-    return;
+  // We should have at least one tx that has no parent.
+  if (Object.keys(missingParens).length == 0) {
+    return [];
   }
-  results.push(resultMap[firstTx]);
-  let nextTx = txChild[firstTx];
-  while (nextTx) {
-    results.push(resultMap[nextTx]);
-    nextTx = txChild[nextTx];
+
+  for (let c in missingParens) {
+    for (let txout of missingParens[c]) {
+      if (resultMap[txout]) {
+        txChild[txout] = c;
+        missingParens[c] = null;
+        break;
+      }
+    }
+  }
+
+  let firstTxOut;
+  for (let c in missingParens) {
+    if (missingParens[c]) {
+      firstTxOut = c;
+    }
+  }
+
+  results.push(resultMap[firstTxOut]);
+  let nextTxVout = txChild[firstTxOut];
+  while (nextTxVout) {
+    results.push(resultMap[nextTxVout]);
+    nextTxVout = txChild[nextTxVout];
   }
 
   if (!cacheAddress) {
-    return;
+    return results;
   }
 
   // Merge the current one and cached one.
@@ -730,44 +753,36 @@ async function traverseKeyValues(ecl, address, namespaceId, transactions, result
       results.splice(foundIndex, 1);
     }
   }
-  for (let i = rescanPos; i < currentkeyValueList.length; i++) {
-    results.push(currentkeyValueList[i]);
-  }
+
+  origResults = [...currentkeyValueList]
+  origResults.splice(0, rescanPos + 1);
+  origResults.reverse();
+  return origResults.concat(results);
 }
 
 export async function getKeyValuesFromTxid(ecl, transactions, txid, keyValueList) {
   let result = await getNamespaceDataFromTx(ecl, transactions, txid);
   let address = result.address;
-  let results = [];
   const namespaceId = kevaToJson(result.result).namespaceId;
-  await traverseKeyValues(ecl, address, namespaceId, transactions, results, keyValueList);
+  let results = await traverseKeyValues(ecl, address, namespaceId, transactions, keyValueList);
   // Merge the results.
   let keyValues = [];
   for (let kv of results) {
       if (kv.op === 'KEVA_OP_PUT') {
         // Remove the existing one.
         keyValues = keyValues.filter(e => e.key != kv.key);
-        keyValues.push({
-          key: kv.key,
-          value: kv.value,
-          tx: kv.tx,
-          n: kv.n,
-          height: kv.height,
-          time: kv.time,
-          address: kv.address,
-        });
+        keyValues.push(kv);
       } else if (kv.op === 'KEVA_OP_DELETE') {
         keyValues = keyValues.filter(e => e.key != kv.key);
       } else if (kv.op === 'KEVA_OP_NAMESPACE') {
-        keyValues.push({
-          key: '_KEVA_NS_',
-          value: kv.displayName,
-          tx: kv.tx,
-          n: kv.n,
-          height: kv.height,
-          time: kv.time,
-          address: kv.address,
-        });
+        keyValues.push({key: '_KEVA_NS_', ...kv});
+      } else {
+        // Legacy - TODO: remove this.
+        if (kv.key == '_KEVA_NS_') {
+          keyValues.push({op: 'KEVA_OP_NAMESPACE', ...kv});
+        } else {
+          keyValues.push({op: 'KEVA_OP_PUT', ...kv});
+        }
       }
   }
   keyValues.reverse();
