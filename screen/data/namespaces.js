@@ -5,7 +5,7 @@ import {
   Easing,
   View,
   TextInput,
-  Alert,
+  ScrollView,
   TouchableOpacity,
   Dimensions,
   Platform,
@@ -504,7 +504,12 @@ class MyNamespaces extends React.Component {
             }}
           />
           :
-          <View style={styles.emptyMessageContainer}>
+          <ScrollView style={{flex: 1, paddingHorizontal: 5}}
+            contentContainerStyle={{justifyContent: 'center', alignItems: 'center'}}
+            refreshControl={
+              <RefreshControl onRefresh={() => this.refreshNamespaces()} refreshing={this.state.isRefreshing} />
+            }
+          >
             <Text style={[styles.emptyMessage, { marginBottom: 20, fontSize: 24 }]}>
               {loc.namespaces.no_data}
             </Text>
@@ -517,7 +522,7 @@ class MyNamespaces extends React.Component {
             <Text style={[styles.emptyMessage, styles.help, {marginTop: 10}]}>
               {loc.namespaces.explain}
             </Text>
-          </View>
+          </ScrollView>
         }
       </View>
     );
