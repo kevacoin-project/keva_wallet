@@ -6,6 +6,7 @@ import {
   View,
   TextInput,
   ScrollView,
+  SafeAreaView,
   TouchableOpacity,
   Dimensions,
   Platform,
@@ -855,7 +856,7 @@ class Namespaces extends React.Component {
       fontSize: 16,
     });
     return (
-      <View style={styles.container}>
+      <SafeAreaView style={styles.container}>
         {this.getNSModal()}
         <TabView
           navigationState={this.state}
@@ -890,7 +891,7 @@ class Namespaces extends React.Component {
             />
           }
         />
-      </View>
+      </SafeAreaView>
     );
   }
 
