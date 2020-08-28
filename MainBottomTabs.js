@@ -1,6 +1,7 @@
 import React from 'react';
 import {
   Text,
+  Platform,
 } from 'react-native';
 import { createAppContainer, getActiveChildNavigationOptions } from 'react-navigation';
 import { createStackNavigator, TransitionPresets } from 'react-navigation-stack';
@@ -57,6 +58,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 let loc = require('./loc');
 
 const StyleSheet = require('./PlatformStyleSheet');
+import { IS_ANDROID } from './util';
 
 const ReorderWalletsStackNavigator = createStackNavigator({
   ReorderWallets: {
@@ -111,7 +113,7 @@ const WalletsStackNavigator = createStackNavigator(
     defaultNavigationOptions: {
       headerBackTitleVisible: false,
       headerTitle: () => null,
-      ...TransitionPresets.SlideFromRightIOS,
+      ...(IS_ANDROID ? TransitionPresets.SlideFromRightIOS : {}),
     },
     navigationOptions: ({ navigation }) => {
       let tabBarVisible = false;
@@ -346,7 +348,7 @@ const SettingsStackNavigator = createStackNavigator(
   {
     defaultNavigationOptions: {
       headerBackTitleVisible: false,
-      ...TransitionPresets.SlideFromRightIOS,
+      ...(IS_ANDROID ? TransitionPresets.SlideFromRightIOS : {}),
     },
     navigationOptions: ({ navigation }) => {
       let tabBarVisible = false;
@@ -386,7 +388,7 @@ const DataStackNavigator = createStackNavigator(
   {
     defaultNavigationOptions: {
       headerBackTitleVisible: false,
-      ...TransitionPresets.SlideFromRightIOS,
+      ...(IS_ANDROID ? TransitionPresets.SlideFromRightIOS : {}),
     },
     navigationOptions: ({ navigation }) => {
       let tabBarVisible = false;

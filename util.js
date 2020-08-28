@@ -3,11 +3,14 @@ import {
   PixelRatio,
   Dimensions,
   View,
+  Platform,
 } from 'react-native';
 
 import Toast from 'react-native-root-toast';
 import { NavigationActions } from 'react-navigation'
 import OverlaySpinner from 'react-native-loading-spinner-overlay'
+
+export const IS_ANDROID = Platform.OS === 'android';
 
 export const backAction = NavigationActions.back({
   key: null
