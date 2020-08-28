@@ -53,6 +53,7 @@ import Broadcast from './screen/send/broadcast';
 import Namespaces from './screen/data/namespaces';
 import KeyValues from './screen/data/keyvalues';
 import AddKeyValue from './screen/data/addkeyvalue';
+import ShowKeyValue from './screen/data/showkeyvalue';
 
 import Ionicons from 'react-native-vector-icons/Ionicons';
 let loc = require('./loc');
@@ -383,6 +384,9 @@ const DataStackNavigator = createStackNavigator(
     },
     AddKeyValue: {
       screen: AddKeyValue,
+    },
+    ShowKeyValue: {
+      screen: ShowKeyValue,
     },
   },
   {

@@ -468,9 +468,11 @@ class KeyValues extends React.Component {
   }
 
   onShow = (key, value) => {
-    this.setState({
-      isModalVisible: true,
-      key, value
+    const {navigation, namespaceId} = this.props;
+    navigation.navigate('ShowKeyValue', {
+      namespaceId,
+      key,
+      value,
     });
   }
 
