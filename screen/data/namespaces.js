@@ -37,6 +37,7 @@ import {
 } from '../../actions'
 import { HDSegwitP2SHWallet,  } from '../../class';
 import { FALLBACK_DATA_PER_BYTE_FEE } from '../../models/networkTransactionFees';
+import Biometric from '../../class/biometrics';
 
 let BlueApp = require('../../BlueApp');
 let loc = require('../../loc');
@@ -294,6 +295,12 @@ class MyNamespaces extends React.Component {
             try {
               await BlueElectrum.ping();
               await BlueElectrum.waitTillConnected();
+              if (this.isBiometricUseCapableAndEnabled) {
+                if (!(await Biometric.unlockWithBiometrics())) {
+                  this.setState({isBroadcasting: false});
+                  return;
+                }
+              }
               let result = await BlueElectrum.broadcast(this.namespaceTx);
               if (result.code) {
                 // Error.
@@ -416,6 +423,7 @@ class MyNamespaces extends React.Component {
       Toast.show('Cannot fetch namespaces');
       console.error(err);
     }
+    this.isBiometricUseCapableAndEnabled = await Biometric.isBiometricUseCapableAndEnabled();
   }
 
   refreshNamespaces = async (walletId) => {

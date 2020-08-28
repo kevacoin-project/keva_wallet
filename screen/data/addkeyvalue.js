@@ -23,7 +23,7 @@ import { connect } from 'react-redux'
 import { updateKeyValue } from '../../class/keva-ops';
 import FloatTextInput from '../../common/FloatTextInput';
 import StepModal from "../../common/StepModalWizard";
-
+import Biometric from '../../class/biometrics';
 
 class AddKeyValue extends React.Component {
 
@@ -67,7 +67,7 @@ class AddKeyValue extends React.Component {
     this.props.navigation.setParams({
       onPress: this.onSave
     });
-
+    this.isBiometricUseCapableAndEnabled = await Biometric.isBiometricUseCapableAndEnabled();
   }
 
   onSave = async () => {
@@ -166,6 +166,12 @@ class AddKeyValue extends React.Component {
             try {
               await BlueElectrum.ping();
               await BlueElectrum.waitTillConnected();
+              if (this.isBiometricUseCapableAndEnabled) {
+                if (!(await Biometric.unlockWithBiometrics())) {
+                  this.setState({isBroadcasting: false});
+                  return;
+                }
+              }
               let result = await BlueElectrum.broadcast(this.namespaceTx);
               if (result.code) {
                 // Error.

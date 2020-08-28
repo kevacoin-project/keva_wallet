@@ -30,6 +30,7 @@ import { getKeyValuesFromShortCode, getKeyValuesFromTxid, deleteKeyValue } from 
 import Toast from 'react-native-root-toast';
 import StepModal from "../../common/StepModalWizard";
 import { timeConverter } from "../../util";
+import Biometric from '../../class/biometrics';
 
 class Item extends React.Component {
 
@@ -246,6 +247,7 @@ class KeyValues extends React.Component {
     } catch (err) {
       Toast.show("Cannot fetch key-values");
     }
+    this.isBiometricUseCapableAndEnabled = await Biometric.isBiometricUseCapableAndEnabled();
     this.subs = [
       this.props.navigation.addListener('willFocus', async () => {
         try {
@@ -384,6 +386,12 @@ class KeyValues extends React.Component {
             try {
               await BlueElectrum.ping();
               await BlueElectrum.waitTillConnected();
+              if (this.isBiometricUseCapableAndEnabled) {
+                if (!(await Biometric.unlockWithBiometrics())) {
+                  this.setState({isBroadcasting: false});
+                  return;
+                }
+              }
               let result = await BlueElectrum.broadcast(this.deleteKeyTx);
               if (result.code) {
                 // Error.
