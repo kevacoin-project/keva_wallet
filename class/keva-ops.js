@@ -661,9 +661,15 @@ async function traverseKeyValues(ecl, address, namespaceId, transactions, curren
     let address = stack.pop();
     let history = await ecl.blockchainScripthash_getHistory(toScriptHash(address));
     let txsToFetch = history.map(h => h.tx_hash);
-    let txs = await ecl.blockchainTransaction_getBatch(txsToFetch, VERBOSE);
+    let txs;
+    if (transactions) {
+      txs = transactions.filter(tx => txsToFetch.includes(tx.txid));
+    }
+    if (txs.length != txsToFetch.length) {
+      txs = await ecl.blockchainTransaction_getBatch(txsToFetch, VERBOSE);
+    }
     for (let i = 0; i < txs.length; i++) {
-      let tx = txs[i].result;
+      let tx = txs[i].result || txs[i];
       // From transactions, tx.outputs
       // From server: tx.vout
       const vout = tx.outputs || tx.vout;
