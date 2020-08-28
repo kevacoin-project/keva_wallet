@@ -861,7 +861,7 @@ class Namespaces extends React.Component {
       fontSize: 16,
     });
     return (
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView style={styles.topContainer}>
         {this.getNSModal()}
         <TabView
           navigationState={this.state}
@@ -914,6 +914,10 @@ function mapStateToProps(state) {
 export default NamespacesScreen = connect(mapStateToProps)(Namespaces)
 
 var styles = StyleSheet.create({
+  topContainer: {
+    flex: 1,
+    backgroundColor: '#fff',
+  },
   container: {
     flex: 1,
     backgroundColor: '#f8f8f8',
