@@ -60,6 +60,8 @@ module.exports = {
         'Lightning wallet should be used for your daily transactions. Fees are unfairly cheap and speed is blazing fast.',
       empty_txs2_lightning: '\nTo start using it tap on "manage funds" and topup your balance.',
       tap_here_to_buy: 'Tap here to buy Kevacoin',
+      single_address: 'Single Address',
+      hd_multi_address: 'HD Multi-Address',
     },
     reorder: {
       title: 'Reorder Wallets',

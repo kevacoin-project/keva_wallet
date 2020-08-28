@@ -3,6 +3,7 @@ import b58 from 'bs58check';
 import { AbstractHDElectrumWallet } from './abstract-hd-electrum-wallet';
 const bitcoin = require('bitcoinjs-lib');
 const HDNode = require('bip32');
+const loc = require('../loc');
 
 //TODO: update for Kevacoin.
 const ypub_VERSION      = '049d7cb2';
@@ -15,7 +16,7 @@ const ypub_VERSION_HEX  = 0x049d7cb2;
  */
 export class HDSegwitP2SHWallet extends AbstractHDElectrumWallet {
   static type = 'HDsegwitP2SH';
-  static typeReadable = 'HD SegWit (BIP49 P2SH)';
+  static typeReadable = loc.wallets.list.hd_multi_address;
 
   allowSend() {
     return true;

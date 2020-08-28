@@ -3,6 +3,7 @@ import { getNonNamespaceUxtos } from './keva-ops';
 const bitcoin = require('bitcoinjs-lib');
 const coinSelectAccumulative = require('coinselect/accumulative');
 const coinSelectSplit = require('coinselect/split');
+const loc = require('../loc');
 
 /**
  * Creates Segwit P2SH Kevacoin address
@@ -21,7 +22,7 @@ function pubkeyToP2shSegwitAddress(pubkey, network) {
 
 export class SegwitP2SHWallet extends LegacyWallet {
   static type = 'segwitP2SH';
-  static typeReadable = 'SegWit (P2SH)';
+  static typeReadable = loc.wallets.list.single_address;
 
   static witnessToAddress(witness) {
     const pubKey = Buffer.from(witness, 'hex');
