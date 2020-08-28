@@ -519,7 +519,7 @@ export default KeyValuesScreen = connect(mapStateToProps)(KeyValues);
 var styles = StyleSheet.create({
   container: {
     flex:1,
-    backgroundColor: '#f8f8f8',
+    backgroundColor: KevaColors.background,
   },
   listStyle: {
     flex: 1,

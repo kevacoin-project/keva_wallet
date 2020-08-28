@@ -290,7 +290,7 @@ export default AddKeyValueScreen = connect(mapStateToProps)(AddKeyValue);
 var styles = StyleSheet.create({
   container: {
     flex:1,
-    backgroundColor: '#f8f8f8',
+    backgroundColor: KevaColors.background,
   },
   inputKey: {
     height:45,

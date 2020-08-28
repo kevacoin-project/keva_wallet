@@ -722,7 +722,6 @@ export default class WalletTransactions extends Component {
             bottom: 30,
             borderRadius: 30,
             minHeight: 48,
-            overflow: 'hidden',
             borderWidth: THIN_BORDER,
             borderColor: KevaColors.cellBorder,
             shadowColor: "#000",

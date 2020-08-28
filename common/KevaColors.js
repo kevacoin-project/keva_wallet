@@ -72,5 +72,6 @@ module.exports = {
   statusColor: '#37c0a1',
   arrowIcon: '#bbb',
   selectColor: '#f25656',
-  backgroundLight: '#fafafa'
+  background: '#f0f0f0',
+  backgroundLight: '#f8f8f8',
 };

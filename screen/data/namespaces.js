@@ -920,7 +920,7 @@ var styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    backgroundColor: '#f8f8f8',
+    backgroundColor: KevaColors.background,
   },
   sectionWrap: {
     marginBottom: 0
@@ -1039,8 +1039,14 @@ var styles = StyleSheet.create({
     flex: 1,
     borderRadius: 4,
     backgroundColor: '#ececed',
-    paddingTop: 5,
-    paddingBottom: 5,
+    android: {
+      paddingTop: 5,
+      paddingBottom: 5,
+    },
+    ios: {
+      paddingTop: 10,
+      paddingBottom: 10,
+    },
     paddingLeft: 7,
     paddingRight: 36,
     fontSize: 15,
@@ -1061,7 +1067,7 @@ var styles = StyleSheet.create({
     color: KevaColors.actionText,
     paddingVertical: 5,
     paddingHorizontal: 9,
-    top: 1,    
+    top: 1,
   },
   searchIcon: {
     width: 42,
@@ -1074,7 +1080,7 @@ var styles = StyleSheet.create({
     },
     ios: {
       top: 3,
-    }    
+    }
   },
   action: {
     fontSize: 16,

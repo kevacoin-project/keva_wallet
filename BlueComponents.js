@@ -1194,6 +1194,7 @@ export class BlueReceiveButtonIcon extends Component {
             flex: 1,
             minWidth: 130,
             backgroundColor: '#fff',
+            borderRadius: 30,
           }}
         >
           <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
@@ -1238,6 +1239,7 @@ export class BlueSendButtonIcon extends Component {
             minWidth: 130,
             backgroundColor: '#fff',
             alignItems: 'center',
+            borderRadius: 30,
           }}
         >
           <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center' }}>
