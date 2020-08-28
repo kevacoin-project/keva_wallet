@@ -960,7 +960,6 @@ var styles = StyleSheet.create({
   },
   listStyle: {
     flex: 1,
-    paddingTop: 5,
   },
   cardTitle: {
     flexDirection: 'row',
@@ -968,7 +967,7 @@ var styles = StyleSheet.create({
     marginHorizontal: 7,
     backgroundColor: '#fff',
     borderRadius: 5,
-    marginVertical: 4
+    marginTop: 7
   },
   cardTitleText: {
     fontSize: 16,
