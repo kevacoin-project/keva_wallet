@@ -27,6 +27,6 @@ export function setOtherNamespaceOrder(order) {
   return { type: SET_OTHER_NAMESPACES_ORDER, order }
 }
 
-export function setKeyValueList(namespaceId, keyValues, order) {
-  return { type: SET_KEYVALUE_LIST, namespaceId,  keyValues, order }
+export function setKeyValueList(namespaceId, keyValues, order, addressList) {
+  return { type: SET_KEYVALUE_LIST, namespaceId,  keyValues, order, addressList }
 }

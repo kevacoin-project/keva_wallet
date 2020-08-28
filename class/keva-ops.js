@@ -306,7 +306,6 @@ export async function createKevaNamespace(wallet, requestedSatPerByte, nsName) {
 
   psbt.finalizeAllInputs();
   let hexTx = psbt.extractTransaction(true).toHex();
-  console.log(hexTx);
   return {tx: hexTx, namespaceId: returnNamespaceId, fee};
 }
 
@@ -499,7 +498,6 @@ export async function updateKeyValue(wallet, requestedSatPerByte, namespaceId, k
 
   psbt.finalizeAllInputs();
   let hexTx = psbt.extractTransaction(true).toHex();
-  console.log(hexTx);
   return {tx: hexTx, fee};
 }
 
@@ -592,7 +590,6 @@ export async function deleteKeyValue(wallet, requestedSatPerByte, namespaceId, k
 
   psbt.finalizeAllInputs();
   let hexTx = psbt.extractTransaction(true).toHex();
-  console.log(hexTx);
   return {tx: hexTx, fee};
 }
 
@@ -632,15 +629,20 @@ const VERBOSE = true;
 
 // Address is the root address, i.e. the address that is involved in
 // namespace creation.
-async function traverseKeyValues(ecl, rootAddress, namespaceId, transactions, currentkeyValueList, cb) {
+async function traverseKeyValues(ecl, rootAddress, namespaceId, transactions, currentkeyValueList, currentAddressList, cb) {
   let results = [];
   let txvoutsDone = {};
   let stack = [];
   let resultMap = {};
   let txChild = {};
+  let startAddress;
+  if (currentAddressList.length > 0) {
+    startAddress = currentAddressList[currentAddressList.length - 1];
+  } else {
+    startAddress = rootAddress;
+  }
 
-  address = rootAddress;
-  stack.push(address);
+  stack.push(startAddress);
   let firstTxOut;
   while (stack.length > 0) {
     let address = stack.pop();
@@ -696,11 +698,11 @@ async function traverseKeyValues(ecl, rootAddress, namespaceId, transactions, cu
           }
         }
 
-        if (rootAddress == address) {
+        if (address == startAddress) {
           firstTxOut = txvout;
         }
 
-        if (!hasParent && rootAddress != address) {
+        if (!hasParent && address != startAddress) {
           continue;
         }
         txvoutsDone[txvout] = 1;
@@ -719,14 +721,27 @@ async function traverseKeyValues(ecl, rootAddress, namespaceId, transactions, cu
     results.push(resultMap[nextTxVout]);
     nextTxVout = txChild[nextTxVout];
   }
-  return results;
+
+  // The lastest one is the last one.
+  const addressList = results.map(r => r.address);
+  if (startAddress == rootAddress) {
+    return {results, addressList};
+  }
+
+  // The first element of addressList and results are duplicated.
+  addressList.shift();
+  results.shift();
+  const mergedAddressList = [...currentAddressList, ...addressList]
+  let mergedResults = [...(currentkeyValueList.reverse()), ...results];
+
+  return {results: mergedResults, addressList: mergedAddressList};
 }
 
-export async function getKeyValuesFromTxid(ecl, transactions, txid, keyValueList, cb) {
+export async function getKeyValuesFromTxid(ecl, transactions, txid, keyValueList, currentAddressList, cb) {
   let result = await getNamespaceDataFromTx(ecl, transactions, txid);
   let address = result.address;
   const namespaceId = kevaToJson(result.result).namespaceId;
-  let results = await traverseKeyValues(ecl, address, namespaceId, transactions, keyValueList, cb);
+  let {results, addressList} = await traverseKeyValues(ecl, address, namespaceId, transactions, keyValueList, currentAddressList, cb);
   // Merge the results.
   let keyValues = [];
   for (let kv of results) {
@@ -748,12 +763,12 @@ export async function getKeyValuesFromTxid(ecl, transactions, txid, keyValueList
       }
   }
   keyValues.reverse();
-  return keyValues;
+  return {keyValues, addressList};
 }
 
-export async function getKeyValuesFromShortCode(ecl, transactions, shortCode, keyValueList, cb) {
+export async function getKeyValuesFromShortCode(ecl, transactions, shortCode, keyValueList, currentAddressList, cb) {
   let txid = await getNamespaceFromShortCode(ecl, shortCode);
-  return getKeyValuesFromTxid(ecl, transactions, txid, keyValueList, cb);
+  return getKeyValuesFromTxid(ecl, transactions, txid, keyValueList, currentAddressList, cb);
 }
 
 export async function findMyNamespaces(wallet, ecl) {

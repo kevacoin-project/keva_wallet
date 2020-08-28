@@ -189,7 +189,6 @@ class KeyValues extends React.Component {
     const shortCode = navigation.getParam('shortCode');
     const txid = navigation.getParam('txid');
     const walletId = navigation.getParam('walletId');
-    let keyValues;
     const wallets = BlueApp.getWallets();
     this.wallet = wallets.find(w => w.getID() == walletId);
     let transactions = [];
@@ -204,15 +203,19 @@ class KeyValues extends React.Component {
     if (!kvList || kvList.length == 0) {
       cb = this.progressCallback;
     }
+
+    let currentAddressList = keyValueList.addressList ? (keyValueList.addressList[namespaceId] || []) : [];
+    let keyValues, addressList;
     if (shortCode) {
-      keyValues = await getKeyValuesFromShortCode(BlueElectrum, transactions, shortCode.toString(), kvList, cb);
+      ({keyValues, addressList} = await getKeyValuesFromShortCode(BlueElectrum, transactions, shortCode.toString(), kvList, currentAddressList, cb));
+
     } else if (txid) {
-      keyValues = await getKeyValuesFromTxid(BlueElectrum, transactions, txid, kvList, cb);
+      ({keyValues, addressList} = await getKeyValuesFromTxid(BlueElectrum, transactions, txid, kvList, currentAddressList, cb));
     }
 
     if (keyValues) {
       let order = keyValueList.order[namespaceId] || [];
-      dispatch(setKeyValueList(namespaceId, keyValues, order));
+      dispatch(setKeyValueList(namespaceId, keyValues, order, addressList));
     }
   }
 
