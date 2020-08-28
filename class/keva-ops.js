@@ -629,34 +629,19 @@ export async function getNamespaceFromShortCode(ecl, shortCode) {
 }
 
 const VERBOSE = true;
-const RELOAD_HEIGHT = 5;
 
 // Address is the root address, i.e. the address that is involved in
 // namespace creation.
-async function traverseKeyValues(ecl, address, namespaceId, transactions, currentkeyValueList, cb) {
+async function traverseKeyValues(ecl, rootAddress, namespaceId, transactions, currentkeyValueList, cb) {
   let results = [];
   let txvoutsDone = {};
   let stack = [];
   let resultMap = {};
   let txChild = {};
 
-  // Caching
-  let cacheAddress;
-  let rescanPos;
-
-  if (currentkeyValueList && currentkeyValueList.length > 0) {
-    if (currentkeyValueList.length > RELOAD_HEIGHT) {
-      rescanPos = RELOAD_HEIGHT;
-      cacheAddress = currentkeyValueList[RELOAD_HEIGHT].address;
-    } else {
-      rescanPos = currentkeyValueList.length - 1;
-      cacheAddress = currentkeyValueList[rescanPos].address;
-    }
-  }
-
-  address = cacheAddress || address;
+  address = rootAddress;
   stack.push(address);
-  let missingParens = {};
+  let firstTxOut;
   while (stack.length > 0) {
     let address = stack.pop();
     let history = await ecl.blockchainScripthash_getHistory(toScriptHash(address));
@@ -694,7 +679,7 @@ async function traverseKeyValues(ecl, address, namespaceId, transactions, curren
         resultJson.n = v.n;
         resultJson.time = tx.time;
         resultJson.address = address;
-        resultMap[resultJson.tx + resultJson.n] = resultJson;
+        resultMap[txvout] = resultJson;
         if (cb) {
           // Report progress.
           cb(resultJson.height);
@@ -705,43 +690,27 @@ async function traverseKeyValues(ecl, address, namespaceId, transactions, curren
         for (let vin of vins) {
           parents.push(vin.txid + vin.vout);
           if (resultMap[vin.txid + vin.vout]) {
-            txChild[vin.txid + vin.vout] = resultJson.tx + resultJson.n;
+            txChild[vin.txid + vin.vout] = txvout;
             hasParent = true;
             break;
           }
         }
 
-        if (!hasParent) {
-          missingParens[resultJson.tx + resultJson.n] = parents;
+        if (rootAddress == address) {
+          firstTxOut = txvout;
         }
 
+        if (!hasParent && rootAddress != address) {
+          continue;
+        }
         txvoutsDone[txvout] = 1;
         stack.push(address);
       }
     }
   }
 
-  //Sort the result according to txChild.
-  // We should have at least one tx that has no parent.
-  if (Object.keys(missingParens).length == 0) {
+  if (!firstTxOut) {
     return [];
-  }
-
-  for (let c in missingParens) {
-    for (let txout of missingParens[c]) {
-      if (resultMap[txout]) {
-        txChild[txout] = c;
-        missingParens[c] = null;
-        break;
-      }
-    }
-  }
-
-  let firstTxOut;
-  for (let c in missingParens) {
-    if (missingParens[c]) {
-      firstTxOut = c;
-    }
   }
 
   results.push(resultMap[firstTxOut]);
@@ -750,23 +719,7 @@ async function traverseKeyValues(ecl, address, namespaceId, transactions, curren
     results.push(resultMap[nextTxVout]);
     nextTxVout = txChild[nextTxVout];
   }
-
-  if (!cacheAddress) {
-    return results;
-  }
-
-  // Merge the current one and cached one.
-  for (let m = 0; m <= rescanPos; m++) {
-    let foundIndex = results.findIndex(r => r.tx == currentkeyValueList[m]);
-    if (foundIndex >= 0) {
-      results.splice(foundIndex, 1);
-    }
-  }
-
-  origResults = [...currentkeyValueList]
-  origResults.splice(0, rescanPos + 1);
-  origResults.reverse();
-  return origResults.concat(results);
+  return results;
 }
 
 export async function getKeyValuesFromTxid(ecl, transactions, txid, keyValueList, cb) {
