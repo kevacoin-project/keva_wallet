@@ -249,7 +249,10 @@ class KeyValues extends React.Component {
     }
     this.isBiometricUseCapableAndEnabled = await Biometric.isBiometricUseCapableAndEnabled();
     this.subs = [
-      this.props.navigation.addListener('willFocus', async () => {
+      this.props.navigation.addListener('willFocus', async (payload) => {
+        if (payload.lastState.routeName == "ShowKeyValue") {
+          return;
+        }
         try {
           this.setState({isRefreshing: true});
           const wallet = this.getCurrentWallet();
@@ -269,62 +272,6 @@ class KeyValues extends React.Component {
     if (this.subs) {
       this.subs.forEach(sub => sub.remove());
     }
-  }
-
-  closeModal = () => {
-    this.setState({
-      isModalVisible: false,
-      key: null,
-      value: null,
-    });
-  }
-
-  getKeyValueModal() {
-    const {key, value, isModalVisible} = this.state;
-    if (!key || !value) {
-      return null;
-    }
-
-    const titleStyle ={
-      fontSize: 17,
-      fontWeight: '700',
-      marginBottom: 5,
-      color: KevaColors.darkText,
-    };
-    const contentStyle ={
-      fontSize: 16,
-      color: KevaColors.lightText,
-      paddingTop: 5,
-      lineHeight: 25,
-    };
-    return (
-      <Modal style={styles.modal}
-        backdrop={true}
-        coverScreen
-        swipeDirection="down"
-        onSwipeComplete={this.closeModal}
-        isVisible={isModalVisible}>
-        <View style={styles.modalHeader}>
-          <TouchableOpacity onPress={this.closeModal}>
-            <Text style={{color: KevaColors.actionText, fontSize: 16, paddingVertical: 5}}>
-              {loc.general.close}
-            </Text>
-          </TouchableOpacity>
-          {utils.ModalHandle}
-          <Text style={{color: '#fff', fontSize: 16}}>
-              {loc.general.close}
-          </Text>
-        </View>
-        <View style={{ paddingVertical: 5, marginHorizontal: 10, maxHeight:"90%"}}>
-          <Text style={titleStyle}>{key}</Text>
-          <ScrollView style={{flexGrow:0}}>
-            <TouchableWithoutFeedback>
-              <Text style={contentStyle}>{value}</Text>
-            </TouchableWithoutFeedback>
-          </ScrollView>
-        </View>
-      </Modal>
-    )
   }
 
   keyDeleteFinish = () => {
@@ -491,7 +438,6 @@ class KeyValues extends React.Component {
            onPress={this.onDeleteConfirm}
         />
         {this.getDeleteModal()}
-        {this.getKeyValueModal()}
         {
           (list.length == 0) &&
           <Text style={{paddingTop: 20, alignSelf: 'center', color: KevaColors.okColor, fontSize: 16}}>{loc.namespaces.scanning_block} {this.state.scanningHeight} ...</Text>
