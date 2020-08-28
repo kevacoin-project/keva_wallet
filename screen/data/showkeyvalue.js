@@ -2,6 +2,7 @@ import React from 'react';
 import {
   Text,
   View,
+  ScrollView,
 } from 'react-native';
 const StyleSheet = require('../../PlatformStyleSheet');
 const KevaColors = require('../../common/KevaColors');
@@ -43,14 +44,14 @@ class ShowKeyValue extends React.Component {
 
   render() {
     return (
-      <View style={styles.container}>
+      <ScrollView style={styles.container}>
         <View style={styles.keyContainer}>
-          <Text style={styles.key}>{this.state.key}</Text>
+          <Text style={styles.key} selectable>{this.state.key}</Text>
         </View>
         <View style={styles.valueContainer}>
-          <Text style={styles.value}>{this.state.value}</Text>
+          <Text style={styles.value} selectable>{this.state.value}</Text>
         </View>
-      </View>
+      </ScrollView>
     );
   }
 
@@ -66,7 +67,6 @@ export default ShowKeyValueScreen = connect(mapStateToProps)(ShowKeyValue);
 
 var styles = StyleSheet.create({
   container: {
-    flex:1,
     backgroundColor: KevaColors.background,
   },
   keyContainer: {
