@@ -784,7 +784,7 @@ export async function getKeyValuesFromTxid(ecl, transactions, txid, keyValueList
       } else if (kv.op === 'KEVA_OP_DELETE') {
         keyValues = keyValues.filter(e => e.key != kv.key);
       } else if (kv.op === 'KEVA_OP_NAMESPACE') {
-        keyValues.push({key: '_KEVA_NS_', ...kv});
+        keyValues.push({key: '_KEVA_NS_', value: kv.displayName, ...kv});
       } else {
         // Legacy - TODO: remove this.
         if (kv.key == '_KEVA_NS_') {
