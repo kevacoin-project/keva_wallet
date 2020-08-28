@@ -39,13 +39,13 @@ class Item extends React.Component {
   }
 
   onEdit = () => {
-    const {navigation, data} = this.props;
+    const {navigation, item} = this.props;
     const {walletId, namespaceId} = navigation.state.params;
     navigation.navigate('AddKeyValue', {
       walletId,
       namespaceId,
-      key: data.key,
-      value: data.value,
+      key: item.key,
+      value: item.value,
     })
   }
 
@@ -287,7 +287,7 @@ class KeyValues extends React.Component {
       fontSize: 17,
       fontWeight: '700',
       marginBottom: 5,
-      color: KevaColors.lightText,
+      color: KevaColors.darkText,
     };
     const contentStyle ={
       fontSize: 16,
@@ -537,7 +537,8 @@ var styles = StyleSheet.create({
   },
   keyDesc: {
     flex: 1,
-    fontSize:16
+    fontSize:16,
+    color: KevaColors.darkText,
   },
   valueDesc: {
     flex: 1,
