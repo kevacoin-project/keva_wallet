@@ -1000,7 +1000,12 @@ var styles = StyleSheet.create({
     justifyContent: 'flex-start',
     marginHorizontal: 0,
     marginBottom: 0,
-    marginTop: 20,
+    android: {
+      marginTop: 20,
+    },
+    ios: {
+      marginTop: 50,
+    }
   },
   modalHeader: {
     paddingHorizontal: 10,
