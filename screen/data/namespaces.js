@@ -639,7 +639,7 @@ class OtherNamespaces extends React.Component {
       duration: 100,
       update: {type: LayoutAnimation.Types.easeInEaseOut}
     });
-    this.setState({inputMode: false, nsName: ''});
+    this.setState({inputMode: false, nsName: '', isRefreshing: false});
     this._inputRef && this._inputRef.blur();
     this._inputRef && this._inputRef.clear();
   }
@@ -684,7 +684,7 @@ class OtherNamespaces extends React.Component {
             :
             <TouchableOpacity onPress={this.onSearchNamespace} disabled={!canSearch}>
               <Icon name={'md-search'}
-                    style={[styles.addIcon, !canSearch && {color: KevaColors.inactiveText}]}
+                    style={[styles.searchIcon, !canSearch && {color: KevaColors.inactiveText}]}
                     size={25} />
             </TouchableOpacity>
           }
@@ -703,7 +703,12 @@ class OtherNamespaces extends React.Component {
           }}
         />
         {otherNamespaceList.order.length == 0 &&
-          <View style={styles.emptyMessageContainer}>
+          <ScrollView style={{flex: 1, paddingHorizontal: 5}}
+            contentContainerStyle={{justifyContent: 'center', alignItems: 'center'}}
+            refreshControl={
+              <RefreshControl onRefresh={() => this.refreshNamespaces()} refreshing={this.state.isRefreshing} />
+            }
+          >
             <Text style={[styles.emptyMessage, { marginBottom: 20, fontSize: 24 }]}>
               {loc.namespaces.no_data}
             </Text>
@@ -719,7 +724,7 @@ class OtherNamespaces extends React.Component {
             <Text style={[styles.emptyMessage, styles.help, {marginTop: 10}]}>
               {loc.namespaces.explain_ns}
             </Text>
-          </View>
+          </ScrollView>
         }
       </View>
     );
@@ -1047,7 +1052,20 @@ var styles = StyleSheet.create({
     color: KevaColors.actionText,
     paddingVertical: 5,
     paddingHorizontal: 9,
-    top: 1
+    top: 1,    
+  },
+  searchIcon: {
+    width: 42,
+    height: 42,
+    color: KevaColors.actionText,
+    paddingVertical: 5,
+    paddingHorizontal: 9,
+    android: {
+      top: 1,
+    },
+    ios: {
+      top: 3,
+    }    
   },
   action: {
     fontSize: 16,
