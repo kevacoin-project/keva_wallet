@@ -115,13 +115,6 @@ export default class WalletsList extends Component {
   }
 
   redrawScreen = (scrollToEnd = false) => {
-    console.log('wallets/list redrawScreen()');
-    if (BlueApp.getBalance() !== 0) {
-      A(A.ENUM.GOT_NONZERO_BALANCE);
-    } else {
-      A(A.ENUM.GOT_ZERO_BALANCE);
-    }
-
     const wallets = BlueApp.getWallets().concat(false);
     if (scrollToEnd) {
       scrollToEnd = wallets.length > this.state.wallets.length;
