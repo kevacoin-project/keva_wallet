@@ -450,9 +450,7 @@ export default class WalletsList extends Component {
         <NavigationEvents
           onDidFocus={() => {
             this.redrawScreen();
-            this.setState({ cameraPreviewIsPaused: this.state.viewPagerIndex === 1 || this.viewPagerRef.current.index === undefined });
           }}
-          onWillBlur={() => this.setState({ cameraPreviewIsPaused: true })}
         />
         <View
           style={styles.wrapper}
