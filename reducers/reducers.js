@@ -6,6 +6,8 @@ import {
   DELETE_OTHER_NAMESPACE,
   SET_OTHER_NAMESPACES_ORDER,
   SET_KEYVALUE_LIST,
+
+  CURRENT_KEYVALUE_LIST_VERSION,
 } from '../actions'
 
 const initNamespaceList = {namespaces: {}, order: []};
@@ -68,7 +70,7 @@ function otherNamespaceList(state = initOtherNamespaceList, action) {
   }
 }
 
-const initKeyValueList = {keyValues: {}, order: {}, addressList: {}};
+const initKeyValueList = {keyValues: {}, version: CURRENT_KEYVALUE_LIST_VERSION};
 
 function keyValueList(state = initKeyValueList, action) {
   switch (action.type) {
@@ -76,22 +78,18 @@ function keyValueList(state = initKeyValueList, action) {
       if (action.namespaceId && action.keyValues) {
         return {
           keyValues: {...state.keyValues, [action.namespaceId]: action.keyValues},
-          order: {...state.order, [action.namespaceId]: action.order},
-          addressList: {...state.addressList, [action.namespaceId]: action.addressList}
+          version: CURRENT_KEYVALUE_LIST_VERSION
         }
       } else if (action.namespaceId && !action.keyValues) {
         // Delete the key values for the given namespace.
         let resultkeyValues = {...state.keyValues};
         delete resultkeyValues[action.namespaceId];
-        let resultOrder = {...state.order};
-        delete resultOrder[action.namespaceId];
-        let resultAddressList = {...state.addressList}
-        delete resultAddressList[action.namespaceId];
         return {
           keyValues: resultkeyValues,
-          order: resultOrder,
+          version: CURRENT_KEYVALUE_LIST_VERSION
         }
       }
+      // Remove all the old data.
       return {...initKeyValueList};
     default:
       return state;

@@ -22,11 +22,10 @@ let BlueElectrum = require('../../BlueElectrum');
 import { FALLBACK_DATA_PER_BYTE_FEE } from '../../models/networkTransactionFees';
 
 import Icon from 'react-native-vector-icons/Ionicons';
-import Modal from 'react-native-modal';
 import ActionSheet from 'react-native-actionsheet';
 import { connect } from 'react-redux'
-import { setKeyValueList } from '../../actions'
-import { getKeyValuesFromShortCode, getKeyValuesFromTxid, deleteKeyValue } from '../../class/keva-ops';
+import { setKeyValueList, CURRENT_KEYVALUE_LIST_VERSION } from '../../actions'
+import { getKeyValuesFromShortCode, getKeyValuesFromTxid, deleteKeyValue, mergeKeyValueList } from '../../class/keva-ops';
 import Toast from 'react-native-root-toast';
 import StepModal from "../../common/StepModalWizard";
 import { timeConverter } from "../../util";
@@ -173,12 +172,6 @@ class KeyValues extends React.Component {
     }
   }
 
-  onRowMoved = async (order) => {
-    let {navigation, dispatch} = this.props;
-    const namespaceId = navigation.getParam('namespaceId');
-    dispatch(setKeyValueOrder(namespaceId, order))
-  }
-
   progressCallback = (scanningHeight) => {
     this.setState({scanningHeight});
   }
@@ -204,18 +197,16 @@ class KeyValues extends React.Component {
       cb = this.progressCallback;
     }
 
-    let currentAddressList = keyValueList.addressList ? (keyValueList.addressList[namespaceId] || []) : [];
-    let keyValues, addressList;
+    let keyValues;
     if (shortCode) {
-      ({keyValues, addressList} = await getKeyValuesFromShortCode(BlueElectrum, transactions, shortCode.toString(), kvList, currentAddressList, cb));
+      keyValues = await getKeyValuesFromShortCode(BlueElectrum, transactions, shortCode.toString(), kvList, cb);
 
     } else if (txid) {
-      ({keyValues, addressList} = await getKeyValuesFromTxid(BlueElectrum, transactions, txid, kvList, currentAddressList, cb));
+      keyValues = await getKeyValuesFromTxid(BlueElectrum, transactions, txid, kvList, cb);
     }
 
     if (keyValues) {
-      let order = keyValueList.order[namespaceId] || [];
-      dispatch(setKeyValueList(namespaceId, keyValues, order, addressList));
+      dispatch(setKeyValueList(namespaceId, keyValues));
     }
   }
 
@@ -245,6 +236,14 @@ class KeyValues extends React.Component {
   }
 
   async componentDidMount() {
+    // Check the version of redux store KeyValue list version.
+    // If not matched, nuke it and start over again.
+    let {keyValueList, dispatch} = this.props;
+    if (keyValueList.version != CURRENT_KEYVALUE_LIST_VERSION) {
+      // Older version data, remove all of them.
+      dispatch(setKeyValueList());
+    }
+
     try {
       await this.refreshKeyValues();
     } catch (err) {
@@ -430,6 +429,7 @@ class KeyValues extends React.Component {
     let {navigation, dispatch, keyValueList} = this.props;
     const namespaceId = navigation.getParam('namespaceId');
     const list = keyValueList.keyValues[namespaceId] || [];
+    const mergeList = mergeKeyValueList(list);
     return (
       <View style={styles.container}>
         <ActionSheet
@@ -446,11 +446,11 @@ class KeyValues extends React.Component {
           <Text style={{paddingTop: 20, alignSelf: 'center', color: KevaColors.okColor, fontSize: 16}}>{loc.namespaces.scanning_block} {this.state.scanningHeight} ...</Text>
         }
         {
-          list &&
+          mergeList &&
           <FlatList
             style={styles.listStyle}
             contentContainerStyle={{paddingBottom: 400}}
-            data={list}
+            data={mergeList}
             onRefresh={() => this.refreshKeyValues()}
             refreshing={this.state.isRefreshing}
             renderItem={({item, index}) =>

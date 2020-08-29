@@ -629,15 +629,23 @@ const VERBOSE = true;
 
 // Address is the root address, i.e. the address that is involved in
 // namespace creation.
-async function traverseKeyValues(ecl, rootAddress, namespaceId, transactions, currentkeyValueList, currentAddressList, cb) {
+async function traverseKeyValues(ecl, rootAddress, namespaceId, transactions, currentkeyValueList, cb) {
   let results = [];
   let txvoutsDone = {};
   let stack = [];
   let resultMap = {};
   let txChild = {};
   let startAddress;
-  if (currentAddressList.length > 0) {
-    startAddress = currentAddressList[currentAddressList.length - 1];
+  let recheckCount = 0;
+  if (currentkeyValueList && currentkeyValueList.length > 0) {
+    // We need to check all the unconfirmed transactions.
+    let uncofirmedCount = currentkeyValueList.filter(kv => kv.height <= 0).length;
+    if (uncofirmedCount == 0) {
+      recheckCount = 1;
+    } else {
+      recheckCount = (currentkeyValueList.length > uncofirmedCount) ? (uncofirmedCount + 1) : uncofirmedCount;
+    }
+    startAddress = currentkeyValueList[currentkeyValueList.length - recheckCount].address;
   } else {
     startAddress = rootAddress;
   }
@@ -722,53 +730,50 @@ async function traverseKeyValues(ecl, rootAddress, namespaceId, transactions, cu
     nextTxVout = txChild[nextTxVout];
   }
 
-  // The lastest one is the last one.
-  const addressList = results.map(r => r.address);
   if (startAddress == rootAddress) {
-    return {results, addressList};
+    return results;
   }
 
-  // The first element of addressList and results are duplicated.
-  addressList.shift();
-  results.shift();
-  const mergedAddressList = [...currentAddressList, ...addressList]
-  let mergedResults = [...(currentkeyValueList.reverse()), ...results];
+  let currentIndex;
+  for (let i = 0; i < recheckCount; i++) {
+    // Rechecked ones only need to update height.
+    currentIndex = currentkeyValueList.length + i - recheckCount;
+    currentkeyValueList[currentIndex].height = results[i].height;
+    currentkeyValueList[currentIndex].time = results[i].time;
+  }
+  results.splice(0, recheckCount);
 
-  return {results: mergedResults, addressList: mergedAddressList};
+  let mergedResults = [...currentkeyValueList, ...results];
+  return mergedResults;
 }
 
-export async function getKeyValuesFromTxid(ecl, transactions, txid, keyValueList, currentAddressList, cb) {
+export function mergeKeyValueList(origkeyValues) {
+  // Merge the results.
+  let keyValues = [];
+  for (let kv of origkeyValues) {
+    if (kv.op === 'KEVA_OP_PUT') {
+      // Remove the existing one.
+      keyValues = keyValues.filter(e => e.key != kv.key);
+      keyValues.push(kv);
+    } else if (kv.op === 'KEVA_OP_DELETE') {
+      keyValues = keyValues.filter(e => e.key != kv.key);
+    } else if (kv.op === 'KEVA_OP_NAMESPACE') {
+      keyValues.push({key: '_KEVA_NS_', value: kv.displayName, ...kv});
+    }
+  }
+  return keyValues.reverse();
+}
+
+export async function getKeyValuesFromTxid(ecl, transactions, txid, keyValueList, cb) {
   let result = await getNamespaceDataFromTx(ecl, transactions, txid);
   let address = result.address;
   const namespaceId = kevaToJson(result.result).namespaceId;
-  let {results, addressList} = await traverseKeyValues(ecl, address, namespaceId, transactions, keyValueList, currentAddressList, cb);
-  // Merge the results.
-  let keyValues = [];
-  for (let kv of results) {
-      if (kv.op === 'KEVA_OP_PUT') {
-        // Remove the existing one.
-        keyValues = keyValues.filter(e => e.key != kv.key);
-        keyValues.push(kv);
-      } else if (kv.op === 'KEVA_OP_DELETE') {
-        keyValues = keyValues.filter(e => e.key != kv.key);
-      } else if (kv.op === 'KEVA_OP_NAMESPACE') {
-        keyValues.push({key: '_KEVA_NS_', value: kv.displayName, ...kv});
-      } else {
-        // Legacy - TODO: remove this.
-        if (kv.key == '_KEVA_NS_') {
-          keyValues.push({op: 'KEVA_OP_NAMESPACE', ...kv});
-        } else {
-          keyValues.push({op: 'KEVA_OP_PUT', ...kv});
-        }
-      }
-  }
-  keyValues.reverse();
-  return {keyValues, addressList};
+  return traverseKeyValues(ecl, address, namespaceId, transactions, keyValueList, cb);
 }
 
-export async function getKeyValuesFromShortCode(ecl, transactions, shortCode, keyValueList, currentAddressList, cb) {
+export async function getKeyValuesFromShortCode(ecl, transactions, shortCode, keyValueList, cb) {
   let txid = await getNamespaceFromShortCode(ecl, shortCode);
-  return getKeyValuesFromTxid(ecl, transactions, txid, keyValueList, currentAddressList, cb);
+  return getKeyValuesFromTxid(ecl, transactions, txid, keyValueList, cb);
 }
 
 export async function findMyNamespaces(wallet, ecl) {
