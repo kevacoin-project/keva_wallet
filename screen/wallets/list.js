@@ -442,7 +442,9 @@ export default class WalletsList extends Component {
       <SafeBlueArea>
         <NavigationEvents
           onDidFocus={() => {
-            this.redrawScreen();
+            setTimeout(() => {
+              this.redrawScreen();
+            }, 200);
           }}
         />
         <View
