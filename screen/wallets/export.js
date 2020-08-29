@@ -9,6 +9,8 @@ import { LegacyWallet, LightningCustodianWallet, SegwitBech32Wallet, SegwitP2SHW
 /** @type {AppStorage} */
 let BlueApp = require('../../BlueApp');
 let loc = require('../../loc');
+import { TransitionPresets } from 'react-navigation-stack';
+import { IS_ANDROID } from '../../util';
 const { height, width } = Dimensions.get('window');
 
 export default class WalletExport extends Component {
@@ -16,6 +18,7 @@ export default class WalletExport extends Component {
     ...BlueNavigationStyle(navigation, true),
     title: loc.wallets.export.title,
     headerLeft: () => null,
+    ...(IS_ANDROID ? TransitionPresets.ModalTransition : {}),
   });
 
   constructor(props) {

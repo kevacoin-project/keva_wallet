@@ -23,6 +23,9 @@ import Modal from 'react-native-modal';
 import HandoffSettings from '../../class/handoff';
 import DeeplinkSchemaMatch from '../../class/deeplink-schema-match';
 import Handoff from 'react-native-handoff';
+import { TransitionPresets } from 'react-navigation-stack';
+import { IS_ANDROID } from '../../util';
+
 /** @type {AppStorage} */
 const BlueApp = require('../../BlueApp');
 const loc = require('../../loc');
@@ -253,6 +256,7 @@ ReceiveDetails.navigationOptions = ({ navigation }) => ({
   ...BlueNavigationStyle(navigation, true),
   title: loc.receive.header,
   headerLeft: () => null,
+  ...(IS_ANDROID ? TransitionPresets.ModalTransition : {}),
 });
 
 export default ReceiveDetails;

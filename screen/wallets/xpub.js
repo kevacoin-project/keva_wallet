@@ -8,6 +8,8 @@ import Biometric from '../../class/biometrics';
 /** @type {AppStorage} */
 let BlueApp = require('../../BlueApp');
 let loc = require('../../loc');
+import { TransitionPresets } from 'react-navigation-stack';
+import { IS_ANDROID } from '../../util';
 const { height, width } = Dimensions.get('window');
 
 export default class WalletXpub extends Component {
@@ -15,6 +17,7 @@ export default class WalletXpub extends Component {
     ...BlueNavigationStyle(navigation, true),
     title: loc.wallets.xpub.title,
     headerLeft: () => null,
+    ...(IS_ANDROID ? TransitionPresets.ModalTransition : {}),
   });
 
   constructor(props) {

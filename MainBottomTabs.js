@@ -1,22 +1,19 @@
 import React from 'react';
 import {
   Text,
-  Platform,
 } from 'react-native';
-import { createAppContainer, getActiveChildNavigationOptions } from 'react-navigation';
-import { createStackNavigator, TransitionPresets } from 'react-navigation-stack';
+import { createAppContainer } from 'react-navigation';
+import { createStackNavigator } from 'react-navigation-stack';
 import { createBottomTabNavigator } from 'react-navigation-tabs';
 
 import Settings from './screen/settings/settings';
 import About from './screen/settings/about';
 import ReleaseNotes from './screen/settings/releasenotes';
 import Licensing from './screen/settings/licensing';
-import Selftest from './screen/selftest';
 import Language from './screen/settings/language';
 import Currency from './screen/settings/currency';
 import EncryptStorage from './screen/settings/encryptStorage';
 import PlausibleDeniability from './screen/plausibledeniability';
-import LightningSettings from './screen/settings/lightningSettings';
 import ElectrumSettings from './screen/settings/electrumSettings';
 import GeneralSettings from './screen/settings/GeneralSettings';
 import NetworkSettings from './screen/settings/NetworkSettings';
@@ -26,7 +23,6 @@ import WalletsList from './screen/wallets/list';
 import WalletTransactions from './screen/wallets/transactions';
 import AddWallet from './screen/wallets/add';
 import PleaseBackup from './screen/wallets/pleaseBackup';
-import PleaseBackupLNDHub from './screen/wallets/pleaseBackupLNDHub';
 import ImportWallet from './screen/wallets/import';
 import WalletDetails from './screen/wallets/details';
 import WalletExport from './screen/wallets/export';
@@ -59,76 +55,12 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 let loc = require('./loc');
 
 const StyleSheet = require('./PlatformStyleSheet');
-import { IS_ANDROID } from './util';
 
 const ReorderWalletsStackNavigator = createStackNavigator({
   ReorderWallets: {
     screen: ReorderWallets,
   },
 });
-
-const WalletsStackNavigator = createStackNavigator(
-  {
-    Wallets: {
-      screen: WalletsList,
-      path: 'wallets',
-      navigationOptions: {
-        headerShown: false,
-      },
-    },
-    WalletTransactions: {
-      screen: WalletTransactions,
-      path: 'WalletTransactions',
-      routeName: 'WalletTransactions',
-    },
-    TransactionStatus: {
-      screen: TransactionStatus,
-    },
-    TransactionDetails: {
-      screen: details,
-    },
-    WalletDetails: {
-      screen: WalletDetails,
-    },
-    HodlHodl: {
-      screen: HodlHodl,
-    },
-    CPFP: {
-      screen: cpfp,
-    },
-    RBFBumpFee: {
-      screen: rbfBumpFee,
-    },
-    RBFCancel: {
-      screen: rbfCancel,
-    },
-    SelectWallet: {
-      screen: SelectWallet,
-    },
-    DefaultView: {
-      screen: DefaultView,
-      path: 'DefaultView',
-    },
-  },
-  {
-    defaultNavigationOptions: {
-      headerBackTitleVisible: false,
-      headerTitle: () => null,
-      ...(IS_ANDROID ? TransitionPresets.SlideFromRightIOS : {}),
-    },
-    navigationOptions: ({ navigation }) => {
-      let tabBarVisible = false;
-      let routeName = navigation.state.routes[navigation.state.index].routeName;
-      if (routeName == 'Wallets') {
-          tabBarVisible = true;
-      }
-      return {
-        tabBarVisible,
-        headerShown: false,
-      }
-    }
-  },
-);
 
 const CreateTransactionStackNavigator = createStackNavigator({
   SendDetails: {
@@ -167,271 +99,12 @@ const CreateWalletStackNavigator = createStackNavigator({
   PleaseBackup: {
     screen: PleaseBackup,
   },
-  PleaseBackupLNDHub: {
-    screen: PleaseBackupLNDHub,
-    swipeEnabled: false,
-    gesturesEnabled: false,
-    navigationOptions: {
-      headerShown: false,
-    },
+}, {
+  defaultNavigationOptions: {
+    headerBackTitleVisible: false,
+    headerTitle: () => null,
   },
 });
-
-
-const HandleOffchainAndOnChainStackNavigator = createStackNavigator(
-  {
-    SelectWallet: {
-      screen: SelectWallet,
-    },
-
-    ScanQRCode: {
-      screen: ScanQRCode,
-    },
-
-    SendDetails: {
-      screen: CreateTransactionStackNavigator,
-      navigationOptions: {
-        headerShown: false,
-      },
-    },
-  },
-  { headerBackTitleVisible: false },
-);
-
-const WalletNavigator = createStackNavigator(
-  {
-    Wallets: {
-      screen: WalletsStackNavigator,
-      path: 'wallets',
-      navigationOptions: {
-        headerShown: false,
-      },
-    },
-    AddWallet: {
-      screen: CreateWalletStackNavigator,
-      navigationOptions: {
-        headerShown: false,
-      },
-    },
-    WalletExport: {
-      screen: WalletExport,
-    },
-    WalletXpub: {
-      screen: WalletXpub,
-    },
-    //
-    SendDetails: {
-      routeName: 'SendDetails',
-      screen: CreateTransactionStackNavigator,
-      navigationOptions: {
-        headerShown: false,
-      },
-    },
-    SelectWallet: {
-      screen: SelectWallet,
-      navigationOptions: {
-        headerLeft: () => null,
-      },
-    },
-
-    ReceiveDetails: {
-      screen: receiveDetails,
-    },
-
-    ScanQRCode: {
-      screen: ScanQRCode,
-    },
-
-    ReorderWallets: {
-      screen: ReorderWalletsStackNavigator,
-      navigationOptions: {
-        headerShown: false,
-      },
-    },
-    HandleOffchainAndOnChain: {
-      screen: HandleOffchainAndOnChainStackNavigator,
-      navigationOptions: {
-        headerShown: false,
-      },
-    },
-  },
-  {
-    mode: 'modal',
-    navigationOptions: ({ navigation }) => {
-      let tabBarVisible = false;
-      let routeName = navigation.state.routes[navigation.state.index].routeName;
-      if (routeName == 'Wallets') {
-          tabBarVisible = true;
-      }
-      const childOptions = getActiveChildNavigationOptions(navigation);
-      if (childOptions.tabBarVisible === false) {
-        tabBarVisible = false;
-      }
-      return {
-        tabBarVisible,
-        headerShown: false,
-      }
-    }
-  },
-);
-
-const SettingsStackNavigator = createStackNavigator(
-  {
-    Settings: {
-      screen: Settings,
-      path: 'Settings',
-      navigationOptions: {
-        headerStyle: {
-          backgroundColor: '#FFFFFF',
-          borderBottomWidth: 0,
-          elevation: 0,
-        },
-        headerTintColor: '#0c2550',
-      },
-    },
-    SelectWallet: {
-      screen: SelectWallet,
-    },
-    Currency: {
-      screen: Currency,
-    },
-    About: {
-      screen: About,
-      path: 'About',
-    },
-    ReleaseNotes: {
-      screen: ReleaseNotes,
-      path: 'ReleaseNotes',
-    },
-    Selftest: {
-      screen: Selftest,
-    },
-    Licensing: {
-      screen: Licensing,
-      path: 'Licensing',
-    },
-    DefaultView: {
-      screen: DefaultView,
-      path: 'DefaultView',
-    },
-    Language: {
-      screen: Language,
-      path: 'Language',
-    },
-    EncryptStorage: {
-      screen: EncryptStorage,
-      path: 'EncryptStorage',
-    },
-    GeneralSettings: {
-      screen: GeneralSettings,
-      path: 'GeneralSettings',
-    },
-    NetworkSettings: {
-      screen: NetworkSettings,
-      path: 'NetworkSettings',
-    },
-    PlausibleDeniability: {
-      screen: PlausibleDeniability,
-      path: 'PlausibleDeniability',
-    },
-    LightningSettings: {
-      screen: LightningSettings,
-      path: 'LightningSettings',
-    },
-    ElectrumSettings: {
-      screen: ElectrumSettings,
-      path: 'ElectrumSettings',
-    },
-    Broadcast: {
-      screen: Broadcast
-    },
-  },
-  {
-    defaultNavigationOptions: {
-      headerBackTitleVisible: false,
-      ...(IS_ANDROID ? TransitionPresets.SlideFromRightIOS : {}),
-    },
-    navigationOptions: ({ navigation }) => {
-      let tabBarVisible = false;
-      let routeName = navigation.state.routes[navigation.state.index].routeName;
-      if (routeName == 'Settings') {
-          tabBarVisible = true;
-      }
-      return {
-        tabBarVisible,
-        headerShown: false,
-      }
-    }
-  },
-);
-
-const DataStackNavigator = createStackNavigator(
-  {
-    Namespaces: {
-      screen: Namespaces,
-      path: 'Data',
-      navigationOptions: {
-        headerStyle: {
-          backgroundColor: '#FFFFFF',
-          borderBottomWidth: 0,
-          elevation: 0,
-        },
-        headerTintColor: '#0c2550',
-      },
-    },
-    KeyValues: {
-      screen: KeyValues,
-    },
-    AddKeyValue: {
-      screen: AddKeyValue,
-    },
-    ShowKeyValue: {
-      screen: ShowKeyValue,
-    },
-  },
-  {
-    defaultNavigationOptions: {
-      headerBackTitleVisible: false,
-      ...(IS_ANDROID ? TransitionPresets.SlideFromRightIOS : {}),
-    },
-    navigationOptions: ({ navigation }) => {
-      let tabBarVisible = false;
-      let routeName = navigation.state.routes[navigation.state.index].routeName;
-      if (routeName == 'Namespaces') {
-          tabBarVisible = true;
-      }
-      return {
-        tabBarVisible,
-        headerShown: false,
-      }
-    },
-  },
-);
-
-
-const MAIN_TABS = {
-  Wallets: {
-    screen: WalletNavigator,
-    path: 'WalletList',
-    navigationOptions: {
-      headerShown: false,
-    },
-  },
-  Data: {
-    screen: DataStackNavigator,
-    path: 'Data',
-    navigationOptions: {
-      headerShown: false,
-    },
-  },
-  Settings: {
-    screen: SettingsStackNavigator,
-    path: 'Settings',
-    navigationOptions: {
-      headerShown: false,
-    },
-  },
-}
 
 let styles = StyleSheet.create({
   container: {
@@ -458,48 +131,231 @@ let styles = StyleSheet.create({
   }
 });
 
-const KevaTabNavigator = createBottomTabNavigator(MAIN_TABS, {
-  initialRouteName: 'Wallets',
-  tabBarPosition: 'bottom',
-  lazy: true,
-  tabBarOptions: {
-    activeTintColor: '#e91e63',
-    inactiveTintColor: '#5E5959',
-    showIcon: true,
-    style: styles.style,
-    labelStyle: styles.labelStyle,
-    tabStyle: styles.tabStyle
+const KevaTabNavigator = createBottomTabNavigator({
+    Wallets: {
+      screen: WalletsList,
+      path: 'wallets',
+      navigationOptions: {
+        headerShown: false,
+      },
+    },
+    Namespaces: {
+      screen: Namespaces,
+      path: 'Namespaces',
+      navigationOptions: {
+        headerStyle: {
+          backgroundColor: '#FFFFFF',
+          borderBottomWidth: 0,
+          elevation: 0,
+        },
+        headerTintColor: '#0c2550',
+      },
+    },
+    Settings: {
+      screen: Settings,
+      path: 'Settings',
+      navigationOptions: {
+        headerStyle: {
+          backgroundColor: '#FFFFFF',
+          borderBottomWidth: 0,
+          elevation: 0,
+        },
+        headerTintColor: '#0c2550',
+      },
+    },
   },
-  defaultNavigationOptions: ({ navigation }) => ({
-    tabBarIcon: ({ focused, horizontal, tintColor }) => {
-      const { routeName } = navigation.state;
-      let iconName;
-      if (routeName === 'Wallets') {
-        // Sometimes we want to add badges to some icons.
-        // https://reactnavigation.org/docs/4.x/tab-based-navigation/
-        // IconComponent = HomeIconWithBadge;
-        iconName = 'md-wallet';
-      } else if (routeName === 'Settings') {
-        iconName = 'md-settings';
-      } else if (routeName === 'Data') {
-        iconName = 'md-filing';
-      }
-      return <Ionicons name={iconName} size={22} color={tintColor}/>;
+  {
+    initialRouteName: 'Wallets',
+    tabBarPosition: 'bottom',
+    lazy: true,
+    tabBarOptions: {
+      activeTintColor: '#e91e63',
+      inactiveTintColor: '#5E5959',
+      showIcon: true,
+      style: styles.style,
+      labelStyle: styles.labelStyle,
+      tabStyle: styles.tabStyle
     },
-    tabBarLabel: ({tintColor}) => {
-      const { routeName } = navigation.state;
-      let label;
-      if (routeName === 'Wallets') {
-        label = loc.general.label_wallets;
-      } else if (routeName === 'Settings') {
-        label = loc.general.label_settings;
-      } else if (routeName === 'Data') {
-        label = loc.general.label_data;
+    defaultNavigationOptions: ({ navigation }) => ({
+      tabBarIcon: ({ focused, horizontal, tintColor }) => {
+        const { routeName } = navigation.state;
+        let iconName;
+        if (routeName === 'Wallets') {
+          // Sometimes we want to add badges to some icons.
+          // https://reactnavigation.org/docs/4.x/tab-based-navigation/
+          // IconComponent = HomeIconWithBadge;
+          iconName = 'md-wallet';
+        } else if (routeName === 'Settings') {
+          iconName = 'md-settings';
+        } else if (routeName === 'Namespaces') {
+          iconName = 'md-filing';
+        }
+        return <Ionicons name={iconName} size={22} color={tintColor}/>;
+      },
+      tabBarLabel: ({tintColor}) => {
+        const { routeName } = navigation.state;
+        let label;
+        if (routeName === 'Wallets') {
+          label = loc.general.label_wallets;
+        } else if (routeName === 'Settings') {
+          label = loc.general.label_settings;
+        } else if (routeName === 'Namespaces') {
+          label = loc.general.label_data;
+        }
+        return <Text style={{fontSize: 12, alignSelf: 'center', color: tintColor, position: 'relative', top: -2}}>{label}</Text>;
+      },
+    }),
+    navigationOptions: ({ navigation }) => {
+      return {
+        headerShown: false,
       }
-      return <Text style={{fontSize: 12, alignSelf: 'center', color: tintColor, position: 'relative', top: -2}}>{label}</Text>;
     },
-  }),
+  }
+);
+
+const HomeStackNavigator = createStackNavigator({
+  Tabs: KevaTabNavigator,
+  // Wallets
+  WalletTransactions: {
+    screen: WalletTransactions,
+    path: 'WalletTransactions',
+    routeName: 'WalletTransactions',
+  },
+  TransactionStatus: {
+    screen: TransactionStatus,
+  },
+  TransactionDetails: {
+    screen: details,
+  },
+  WalletDetails: {
+    screen: WalletDetails,
+  },
+  HodlHodl: {
+    screen: HodlHodl,
+  },
+  CPFP: {
+    screen: cpfp,
+  },
+  RBFBumpFee: {
+    screen: rbfBumpFee,
+  },
+  RBFCancel: {
+    screen: rbfCancel,
+  },
+  SelectWallet: {
+    screen: SelectWallet,
+  },
+  DefaultView: {
+    screen: DefaultView,
+    path: 'DefaultView',
+  },
+  AddWallet: {
+    screen: CreateWalletStackNavigator,
+    navigationOptions: {
+      headerShown: false,
+    },
+  },
+  WalletExport: {
+    screen: WalletExport,
+  },
+  WalletXpub: {
+    screen: WalletXpub,
+  },
+  SendDetails: {
+    routeName: 'SendDetails',
+    screen: CreateTransactionStackNavigator,
+    navigationOptions: {
+      headerShown: false,
+    },
+  },
+  SelectWallet: {
+    screen: SelectWallet,
+    navigationOptions: {
+      headerLeft: () => null,
+    },
+  },
+  ReceiveDetails: {
+    screen: receiveDetails,
+  },
+  ScanQRCode: {
+    screen: ScanQRCode,
+  },
+  ReorderWallets: {
+    screen: ReorderWalletsStackNavigator,
+    navigationOptions: {
+      headerShown: false,
+    },
+  },
+  // Namespaces
+  KeyValues: {
+    screen: KeyValues,
+  },
+  AddKeyValue: {
+    screen: AddKeyValue,
+  },
+  ShowKeyValue: {
+    screen: ShowKeyValue,
+  },
+  // Settings
+  SelectWallet: {
+    screen: SelectWallet,
+  },
+  Currency: {
+    screen: Currency,
+  },
+  About: {
+    screen: About,
+    path: 'About',
+  },
+  ReleaseNotes: {
+    screen: ReleaseNotes,
+    path: 'ReleaseNotes',
+  },
+  Licensing: {
+    screen: Licensing,
+    path: 'Licensing',
+  },
+  DefaultView: {
+    screen: DefaultView,
+    path: 'DefaultView',
+  },
+  Language: {
+    screen: Language,
+    path: 'Language',
+  },
+  EncryptStorage: {
+    screen: EncryptStorage,
+    path: 'EncryptStorage',
+  },
+  GeneralSettings: {
+    screen: GeneralSettings,
+    path: 'GeneralSettings',
+  },
+  NetworkSettings: {
+    screen: NetworkSettings,
+    path: 'NetworkSettings',
+  },
+  PlausibleDeniability: {
+    screen: PlausibleDeniability,
+    path: 'PlausibleDeniability',
+  },
+  ElectrumSettings: {
+    screen: ElectrumSettings,
+    path: 'ElectrumSettings',
+  },
+  Broadcast: {
+    screen: Broadcast
+  },
+}, {
+  defaultNavigationOptions: {
+    headerBackTitleVisible: false,
+    headerTitle: () => null,
+  },
+  navigationOptions: ({ navigation }) => {
+    return {
+      headerShown: false,
+    }
+  },
 });
 
-
-export default createAppContainer(KevaTabNavigator);
+export default createAppContainer(HomeStackNavigator);

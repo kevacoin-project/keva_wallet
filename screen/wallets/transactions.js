@@ -46,6 +46,8 @@ let loc = require('../../loc');
 let EV = require('../../events');
 let BlueElectrum = require('../../BlueElectrum');
 const LocalQRCode = require('@remobile/react-native-qrcode-local-image');
+import { TransitionPresets } from 'react-navigation-stack';
+import { IS_ANDROID } from '../../util';
 
 export default class WalletTransactions extends Component {
   static navigationOptions = ({ navigation }) => {
@@ -71,6 +73,7 @@ export default class WalletTransactions extends Component {
         shadowColor: 'transparent',
       },
       headerTintColor: '#FFFFFF',
+      ...(IS_ANDROID ? TransitionPresets.SlideFromRightIOS : {}),
     };
   };
 

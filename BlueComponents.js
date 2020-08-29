@@ -24,6 +24,7 @@ import {
   TextInput,
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
+import { TransitionPresets } from 'react-navigation-stack';
 import { LightningCustodianWallet, PlaceholderWallet } from './class';
 import Carousel from 'react-native-snap-carousel';
 import { BitcoinUnit } from './models/bitcoinUnits';
@@ -35,6 +36,8 @@ import showPopupMenu from 'react-native-popup-menu-android';
 import NetworkTransactionFees, { NetworkTransactionFeeType } from './models/networkTransactionFees';
 import Biometric from './class/biometrics';
 let loc = require('./loc/');
+import { IS_ANDROID } from './util';
+
 /** @type {AppStorage} */
 let BlueApp = require('./BlueApp');
 const { height, width } = Dimensions.get('window');
@@ -425,6 +428,7 @@ export const BlueNavigationStyle = (navigation, withNavigationCloseButton = fals
     </TouchableOpacity>
   ) : null,
   headerBackTitle: null,
+  ...(IS_ANDROID ? TransitionPresets.SlideFromRightIOS : {}),
 });
 
 export const BlueCreateTxNavigationStyle = (navigation, withAdvancedOptionsMenuButton = false, advancedOptionsMenuButtonAction) => ({
