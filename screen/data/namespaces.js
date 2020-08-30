@@ -1032,7 +1032,7 @@ var styles = StyleSheet.create({
     color: KevaColors.errColor
   },
   inputContainer: {
-    paddingVertical: 7,
+    paddingVertical: 4,
     paddingLeft: 8,
     backgroundColor: '#fff',
     borderBottomWidth: THIN_BORDER,
@@ -1044,7 +1044,7 @@ var styles = StyleSheet.create({
   textInput:
   {
     flex: 1,
-    borderRadius: 4,
+    borderRadius: 6,
     backgroundColor: '#ececed',
     android: {
       paddingTop: 5,
