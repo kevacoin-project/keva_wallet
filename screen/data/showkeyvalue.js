@@ -3,6 +3,8 @@ import {
   Text,
   View,
   ScrollView,
+  Image,
+  Dimensions,
 } from 'react-native';
 import HTMLView from 'react-native-htmlview';
 import { ButtonGroup } from 'react-native-elements';
@@ -34,13 +36,17 @@ class ShowKeyValue extends React.Component {
     tabBarVisible: false,
   });
 
+  maybeHTML = value => {
+    return /<(?=.*? .*?\/ ?>|br|hr|input|!--|wbr)[a-z]+.*?>|<([a-z]+).*?<\/\1>/i.test(value);
+  }
+
   async componentDidMount() {
     const {key, value} = this.props.navigation.state.params;
     if (key && key.length > 0 && value && value.length > 0) {
       this.setState({
         key,
         value,
-        valueOnly: true
+        selectedIndex: this.maybeHTML(value) ? 0 : 1,
       });
     }
   }
@@ -49,31 +55,42 @@ class ShowKeyValue extends React.Component {
     this.setState({selectedIndex: index});
   }
 
+  renderNode = (node, index) => {
+    if (node.name == 'img') {
+      const a = node.attribs;
+      const width = Dimensions.get('window').width * 0.9;
+      const height = (a.height && a.width) ? (a.height / a.width) * width : width;
+      return (<Image style={{ width, height, alignSelf: 'center'}} source={{ uri: a.src }} key={index} resizeMode="contain"/>);
+    }
+  }
+
   render() {
     const buttons = ['html', 'text']
-    const selected = this.state.selectedIndex;
+    let {selectedIndex, value, key} = this.state;
+
     return (
       <ScrollView style={styles.container}>
         <View style={styles.keyContainer}>
-          <Text style={styles.key} selectable>{this.state.key}</Text>
+          <Text style={styles.key} selectable>{key}</Text>
         </View>
         <ButtonGroup
           onPress={this.updateIndex}
-          selectedIndex={selected}
+          selectedIndex={selectedIndex}
           buttons={buttons}
           containerStyle={{height: 30, width: 130, borderRadius: 6, alignSelf: 'center', borderColor: KevaColors.actionText}}
           selectedButtonStyle={{backgroundColor: KevaColors.actionText}}
           textStyle={{color: KevaColors.actionText}}
         />
         <View style={styles.valueContainer}>
-          {(selected == 0) ?
-            <HTMLView value={`<p>${this.state.value}</p>`}
+          {(selectedIndex == 0) ?
+            <HTMLView value={`${value}`}
               addLineBreaks={false}
               stylesheet={htmlStyles}
               nodeComponentProps={{selectable: true}}
+              renderNode={this.renderNode}
           />
           :
-          <Text style={styles.value} selectable>{this.state.value}</Text>
+          <Text style={styles.value} selectable>{value}</Text>
           }
         </View>
       </ScrollView>
@@ -132,9 +149,14 @@ var htmlStyles = StyleSheet.create({
     color: KevaColors.darkText,
     lineHeight: 25,
     padding: 0,
-    marginBottom: 0,
+    margin: 0,
   },
-  br: {
-    lineHeight: 0,
-  }
+  h3: {
+    fontSize: 20,
+    fontWeight: '700',
+    alignSelf: 'center',
+    color: KevaColors.darkText,
+    lineHeight: 25,
+    paddingVertical: 20,
+  },
 });
