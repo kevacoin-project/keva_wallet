@@ -3,7 +3,7 @@ import {
   Text,
 } from 'react-native';
 import { createAppContainer } from 'react-navigation';
-import { createStackNavigator } from 'react-navigation-stack';
+import { createStackNavigator, TransitionPresets } from 'react-navigation-stack';
 import { createBottomTabNavigator } from 'react-navigation-tabs';
 
 import Settings from './screen/settings/settings';
@@ -257,8 +257,10 @@ const HomeStackNavigator = createStackNavigator({
   },
   AddWallet: {
     screen: CreateWalletStackNavigator,
+    path: 'addwallet',
     navigationOptions: {
       headerShown: false,
+      ...TransitionPresets.ModalTransition,
     },
   },
   WalletExport: {
@@ -272,6 +274,7 @@ const HomeStackNavigator = createStackNavigator({
     screen: CreateTransactionStackNavigator,
     navigationOptions: {
       headerShown: false,
+      ...TransitionPresets.ModalTransition,
     },
   },
   Confirm: {
