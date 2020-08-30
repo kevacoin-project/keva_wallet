@@ -66,6 +66,7 @@ export default class SendDetails extends Component {
       navigation.state.params.advancedOptionsMenuButtonAction,
     ),
     title: loc.send.header,
+    headerStyle: { backgroundColor: '#fff', elevation:0, shadowColor: 'transparent' },
     ...TransitionPresets.ModalTransition,
   });
 
