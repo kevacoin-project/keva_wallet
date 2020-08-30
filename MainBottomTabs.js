@@ -187,6 +187,38 @@ const KevaTabNavigator = createBottomTabNavigator({
   }
 );
 
+const CreateTransactionStackNavigator = createStackNavigator({
+  SendDetails: {
+    routeName: 'SendDetails',
+    screen: sendDetails,
+  },
+  Confirm: {
+    screen: Confirm,
+  },
+  PsbtWithHardwareWallet: {
+    screen: PsbtWithHardwareWallet,
+  },
+  CreateTransaction: {
+    screen: sendCreate,
+    navigationOptions: {
+      headerStyle: {
+        backgroundColor: '#FFFFFF',
+        borderBottomWidth: 0,
+      },
+      headerTintColor: '#0c2550',
+    },
+  },
+  Success: {
+    screen: Success,
+  },
+  SelectWallet: {
+    screen: SelectWallet,
+    navigationOptions: {
+      headerRight: null,
+    },
+  },
+});
+
 const HomeStackNavigator = createStackNavigator({
   Tabs: KevaTabNavigator,
   // Wallets
@@ -237,7 +269,10 @@ const HomeStackNavigator = createStackNavigator({
   },
   SendDetails: {
     routeName: 'SendDetails',
-    screen: sendDetails,
+    screen: CreateTransactionStackNavigator,
+    navigationOptions: {
+      headerShown: false,
+    },
   },
   Confirm: {
     screen: Confirm,
