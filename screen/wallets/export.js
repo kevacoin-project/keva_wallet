@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Dimensions, ScrollView, ActivityIndicator, View } from 'react-native';
+import { Dimensions, ScrollView, ActivityIndicator, View, InteractionManager } from 'react-native';
 import QRCode from 'react-native-qrcode-svg';
 import { BlueSpacing20, SafeBlueArea, BlueNavigationStyle, BlueText, BlueCopyTextToClipboard, BlueCard } from '../../BlueComponents';
 import PropTypes from 'prop-types';
@@ -10,7 +10,6 @@ import { LegacyWallet, LightningCustodianWallet, SegwitBech32Wallet, SegwitP2SHW
 let BlueApp = require('../../BlueApp');
 let loc = require('../../loc');
 import { TransitionPresets } from 'react-navigation-stack';
-import { IS_ANDROID } from '../../util';
 const { height, width } = Dimensions.get('window');
 
 export default class WalletExport extends Component {
@@ -18,7 +17,7 @@ export default class WalletExport extends Component {
     ...BlueNavigationStyle(navigation, true),
     title: loc.wallets.export.title,
     headerLeft: () => null,
-    ...(IS_ANDROID ? TransitionPresets.ModalTransition : {}),
+    ...TransitionPresets.ModalTransition,
   });
 
   constructor(props) {
@@ -31,25 +30,26 @@ export default class WalletExport extends Component {
     };
   }
 
-  async componentDidMount() {
-    Privacy.enableBlur();
-    const isBiometricsEnabled = await Biometric.isBiometricUseCapableAndEnabled();
+  componentDidMount() {
+    InteractionManager.runAfterInteractions(async () => {
+      Privacy.enableBlur();
+      const isBiometricsEnabled = await Biometric.isBiometricUseCapableAndEnabled();
 
-    if (isBiometricsEnabled) {
-      if (!(await Biometric.unlockWithBiometrics())) {
-        return this.props.navigation.goBack();
+      if (isBiometricsEnabled) {
+        if (!(await Biometric.unlockWithBiometrics())) {
+          return this.props.navigation.goBack();
+        }
       }
-    }
 
-    this.setState(
-      {
-        isLoading: false,
-      },
-      () => {
-        this.state.wallet.setUserHasSavedExport(true);
-        BlueApp.saveToDisk();
-      },
-    );
+      this.setState({
+          isLoading: false,
+        },
+        () => {
+          this.state.wallet.setUserHasSavedExport(true);
+          BlueApp.saveToDisk();
+        },
+      );
+    });
   }
 
   async componentWillUnmount() {
@@ -64,7 +64,7 @@ export default class WalletExport extends Component {
   render() {
     if (this.state.isLoading) {
       return (
-        <View style={{ flex: 1, paddingTop: 20 }} onLayout={this.onLayout}>
+        <View style={{ flex: 1, paddingTop: 20, backgroundColor: '#fff' }} onLayout={this.onLayout}>
           <ActivityIndicator />
         </View>
       );

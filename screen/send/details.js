@@ -49,7 +49,6 @@ let BlueApp: AppStorage = require('../../BlueApp');
 let loc = require('../../loc');
 let BlueElectrum = require('../../BlueElectrum');
 import { TransitionPresets } from 'react-navigation-stack';
-import { IS_ANDROID } from '../../util';
 
 /**
  * The screen that allows user to enter the amount of KVA to send, the address etc.
@@ -67,7 +66,7 @@ export default class SendDetails extends Component {
       navigation.state.params.advancedOptionsMenuButtonAction,
     ),
     title: loc.send.header,
-    ...(IS_ANDROID ? TransitionPresets.ModalTransition : {}),
+    ...TransitionPresets.ModalTransition,
   });
 
   state = { isLoading: true };

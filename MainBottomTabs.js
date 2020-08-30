@@ -62,32 +62,6 @@ const ReorderWalletsStackNavigator = createStackNavigator({
   },
 });
 
-const CreateTransactionStackNavigator = createStackNavigator({
-  SendDetails: {
-    routeName: 'SendDetails',
-    screen: sendDetails,
-  },
-  Confirm: {
-    screen: Confirm,
-  },
-  PsbtWithHardwareWallet: {
-    screen: PsbtWithHardwareWallet,
-  },
-  CreateTransaction: {
-    screen: sendCreate
-  },
-  Success: {
-    screen: Success,
-  },
-  SelectWallet: {
-    screen: SelectWallet,
-    navigationOptions: {
-      headerRight: null,
-    },
-  },
-});
-
-
 const CreateWalletStackNavigator = createStackNavigator({
   AddWallet: {
     screen: AddWallet,
@@ -263,9 +237,24 @@ const HomeStackNavigator = createStackNavigator({
   },
   SendDetails: {
     routeName: 'SendDetails',
-    screen: CreateTransactionStackNavigator,
+    screen: sendDetails,
+  },
+  Confirm: {
+    screen: Confirm,
+  },
+  PsbtWithHardwareWallet: {
+    screen: PsbtWithHardwareWallet,
+  },
+  CreateTransaction: {
+    screen: sendCreate
+  },
+  Success: {
+    screen: Success,
+  },
+  SelectWallet: {
+    screen: SelectWallet,
     navigationOptions: {
-      headerShown: false,
+      headerRight: null,
     },
   },
   SelectWallet: {
@@ -347,6 +336,7 @@ const HomeStackNavigator = createStackNavigator({
     screen: Broadcast
   },
 }, {
+  headerMode: 'screen',
   defaultNavigationOptions: {
     headerBackTitleVisible: false,
     headerTitle: () => null,

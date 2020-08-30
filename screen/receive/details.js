@@ -24,7 +24,6 @@ import HandoffSettings from '../../class/handoff';
 import DeeplinkSchemaMatch from '../../class/deeplink-schema-match';
 import Handoff from 'react-native-handoff';
 import { TransitionPresets } from 'react-navigation-stack';
-import { IS_ANDROID } from '../../util';
 
 /** @type {AppStorage} */
 const BlueApp = require('../../BlueApp');
@@ -45,40 +44,40 @@ const ReceiveDetails = () => {
 
   const renderReceiveDetails = useCallback(async () => {
     console.log('receive/details - componentDidMount');
-    wallet.setUserHasSavedExport(true);
-    await BlueApp.saveToDisk();
-    let address;
-    if (wallet.getAddressAsync) {
-      if (wallet.chain === Chain.ONCHAIN) {
-        try {
-          address = await Promise.race([wallet.getAddressAsync(), BlueApp.sleep(1000)]);
-        } catch (_) {}
-        if (!address) {
-          // either sleep expired or getAddressAsync threw an exception
-          console.warn('either sleep expired or getAddressAsync threw an exception');
-          address = wallet._getExternalAddressByIndex(wallet.next_free_address_index);
-        } else {
-          BlueApp.saveToDisk(); // caching whatever getAddressAsync() generated internally
+    InteractionManager.runAfterInteractions(async () => {
+      wallet.setUserHasSavedExport(true);
+      await BlueApp.saveToDisk();
+      let address;
+      if (wallet.getAddressAsync) {
+        if (wallet.chain === Chain.ONCHAIN) {
+          try {
+            address = await Promise.race([wallet.getAddressAsync(), BlueApp.sleep(1000)]);
+          } catch (_) {}
+          if (!address) {
+            // either sleep expired or getAddressAsync threw an exception
+            console.warn('either sleep expired or getAddressAsync threw an exception');
+            address = wallet._getExternalAddressByIndex(wallet.next_free_address_index);
+          } else {
+            BlueApp.saveToDisk(); // caching whatever getAddressAsync() generated internally
+          }
+          setAddress(address);
+        } else if (wallet.chain === Chain.OFFCHAIN) {
+          try {
+            await Promise.race([wallet.getAddressAsync(), BlueApp.sleep(1000)]);
+            address = wallet.getAddress();
+          } catch (_) {}
+          if (!address) {
+            // either sleep expired or getAddressAsync threw an exception
+            console.warn('either sleep expired or getAddressAsync threw an exception');
+            address = wallet.getAddress();
+          } else {
+            BlueApp.saveToDisk(); // caching whatever getAddressAsync() generated internally
+          }
         }
         setAddress(address);
-      } else if (wallet.chain === Chain.OFFCHAIN) {
-        try {
-          await Promise.race([wallet.getAddressAsync(), BlueApp.sleep(1000)]);
-          address = wallet.getAddress();
-        } catch (_) {}
-        if (!address) {
-          // either sleep expired or getAddressAsync threw an exception
-          console.warn('either sleep expired or getAddressAsync threw an exception');
-          address = wallet.getAddress();
-        } else {
-          BlueApp.saveToDisk(); // caching whatever getAddressAsync() generated internally
-        }
+      } else if (wallet.getAddress) {
+        setAddress(wallet.getAddress());
       }
-      setAddress(address);
-    } else if (wallet.getAddress) {
-      setAddress(wallet.getAddress());
-    }
-    InteractionManager.runAfterInteractions(async () => {
       const bip21encoded = DeeplinkSchemaMatch.bip21encode(address);
       setBip21encoded(bip21encoded);
     });
@@ -256,7 +255,7 @@ ReceiveDetails.navigationOptions = ({ navigation }) => ({
   ...BlueNavigationStyle(navigation, true),
   title: loc.receive.header,
   headerLeft: () => null,
-  ...(IS_ANDROID ? TransitionPresets.ModalTransition : {}),
+  ...TransitionPresets.ModalTransition,
 });
 
 export default ReceiveDetails;
