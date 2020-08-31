@@ -79,6 +79,7 @@ class ShowKeyValue extends React.Component {
           buttons={buttons}
           containerStyle={{height: 30, width: 130, borderRadius: 6, alignSelf: 'center', borderColor: KevaColors.actionText}}
           selectedButtonStyle={{backgroundColor: KevaColors.actionText}}
+          innerBorderStyle={{width:0, color: '#000'}}
           textStyle={{color: KevaColors.actionText}}
         />
         <View style={styles.valueContainer}>
