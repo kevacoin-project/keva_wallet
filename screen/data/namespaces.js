@@ -27,7 +27,6 @@ import Modal from 'react-native-modal';
 import ActionSheet from 'react-native-actionsheet';
 import SortableListView from 'react-native-sortable-list'
 import RNPickerSelect from 'react-native-picker-select';
-import ElevatedView from 'react-native-elevated-view'
 import { TabView, TabBar } from 'react-native-tab-view';
 import { connect } from 'react-redux'
 import {
@@ -135,8 +134,7 @@ class Namespace extends React.Component {
     const {canDelete, onDelete} = this.props;
     return (
       <Animated.View style={this._style}>
-        <ElevatedView elevation={1} style={styles.cardTitle}>
-          <View style={{borderWidth: THIN_BORDER, borderColor: '#ccc', borderRadius: 4, width: 3, height: 32, marginLeft: 5 }}/>
+        <View style={styles.cardTitle} >
           <View style={{ flex: 1, justifyContent: 'space-between', paddingHorizontal: 7, paddingTop: 10 }}>
             <View style={{ flex: 1 }} >
               <Text style={styles.cardTitleText} numberOfLines={1} ellipsizeMode="tail">{namespace.displayName}</Text>
@@ -157,7 +155,7 @@ class Namespace extends React.Component {
               <Icon name="ios-arrow-forward" size={24} color={KevaColors.actionText} style={{ padding: 12 }} />
             </View>
           </TouchableOpacity>
-        </ElevatedView>
+        </View>
       </Animated.View>
     )
   }
@@ -979,13 +977,21 @@ var styles = StyleSheet.create({
   cardTitle: {
     flexDirection: 'row',
     alignItems: "center",
-    marginHorizontal: 7,
+    marginHorizontal: 10,
     backgroundColor: '#fff',
-    borderRadius: 5,
-    marginTop: 7
+    borderRadius: 12,
+    marginTop: 14,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.22,
+    shadowRadius: 2.22,
+    elevation: 3,
   },
   cardTitleText: {
-    fontSize: 16,
+    fontSize: 17,
     color: KevaColors.darkText,
     paddingHorizontal: 5,
   },
@@ -1047,7 +1053,7 @@ var styles = StyleSheet.create({
     color: KevaColors.errColor
   },
   inputContainer: {
-    paddingVertical: 4,
+    paddingVertical: 3,
     paddingLeft: 8,
     backgroundColor: '#fff',
     borderBottomWidth: THIN_BORDER,
@@ -1059,15 +1065,15 @@ var styles = StyleSheet.create({
   textInput:
   {
     flex: 1,
-    borderRadius: 6,
-    backgroundColor: '#ececed',
+    borderRadius: 8,
+    backgroundColor: '#e2e2e3',
     android: {
       paddingTop: 5,
       paddingBottom: 5,
     },
     ios: {
-      paddingTop: 10,
-      paddingBottom: 10,
+      paddingTop: 8,
+      paddingBottom: 8,
     },
     paddingLeft: 7,
     paddingRight: 36,

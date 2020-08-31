@@ -23,7 +23,7 @@ module.exports = {
     height: "block",
     my_data: "My Data",
     others: "Others",
-    namespace_name: "name of namespace",
+    namespace_name: "Name of namespace",
     shortcode_id: "Shortcode or Tx Id",
     no_data: "No Data",
     click_add_btn: "Enter name and click the 'add' button to create your first namespace",
