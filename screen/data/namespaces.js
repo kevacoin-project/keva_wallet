@@ -310,7 +310,6 @@ class MyNamespaces extends React.Component {
               this.setState({isBroadcasting: false, showSkip: false});
               this.closeItemAni();
               await BlueApp.saveToDisk();
-              await this.refreshNamespaces(this.state.walletId);
             } catch (err) {
               this.setState({isBroadcasting: false});
               console.warn(err);
@@ -356,6 +355,7 @@ class MyNamespaces extends React.Component {
                 showNSCreationModal: false,
                 nsName: '',
               });
+              await this.refreshNamespaces(this.state.walletId);
             }}
           />
         </View>
