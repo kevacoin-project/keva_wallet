@@ -2,9 +2,7 @@ import React from 'react';
 import {
   Text,
   View,
-  ScrollView,
   TouchableOpacity,
-  TouchableWithoutFeedback,
   FlatList,
 } from 'react-native';
 const StyleSheet = require('../../PlatformStyleSheet');
@@ -22,6 +20,7 @@ let BlueElectrum = require('../../BlueElectrum');
 import { FALLBACK_DATA_PER_BYTE_FEE } from '../../models/networkTransactionFees';
 
 import Icon from 'react-native-vector-icons/Ionicons';
+import MIcon from 'react-native-vector-icons/MaterialIcons';
 import ActionSheet from 'react-native-actionsheet';
 import { connect } from 'react-redux'
 import { setKeyValueList, CURRENT_KEYVALUE_LIST_VERSION } from '../../actions'
@@ -57,7 +56,7 @@ class Item extends React.Component {
   }
 
   render() {
-    let {item, onShow, namespaceId, navigation} = this.props;
+    let {item, onShow, onReply, namespaceId, navigation} = this.props;
     const {isOther} = navigation.state.params;
 
     return (
@@ -92,6 +91,14 @@ class Item extends React.Component {
             <Text style={styles.valueDesc} numberOfLines={3} ellipsizeMode="tail">{item.value}</Text>
           </View>
         </TouchableOpacity>
+        <View style={{flexDirection: 'row'}}>
+          <TouchableOpacity onPress={() => onReply(item.tx)}>
+            <MIcon name="chat-bubble-outline" size={22} style={styles.actionIcon} />
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => {}}>
+            <MIcon name="card-giftcard" size={22} style={styles.actionIcon} />
+          </TouchableOpacity>
+        </View>
       </View>
     )
   }
@@ -252,7 +259,8 @@ class KeyValues extends React.Component {
     this.isBiometricUseCapableAndEnabled = await Biometric.isBiometricUseCapableAndEnabled();
     this.subs = [
       this.props.navigation.addListener('willFocus', async (payload) => {
-        if (payload.lastState.routeName == "ShowKeyValue") {
+        const routeName = payload.lastState.routeName;
+        if (routeName == "ShowKeyValue" || routeName == "ReplyKeyValue") {
           return;
         }
         try {
@@ -425,6 +433,21 @@ class KeyValues extends React.Component {
     });
   }
 
+  onReply = (replyTxid) => {
+    const {navigation, namespaceList} = this.props;
+    const rootAddress = navigation.getParam('rootAddress');
+    // Must have a namespace.
+    if (Object.keys(namespaceList).length == 0) {
+      Toast.show('Create a namespace first');
+      return;
+    }
+
+    navigation.navigate('ReplyKeyValue', {
+      rootAddress,
+      replyTxid,
+    })
+  }
+
   render() {
     let {navigation, dispatch, keyValueList} = this.props;
     const namespaceId = navigation.getParam('namespaceId');
@@ -456,6 +479,7 @@ class KeyValues extends React.Component {
             renderItem={({item, index}) =>
               <Item item={item} key={index} dispatch={dispatch} onDelete={this.onDelete}
                 onShow={this.onShow} namespaceId={namespaceId}
+                onReply={this.onReply}
                 navigation={navigation}
               />
             }
@@ -470,6 +494,7 @@ class KeyValues extends React.Component {
 function mapStateToProps(state) {
   return {
     keyValueList: state.keyValueList,
+    namespaceList: state.namespaceList,
   }
 }
 

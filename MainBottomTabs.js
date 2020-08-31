@@ -49,6 +49,7 @@ import Broadcast from './screen/send/broadcast';
 import Namespaces from './screen/data/namespaces';
 import KeyValues from './screen/data/keyvalues';
 import AddKeyValue from './screen/data/addkeyvalue';
+import ReplyKeyValue from './screen/data/replykeyvalue';
 import ShowKeyValue from './screen/data/showkeyvalue';
 
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -319,6 +320,9 @@ const HomeStackNavigator = createStackNavigator({
   },
   AddKeyValue: {
     screen: AddKeyValue,
+  },
+  ReplyKeyValue: {
+    screen: ReplyKeyValue,
   },
   ShowKeyValue: {
     screen: ShowKeyValue,

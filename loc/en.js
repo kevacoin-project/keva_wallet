@@ -12,6 +12,7 @@ module.exports = {
     cancel: 'Cancel',
     delete: 'Delete',
     close: 'Close',
+    reply: 'Reply',
     copiedToClipboard: 'Copied to clipboard',
     unconfirmed: 'Unconfirmed',
     label_wallets: 'Wallets',

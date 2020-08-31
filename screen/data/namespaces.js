@@ -114,6 +114,7 @@ class Namespace extends React.Component {
       namespaceId: namespace.id,
       shortCode: namespace.shortCode,
       txid: namespace.txId,
+      rootAddress: namespace.rootAddress,
       walletId: namespace.walletId,
       isOther,
     });
@@ -928,9 +929,7 @@ class Namespaces extends React.Component {
 function mapStateToProps(state) {
   return {
     namespaceList: state.namespaceList,
-    namespaceOrder: state.namespaceOrder,
     otherNamespaceList: state.otherNamespaceList,
-    otherNamespaceOrder: state.otherNamespaceOrder,
   }
 }
 

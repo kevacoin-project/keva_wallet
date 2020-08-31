@@ -12,6 +12,7 @@ module.exports = {
     cancel: '取消',
     delete: '删除',
     close: '关闭',
+    reply: '回复',
     copiedToClipboard: '已复制到剪贴板',
     unconfirmed: '未确认',
     label_wallets: '钱包',
