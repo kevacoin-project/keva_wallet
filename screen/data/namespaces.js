@@ -405,6 +405,7 @@ class MyNamespaces extends React.Component {
     const { dispatch } = this.props;
     const wallets = BlueApp.getWallets();
     let namespaces = {};
+    await BlueElectrum.ping();
     for (let w of wallets) {
       const ns = await findMyNamespaces(w, BlueElectrum);
       namespaces = {...namespaces, ...ns};
@@ -606,6 +607,7 @@ class OtherNamespaces extends React.Component {
         return;
       }
       this.setState({isRefreshing: true, inputMode: false});
+      await BlueElectrum.ping();
       const namespace = await findOtherNamespace(BlueElectrum, this.state.nsName);
       if (!namespace) {
         return;
