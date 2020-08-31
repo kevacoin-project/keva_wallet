@@ -514,8 +514,8 @@ class MyNamespaces extends React.Component {
             refreshControl={
               <RefreshControl onRefresh={() => this.refreshNamespaces()} refreshing={this.state.isRefreshing} />
             }
-            renderRow={({data, active}) => {
-              return <Namespace onInfo={onInfo} data={data} active={active} navigation={navigation} />
+            renderRow={({data, active, key}) => {
+              return <Namespace onInfo={onInfo} data={data} active={active} navigation={navigation} key={key}/>
             }}
           />
           :

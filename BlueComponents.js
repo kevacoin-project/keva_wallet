@@ -1748,14 +1748,10 @@ export class WalletsCarousel extends Component {
   _renderItem = ({ item, index }) => {
 
     let scaleAnimation = new Animated.Value(1.0);
-    const tension  = 40;
-    const friction = 7;
 
     this.onPressedIn = () => {
       Animated.spring(scaleAnimation, {
         toValue: 0.92,
-        tension,
-        friction,
         useNativeDriver: true,
       }).start();
     };
@@ -1763,8 +1759,6 @@ export class WalletsCarousel extends Component {
     this.onPressedOut = () => {
       Animated.spring(scaleAnimation, {
         toValue: 1.0,
-        tension,
-        friction,
         useNativeDriver: true,
       }).start();
     };
@@ -1794,9 +1788,9 @@ export class WalletsCarousel extends Component {
             onPressOut={item.getIsFailure() ? this.onPressedOut : null}
             onPress={() => {
               if (item.getIsFailure()) {
-                //this.onPressedOut();
+                this.onPressedOut();
                 this.props.onPress(index);
-                //this.onPressedOut();
+                this.onPressedOut();
               }
             }}
           >
@@ -1867,9 +1861,9 @@ export class WalletsCarousel extends Component {
             onPressOut={this.onPressedOut}
             onLongPress={this.props.handleLongPress}
             onPress={() => {
-              //this.onPressedOut();
+              this.onPressedOut();
               this.props.onPress(index);
-              //this.onPressedOut();
+              this.onPressedOut();
             }}
           >
             <LinearGradient
