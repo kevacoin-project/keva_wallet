@@ -62,7 +62,7 @@ module.exports = {
   extraLightText: '#aaa',
   icon: "#7a7a7a",
   darkCellBorder: '#9B9B9B',
-  cellBorder: '#EEEEEE',
+  cellBorder: 'rgba(164,164,164,0.4)',
   darkBackground: '#183E63',
   colorForLocation,
   colorForTopic,

@@ -159,5 +159,6 @@ var htmlStyles = StyleSheet.create({
     color: KevaColors.darkText,
     lineHeight: 25,
     paddingVertical: 20,
+    textAlign: 'center',
   },
 });
