@@ -977,7 +977,7 @@ var styles = StyleSheet.create({
   cardTitle: {
     flexDirection: 'row',
     alignItems: "center",
-    marginHorizontal: 10,
+    marginHorizontal: 12,
     backgroundColor: '#fff',
     borderRadius: 12,
     marginTop: 14,
@@ -988,7 +988,7 @@ var styles = StyleSheet.create({
     },
     shadowOpacity: 0.50,
     shadowRadius: 12.35,
-    elevation: 3,
+    elevation: 7,
   },
   cardTitleText: {
     fontSize: 17,
@@ -1057,7 +1057,7 @@ var styles = StyleSheet.create({
     paddingLeft: 8,
     backgroundColor: '#fff',
     borderBottomWidth: THIN_BORDER,
-    borderColor: KevaColors.darkCellBorder,
+    borderColor: KevaColors.cellBorder,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
