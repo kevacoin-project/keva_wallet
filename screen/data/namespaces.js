@@ -384,18 +384,23 @@ class MyNamespaces extends React.Component {
       return Toast.show('No wallet available');
     }
 
-    if (this.state.nsName && this.state.nsName.length > 0) {
-      this.setState({
-        showNSCreationModal: true,
-        currentPage: 0,
-        showSkip: true,
-        broadcastErr: null,
-        isBroadcasting: false,
-        fee: 0,
-        createTransactionErr: null,
-        walletId: wallets[0].getID(),
-      });
+    Keyboard.dismiss();
+    if (!this.state.nsName || this.state.nsName.length == 0) {
+      this.setState({inputMode: false});
+      return;
     }
+
+    this.setState({
+      showNSCreationModal: true,
+      currentPage: 0,
+      showSkip: true,
+      broadcastErr: null,
+      isBroadcasting: false,
+      fee: 0,
+      createTransactionErr: null,
+      inputMode: false,
+      walletId: wallets[0].getID(),
+    });
   }
 
   fetchNamespaces = async () => {
@@ -485,7 +490,10 @@ class MyNamespaces extends React.Component {
             placeholder={loc.namespaces.namespace_name}
             multiline={false}
             underlineColorAndroid='rgba(0,0,0,0)'
+            returnKeyType={ 'done' }
             style={styles.textInput}
+            onEndEditing={this.onAddNamespace}
+            clearButtonMode='while-editing'
           />
           {this.state.saving ?
             <ActivityIndicator size="small" color={KevaColors.actionText} style={{ width: 42, height: 42 }} />
@@ -595,7 +603,11 @@ class OtherNamespaces extends React.Component {
     const { dispatch, otherNamespaceList } = this.props;
     try {
       Keyboard.dismiss();
-      this.setState({isRefreshing: true});
+      if (!this.state.nsName || this.state.nsName.length == 0) {
+        this.setState({inputMode: false});
+        return;
+      }
+      this.setState({isRefreshing: true, inputMode: false});
       const namespace = await findOtherNamespace(BlueElectrum, this.state.nsName);
       if (!namespace) {
         return;
@@ -686,6 +698,9 @@ class OtherNamespaces extends React.Component {
             clearButtonMode='while-editing'
             onSubmitEditing={this.onSearchNamespace}
             style={styles.textInput}
+            returnKeyType={ 'done' }
+            onEndEditing={this.onSearchNamespace}
+            clearButtonMode='while-editing'
           />
           {this.state.saving ?
             <ActivityIndicator size="small" color={KevaColors.actionText} style={{ width: 42, height: 42 }} />
