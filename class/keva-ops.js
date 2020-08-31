@@ -598,12 +598,13 @@ export async function findNamespaceShortCode(ecl, transctions, nsTx) {
   // Find the "root" tx, the first tx that creates the namespace.
   let result = await getNamespaceDataFromTx(ecl, transctions, nsTx);
   let txid = result.txid;
+  let rootAddress = result.address;
   let history = await ecl.blockchainScripthash_getHistory(toScriptHash(result.address));
   let foundTx = history.find(h => h.tx_hash == txid);
   if (foundTx) {
     if (foundTx.height <= 0) {
       // Still in mempool.
-      return { rootTxidL: txid };
+      return { rootTxid: txid, rootAddress };
     }
     let merkle = await ecl.blockchainTransaction_getMerkle(txid, foundTx.height, false);
     if (merkle) {
@@ -611,10 +612,10 @@ export async function findNamespaceShortCode(ecl, transctions, nsTx) {
       let strHeight = merkle.block_height.toString();
       let prefix = strHeight.length;
       let shortCode = prefix + strHeight + merkle.pos.toString();
-      return { shortCode, rootTxid: txid };
+      return { shortCode, rootTxid: txid, rootAddress };
     }
   }
-  return { rootTxidL: txid };
+  return { rootTxid: txid, rootAddress };
 }
 
 export async function getNamespaceFromShortCode(ecl, shortCode) {
@@ -805,9 +806,10 @@ export async function findMyNamespaces(wallet, ecl) {
 
   for (let nsId of Object.keys(namespaces)) {
     // Find the root txid and short code for each namespace.
-    const { shortCode, rootTxid } = await findNamespaceShortCode(ecl, transactions, namespaces[nsId].txId);
+    const { shortCode, rootTxid, rootAddress } = await findNamespaceShortCode(ecl, transactions, namespaces[nsId].txId);
     namespaces[nsId].shortCode = shortCode;
     namespaces[nsId].rootTxid = rootTxid;
+    namespaces[nsId].rootAddress = rootAddress;
   }
   return namespaces;
 }
@@ -822,7 +824,7 @@ export async function findOtherNamespace(ecl, txidOrShortCode) {
   }
 
   const transactions = [];
-  const { shortCode, rootTxid } = await findNamespaceShortCode(ecl, transactions, txid);
+  const { shortCode, rootTxid, rootAddress } = await findNamespaceShortCode(ecl, transactions, txid);
 
   if (!rootTxid) {
     return null;
@@ -852,6 +854,7 @@ export async function findOtherNamespace(ecl, txidOrShortCode) {
   if (nsId) {
     namespaces[nsId].shortCode = shortCode;
     namespaces[nsId].rootTxid = rootTxid;
+    namespaces[nsId].rootAddress = rootAddress;
   }
   return namespaces;
 }
