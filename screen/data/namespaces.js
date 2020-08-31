@@ -1057,7 +1057,7 @@ var styles = StyleSheet.create({
     paddingLeft: 8,
     backgroundColor: '#fff',
     borderBottomWidth: THIN_BORDER,
-    borderColor: KevaColors.cellBorder,
+    borderColor: KevaColors.darkCellBorder,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
