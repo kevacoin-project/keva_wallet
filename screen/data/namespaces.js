@@ -981,13 +981,13 @@ var styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderRadius: 12,
     marginTop: 14,
-    shadowColor: "#000",
+    shadowColor: "#aaa",
     shadowOffset: {
       width: 0,
-      height: 1,
+      height: 9,
     },
-    shadowOpacity: 0.22,
-    shadowRadius: 2.22,
+    shadowOpacity: 0.50,
+    shadowRadius: 12.35,
     elevation: 3,
   },
   cardTitleText: {
