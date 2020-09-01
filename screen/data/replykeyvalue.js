@@ -281,6 +281,10 @@ class ReplyKeyValue extends React.Component {
                 showKeyValueModal: false,
                 nsName: '',
               });
+              Toast.show(loc.general.reply_sent, {
+                position: Toast.positions.TOP,
+                backgroundColor: "#53DD6C",
+              });
               this.props.navigation.goBack();
             }}
           />

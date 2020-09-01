@@ -436,8 +436,10 @@ class KeyValues extends React.Component {
   }
 
   onShow = (key, value, tx, replies) => {
-    const {navigation, namespaceId} = this.props;
+    const {navigation} = this.props;
     const rootAddress = navigation.getParam('rootAddress');
+    const isOther = navigation.getParam('isOther');
+    const namespaceId = navigation.getParam('namespaceId');
     navigation.navigate('ShowKeyValue', {
       namespaceId,
       key,
@@ -445,6 +447,7 @@ class KeyValues extends React.Component {
       rootAddress,
       replyTxid: tx,
       replies,
+      isOther,
     });
   }
 

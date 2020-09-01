@@ -13,6 +13,7 @@ module.exports = {
     delete: '删除',
     close: '关闭',
     reply: '回复',
+    reply_sent: '回复已发送',
     copiedToClipboard: '已复制到剪贴板',
     unconfirmed: '未确认',
     label_wallets: '钱包',

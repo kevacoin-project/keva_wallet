@@ -10,11 +10,14 @@ import {
 } from 'react-native';
 import HTMLView from 'react-native-htmlview';
 import { ButtonGroup } from 'react-native-elements';
+const BlueElectrum = require('../../BlueElectrum');
 import Toast from 'react-native-root-toast';
 import MIcon from 'react-native-vector-icons/MaterialIcons';
 const StyleSheet = require('../../PlatformStyleSheet');
 const KevaColors = require('../../common/KevaColors');
 import { THIN_BORDER, timeConverter } from "../../util";
+import { getReplies } from '../../class/keva-ops';
+import { setKeyValueList } from '../../actions'
 import {
   BlueNavigationStyle,
 } from '../../BlueComponents';
@@ -70,7 +73,7 @@ class ShowKeyValue extends React.Component {
   constructor() {
     super();
     this.state = {
-      loaded: false,
+      isRefreshing: false,
       key: '',
       value: '',
       selectedIndex: 0,
@@ -95,6 +98,24 @@ class ShowKeyValue extends React.Component {
         value,
         selectedIndex: this.maybeHTML(value) ? 0 : 1,
       });
+    }
+    this.subs = [
+      this.props.navigation.addListener('willFocus', async (payload) => {
+        try {
+          this.setState({isRefreshing: true});
+          await this.fetchReplies();
+          this.setState({isRefreshing: false});
+        } catch (err) {
+          console.warn(err)
+          this.setState({isRefreshing: false});
+        }
+      }),
+    ];
+  }
+
+  componentWillUnmount () {
+    if (this.subs) {
+      this.subs.forEach(sub => sub.remove());
     }
   }
 
@@ -125,6 +146,32 @@ class ShowKeyValue extends React.Component {
       rootAddress,
       replyTxid
     })
+  }
+
+  fetchReplies = async () => {
+    const {dispatch, navigation, keyValueList} = this.props;
+    const namespaceId = navigation.getParam('namespaceId');
+    const rootAddress = navigation.getParam('rootAddress');
+
+    try {
+      // Fetch replies.
+      this.setState({isRefreshing: true});
+      const replies = await getReplies(BlueElectrum, rootAddress, namespaceId);
+      const keyValues = keyValueList.keyValues[namespaceId];
+      // Add the replies.
+      for (let kv of keyValues) {
+        const txReplies = replies.filter(r => kv.tx.startsWith(r.partialTxId));
+        if (txReplies && txReplies.length > 0) {
+          kv.replies = txReplies;
+        }
+      }
+      dispatch(setKeyValueList(namespaceId, keyValues));
+      this.setState({isRefreshing: false});
+    } catch(err) {
+      console.warn(err);
+      this.setState({isRefreshing: false});
+      Toast.show('Cannot fetch replies');
+    }
   }
 
   render() {
@@ -178,6 +225,8 @@ class ShowKeyValue extends React.Component {
         ListHeaderComponent={listHeader}
         contentContainerStyle={{paddingBottom: 100}}
         data={replies}
+        onRefresh={() => this.fetchReplies()}
+        refreshing={this.state.isRefreshing}
         renderItem={({item, index}) =>
           <Reply item={item} key={index}/>
         }
