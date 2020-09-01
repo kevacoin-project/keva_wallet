@@ -520,7 +520,7 @@ class MyNamespaces extends React.Component {
             }}
           />
           :
-          <ScrollView style={{flex: 1, paddingHorizontal: 5, paddingTop: 30}}
+          <ScrollView style={{flex: 1, paddingHorizontal: 10, paddingTop: 30}}
             contentContainerStyle={{justifyContent: 'center', alignItems: 'center'}}
             refreshControl={
               <RefreshControl onRefresh={() => this.refreshNamespaces()} refreshing={this.state.isRefreshing} />
@@ -727,7 +727,7 @@ class OtherNamespaces extends React.Component {
           }}
         />
         {otherNamespaceList.order.length == 0 &&
-          <ScrollView style={{flex: 1, paddingHorizontal: 5, paddingTop: 30}}
+          <ScrollView style={{flex: 1, paddingHorizontal: 10, paddingTop: 30}}
             contentContainerStyle={{justifyContent: 'center', alignItems: 'center'}}
             refreshControl={
               <RefreshControl onRefresh={() => this.refreshNamespaces()} refreshing={this.state.isRefreshing} />
@@ -1141,15 +1141,9 @@ var styles = StyleSheet.create({
     fontSize: 16,
     marginTop: 20,
   },
-  emptyMessageContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 5,
-  },
   emptyMessage: {
     fontSize: 18,
-    color: KevaColors.inactiveText,
+    color: KevaColors.darkText,
     textAlign: 'center',
   },
   help: {
