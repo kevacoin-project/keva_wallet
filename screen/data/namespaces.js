@@ -607,7 +607,7 @@ class OtherNamespaces extends React.Component {
         this.setState({inputMode: false});
         return;
       }
-      this.setState({isRefreshing: true, inputMode: false});
+      this.setState({saving: true, inputMode: false});
       await BlueElectrum.ping();
       const namespace = await findOtherNamespace(BlueElectrum, this.state.nsName);
       if (!namespace) {
@@ -621,10 +621,10 @@ class OtherNamespaces extends React.Component {
         order.unshift(newId);
       }
       dispatch(setOtherNamespaceList(namespace, order));
-      this.setState({nsName: '', isRefreshing: false});
+      this.setState({nsName: '', saving: false});
       this.closeItemAni();
     } catch (err) {
-      this.setState({isRefreshing: false});
+      this.setState({saving: false});
       Toast.show('Cannot find namespace');
       console.log(err);
     }
