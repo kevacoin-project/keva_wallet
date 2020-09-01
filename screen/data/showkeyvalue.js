@@ -5,9 +5,11 @@ import {
   ScrollView,
   Image,
   Dimensions,
+  TouchableOpacity,
 } from 'react-native';
 import HTMLView from 'react-native-htmlview';
 import { ButtonGroup } from 'react-native-elements';
+import MIcon from 'react-native-vector-icons/MaterialIcons';
 const StyleSheet = require('../../PlatformStyleSheet');
 const KevaColors = require('../../common/KevaColors');
 const utils = require('../../util');
@@ -64,9 +66,26 @@ class ShowKeyValue extends React.Component {
     }
   }
 
+  onReply = () => {
+    const {navigation, namespaceList} = this.props;
+    const rootAddress = navigation.getParam('rootAddress');
+    const replyTxid = navigation.getParam('replyTxid');
+    // Must have a namespace.
+    if (Object.keys(namespaceList).length == 0) {
+      Toast.show('Create a namespace first');
+      return;
+    }
+
+    navigation.navigate('ReplyKeyValue', {
+      rootAddress,
+      replyTxid
+    })
+  }
+
   render() {
     const buttons = ['html', 'text']
     let {selectedIndex, value, key} = this.state;
+    const replies = this.props.navigation.getParam('replies');
 
     return (
       <ScrollView style={styles.container}>
@@ -94,6 +113,17 @@ class ShowKeyValue extends React.Component {
           <Text style={styles.value} selectable>{value}</Text>
           }
         </View>
+        <View style={styles.actionContainer}>
+          <TouchableOpacity onPress={() => this.onReply()} style={{flexDirection: 'row'}}>
+            <MIcon name="chat-bubble-outline" size={22} style={styles.talkIcon} />
+            {(replies && replies.length > 0) && <Text style={styles.count}>{replies.length}</Text>}
+          </TouchableOpacity>
+          {/*
+            <TouchableOpacity onPress={() => {}}>
+              <MIcon name="card-giftcard" size={22} style={styles.actionIcon} />
+            </TouchableOpacity>
+          */}
+        </View>
       </ScrollView>
     );
   }
@@ -103,6 +133,7 @@ class ShowKeyValue extends React.Component {
 function mapStateToProps(state) {
   return {
     keyValueList: state.keyValueList,
+    namespaceList: state.namespaceList,
   }
 }
 
@@ -134,6 +165,23 @@ var styles = StyleSheet.create({
     borderColor: KevaColors.cellBorder,
     backgroundColor: '#fff',
     padding: 10,
+  },
+  actionContainer: {
+    flexDirection: 'row',
+    borderBottomWidth: utils.THIN_BORDER,
+    borderColor: KevaColors.cellBorder,
+    backgroundColor: '#fff',
+    padding: 10,
+  },
+  talkIcon: {
+    color: KevaColors.arrowIcon,
+    paddingLeft: 15,
+    paddingRight: 2,
+    paddingVertical: 2
+  },
+  count: {
+    color: KevaColors.arrowIcon,
+    paddingVertical: 2
   },
 });
 

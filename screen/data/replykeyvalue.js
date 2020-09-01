@@ -151,18 +151,23 @@ class ReplyKeyValue extends React.Component {
           caption={'Next'}
           onPress={async () => {
             try {
-              const walletId = namespaceList.namespaces[this.state.namespaceId].walletId;
+              const {namespaceId, value} = this.state;
+              const shortCode = namespaceList.namespaces[namespaceId].shortCode;
+              if (!shortCode) {
+                throw new Error('Namespace not confirmed yet');
+              }
+              const walletId = namespaceList.namespaces[namespaceId].walletId;
               const wallets = BlueApp.getWallets();
               const wallet = wallets.find(w => w.getID() == walletId);
               if (!wallet) {
-                throw new Error('Wallet not found.');
+                throw new Error('Wallet not found');
               }
               // Make sure it is not single address wallet.
               if (wallet.type != HDSegwitP2SHWallet.type) {
                 return alert(loc.namespaces.multiaddress_wallet);
               }
               this.setState({ showNSCreationModal: true, currentPage: 1 });
-              const { tx, fee, cost } = await replyKeyValue(wallet, FALLBACK_DATA_PER_BYTE_FEE, this.state.namespaceId, this.state.value, rootAddress, replyTxid);
+              const { tx, fee, cost } = await replyKeyValue(wallet, FALLBACK_DATA_PER_BYTE_FEE, namespaceId, shortCode, value, rootAddress, replyTxid);
               let feeKVA = (fee + cost) / 100000000;
               this.setState({ showNSCreationModal: true, currentPage: 2, fee: feeKVA });
               this.namespaceTx = tx;

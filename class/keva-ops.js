@@ -503,11 +503,25 @@ export async function updateKeyValue(wallet, requestedSatPerByte, namespaceId, k
 
 const REPLY_COST = 1000000;
 
+function createReplyKey(txId, shortCode) {
+  return `:${txId.substring(0, 8)}:${shortCode}`
+}
+
+const regexReply = /^:([0-a,a-f]+):([0-9]+)$/gm;
+
+export function parseReplyKey(key) {
+  let matches = regexReply.exec(key);
+  if (!matches) {
+    return false;
+  }
+  return {partialTxId: matches[1], shortCode: matches[2]};
+}
+
 // Send a reply/comment to a post(key/value pair).
 // replyRootAddress: the root namespace of the post.
 // replyTxid: the txid of the post
 //
-export async function replyKeyValue(wallet, requestedSatPerByte, namespaceId, value, replyRootAddress, replyTxid) {
+export async function replyKeyValue(wallet, requestedSatPerByte, namespaceId, shortCode, value, replyRootAddress, replyTxid) {
   await wallet.fetchTransactions();
   let nsUtxo = await getNamespaceUtxo(wallet, namespaceId);
   if (!nsUtxo) {
@@ -515,7 +529,7 @@ export async function replyKeyValue(wallet, requestedSatPerByte, namespaceId, va
   }
 
   // To reply to a post, the key must be :replyTxid.
-  const key = `:${replyTxid}`;
+  const key = createReplyKey(replyTxid, shortCode);
   const namespaceAddress = await wallet.getAddressAsync();
   const nsScript = getKeyValueUpdateScript(namespaceId, namespaceAddress, key, value);
 
@@ -959,4 +973,52 @@ export async function findOtherNamespace(ecl, txidOrShortCode) {
     namespaces[nsId].rootAddress = rootAddress;
   }
   return namespaces;
+}
+
+// Address is the root address, i.e. the address that is involved in
+// namespace creation.
+export async function getReplies(ecl, rootAddress, cb) {
+  let replies = [];
+  const history = await ecl.blockchainScripthash_getHistory(toScriptHash(rootAddress));
+  const txsToFetch = history.map(h => h.tx_hash);
+  const txs = await ecl.blockchainTransaction_getBatch(txsToFetch, VERBOSE);
+  for (let i = 0; i < txs.length; i++) {
+    let tx = txs[i].result || txs[i];
+    // From transactions, tx.outputs
+    // From server: tx.vout
+    const vout = tx.outputs || tx.vout;
+    for (let v of vout) {
+      let result = parseKeva(v.scriptPubKey.asm);
+      if (!result || result[0] == KEVA_OP_NAMESPACE) {
+        continue;
+      }
+      address = v.scriptPubKey.addresses[0];
+      let resultJson = kevaToJson(result);
+      const {partialTxId, shortCode} = parseReplyKey(resultJson.key);
+      if (!partialTxId || !shortCode) {
+        continue;
+      }
+      resultJson.time = tx.time;
+      const h = history.find(h => h.tx_hash == tx.txid);
+      resultJson.height = h.height;
+
+      const nsRootId = await getNamespaceFromShortCode(ecl, shortCode);
+      let resultReplier = await getNamespaceDataFromTx(ecl, [], nsRootId);
+      if (!resultReplier) {
+        continue;
+      }
+      const replier = kevaToJson(resultReplier.result)
+      if (replier.namespaceId != resultJson.namespaceId) {
+        continue;
+      }
+      resultJson.partialTxId = partialTxId;
+      resultJson.sender = {
+        shortCode,
+        rootTxid: nsRootId,
+        displayName: replier.displayName,
+      }
+      replies.push(resultJson);
+    }
+  }
+  return replies;
 }
