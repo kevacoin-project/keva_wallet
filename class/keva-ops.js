@@ -507,9 +507,9 @@ function createReplyKey(txId, shortCode) {
   return `:${txId.substring(0, 8)}:${shortCode}`
 }
 
-const regexReply = /^:([0-a,a-f]+):([0-9]+)$/gm;
 
 export function parseReplyKey(key) {
+  const regexReply = /^:([0-9a-f]+):([0-9]+)$/gm;
   let matches = regexReply.exec(key);
   if (!matches) {
     return false;
