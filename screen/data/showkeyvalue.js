@@ -45,7 +45,7 @@ class Reply extends React.Component {
         <View>
           <View style={{flexDirection: 'row'}}>
             <Text style={styles.sender} numberOfLines={1} ellipsizeMode="tail">
-              {item.sender.displayName}
+              {item.sender.displayName + ' '}
             </Text>
             <TouchableOpacity onPress={() => this.copyString(item.sender.shortCode)}>
               <Text style={styles.shortCode}>
@@ -253,6 +253,7 @@ var styles = StyleSheet.create({
     fontSize: 16,
     color: KevaColors.darkText,
     paddingVertical: 5,
+    lineHeight: 25,
   },
   timestamp: {
     color: KevaColors.extraLightText,
