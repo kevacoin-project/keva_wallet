@@ -149,7 +149,8 @@ const KevaTabNavigator = createBottomTabNavigator({
       showIcon: true,
       style: styles.style,
       labelStyle: styles.labelStyle,
-      tabStyle: styles.tabStyle
+      tabStyle: styles.tabStyle,
+      labelPosition: 'below-icon',
     },
     defaultNavigationOptions: ({ navigation }) => ({
       tabBarIcon: ({ focused, horizontal, tintColor }) => {

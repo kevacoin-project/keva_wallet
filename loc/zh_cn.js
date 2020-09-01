@@ -40,6 +40,7 @@ module.exports = {
     creating_tx: '创建交易 ...',
     please_wait: '大约需要10秒钟, 请稍候',
     scanning_block: '扫描区块',
+    refreshing: '刷新数据...',
   },
   wallets: {
     select_wallet: '选择钱包',

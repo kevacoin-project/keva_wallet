@@ -8,7 +8,7 @@ import {
 const StyleSheet = require('../../PlatformStyleSheet');
 const KevaButton = require('../../common/KevaButton');
 const KevaColors = require('../../common/KevaColors');
-const utils = require('../../util');
+import { THIN_BORDER, showStatusAlways, hideStatus } from '../../util';
 import {
   BlueNavigationStyle,
   BlueLoading,
@@ -231,15 +231,10 @@ class KeyValues extends React.Component {
     dispatch(setKeyValueList(namespaceId, keyValues));
   }
 
-  refreshKeyValues = async (additionalFetch) => {
+  refreshKeyValues = async () => {
     try {
       this.setState({isRefreshing: true});
       await BlueElectrum.ping();
-      if (additionalFetch) {
-        const wallet = this.getCurrentWallet();
-        await wallet.fetchBalance();
-        await wallet.fetchTransactions();
-      }
       await this.fetchKeyValues();
       this.setState({isRefreshing: false});
     } catch (err) {
@@ -277,11 +272,15 @@ class KeyValues extends React.Component {
         if (routeName == "ShowKeyValue") {
           return;
         }
+        let toast;
         try {
           this.setState({isRefreshing: true});
+          toast = showStatusAlways(loc.namespaces.refreshing);
           await this.fetchKeyValues();
           this.setState({isRefreshing: false});
+          hideStatus(toast);
         } catch (err) {
+          hideStatus(toast);
           console.warn(err)
           this.setState({isRefreshing: false});
         }
@@ -414,7 +413,7 @@ class KeyValues extends React.Component {
               this.setState({
                 showDeleteModal: false,
               });
-              await this.refreshKeyValues(true);
+              await this.refreshKeyValues();
             }}
           />
         </View>
@@ -533,8 +532,8 @@ var styles = StyleSheet.create({
   card: {
     backgroundColor:'#fff',
     marginVertical:3,
-    borderTopWidth: utils.THIN_BORDER,
-    borderBottomWidth: utils.THIN_BORDER,
+    borderTopWidth: THIN_BORDER,
+    borderBottomWidth: THIN_BORDER,
     borderColor: KevaColors.cellBorder,
   },
   keyDesc: {

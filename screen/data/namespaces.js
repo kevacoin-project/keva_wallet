@@ -16,6 +16,7 @@ import {
   Clipboard,
   LayoutAnimation,
   Keyboard,
+  Image,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import {
@@ -521,15 +522,13 @@ class MyNamespaces extends React.Component {
             }}
           />
           :
-          <ScrollView style={{flex: 1, paddingHorizontal: 5, paddingTop: 30}}
+          <ScrollView style={{flex: 1, paddingHorizontal: 10, paddingTop: 30}}
             contentContainerStyle={{justifyContent: 'center', alignItems: 'center'}}
             refreshControl={
               <RefreshControl onRefresh={() => this.refreshNamespaces()} refreshing={this.state.isRefreshing} />
             }
           >
-            <Text style={[styles.emptyMessage, { marginBottom: 20, fontSize: 24 }]}>
-              {loc.namespaces.no_data}
-            </Text>
+            <Image source={require('../../img/my_no_data.png')} style={{ width: SCREEN_WIDTH*0.33, height: SCREEN_WIDTH*0.33, marginBottom: 20 }} />
             <Text style={[styles.emptyMessage, { marginBottom: 7 }]}>
               {loc.namespaces.click_add_btn}
             </Text>
@@ -608,7 +607,7 @@ class OtherNamespaces extends React.Component {
         this.setState({inputMode: false});
         return;
       }
-      this.setState({isRefreshing: true, inputMode: false});
+      this.setState({saving: true, inputMode: false});
       await BlueElectrum.ping();
       const namespace = await findOtherNamespace(BlueElectrum, this.state.nsName);
       if (!namespace) {
@@ -622,10 +621,10 @@ class OtherNamespaces extends React.Component {
         order.unshift(newId);
       }
       dispatch(setOtherNamespaceList(namespace, order));
-      this.setState({nsName: '', isRefreshing: false});
+      this.setState({nsName: '', saving: false});
       this.closeItemAni();
     } catch (err) {
-      this.setState({isRefreshing: false});
+      this.setState({saving: false});
       Toast.show('Cannot find namespace');
       console.log(err);
     }
@@ -714,29 +713,28 @@ class OtherNamespaces extends React.Component {
             </TouchableOpacity>
           }
         </View>
-        <SortableListView
-          style={[styles.listStyle, isEmpty && {flex: 0}]}
-          contentContainerStyle={(!isEmpty) && {paddingBottom: 400}}
-          data={otherNamespaceList.namespaces}
-          order={otherNamespaceList.order}
-          onChangeOrder={this.onChangeOrder}
-          refreshControl={
-            <RefreshControl onRefresh={() => this.refreshNamespaces()} refreshing={this.state.isRefreshing} />
-          }
-          renderRow={({data, active}) => {
-            return <Namespace onInfo={onInfo} onDelete={this.onDelete} data={data} active={active} navigation={navigation} canDelete={true} isOther={true}/>
-          }}
-        />
-        {otherNamespaceList.order.length == 0 &&
-          <ScrollView style={{flex: 1, paddingHorizontal: 5, paddingTop: 30}}
+        {otherNamespaceList.order.length > 0 ?
+          <SortableListView
+            style={[styles.listStyle, isEmpty && {flex: 0}]}
+            contentContainerStyle={(!isEmpty) && {paddingBottom: 400}}
+            data={otherNamespaceList.namespaces}
+            order={otherNamespaceList.order}
+            onChangeOrder={this.onChangeOrder}
+            refreshControl={
+              <RefreshControl onRefresh={() => this.refreshNamespaces()} refreshing={this.state.isRefreshing} />
+            }
+            renderRow={({data, active}) => {
+              return <Namespace onInfo={onInfo} onDelete={this.onDelete} data={data} active={active} navigation={navigation} canDelete={true} isOther={true}/>
+            }}
+          />
+          :
+          <ScrollView style={{flex: 1, paddingHorizontal: 10, paddingTop: 30}}
             contentContainerStyle={{justifyContent: 'center', alignItems: 'center'}}
             refreshControl={
               <RefreshControl onRefresh={() => this.refreshNamespaces()} refreshing={this.state.isRefreshing} />
             }
           >
-            <Text style={[styles.emptyMessage, { marginBottom: 20, fontSize: 24 }]}>
-              {loc.namespaces.no_data}
-            </Text>
+            <Image source={require('../../img/other_no_data.png')} style={{ width: SCREEN_WIDTH*0.33, height: SCREEN_WIDTH*0.33, marginBottom: 20 }} />
             <Text style={[styles.emptyMessage, { marginBottom: 7 }]}>
               {loc.namespaces.click_search_btn}
             </Text>
@@ -1140,16 +1138,11 @@ var styles = StyleSheet.create({
     fontSize: 16,
     marginTop: 20,
   },
-  emptyMessageContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 5,
-  },
   emptyMessage: {
     fontSize: 18,
-    color: KevaColors.inactiveText,
+    color: KevaColors.darkText,
     textAlign: 'center',
+    lineHeight: 30,
   },
   help: {
     fontSize: 16,
