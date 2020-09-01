@@ -713,20 +713,21 @@ class OtherNamespaces extends React.Component {
             </TouchableOpacity>
           }
         </View>
-        <SortableListView
-          style={[styles.listStyle, isEmpty && {flex: 0}]}
-          contentContainerStyle={(!isEmpty) && {paddingBottom: 400}}
-          data={otherNamespaceList.namespaces}
-          order={otherNamespaceList.order}
-          onChangeOrder={this.onChangeOrder}
-          refreshControl={
-            <RefreshControl onRefresh={() => this.refreshNamespaces()} refreshing={this.state.isRefreshing} />
-          }
-          renderRow={({data, active}) => {
-            return <Namespace onInfo={onInfo} onDelete={this.onDelete} data={data} active={active} navigation={navigation} canDelete={true} isOther={true}/>
-          }}
-        />
-        {otherNamespaceList.order.length == 0 &&
+        {otherNamespaceList.order.length > 0 ?
+          <SortableListView
+            style={[styles.listStyle, isEmpty && {flex: 0}]}
+            contentContainerStyle={(!isEmpty) && {paddingBottom: 400}}
+            data={otherNamespaceList.namespaces}
+            order={otherNamespaceList.order}
+            onChangeOrder={this.onChangeOrder}
+            refreshControl={
+              <RefreshControl onRefresh={() => this.refreshNamespaces()} refreshing={this.state.isRefreshing} />
+            }
+            renderRow={({data, active}) => {
+              return <Namespace onInfo={onInfo} onDelete={this.onDelete} data={data} active={active} navigation={navigation} canDelete={true} isOther={true}/>
+            }}
+          />
+          :
           <ScrollView style={{flex: 1, paddingHorizontal: 10, paddingTop: 30}}
             contentContainerStyle={{justifyContent: 'center', alignItems: 'center'}}
             refreshControl={
