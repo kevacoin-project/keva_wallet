@@ -521,7 +521,7 @@ class MyNamespaces extends React.Component {
             }}
           />
           :
-          <ScrollView style={{flex: 1, paddingHorizontal: 5}}
+          <ScrollView style={{flex: 1, paddingHorizontal: 5, paddingTop: 30}}
             contentContainerStyle={{justifyContent: 'center', alignItems: 'center'}}
             refreshControl={
               <RefreshControl onRefresh={() => this.refreshNamespaces()} refreshing={this.state.isRefreshing} />
@@ -728,7 +728,7 @@ class OtherNamespaces extends React.Component {
           }}
         />
         {otherNamespaceList.order.length == 0 &&
-          <ScrollView style={{flex: 1, paddingHorizontal: 5}}
+          <ScrollView style={{flex: 1, paddingHorizontal: 5, paddingTop: 30}}
             contentContainerStyle={{justifyContent: 'center', alignItems: 'center'}}
             refreshControl={
               <RefreshControl onRefresh={() => this.refreshNamespaces()} refreshing={this.state.isRefreshing} />
