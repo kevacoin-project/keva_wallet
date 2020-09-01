@@ -16,6 +16,7 @@ import {
   Clipboard,
   LayoutAnimation,
   Keyboard,
+  Image,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import {
@@ -505,7 +506,7 @@ class MyNamespaces extends React.Component {
           }
         </View>
         {
-          namespaceList.order.length > 0 ?
+          namespaceList.order.length == 0 ?
           <SortableListView
             style={styles.listStyle}
             contentContainerStyle={{paddingBottom: 400}}
@@ -526,9 +527,7 @@ class MyNamespaces extends React.Component {
               <RefreshControl onRefresh={() => this.refreshNamespaces()} refreshing={this.state.isRefreshing} />
             }
           >
-            <Text style={[styles.emptyMessage, { marginBottom: 20, fontSize: 24 }]}>
-              {loc.namespaces.no_data}
-            </Text>
+            <Image source={require('../../img/my_no_data.png')} style={{ width: SCREEN_WIDTH*0.33, height: SCREEN_WIDTH*0.33, marginBottom: 20 }} />
             <Text style={[styles.emptyMessage, { marginBottom: 7 }]}>
               {loc.namespaces.click_add_btn}
             </Text>
@@ -734,9 +733,7 @@ class OtherNamespaces extends React.Component {
               <RefreshControl onRefresh={() => this.refreshNamespaces()} refreshing={this.state.isRefreshing} />
             }
           >
-            <Text style={[styles.emptyMessage, { marginBottom: 20, fontSize: 24 }]}>
-              {loc.namespaces.no_data}
-            </Text>
+            <Image source={require('../../img/other_no_data.png')} style={{ width: SCREEN_WIDTH*0.33, height: SCREEN_WIDTH*0.33, marginBottom: 20 }} />
             <Text style={[styles.emptyMessage, { marginBottom: 7 }]}>
               {loc.namespaces.click_search_btn}
             </Text>
@@ -1146,6 +1143,7 @@ var styles = StyleSheet.create({
     fontSize: 18,
     color: KevaColors.darkText,
     textAlign: 'center',
+    lineHeight: 30,
   },
   help: {
     fontSize: 16,
