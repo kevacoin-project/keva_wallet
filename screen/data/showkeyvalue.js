@@ -2,14 +2,15 @@ import React from 'react';
 import {
   Text,
   View,
-  ScrollView,
   Image,
   Dimensions,
   TouchableOpacity,
   FlatList,
+  Clipboard,
 } from 'react-native';
 import HTMLView from 'react-native-htmlview';
 import { ButtonGroup } from 'react-native-elements';
+import Toast from 'react-native-root-toast';
 import MIcon from 'react-native-vector-icons/MaterialIcons';
 const StyleSheet = require('../../PlatformStyleSheet');
 const KevaColors = require('../../common/KevaColors');
@@ -28,6 +29,14 @@ class Reply extends React.Component {
     this.state = { };
   }
 
+  copyString = (str) => {
+    Clipboard.setString(str);
+    Toast.show(loc.general.copiedToClipboard, {
+      position: Toast.positions.TOP,
+      backgroundColor: "#53DD6C",
+    });
+  }
+
   render() {
     let {item} = this.props;
     return (
@@ -38,9 +47,11 @@ class Reply extends React.Component {
             <Text style={styles.sender} numberOfLines={1} ellipsizeMode="tail">
               {item.sender.displayName}
             </Text>
-            <Text style={styles.shortCode}>
-              {`@${item.sender.shortCode}`}
-            </Text>
+            <TouchableOpacity onPress={() => this.copyString(item.sender.shortCode)}>
+              <Text style={styles.shortCode}>
+                {`@${item.sender.shortCode}`}
+              </Text>
+            </TouchableOpacity>
           </View>
           <Text style={styles.replyValue}>{item.value}</Text>
           {(item.height > 0) ?
