@@ -38,6 +38,7 @@ module.exports = {
     creating_tx: 'Creating Transaction ...',
     please_wait: 'This will take about 10 seconds.',
     scanning_block: 'Scanning block',
+    refreshing: 'Refreshing data ...',
   },
   wallets: {
     select_wallet: 'Select Wallet',
