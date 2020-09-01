@@ -506,7 +506,7 @@ class MyNamespaces extends React.Component {
           }
         </View>
         {
-          namespaceList.order.length == 0 ?
+          namespaceList.order.length > 0 ?
           <SortableListView
             style={styles.listStyle}
             contentContainerStyle={{paddingBottom: 400}}
