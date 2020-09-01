@@ -6,19 +6,53 @@ import {
   Image,
   Dimensions,
   TouchableOpacity,
+  FlatList,
 } from 'react-native';
 import HTMLView from 'react-native-htmlview';
 import { ButtonGroup } from 'react-native-elements';
 import MIcon from 'react-native-vector-icons/MaterialIcons';
 const StyleSheet = require('../../PlatformStyleSheet');
 const KevaColors = require('../../common/KevaColors');
-const utils = require('../../util');
+import { THIN_BORDER, timeConverter } from "../../util";
 import {
   BlueNavigationStyle,
 } from '../../BlueComponents';
 const loc = require('../../loc');
 
 import { connect } from 'react-redux'
+
+class Reply extends React.Component {
+
+  constructor(props) {
+    super(props);
+    this.state = { };
+  }
+
+  render() {
+    let {item} = this.props;
+    return (
+      <View style={styles.reply}>
+        <View style={styles.senderBar} />
+        <View>
+          <View style={{flexDirection: 'row'}}>
+            <Text style={styles.sender} numberOfLines={1} ellipsizeMode="tail">
+              {item.sender.displayName}
+            </Text>
+            <Text style={styles.shortCode}>
+              {`@${item.sender.shortCode}`}
+            </Text>
+          </View>
+          <Text style={styles.replyValue}>{item.value}</Text>
+          {(item.height > 0) ?
+            <Text style={styles.timestamp}>{timeConverter(item.time) + ' ' + item.height}</Text>
+            :
+            <Text style={styles.timestamp}>{loc.general.unconfirmed}</Text>
+          }
+        </View>
+      </View>
+    )
+  }
+}
 
 class ShowKeyValue extends React.Component {
 
@@ -87,8 +121,8 @@ class ShowKeyValue extends React.Component {
     let {selectedIndex, value, key} = this.state;
     const replies = this.props.navigation.getParam('replies');
 
-    return (
-      <ScrollView style={styles.container}>
+    const listHeader = (
+      <View style={styles.container}>
         <View style={styles.keyContainer}>
           <Text style={styles.key} selectable>{key}</Text>
         </View>
@@ -124,8 +158,20 @@ class ShowKeyValue extends React.Component {
             </TouchableOpacity>
           */}
         </View>
-      </ScrollView>
+      </View>
     );
+
+    return (
+      <FlatList
+        style={styles.listStyle}
+        ListHeaderComponent={listHeader}
+        contentContainerStyle={{paddingBottom: 100}}
+        data={replies}
+        renderItem={({item, index}) =>
+          <Reply item={item} key={index}/>
+        }
+      />
+    )
   }
 
 }
@@ -145,7 +191,7 @@ var styles = StyleSheet.create({
   },
   keyContainer: {
     marginVertical: 10,
-    borderWidth: utils.THIN_BORDER,
+    borderWidth: THIN_BORDER,
     borderColor: KevaColors.cellBorder,
     backgroundColor: '#fff',
     padding: 10,
@@ -161,14 +207,14 @@ var styles = StyleSheet.create({
   },
   valueContainer: {
     marginTop: 2,
-    borderWidth: utils.THIN_BORDER,
+    borderWidth: THIN_BORDER,
     borderColor: KevaColors.cellBorder,
     backgroundColor: '#fff',
     padding: 10,
   },
   actionContainer: {
     flexDirection: 'row',
-    borderBottomWidth: utils.THIN_BORDER,
+    borderBottomWidth: THIN_BORDER,
     borderColor: KevaColors.cellBorder,
     backgroundColor: '#fff',
     padding: 10,
@@ -183,6 +229,49 @@ var styles = StyleSheet.create({
     color: KevaColors.arrowIcon,
     paddingVertical: 2
   },
+  reply: {
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+    paddingVertical: 10,
+    paddingHorizontal: 10,
+    backgroundColor:'#fff',
+    borderBottomWidth: THIN_BORDER,
+    borderColor: KevaColors.cellBorder,
+  },
+  replyValue: {
+    fontSize: 16,
+    color: KevaColors.darkText,
+    paddingVertical: 5,
+  },
+  timestamp: {
+    color: KevaColors.extraLightText,
+    paddingTop: 5,
+    fontSize: 13,
+    alignSelf: 'flex-start'
+  },
+  sender: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: KevaColors.darkText,
+    lineHeight: 25,
+    paddingBottom: 5,
+    maxWidth: 220,
+  },
+  shortCode: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: KevaColors.actionText,
+    lineHeight: 25,
+    paddingBottom: 5,
+  },
+  senderBar: {
+    borderLeftWidth: 4,
+    borderColor: KevaColors.cellBorder,
+    width: 0,
+    paddingLeft: 3,
+    paddingRight: 7,
+    height: '100%',
+  }
 });
 
 var htmlStyles = StyleSheet.create({
