@@ -14,6 +14,8 @@ module.exports = {
     close: 'Close',
     reply: 'Reply',
     reply_sent: 'Reply sent',
+    share: 'Share',
+    share_sent: 'Shared successfully',
     copiedToClipboard: 'Copied to clipboard',
     unconfirmed: 'Unconfirmed',
     label_wallets: 'Wallets',

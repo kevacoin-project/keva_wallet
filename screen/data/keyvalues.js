@@ -56,7 +56,7 @@ class Item extends React.Component {
   }
 
   render() {
-    let {item, onShow, onReply, namespaceId, navigation} = this.props;
+    let {item, onShow, onReply, onShare, namespaceId, navigation} = this.props;
     const {isOther} = navigation.state.params;
     return (
       <View style={styles.card}>
@@ -95,11 +95,9 @@ class Item extends React.Component {
             <MIcon name="chat-bubble-outline" size={22} style={styles.talkIcon} />
             {(item.replies && item.replies.length > 0) && <Text style={styles.count}>{item.replies.length}</Text>}
           </TouchableOpacity>
-          {/*
-            <TouchableOpacity onPress={() => {}}>
-              <MIcon name="card-giftcard" size={22} style={styles.actionIcon} />
-            </TouchableOpacity>
-          */}
+          <TouchableOpacity onPress={() => onShare(item.tx, item.key, item.value)}>
+            <MIcon name="cached" size={22} style={styles.actionIcon} />
+          </TouchableOpacity>
         </View>
       </View>
     )
@@ -465,6 +463,23 @@ class KeyValues extends React.Component {
     })
   }
 
+  onShare = (shareTxid, key, value) => {
+    const {navigation, namespaceList} = this.props;
+    const rootAddress = navigation.getParam('rootAddress');
+    // Must have a namespace.
+    if (Object.keys(namespaceList).length == 0) {
+      Toast.show('Create a namespace first');
+      return;
+    }
+
+    navigation.navigate('ShareKeyValue', {
+      rootAddress,
+      shareTxid,
+      origKey: key,
+      origValue: value,
+    })
+  }
+
   render() {
     let {navigation, dispatch, keyValueList} = this.props;
     const namespaceId = navigation.getParam('namespaceId');
@@ -497,6 +512,7 @@ class KeyValues extends React.Component {
               <Item item={item} key={index} dispatch={dispatch} onDelete={this.onDelete}
                 onShow={this.onShow} namespaceId={namespaceId}
                 onReply={this.onReply}
+                onShare={this.onShare}
                 navigation={navigation}
               />
             }

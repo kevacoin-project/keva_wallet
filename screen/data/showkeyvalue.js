@@ -210,11 +210,9 @@ class ShowKeyValue extends React.Component {
             <MIcon name="chat-bubble-outline" size={22} style={styles.talkIcon} />
             {(replies && replies.length > 0) && <Text style={styles.count}>{replies.length}</Text>}
           </TouchableOpacity>
-          {/*
-            <TouchableOpacity onPress={() => {}}>
-              <MIcon name="card-giftcard" size={22} style={styles.actionIcon} />
-            </TouchableOpacity>
-          */}
+          <TouchableOpacity onPress={() => onShare(item.tx, item.key, item.value)}>
+            <MIcon name="cached" size={22} style={styles.actionIcon} />
+          </TouchableOpacity>
         </View>
       </View>
     );
@@ -285,6 +283,11 @@ var styles = StyleSheet.create({
     paddingRight: 2,
     paddingVertical: 2
   },
+  actionIcon: {
+    color: KevaColors.arrowIcon,
+    paddingHorizontal: 15,
+    paddingVertical: 2
+  },
   count: {
     color: KevaColors.arrowIcon,
     paddingVertical: 2
@@ -332,10 +335,10 @@ var styles = StyleSheet.create({
     paddingLeft: 3,
     paddingRight: 7,
     height: '100%',
-  }
+  },
 });
 
-var htmlStyles = StyleSheet.create({
+export const htmlStyles = StyleSheet.create({
   div: {
     fontSize: 16,
     color: KevaColors.darkText,

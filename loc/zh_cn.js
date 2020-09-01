@@ -14,6 +14,8 @@ module.exports = {
     close: '关闭',
     reply: '回复',
     reply_sent: '回复已发送',
+    share: '分享',
+    share_sent: '共享成功',
     copiedToClipboard: '已复制到剪贴板',
     unconfirmed: '未确认',
     label_wallets: '钱包',

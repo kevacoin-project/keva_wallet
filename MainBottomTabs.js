@@ -50,6 +50,7 @@ import Namespaces from './screen/data/namespaces';
 import KeyValues from './screen/data/keyvalues';
 import AddKeyValue from './screen/data/addkeyvalue';
 import ReplyKeyValue from './screen/data/replykeyvalue';
+import ShareKeyValue from './screen/data/sharekeyvalue';
 import ShowKeyValue from './screen/data/showkeyvalue';
 
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -324,6 +325,9 @@ const HomeStackNavigator = createStackNavigator({
   },
   ReplyKeyValue: {
     screen: ReplyKeyValue,
+  },
+  ShareKeyValue: {
+    screen: ShareKeyValue,
   },
   ShowKeyValue: {
     screen: ShowKeyValue,
