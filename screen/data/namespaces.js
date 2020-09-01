@@ -567,6 +567,7 @@ class OtherNamespaces extends React.Component {
   fetchOtherNamespaces = async () => {
     const { dispatch, otherNamespaceList } = this.props;
     try {
+      await BlueElectrum.ping();
       const order = otherNamespaceList.order;
       const namespaces = otherNamespaceList.namespaces;
       for (let ns of Object.keys(namespaces)) {

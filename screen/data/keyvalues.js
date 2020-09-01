@@ -274,14 +274,11 @@ class KeyValues extends React.Component {
     this.subs = [
       this.props.navigation.addListener('willFocus', async (payload) => {
         const routeName = payload.lastState.routeName;
-        if (routeName == "ShowKeyValue" || routeName == "ReplyKeyValue") {
+        if (routeName == "ShowKeyValue") {
           return;
         }
         try {
           this.setState({isRefreshing: true});
-          const wallet = this.getCurrentWallet();
-          await wallet.fetchBalance();
-          await wallet.fetchTransactions();
           await this.fetchKeyValues();
           this.setState({isRefreshing: false});
         } catch (err) {
