@@ -238,6 +238,26 @@ class ShowKeyValue extends React.Component {
     );
   }
 
+  onShare = (key, value) => {
+    const {navigation, namespaceList} = this.props;
+    // Must have a namespace.
+    if (Object.keys(namespaceList).length == 0) {
+      Toast.show('Create a namespace first');
+      return;
+    }
+
+    const {rootAddress, namespaceId, shortCode, shareTxid, height} = navigation.state.params;
+    navigation.navigate('ShareKeyValue', {
+      rootAddress,
+      shareTxid,
+      origKey: key,
+      origValue: value,
+      origNamespace: namespaceId,
+      origShortCode: shortCode,
+      height,
+    })
+  }
+
   render() {
     let {isRaw, value, key} = this.state;
     const replies = this.props.navigation.getParam('replies');
@@ -266,7 +286,7 @@ class ShowKeyValue extends React.Component {
               <MIcon name="chat-bubble-outline" size={22} style={styles.talkIcon} />
               {(replies && replies.length > 0) && <Text style={styles.count}>{replies.length}</Text>}
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => onShare(item.tx, item.key, item.value)} style={{flexDirection: 'row'}}>
+            <TouchableOpacity onPress={() => this.onShare(key, value)} style={{flexDirection: 'row'}}>
               <MIcon name="cached" size={22} style={styles.actionIcon} />
             </TouchableOpacity>
           </View>

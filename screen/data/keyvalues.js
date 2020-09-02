@@ -65,7 +65,7 @@ class Item extends React.Component {
 
     return (
       <View style={styles.card}>
-        <TouchableOpacity onPress={() => onShow(item.key, item.value, item.tx, item.replies)}>
+        <TouchableOpacity onPress={() => onShow(item.key, item.value, item.tx, item.replies, item.height)}>
           <View style={{flex:1,paddingHorizontal:10,paddingTop:2}}>
             <View style={{flexDirection:'row',alignItems:'center',justifyContent:'space-between'}}>
               <Text style={styles.keyDesc} numberOfLines={1} ellipsizeMode="tail">{item.key}</Text>
@@ -438,19 +438,23 @@ class KeyValues extends React.Component {
     );
   }
 
-  onShow = (key, value, tx, replies) => {
+  onShow = (key, value, tx, replies, height) => {
     const {navigation} = this.props;
     const rootAddress = navigation.getParam('rootAddress');
     const isOther = navigation.getParam('isOther');
     const namespaceId = navigation.getParam('namespaceId');
+    const shortCode = navigation.getParam('shortCode');
     navigation.navigate('ShowKeyValue', {
       namespaceId,
+      shortCode,
       key,
       value,
       rootAddress,
       replyTxid: tx,
+      shareTxid: tx,
       replies,
       isOther,
+      height,
     });
   }
 
