@@ -489,7 +489,6 @@ class KeyValues extends React.Component {
       shareTxid,
       origKey: key,
       origValue: value,
-      origNamespace: namespaceId,
       origShortCode: shortCode,
       height,
     })

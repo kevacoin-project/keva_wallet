@@ -30,7 +30,7 @@ import { FALLBACK_DATA_PER_BYTE_FEE } from '../../models/networkTransactionFees'
 import { TransitionPresets } from 'react-navigation-stack';
 
 import { connect } from 'react-redux'
-import { shareKeyValue } from '../../class/keva-ops';
+import { shareKeyValue, getTxIdFromShortCode, getNamespaceDataFromTx } from '../../class/keva-ops';
 import StepModal from "../../common/StepModalWizard";
 import Biometric from '../../class/biometrics';
 
@@ -128,7 +128,7 @@ class ShareKeyValue extends React.Component {
 
   getShareKeyValueModal = () => {
     const { namespaceList } = this.props;
-    const { shareTxid, rootAddress, origShortCode, height } = this.props.navigation.state.params;
+    const { shareTxid, rootAddress, origShortCode, height, txIdShortCode } = this.props.navigation.state.params;
     if (!this.state.showKeyValueModal) {
       return null;
     }
@@ -172,7 +172,23 @@ class ShareKeyValue extends React.Component {
                 return alert(loc.namespaces.multiaddress_wallet);
               }
               this.setState({ showNSCreationModal: true, currentPage: 1 });
-              const { tx, fee, cost } = await shareKeyValue(BlueElectrum, wallet, FALLBACK_DATA_PER_BYTE_FEE, namespaceId, shortCode, origShortCode, value, rootAddress, shareTxid, height);
+              let actualRootAddress;
+              if (rootAddress) {
+                actualRootAddress = rootAddress;
+              } else {
+                // We are sharing a shared post. Get the rootAddress from origShortCode.
+                const nsRootId = await getTxIdFromShortCode(BlueElectrum, origShortCode);
+                let nsData = await getNamespaceDataFromTx(BlueElectrum, [], nsRootId);
+                actualRootAddress = nsData.address;
+              }
+
+              let actualShareTxid;
+              if (shareTxid) {
+                actualShareTxid = shareTxid;
+              } else {
+                actualShareTxid = await getTxIdFromShortCode(BlueElectrum, txIdShortCode);
+              }
+              const { tx, fee, cost } = await shareKeyValue(BlueElectrum, wallet, FALLBACK_DATA_PER_BYTE_FEE, namespaceId, shortCode, origShortCode, value, actualRootAddress, actualShareTxid, height);
               let feeKVA = (fee + cost) / 100000000;
               this.setState({ showNSCreationModal: true, currentPage: 2, fee: feeKVA });
               this.namespaceTx = tx;

@@ -246,16 +246,32 @@ class ShowKeyValue extends React.Component {
       return;
     }
 
-    const {rootAddress, namespaceId, shortCode, shareTxid, height} = navigation.state.params;
+    const shareInfo = parseShareKey(key);
+    if (!shareInfo) {
+      // This is not a share post.
+      const {rootAddress, shortCode, shareTxid, height} = navigation.state.params;
+      navigation.navigate('ShareKeyValue', {
+        rootAddress,
+        shareTxid,
+        origKey: key,
+        origValue: value,
+        origShortCode: shortCode,
+        height,
+      });
+    }
+
+    // This is a share post, share the shared post instead.
+    const {txIdShortCode, origShortCode} = shareInfo;
+    const {shareValue} = this.state;
+    const height = getHeightFromShortCode(txIdShortCode);
     navigation.navigate('ShareKeyValue', {
-      rootAddress,
-      shareTxid,
-      origKey: key,
-      origValue: value,
-      origNamespace: namespaceId,
-      origShortCode: shortCode,
+      rootAddress: null, // Must get it from origShortCode.
+      shareTxid: null, // Must get it from the txIdShortCode
+      txIdShortCode,
+      origValue: shareValue,
+      origShortCode: origShortCode,
       height,
-    })
+    });
   }
 
   render() {
