@@ -268,6 +268,7 @@ class ShowKeyValue extends React.Component {
         origShortCode: shortCode,
         height,
       });
+      return;
     }
 
     // This is a share post, share the shared post instead.

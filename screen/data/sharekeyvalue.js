@@ -303,6 +303,7 @@ class ShareKeyValue extends React.Component {
                 nsName: '',
               });
               Toast.show(loc.general.share_sent, {
+                duration: Toast.durations.LONG,
                 position: Toast.positions.TOP,
                 backgroundColor: "#53DD6C",
               });
