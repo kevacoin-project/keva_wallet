@@ -126,7 +126,7 @@ class ShowKeyValue extends React.Component {
       return (<Text key={index} style={{fontSize: 16, color: KevaColors.darkText, lineHeight: 25}}>{unescape(node.data)}</Text>);
     } else if (node.name == 'img') {
       const a = node.attribs;
-      const width = Dimensions.get('window').width * 0.9;
+      const width = Dimensions.get('window').width;
       const height = (a.height && a.width) ? (a.height / a.width) * width : width;
       return (<Image style={{ width, height, alignSelf: 'center'}} source={{ uri: a.src }} key={index} resizeMode="contain"/>);
     }
