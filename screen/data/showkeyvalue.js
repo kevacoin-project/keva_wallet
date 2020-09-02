@@ -181,11 +181,12 @@ class ShowKeyValue extends React.Component {
     const {dispatch, navigation, keyValueList} = this.props;
     const namespaceId = navigation.getParam('namespaceId');
     const rootAddress = navigation.getParam('rootAddress');
+    const thisTxId = navigation.getParam('replyTxid');
 
     try {
       // Fetch replies.
       this.setState({isRefreshing: true});
-      const {replies, shares} = await getRepliesAndShares(BlueElectrum, rootAddress, namespaceId);
+      const {replies, shares} = await getRepliesAndShares(BlueElectrum, rootAddress);
       const keyValues = keyValueList.keyValues[namespaceId];
 
       // Add the replies.
@@ -205,7 +206,15 @@ class ShowKeyValue extends React.Component {
       }
 
       dispatch(setKeyValueList(namespaceId, keyValues));
-      this.setState({isRefreshing: false});
+
+      // Update the replies and shares for this.
+      const thisKV = keyValues.find(kv => kv.tx == thisTxId);
+      this.setState({
+        isRefreshing: false,
+        replies: thisKV.replies,
+        shares: thisKV.shares,
+      });
+
     } catch(err) {
       console.warn(err);
       this.setState({isRefreshing: false});

@@ -997,7 +997,7 @@ export async function findOtherNamespace(ecl, txidOrShortCode) {
 
 // Address is the root address, i.e. the address that is involved in
 // namespace creation.
-export async function getRepliesAndShares(ecl, rootAddress, cb) {
+export async function getRepliesAndShares(ecl, rootAddress) {
   let replies = [];
   let shares = [];
   const history = await ecl.blockchainScripthash_getHistory(toScriptHash(rootAddress));
