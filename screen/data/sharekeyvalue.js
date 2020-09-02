@@ -128,7 +128,7 @@ class ShareKeyValue extends React.Component {
 
   getShareKeyValueModal = () => {
     const { namespaceList } = this.props;
-    const { shareTxid, rootAddress } = this.props.navigation.state.params;
+    const { shareTxid, rootAddress, origShortCode, height } = this.props.navigation.state.params;
     if (!this.state.showKeyValueModal) {
       return null;
     }
@@ -172,7 +172,7 @@ class ShareKeyValue extends React.Component {
                 return alert(loc.namespaces.multiaddress_wallet);
               }
               this.setState({ showNSCreationModal: true, currentPage: 1 });
-              const { tx, fee, cost } = await shareKeyValue(wallet, FALLBACK_DATA_PER_BYTE_FEE, namespaceId, shortCode, value, rootAddress, shareTxid);
+              const { tx, fee, cost } = await shareKeyValue(BlueElectrum, wallet, FALLBACK_DATA_PER_BYTE_FEE, namespaceId, shortCode, origShortCode, value, rootAddress, shareTxid, height);
               let feeKVA = (fee + cost) / 100000000;
               this.setState({ showNSCreationModal: true, currentPage: 2, fee: feeKVA });
               this.namespaceTx = tx;

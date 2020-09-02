@@ -734,7 +734,7 @@ export async function findNamespaceShortCode(ecl, transctions, nsTx) {
   return { rootTxid: txid, rootAddress };
 }
 
-export async function getTxShortCode(txid, height) {
+export async function getTxShortCode(ecl, txid, height) {
   let merkle = await ecl.blockchainTransaction_getMerkle(txid, height, false);
   if (!merkle) {
     return -1;
@@ -1038,25 +1038,28 @@ export async function getReplies(ecl, rootAddress, cb) {
 
 const SHARE_COST = 1000000;
 
-function createShareKey(txId, shortCode) {
-  return `"${txId}:${shortCode}`
+// Format:
+// "[shortcode of tx to share]:[shortcode of original namespace]:[shortcode of my namespace]
+// Original namespace is the one that owns the tx.
+function createShareKey(txIdShortCode, origShortCode, myShortCode) {
+  return `"${txIdShortCode}:${origShortCode}:${myShortCode}`
 }
 
-
+// See createShareKey for format.
 export function parseShareKey(key) {
-  const regexShare = /^"([0-9a-f]+):([0-9]+)$/gm;
+  const regexShare = /^"([0-9]+):([0-9]+):([0-9]+)$/gm;
   let matches = regexShare.exec(key);
   if (!matches) {
     return false;
   }
-  return {txId: matches[1], shortCode: matches[2]};
+  return {txIdShortCode: matches[1], origShortCode: matches[2], myShortCode: matches[3]};
 }
 
 // Share a post (key/value pair).
 // replyRootAddress: the root namespace of the post.
 // replyTxid: the txid of the post
 //
-export async function shareKeyValue(wallet, requestedSatPerByte, namespaceId, shortCode, value, shareRootAddress, shareTxid) {
+export async function shareKeyValue(ecl, wallet, requestedSatPerByte, namespaceId, shortCode, origShortCode, value, shareRootAddress, shareTxid, height) {
   await wallet.fetchTransactions();
   let nsUtxo = await getNamespaceUtxo(wallet, namespaceId);
   if (!nsUtxo) {
@@ -1064,7 +1067,8 @@ export async function shareKeyValue(wallet, requestedSatPerByte, namespaceId, sh
   }
 
   // To share a post, the key must be "fullShareTxid:shortCode.
-  const key = createShareKey(shareTxid, shortCode);
+  const shareTxidShortCode = await getTxShortCode(ecl, shareTxid, height);
+  const key = createShareKey(shareTxidShortCode, origShortCode, shortCode);
   const namespaceAddress = await wallet.getAddressAsync();
   const nsScript = getKeyValueUpdateScript(namespaceId, namespaceAddress, key, value);
 

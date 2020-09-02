@@ -100,7 +100,7 @@ class Item extends React.Component {
             <MIcon name="chat-bubble-outline" size={22} style={styles.talkIcon} />
             {(item.replies && item.replies.length > 0) && <Text style={styles.count}>{item.replies.length}</Text>}
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => onShare(item.tx, item.key, item.value)}>
+          <TouchableOpacity onPress={() => onShare(item.tx, item.key, item.value, item.height)}>
             <MIcon name="cached" size={22} style={styles.actionIcon} />
           </TouchableOpacity>
         </View>
@@ -469,7 +469,7 @@ class KeyValues extends React.Component {
     })
   }
 
-  onShare = (shareTxid, key, value) => {
+  onShare = (shareTxid, key, value, height) => {
     const {navigation, namespaceList} = this.props;
     const rootAddress = navigation.getParam('rootAddress');
     // Must have a namespace.
@@ -478,11 +478,16 @@ class KeyValues extends React.Component {
       return;
     }
 
+    const namespaceId = navigation.getParam('namespaceId');
+    const shortCode = navigation.getParam('shortCode');
     navigation.navigate('ShareKeyValue', {
       rootAddress,
       shareTxid,
       origKey: key,
       origValue: value,
+      origNamespace: namespaceId,
+      origShortCode: shortCode,
+      height,
     })
   }
 
