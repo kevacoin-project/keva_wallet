@@ -734,6 +734,19 @@ export async function findNamespaceShortCode(ecl, transctions, nsTx) {
   return { rootTxid: txid, rootAddress };
 }
 
+export async function getTxShortCode(txid, height) {
+  let merkle = await ecl.blockchainTransaction_getMerkle(txid, height, false);
+  if (!merkle) {
+    return -1;
+  }
+
+  // The first digit is the length of the block height.
+  let strHeight = merkle.block_height.toString();
+  let prefix = strHeight.length;
+  let shortCode = prefix + strHeight + merkle.pos.toString();
+  return shortCode;
+}
+
 export async function getNamespaceFromShortCode(ecl, shortCode) {
   let prefix = parseInt(shortCode.substring(0, 1));
   let height = shortCode.substring(1, 1 + prefix);

@@ -312,8 +312,8 @@ class ShareKeyValue extends React.Component {
   }
 
   renderNode = (node, index) => {
-    if (!node.name && node.type == 'text') {
-      return (<Text style={{fontSize: 16, color: KevaColors.darkText, lineHeight: 25}}>{node.data}</Text>);
+    if (!node.prev && !node.next && !node.parent && node.type == 'text') {
+      return (<Text key={index} style={{fontSize: 16, color: KevaColors.darkText, lineHeight: 25}}>{unescape(node.data)}</Text>);
     } else if (node.name == 'img') {
       const a = node.attribs;
       const width = Dimensions.get('window').width * 0.9;

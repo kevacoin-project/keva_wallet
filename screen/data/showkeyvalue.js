@@ -9,7 +9,6 @@ import {
   Clipboard,
 } from 'react-native';
 import HTMLView from 'react-native-htmlview';
-import { ButtonGroup } from 'react-native-elements';
 const BlueElectrum = require('../../BlueElectrum');
 import Toast from 'react-native-root-toast';
 import MIcon from 'react-native-vector-icons/MaterialIcons';
@@ -76,7 +75,7 @@ class ShowKeyValue extends React.Component {
       isRefreshing: false,
       key: '',
       value: '',
-      selectedIndex: 0,
+      isRaw: false,
     };
   }
 
@@ -96,7 +95,6 @@ class ShowKeyValue extends React.Component {
       this.setState({
         key,
         value,
-        selectedIndex: this.maybeHTML(value) ? 0 : 1,
       });
     }
     this.subs = [
@@ -119,12 +117,14 @@ class ShowKeyValue extends React.Component {
     }
   }
 
-  updateIndex = index => {
-    this.setState({selectedIndex: index});
+  onToggleRaw = () => {
+    this.setState({isRaw: !this.state.isRaw});
   }
 
   renderNode = (node, index) => {
-    if (node.name == 'img') {
+    if (!node.prev && !node.next && !node.parent && node.type == 'text') {
+      return (<Text key={index} style={{fontSize: 16, color: KevaColors.darkText, lineHeight: 25}}>{unescape(node.data)}</Text>);
+    } else if (node.name == 'img') {
       const a = node.attribs;
       const width = Dimensions.get('window').width * 0.9;
       const height = (a.height && a.width) ? (a.height / a.width) * width : width;
@@ -175,8 +175,7 @@ class ShowKeyValue extends React.Component {
   }
 
   render() {
-    const buttons = ['html', 'text']
-    let {selectedIndex, value, key} = this.state;
+    let {isRaw, value, key} = this.state;
     const replies = this.props.navigation.getParam('replies');
 
     const listHeader = (
@@ -184,34 +183,30 @@ class ShowKeyValue extends React.Component {
         <View style={styles.keyContainer}>
           <Text style={styles.key} selectable>{key}</Text>
         </View>
-        <ButtonGroup
-          onPress={this.updateIndex}
-          selectedIndex={selectedIndex}
-          buttons={buttons}
-          containerStyle={{height: 30, width: 130, borderRadius: 6, alignSelf: 'center', borderColor: KevaColors.actionText}}
-          selectedButtonStyle={{backgroundColor: KevaColors.actionText}}
-          innerBorderStyle={{width:0, color: '#000'}}
-          textStyle={{color: KevaColors.actionText}}
-        />
         <View style={styles.valueContainer}>
-          {(selectedIndex == 0) ?
+          { isRaw ?
+            <Text style={styles.value} selectable>{value}</Text>
+          :
             <HTMLView value={`${value}`}
               addLineBreaks={false}
               stylesheet={htmlStyles}
               nodeComponentProps={{selectable: true}}
               renderNode={this.renderNode}
-          />
-          :
-          <Text style={styles.value} selectable>{value}</Text>
+            />
           }
         </View>
         <View style={styles.actionContainer}>
-          <TouchableOpacity onPress={() => this.onReply()} style={{flexDirection: 'row'}}>
-            <MIcon name="chat-bubble-outline" size={22} style={styles.talkIcon} />
-            {(replies && replies.length > 0) && <Text style={styles.count}>{replies.length}</Text>}
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => onShare(item.tx, item.key, item.value)}>
-            <MIcon name="cached" size={22} style={styles.actionIcon} />
+          <View style={{flexDirection: 'row'}}>
+            <TouchableOpacity onPress={() => this.onReply()} style={{flexDirection: 'row'}}>
+              <MIcon name="chat-bubble-outline" size={22} style={styles.talkIcon} />
+              {(replies && replies.length > 0) && <Text style={styles.count}>{replies.length}</Text>}
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => onShare(item.tx, item.key, item.value)} style={{flexDirection: 'row'}}>
+              <MIcon name="cached" size={22} style={styles.actionIcon} />
+            </TouchableOpacity>
+          </View>
+          <TouchableOpacity onPress={() => this.onToggleRaw()}>
+            <MIcon name="format-clear" size={22} style={this.state.isRaw ? styles.rawIcon : styles.actionIcon} />
           </TouchableOpacity>
         </View>
       </View>
@@ -272,6 +267,7 @@ var styles = StyleSheet.create({
   },
   actionContainer: {
     flexDirection: 'row',
+    justifyContent: 'space-between',
     borderBottomWidth: THIN_BORDER,
     borderColor: KevaColors.cellBorder,
     backgroundColor: '#fff',
@@ -285,6 +281,11 @@ var styles = StyleSheet.create({
   },
   actionIcon: {
     color: KevaColors.arrowIcon,
+    paddingHorizontal: 15,
+    paddingVertical: 2
+  },
+  rawIcon: {
+    color: KevaColors.actionText,
     paddingHorizontal: 15,
     paddingVertical: 2
   },
