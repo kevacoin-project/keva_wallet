@@ -114,6 +114,10 @@ class ShowKeyValue extends React.Component {
     this.subs = [
       this.props.navigation.addListener('willFocus', async (payload) => {
         try {
+          if (payload.lastState.routeName == 'KeyValues') {
+            // No need to refresh when first entering this screen.
+            return;
+          }
           this.setState({isRefreshing: true});
           await this.fetchReplies();
           this.setState({isRefreshing: false});
