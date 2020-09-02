@@ -988,7 +988,7 @@ var styles = StyleSheet.create({
     },
     shadowOpacity: 0.50,
     shadowRadius: 12.35,
-    elevation: 7,
+    elevation: 10,
   },
   cardTitleText: {
     fontSize: 17,

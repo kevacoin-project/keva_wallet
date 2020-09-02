@@ -140,6 +140,7 @@ class KeyValues extends React.Component {
         <Icon name="ios-add-circle" type="octicon" size={30} color={KevaColors.actionText} />
       </TouchableOpacity>
     ),
+    headerStyle: { backgroundColor: '#fff', elevation:0, shadowColor: 'transparent', borderBottomWidth: THIN_BORDER, borderColor: KevaColors.cellBorder },
   });
 
   onDelete = (namespaceId, key) => {
@@ -541,19 +542,15 @@ export default KeyValuesScreen = connect(mapStateToProps)(KeyValues);
 var styles = StyleSheet.create({
   container: {
     flex:1,
-    backgroundColor: KevaColors.background,
   },
   listStyle: {
     flex: 1,
-    paddingTop:5,
     borderBottomWidth: 1,
     borderColor: KevaColors.cellBorder,
-    backgroundColor: KevaColors.background
   },
   card: {
     backgroundColor:'#fff',
-    marginVertical:3,
-    borderTopWidth: THIN_BORDER,
+    marginVertical:0,
     borderBottomWidth: THIN_BORDER,
     borderColor: KevaColors.cellBorder,
   },
