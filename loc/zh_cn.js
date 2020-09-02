@@ -43,6 +43,7 @@ module.exports = {
     please_wait: '大约需要10秒钟, 请稍候',
     scanning_block: '扫描区块',
     refreshing: '刷新数据...',
+    default_share: '分享帖子',
   },
   wallets: {
     select_wallet: '选择钱包',

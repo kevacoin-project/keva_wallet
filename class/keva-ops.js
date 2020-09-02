@@ -1103,7 +1103,8 @@ export async function shareKeyValue(ecl, wallet, requestedSatPerByte, namespaceI
     throw new Error(loc.namespaces.update_key_err);
   }
 
-  // To share a post, the key must be "fullShareTxid:shortCode.
+  // To share a post, key must be:
+  // "[shortcode of tx to share]:[shortcode of original namespace]:[shortcode of my namespace]
   const shareTxidShortCode = await getTxShortCode(ecl, shareTxid, height);
   const key = createShareKey(shareTxidShortCode, origShortCode, shortCode);
   const namespaceAddress = await wallet.getAddressAsync();

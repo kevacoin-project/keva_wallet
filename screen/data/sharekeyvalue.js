@@ -30,7 +30,8 @@ import { FALLBACK_DATA_PER_BYTE_FEE } from '../../models/networkTransactionFees'
 import { TransitionPresets } from 'react-navigation-stack';
 
 import { connect } from 'react-redux'
-import { shareKeyValue, getTxIdFromShortCode, getNamespaceDataFromTx } from '../../class/keva-ops';
+import { shareKeyValue, getTxIdFromShortCode, getNamespaceDataFromTx,
+         getNamespaceInfoFromShortCode } from '../../class/keva-ops';
 import StepModal from "../../common/StepModalWizard";
 import Biometric from '../../class/biometrics';
 
@@ -105,7 +106,6 @@ class ShareKeyValue extends React.Component {
       createTransactionErr: null,
       currentPage: 0,
       namespaceId: this.state.namespaceId || defaultNamespaceId,
-      value: (value.length == 0) ? " " : this.state.value,
     });
   }
 
@@ -169,6 +169,8 @@ class ShareKeyValue extends React.Component {
                 return alert(loc.namespaces.multiaddress_wallet);
               }
               this.setState({ showNSCreationModal: true, currentPage: 1 });
+
+              let authorName;
               let actualRootAddress;
               if (rootAddress) {
                 actualRootAddress = rootAddress;
@@ -177,6 +179,7 @@ class ShareKeyValue extends React.Component {
                 const nsRootId = await getTxIdFromShortCode(BlueElectrum, origShortCode);
                 let nsData = await getNamespaceDataFromTx(BlueElectrum, [], nsRootId);
                 actualRootAddress = nsData.address;
+                authorName = nsData.result.displayName;
               }
 
               let actualShareTxid;
@@ -185,7 +188,18 @@ class ShareKeyValue extends React.Component {
               } else {
                 actualShareTxid = await getTxIdFromShortCode(BlueElectrum, txIdShortCode);
               }
-              const { tx, fee, cost } = await shareKeyValue(BlueElectrum, wallet, FALLBACK_DATA_PER_BYTE_FEE, namespaceId, shortCode, origShortCode, value, actualRootAddress, actualShareTxid, height);
+
+              let actualValue;
+              if (value.length > 0) {
+                actualValue = value;
+              } else {
+                if (!authorName) {
+                  let nsResult = await getNamespaceInfoFromShortCode(BlueElectrum, origShortCode);
+                  authorName = nsResult.displayName;
+                }
+                actualValue = `${loc.namespaces.default_share} ${authorName}@${origShortCode}`;
+              }
+              const { tx, fee, cost } = await shareKeyValue(BlueElectrum, wallet, FALLBACK_DATA_PER_BYTE_FEE, namespaceId, shortCode, origShortCode, actualValue, actualRootAddress, actualShareTxid, height);
               let feeKVA = (fee + cost) / 100000000;
               this.setState({ showNSCreationModal: true, currentPage: 2, fee: feeKVA });
               this.namespaceTx = tx;

@@ -43,6 +43,7 @@ module.exports = {
     please_wait: 'This will take about 10 seconds.',
     scanning_block: 'Scanning block',
     refreshing: 'Refreshing data ...',
+    default_share: 'A post from',
   },
   wallets: {
     select_wallet: 'Select Wallet',
