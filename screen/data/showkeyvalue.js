@@ -24,6 +24,8 @@ import {
 } from '../../BlueComponents';
 const loc = require('../../loc');
 
+const MAX_TIME = 3147483647;
+
 import { connect } from 'react-redux'
 
 class Reply extends React.Component {
@@ -42,7 +44,7 @@ class Reply extends React.Component {
   }
 
   render() {
-    let {item, key} = this.props;
+    let {item} = this.props;
     return (
       <View style={styles.reply}>
         <View style={styles.senderBar} />
@@ -91,13 +93,21 @@ class ShowKeyValue extends React.Component {
     return /<(?=.*? .*?\/ ?>|br|hr|input|!--|wbr)[a-z]+.*?>|<([a-z]+).*?<\/\1>/i.test(value);
   }
 
+  sortReplies = replies => {
+    return replies.sort((a, b) => {
+      const btime = b.time || MAX_TIME;
+      const atime = a.time || MAX_TIME;
+      return (btime - atime)
+    });
+  }
+
   async componentDidMount() {
     const {key, value, replies, shares} = this.props.navigation.state.params;
 
     this.setState({
       key,
       value,
-      replies,
+      replies: this.sortReplies(replies),
       shares
     });
 
@@ -211,7 +221,7 @@ class ShowKeyValue extends React.Component {
       const thisKV = keyValues.find(kv => kv.tx == thisTxId);
       this.setState({
         isRefreshing: false,
-        replies: thisKV.replies,
+        replies: this.sortReplies(thisKV.replies),
         shares: thisKV.shares,
       });
 
