@@ -42,7 +42,7 @@ class Reply extends React.Component {
   }
 
   render() {
-    let {item} = this.props;
+    let {item, key} = this.props;
     return (
       <View style={styles.reply}>
         <View style={styles.senderBar} />
@@ -333,7 +333,6 @@ class ShowKeyValue extends React.Component {
         </View>
       </View>
     );
-
     return (
       <FlatList
         style={styles.listStyle}
@@ -342,9 +341,8 @@ class ShowKeyValue extends React.Component {
         data={replies}
         onRefresh={() => this.fetchReplies()}
         refreshing={this.state.isRefreshing}
-        renderItem={({item, index}) =>
-          <Reply item={item} key={index}/>
-        }
+        keyExtractor={(item, index) => item.key + index}
+        renderItem={({item, index}) => <Reply item={item} />}
       />
     )
   }
