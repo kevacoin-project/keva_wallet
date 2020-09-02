@@ -86,10 +86,6 @@ class ShareKeyValue extends React.Component {
     const { value } = this.state;
     const { namespaceList } = this.props;
 
-    if (value.length == 0) {
-      Toast.show('Write something to reply');
-      return;
-    }
     const wallets = BlueApp.getWallets();
     if (wallets.length == 0) {
       Toast.show("You don't have wallet");
@@ -109,6 +105,7 @@ class ShareKeyValue extends React.Component {
       createTransactionErr: null,
       currentPage: 0,
       namespaceId: this.state.namespaceId || defaultNamespaceId,
+      value: (value.length == 0) ? " " : this.state.value,
     });
   }
 
