@@ -24,7 +24,7 @@ import MIcon from 'react-native-vector-icons/MaterialIcons';
 import ActionSheet from 'react-native-actionsheet';
 import { connect } from 'react-redux'
 import { setKeyValueList, CURRENT_KEYVALUE_LIST_VERSION } from '../../actions'
-import { getKeyValuesFromShortCode, getKeyValuesFromTxid, deleteKeyValue, mergeKeyValueList, getReplies } from '../../class/keva-ops';
+import { getKeyValuesFromShortCode, getKeyValuesFromTxid, deleteKeyValue, mergeKeyValueList, getRepliesAndShares } from '../../class/keva-ops';
 import Toast from 'react-native-root-toast';
 import StepModal from "../../common/StepModalWizard";
 import { timeConverter } from "../../util";
@@ -65,7 +65,7 @@ class Item extends React.Component {
 
     return (
       <View style={styles.card}>
-        <TouchableOpacity onPress={() => onShow(item.key, item.value, item.tx, item.replies, item.height)}>
+        <TouchableOpacity onPress={() => onShow(item.key, item.value, item.tx, item.replies, item.shares, item.height)}>
           <View style={{flex:1,paddingHorizontal:10,paddingTop:2}}>
             <View style={{flexDirection:'row',alignItems:'center',justifyContent:'space-between'}}>
               <Text style={styles.keyDesc} numberOfLines={1} ellipsizeMode="tail">{item.key}</Text>
@@ -100,8 +100,9 @@ class Item extends React.Component {
             <MIcon name="chat-bubble-outline" size={22} style={styles.talkIcon} />
             {(item.replies && item.replies.length > 0) && <Text style={styles.count}>{item.replies.length}</Text>}
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => onShare(item.tx, item.key, item.value, item.height)}>
-            <MIcon name="cached" size={22} style={styles.actionIcon} />
+          <TouchableOpacity onPress={() => onShare(item.tx, item.key, item.value, item.height)} style={{flexDirection: 'row'}}>
+            <MIcon name="cached" size={22} style={styles.shareIcon} />
+            {(item.shares && item.shares.length > 0) && <Text style={styles.count}>{item.shares.length}</Text>}
           </TouchableOpacity>
         </View>
       </View>
@@ -223,7 +224,7 @@ class KeyValues extends React.Component {
     }
 
     // Fetch replies.
-    const replies = await getReplies(BlueElectrum, rootAddress, namespaceId);
+    const {replies, shares} = await getRepliesAndShares(BlueElectrum, rootAddress, namespaceId);
 
     // Add the replies.
     for (let kv of keyValues) {
@@ -232,6 +233,15 @@ class KeyValues extends React.Component {
         kv.replies = txReplies;
       }
     }
+
+    // Add the shares
+    for (let kv of keyValues) {
+      const txShares = shares.filter(r => kv.tx == r.sharedTxId);
+      if (txShares && txShares.length > 0) {
+        kv.shares = txShares;
+      }
+    }
+
     dispatch(setKeyValueList(namespaceId, keyValues));
   }
 
@@ -438,7 +448,7 @@ class KeyValues extends React.Component {
     );
   }
 
-  onShow = (key, value, tx, replies, height) => {
+  onShow = (key, value, tx, replies, shares, height) => {
     const {navigation} = this.props;
     const rootAddress = navigation.getParam('rootAddress');
     const isOther = navigation.getParam('isOther');
@@ -453,6 +463,7 @@ class KeyValues extends React.Component {
       replyTxid: tx,
       shareTxid: tx,
       replies,
+      shares,
       isOther,
       height,
     });
@@ -579,6 +590,12 @@ var styles = StyleSheet.create({
     paddingVertical: 7
   },
   talkIcon: {
+    color: KevaColors.arrowIcon,
+    paddingLeft: 15,
+    paddingRight: 2,
+    paddingVertical: 7
+  },
+  shareIcon: {
     color: KevaColors.arrowIcon,
     paddingLeft: 15,
     paddingRight: 2,

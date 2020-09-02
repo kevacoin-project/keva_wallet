@@ -997,8 +997,9 @@ export async function findOtherNamespace(ecl, txidOrShortCode) {
 
 // Address is the root address, i.e. the address that is involved in
 // namespace creation.
-export async function getReplies(ecl, rootAddress, cb) {
+export async function getRepliesAndShares(ecl, rootAddress, cb) {
   let replies = [];
+  let shares = [];
   const history = await ecl.blockchainScripthash_getHistory(toScriptHash(rootAddress));
   const txsToFetch = history.map(h => h.tx_hash);
   const txs = await ecl.blockchainTransaction_getBatch(txsToFetch, VERBOSE);
@@ -1014,6 +1015,35 @@ export async function getReplies(ecl, rootAddress, cb) {
       }
       address = v.scriptPubKey.addresses[0];
       let resultJson = kevaToJson(result);
+
+      // Check if it is a share
+      const {txIdShortCode, origShortCode, myShortCode} = parseShareKey(resultJson.key);
+      if (txIdShortCode && origShortCode && myShortCode) {
+        // It is a share.
+        resultJson.time = tx.time;
+        const h = history.find(h => h.tx_hash == tx.txid);
+        resultJson.height = h.height;
+        resultJson.sharedTxId = await getTxIdFromShortCode(ecl, txIdShortCode);
+
+        const nsRootId = await getTxIdFromShortCode(ecl, myShortCode);
+        let resultSharer = await getNamespaceDataFromTx(ecl, [], nsRootId);
+        if (!resultSharer) {
+          continue;
+        }
+        const sharer = kevaToJson(resultSharer.result)
+        if (sharer.namespaceId != resultJson.namespaceId) {
+          continue;
+        }
+        resultJson.sharer = {
+          shortCode: myShortCode,
+          rootTxid: nsRootId,
+          displayName: sharer.displayName,
+        }
+        shares.push(resultJson);
+        continue;
+      }
+
+      // Check if it is a reply
       const {partialTxId, shortCode} = parseReplyKey(resultJson.key);
       if (!partialTxId || !shortCode) {
         continue;
@@ -1040,7 +1070,7 @@ export async function getReplies(ecl, rootAddress, cb) {
       replies.push(resultJson);
     }
   }
-  return replies;
+  return {replies, shares};
 }
 
 const SHARE_COST = 1000000;

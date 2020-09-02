@@ -15,7 +15,7 @@ import MIcon from 'react-native-vector-icons/MaterialIcons';
 const StyleSheet = require('../../PlatformStyleSheet');
 const KevaColors = require('../../common/KevaColors');
 import { THIN_BORDER, timeConverter } from "../../util";
-import { getReplies, parseShareKey, getKeyValueFromTxid,
+import { getRepliesAndShares, parseShareKey, getKeyValueFromTxid,
         getNamespaceInfoFromShortCode, getHeightFromShortCode,
         getTxIdFromShortCode } from '../../class/keva-ops';
 import { setKeyValueList } from '../../actions'
@@ -184,8 +184,9 @@ class ShowKeyValue extends React.Component {
     try {
       // Fetch replies.
       this.setState({isRefreshing: true});
-      const replies = await getReplies(BlueElectrum, rootAddress, namespaceId);
+      const {replies, shares} = await getRepliesAndShares(BlueElectrum, rootAddress, namespaceId);
       const keyValues = keyValueList.keyValues[namespaceId];
+
       // Add the replies.
       for (let kv of keyValues) {
         const txReplies = replies.filter(r => kv.tx.startsWith(r.partialTxId));
@@ -193,6 +194,15 @@ class ShowKeyValue extends React.Component {
           kv.replies = txReplies;
         }
       }
+
+      // Add the shares
+      for (let kv of keyValues) {
+        const txShares = shares.filter(r => kv.tx == r.sharedTxId);
+        if (txShares && txShares.length > 0) {
+          kv.shares = txShares;
+        }
+      }
+
       dispatch(setKeyValueList(namespaceId, keyValues));
       this.setState({isRefreshing: false});
     } catch(err) {
@@ -277,6 +287,7 @@ class ShowKeyValue extends React.Component {
   render() {
     let {isRaw, value, key} = this.state;
     const replies = this.props.navigation.getParam('replies');
+    const shares = this.props.navigation.getParam('shares');
 
     const listHeader = (
       <View style={styles.container}>
@@ -303,7 +314,8 @@ class ShowKeyValue extends React.Component {
               {(replies && replies.length > 0) && <Text style={styles.count}>{replies.length}</Text>}
             </TouchableOpacity>
             <TouchableOpacity onPress={() => this.onShare(key, value)} style={{flexDirection: 'row'}}>
-              <MIcon name="cached" size={22} style={styles.actionIcon} />
+              <MIcon name="cached" size={22} style={styles.shareIcon} />
+              {(shares && shares.length > 0) && <Text style={styles.count}>{shares.length}</Text>}
             </TouchableOpacity>
           </View>
           <TouchableOpacity onPress={() => this.onToggleRaw()}>
@@ -375,6 +387,12 @@ var styles = StyleSheet.create({
     padding: 10,
   },
   talkIcon: {
+    color: KevaColors.arrowIcon,
+    paddingLeft: 15,
+    paddingRight: 2,
+    paddingVertical: 2
+  },
+  shareIcon: {
     color: KevaColors.arrowIcon,
     paddingLeft: 15,
     paddingRight: 2,
