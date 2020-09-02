@@ -55,9 +55,14 @@ class Item extends React.Component {
     }
   }
 
+  stripHtml = str => {
+    return str.replace(/(<([^>]+)>)/gi, "");
+  }
+
   render() {
     let {item, onShow, onReply, onShare, namespaceId, navigation} = this.props;
     const {isOther} = navigation.state.params;
+
     return (
       <View style={styles.card}>
         <TouchableOpacity onPress={() => onShow(item.key, item.value, item.tx, item.replies)}>
@@ -87,7 +92,7 @@ class Item extends React.Component {
               :
               <Text style={styles.timestamp}>{loc.general.unconfirmed}</Text>
             }
-            <Text style={styles.valueDesc} numberOfLines={3} ellipsizeMode="tail">{item.value}</Text>
+            <Text style={styles.valueDesc} numberOfLines={3} ellipsizeMode="tail">{this.stripHtml(item.value)}</Text>
           </View>
         </TouchableOpacity>
         <View style={{flexDirection: 'row'}}>
