@@ -94,6 +94,9 @@ class ShowKeyValue extends React.Component {
   }
 
   sortReplies = replies => {
+    if (!replies) {
+      return;
+    }
     return replies.sort((a, b) => {
       const btime = b.time || MAX_TIME;
       const atime = a.time || MAX_TIME;
