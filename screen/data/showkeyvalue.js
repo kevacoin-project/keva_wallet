@@ -15,7 +15,9 @@ import MIcon from 'react-native-vector-icons/MaterialIcons';
 const StyleSheet = require('../../PlatformStyleSheet');
 const KevaColors = require('../../common/KevaColors');
 import { THIN_BORDER, timeConverter } from "../../util";
-import { getReplies } from '../../class/keva-ops';
+import { getReplies, parseShareKey, getKeyValueFromTxid,
+        getNamespaceInfoFromShortCode, getHeightFromShortCode,
+        getTxIdFromShortCode } from '../../class/keva-ops';
 import { setKeyValueList } from '../../actions'
 import {
   BlueNavigationStyle,
@@ -97,6 +99,7 @@ class ShowKeyValue extends React.Component {
         value,
       });
     }
+
     this.subs = [
       this.props.navigation.addListener('willFocus', async (payload) => {
         try {
@@ -109,6 +112,31 @@ class ShowKeyValue extends React.Component {
         }
       }),
     ];
+
+    // Check if it is a shared post.
+    const shareInfo = parseShareKey(key);
+    if (!shareInfo) {
+      return;
+    }
+
+    try {
+      const {txIdShortCode, origShortCode, myShortCode} = shareInfo;
+      const txId = await getTxIdFromShortCode(BlueElectrum, txIdShortCode);
+      const kevaResult = await getKeyValueFromTxid(BlueElectrum, txId);
+      const height = getHeightFromShortCode(txIdShortCode);
+      const origInfo = await getNamespaceInfoFromShortCode(BlueElectrum, origShortCode);
+      this.setState({
+        shareKey: kevaResult.key,
+        shareValue: kevaResult.value,
+        shareTime: kevaResult.time,
+        shareHeight: height,
+        origShortCode,
+        myShortCode,
+        origName: origInfo.displayName,
+      });
+    } catch (err) {
+      console.warn(err);
+    }
   }
 
   componentWillUnmount () {
@@ -174,6 +202,42 @@ class ShowKeyValue extends React.Component {
     }
   }
 
+  getShareContent = () => {
+    if (!this.state.shareValue) {
+      return null;
+    }
+    const {shareValue, shareTime, shareHeight, origName, origShortCode} = this.state;
+    return (
+      <View style={{backgroundColor: '#fff'}}>
+        <View style={styles.shareContainer}>
+          <View>
+            <View style={{flexDirection: 'row'}}>
+              <Text style={styles.sender} numberOfLines={1} ellipsizeMode="tail">
+                {origName + ' '}
+              </Text>
+              <TouchableOpacity onPress={() => this.copyString(origShortCode)}>
+                <Text style={styles.shortCode}>
+                  {`@${origShortCode}`}
+                </Text>
+              </TouchableOpacity>
+              {(shareTime > 0) ?
+                <Text style={styles.timestamp}>{'  ' + timeConverter(shareTime)}</Text>
+                :
+                <Text style={styles.timestamp}>{loc.general.unconfirmed}</Text>
+              }
+            </View>
+          </View>
+          <HTMLView value={`${shareValue}`}
+            addLineBreaks={false}
+            stylesheet={htmlStyles}
+            nodeComponentProps={{selectable: true}}
+            renderNode={this.renderNode}
+          />
+        </View>
+      </View>
+    );
+  }
+
   render() {
     let {isRaw, value, key} = this.state;
     const replies = this.props.navigation.getParam('replies');
@@ -195,6 +259,7 @@ class ShowKeyValue extends React.Component {
             />
           }
         </View>
+        { this.getShareContent() }
         <View style={styles.actionContainer}>
           <View style={{flexDirection: 'row'}}>
             <TouchableOpacity onPress={() => this.onReply()} style={{flexDirection: 'row'}}>
@@ -336,6 +401,17 @@ var styles = StyleSheet.create({
     paddingLeft: 3,
     paddingRight: 7,
     height: '100%',
+  },
+  shareContainer: {
+    flexDirection: 'column',
+    justifyContent: 'flex-start',
+    backgroundColor: '#fff',
+    paddingHorizontal: 10,
+    paddingVertical: 10,
+    borderWidth: THIN_BORDER,
+    borderColor: KevaColors.cellBorder,
+    borderRadius: 12,
+    margin: 10,
   },
 });
 

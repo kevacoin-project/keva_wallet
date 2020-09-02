@@ -747,7 +747,14 @@ export async function getTxShortCode(ecl, txid, height) {
   return shortCode;
 }
 
-export async function getNamespaceFromShortCode(ecl, shortCode) {
+export function getHeightFromShortCode(shortCode) {
+  // The first digit is the length of the block height.
+  let len = parseInt(shortCode.charAt(0));
+  let height = parseInt(shortCode.substring(1, len + 1));
+  return height;
+}
+
+export async function getTxIdFromShortCode(ecl, shortCode) {
   let prefix = parseInt(shortCode.substring(0, 1));
   let height = shortCode.substring(1, 1 + prefix);
   let pos = shortCode.substring(1 + prefix, 2 + prefix);
@@ -902,7 +909,7 @@ export async function getKeyValuesFromTxid(ecl, transactions, txid, keyValueList
 }
 
 export async function getKeyValuesFromShortCode(ecl, transactions, shortCode, keyValueList, cb) {
-  let txid = await getNamespaceFromShortCode(ecl, shortCode);
+  let txid = await getTxIdFromShortCode(ecl, shortCode);
   return getKeyValuesFromTxid(ecl, transactions, txid, keyValueList, cb);
 }
 
@@ -949,7 +956,7 @@ export async function findOtherNamespace(ecl, txidOrShortCode) {
     // It is txid;
     txid = txidOrShortCode;
   } else {
-    txid = await getNamespaceFromShortCode(ecl, txidOrShortCode);
+    txid = await getTxIdFromShortCode(ecl, txidOrShortCode);
   }
 
   const transactions = [];
@@ -1015,7 +1022,7 @@ export async function getReplies(ecl, rootAddress, cb) {
       const h = history.find(h => h.tx_hash == tx.txid);
       resultJson.height = h.height;
 
-      const nsRootId = await getNamespaceFromShortCode(ecl, shortCode);
+      const nsRootId = await getTxIdFromShortCode(ecl, shortCode);
       let resultReplier = await getNamespaceDataFromTx(ecl, [], nsRootId);
       if (!resultReplier) {
         continue;
@@ -1154,4 +1161,29 @@ export async function shareKeyValue(ecl, wallet, requestedSatPerByte, namespaceI
   psbt.finalizeAllInputs();
   let hexTx = psbt.extractTransaction(true).toHex();
   return {tx: hexTx, fee, cost: REPLY_COST};
+}
+
+export async function getKeyValueFromTxid(ecl, txid) {
+  const tx = await ecl.blockchainTransaction_get(txid, true);
+  const vout = tx.vout;
+  for (let v of vout) {
+    let result = parseKeva(v.scriptPubKey.asm);
+    if (result) {
+      let resultJson = kevaToJson(result);
+      resultJson.time = tx.time;
+      return resultJson;
+    }
+  }
+
+  return null;
+}
+
+export async function getNamespaceInfoFromShortCode(ecl, shortCode) {
+  const nsRootId = await getTxIdFromShortCode(ecl, shortCode);
+  let nsData = await getNamespaceDataFromTx(ecl, [], nsRootId);
+  if (!nsData) {
+    return;
+  }
+  const nsInfo = kevaToJson(nsData.result);
+  return nsInfo;
 }

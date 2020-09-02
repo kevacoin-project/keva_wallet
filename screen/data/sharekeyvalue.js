@@ -440,12 +440,4 @@ var styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 10,
   },
-  quote: {
-    borderLeftWidth: 4,
-    borderColor: KevaColors.cellBorder,
-    width: 0,
-    marginLeft: 10,
-    marginRight: 7,
-    height: '100%',
-  }
 });
