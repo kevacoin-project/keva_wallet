@@ -92,13 +92,14 @@ class ShowKeyValue extends React.Component {
   }
 
   async componentDidMount() {
-    const {key, value} = this.props.navigation.state.params;
-    if (key && key.length > 0 && value && value.length > 0) {
-      this.setState({
-        key,
-        value,
-      });
-    }
+    const {key, value, replies, shares} = this.props.navigation.state.params;
+
+    this.setState({
+      key,
+      value,
+      replies,
+      shares
+    });
 
     this.subs = [
       this.props.navigation.addListener('willFocus', async (payload) => {
@@ -286,9 +287,7 @@ class ShowKeyValue extends React.Component {
   }
 
   render() {
-    let {isRaw, value, key} = this.state;
-    const replies = this.props.navigation.getParam('replies');
-    const shares = this.props.navigation.getParam('shares');
+    let {isRaw, value, key, replies, shares} = this.state;
 
     const listHeader = (
       <View style={styles.container}>
