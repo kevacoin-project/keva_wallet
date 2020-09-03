@@ -239,6 +239,14 @@ class ShowKeyValue extends React.Component {
     }
   }
 
+  copyString = (str) => {
+    Clipboard.setString(str);
+    Toast.show(loc.general.copiedToClipboard, {
+      position: Toast.positions.TOP,
+      backgroundColor: "#53DD6C",
+    });
+  }
+
   getShareContent = () => {
     if (!this.state.shareValue) {
       return null;
