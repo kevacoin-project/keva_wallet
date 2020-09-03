@@ -781,7 +781,7 @@ const VERBOSE = true;
 
 // Address is the root address, i.e. the address that is involved in
 // namespace creation.
-async function traverseKeyValues(ecl, namespaceId, transactions, currentkeyValueList, cb) {
+async function traverseKeyValues(ecl, namespaceId, currentkeyValueList, cb) {
   const nsScriptHash = getNamespaceScriptHash(namespaceId);
   const history = await ecl.blockchainScripthash_getHistory(nsScriptHash);
   // Only need to fetch the txs that are not in the current list, or have different height.
@@ -860,15 +860,15 @@ export function mergeKeyValueList(origkeyValues) {
   return keyValues.reverse();
 }
 
-export async function getKeyValuesFromTxid(ecl, transactions, txid, keyValueList, cb) {
-  let result = await getNamespaceDataFromTx(ecl, transactions, txid);
+export async function getKeyValuesFromTxid(ecl, txid, keyValueList, cb) {
+  let result = await getNamespaceDataFromTx(ecl, [], txid);
   const namespaceId = kevaToJson(result.result).namespaceId;
-  return traverseKeyValues(ecl, namespaceId, transactions, keyValueList, cb);
+  return traverseKeyValues(ecl, namespaceId, keyValueList, cb);
 }
 
-export async function getKeyValuesFromShortCode(ecl, transactions, shortCode, keyValueList, cb) {
+export async function getKeyValuesFromShortCode(ecl, shortCode, keyValueList, cb) {
   let txid = await getTxIdFromShortCode(ecl, shortCode);
-  return getKeyValuesFromTxid(ecl, transactions, txid, keyValueList, cb);
+  return getKeyValuesFromTxid(ecl, txid, keyValueList, cb);
 }
 
 export async function findMyNamespaces(wallet, ecl) {

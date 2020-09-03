@@ -193,18 +193,12 @@ class KeyValues extends React.Component {
 
   fetchKeyValues = async () => {
     let {navigation, dispatch, keyValueList} = this.props;
-    const namespaceId = navigation.getParam('namespaceId');
-    const shortCode = navigation.getParam('shortCode');
-    const txid = navigation.getParam('txid');
-    const rootAddress = navigation.getParam('rootAddress');
-    const walletId = navigation.getParam('walletId');
+    const {namespaceId, shortCode, txid, rootAddress, walletId} = navigation.state.params;
     const wallets = BlueApp.getWallets();
     this.wallet = wallets.find(w => w.getID() == walletId);
-    let transactions = [];
     if (this.wallet) {
       await this.wallet.fetchBalance();
       await this.wallet.fetchTransactions();
-      transactions = this.wallet.getTransactions();
     }
 
     let kvList = keyValueList.keyValues[namespaceId];
@@ -215,9 +209,9 @@ class KeyValues extends React.Component {
 
     let keyValues;
     if (shortCode) {
-      keyValues = await getKeyValuesFromShortCode(BlueElectrum, transactions, shortCode.toString(), kvList, cb);
+      keyValues = await getKeyValuesFromShortCode(BlueElectrum, shortCode.toString(), kvList, cb);
     } else if (txid) {
-      keyValues = await getKeyValuesFromTxid(BlueElectrum, transactions, txid, kvList, cb);
+      keyValues = await getKeyValuesFromTxid(BlueElectrum, txid, kvList, cb);
     }
 
     if (!keyValues) {
