@@ -120,7 +120,8 @@ class KeyValues extends React.Component {
       currentPage: 0,
       showDeleteModal: false,
       isRefreshing: false,
-      scanningHeight: 0,
+      totalToFetch: 0,
+      fetched: 0,
     };
   }
 
@@ -186,8 +187,8 @@ class KeyValues extends React.Component {
     }
   }
 
-  progressCallback = (scanningHeight) => {
-    this.setState({scanningHeight});
+  progressCallback = (totalToFetch, fetched) => {
+    this.setState({totalToFetch, fetched});
   }
 
   fetchKeyValues = async () => {
@@ -523,7 +524,9 @@ class KeyValues extends React.Component {
         {this.getDeleteModal()}
         {
           (list.length == 0) &&
-          <Text style={{paddingTop: 20, alignSelf: 'center', color: KevaColors.okColor, fontSize: 16}}>{loc.namespaces.scanning_block} {this.state.scanningHeight} ...</Text>
+          <Text style={{paddingTop: 20, alignSelf: 'center', color: KevaColors.okColor, fontSize: 16}}>
+            {loc.namespaces.scanning_block} { this.state.fetched + ' / ' + this.state.totalToFetch } ...
+          </Text>
         }
         {
           mergeList &&

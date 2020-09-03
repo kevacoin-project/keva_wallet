@@ -41,7 +41,7 @@ module.exports = {
     multiaddress_wallet: 'Only multiple-address wallet is supported.',
     creating_tx: 'Creating Transaction ...',
     please_wait: 'This will take about 10 seconds.',
-    scanning_block: 'Scanning block',
+    scanning_block: 'Fetching transactions:',
     refreshing: 'Refreshing data ...',
     default_share: 'A post from',
   },

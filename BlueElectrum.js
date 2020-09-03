@@ -361,7 +361,7 @@ function txNeedUpdate(tx) {
   return (!tx || !tx.confirmations || tx.confirmations < 10)
 }
 
-module.exports.multiGetTransactionByTxid = async function(txids, batchsize, verbose) {
+module.exports.multiGetTransactionByTxid = async function(txids, batchsize, verbose, cb) {
   batchsize = batchsize || 45;
   // this value is fine-tuned so althrough wallets in test suite will occasionally
   // throw 'response too large (over 1,000,000 bytes', test suite will pass
@@ -373,8 +373,11 @@ module.exports.multiGetTransactionByTxid = async function(txids, batchsize, verb
   // Filter out those already in cache.
   let txidsToFetch;
   let cachedTxs = await BlueApp.getMultiTxFromDisk(txids);
+
   txidsToFetch = txids.filter(t => txNeedUpdate(cachedTxs[t]));
 
+  let totalToFetch = txidsToFetch.length;
+  let fetched = 0;
   let chunks = splitIntoChunks(txidsToFetch, batchsize);
   for (let chunk of chunks) {
     let results = [];
@@ -405,6 +408,10 @@ module.exports.multiGetTransactionByTxid = async function(txids, batchsize, verb
     } else {
       let toast = showStatus("Getting txs: " + chunk.length);
       results = await mainClient.blockchainTransaction_getBatch(chunk, verbose);
+      if (cb) {
+        fetched += chunk.length;
+        cb(totalToFetch, fetched);
+      }
       hideStatus(toast);
     }
 

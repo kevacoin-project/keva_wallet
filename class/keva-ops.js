@@ -153,6 +153,21 @@ export function toScriptHash(addr) {
   return reversedHash.toString('hex');
 }
 
+export function getNamespaceScriptHash(namespaceId) {
+  let emptyBuffer = Buffer.alloc(0);
+  let bscript = bitcoin.script;
+  let nsScript = bscript.compile([
+    KEVA_OP_PUT,
+    namespaceToHex(namespaceId),
+    emptyBuffer,
+    bscript.OPS.OP_2DROP,
+    bscript.OPS.OP_DROP,
+    bscript.OPS.OP_RETURN]);
+  let hash = bitcoin.crypto.sha256(nsScript);
+  let reversedHash = Buffer.from(reverse(hash));
+  return reversedHash.toString('hex');
+}
+
 export async function getNamespaceDataFromTx(ecl, transactions, txidStart, nsStart) {
   let stack = [];
   stack.push([txidStart, nsStart]);
@@ -766,122 +781,66 @@ const VERBOSE = true;
 
 // Address is the root address, i.e. the address that is involved in
 // namespace creation.
-async function traverseKeyValues(ecl, rootAddress, namespaceId, transactions, currentkeyValueList, cb) {
+async function traverseKeyValues(ecl, namespaceId, transactions, currentkeyValueList, cb) {
+  const nsScriptHash = getNamespaceScriptHash(namespaceId);
+  const history = await ecl.blockchainScripthash_getHistory(nsScriptHash);
+  // Only need to fetch the txs that are not in the current list, or have different height.
+  let txsToFetch = [];
+  currentkeyValueList = currentkeyValueList || [];
+  history.forEach(h => {
+    const same = currentkeyValueList.find(c => (c.tx == h.tx_hash) && (c.height == h.height));
+    if (same) {
+      // No need to update.
+      return;
+    }
+    txsToFetch.push(h.tx_hash);
+  });
+
+  if (txsToFetch.length == 0) {
+    // No changes, return the original ones.
+    return currentkeyValueList;
+  }
+
+  const txsMap = await ecl.multiGetTransactionByTxid(txsToFetch, 20, VERBOSE, cb);
+  let txs = [];
+  for (let t of txsToFetch) {
+    txs.push(txsMap[t]);
+  }
   let results = [];
-  let txvoutsDone = {};
-  let stack = [];
-  let resultMap = {};
-  let txChild = {};
-  let startAddress;
-  let recheckCount = 0;
-  if (currentkeyValueList && currentkeyValueList.length > 0) {
-    // We need to check all the unconfirmed transactions.
-    let uncofirmedCount = currentkeyValueList.filter(kv => kv.height <= 0).length;
-    if (uncofirmedCount == 0) {
-      recheckCount = 1;
-    } else {
-      recheckCount = (currentkeyValueList.length > uncofirmedCount) ? (uncofirmedCount + 1) : uncofirmedCount;
-    }
-    startAddress = currentkeyValueList[currentkeyValueList.length - recheckCount].address;
-  } else {
-    startAddress = rootAddress;
-  }
-
-  stack.push(startAddress);
-  let firstTxOut;
-  while (stack.length > 0) {
-    let address = stack.pop();
-    let history = await ecl.blockchainScripthash_getHistory(toScriptHash(address));
-    let txsToFetch = history.map(h => h.tx_hash);
-    let txs;
-    if (transactions) {
-      txs = transactions.filter(tx => txsToFetch.includes(tx.txid));
-    }
-    if (txs.length != txsToFetch.length) {
-      txs = await ecl.blockchainTransaction_getBatch(txsToFetch, VERBOSE);
-    }
-    for (let i = 0; i < txs.length; i++) {
-      let tx = txs[i].result || txs[i];
-      // From transactions, tx.outputs
-      // From server: tx.vout
-      const vout = tx.outputs || tx.vout;
-      for (let v of vout) {
-        let txvout = tx.txid + v.n.toString();
-        if (txvoutsDone[txvout]) {
-          continue;
-        }
-        let result = parseKeva(v.scriptPubKey.asm);
-        if (!result) {
-          txvoutsDone[txvout] = 1;
-          continue;
-        }
-        address = v.scriptPubKey.addresses[0];
-        let resultJson = kevaToJson(result);
-        if (resultJson.namespaceId != namespaceId) {
-          continue;
-        }
-        resultJson.tx = tx.txid;
-        let h = history.find(h => h.tx_hash == tx.txid);
-        resultJson.height = h.height;
-        resultJson.n = v.n;
-        resultJson.time = tx.time;
-        resultJson.address = address;
-        resultMap[txvout] = resultJson;
-        if (cb) {
-          // Report progress.
-          cb(resultJson.height);
-        }
-        const vins = tx.inputs || tx.vin;
-        let hasParent = false;
-        let parents = [];
-        for (let vin of vins) {
-          parents.push(vin.txid + vin.vout);
-          if (resultMap[vin.txid + vin.vout]) {
-            txChild[vin.txid + vin.vout] = txvout;
-            hasParent = true;
-            break;
-          }
-        }
-
-        if (address == startAddress) {
-          firstTxOut = txvout;
-        }
-
-        if (!hasParent && address != startAddress) {
-          continue;
-        }
-        txvoutsDone[txvout] = 1;
-        stack.push(address);
+  for (let i = 0; i < txs.length; i++) {
+    let tx = txs[i].result || txs[i];
+    // From transactions, tx.outputs
+    // From server: tx.vout
+    const vout = tx.outputs || tx.vout;
+    for (let v of vout) {
+      let result = parseKeva(v.scriptPubKey.asm);
+      if (!result) {
+        continue;
       }
+      let resultJson = kevaToJson(result);
+      resultJson.tx = tx.txid;
+      const h = history.find(h => h.tx_hash == tx.txid);
+      resultJson.height = h.height;
+      resultJson.n = v.n;
+      resultJson.time = tx.time;
+      address = v.scriptPubKey.addresses[0];
+      resultJson.address = address;
+      results.push(resultJson);
     }
   }
 
-  if (!firstTxOut) {
-    return [];
+  // Merge the results. Update the existing ones, and append the rest
+  // to the end;
+  for (let c of currentkeyValueList) {
+    const foundIndex = results.findIndex(r => (r.tx == c.tx));
+    if (foundIndex >= 0) {
+      // Update height in case it is different.
+      c.height = results[foundIndex].height;
+      results.splice(foundIndex, 1);
+    }
   }
 
-  results.push(resultMap[firstTxOut]);
-  let nextTxVout = txChild[firstTxOut];
-  while (nextTxVout) {
-    results.push(resultMap[nextTxVout]);
-    nextTxVout = txChild[nextTxVout];
-  }
-
-  if (startAddress == rootAddress) {
-    return results;
-  }
-
-  let currentIndex;
-  for (let i = 0; i < recheckCount; i++) {
-    // Rechecked ones only need to update height.
-    currentIndex = currentkeyValueList.length + i - recheckCount;
-    currentkeyValueList[currentIndex].height = results[i].height;
-    currentkeyValueList[currentIndex].time = results[i].time;
-  }
-  results.splice(0, recheckCount);
-
-  let mergedResults = [...currentkeyValueList, ...results];
-  return mergedResults;
+  return [...currentkeyValueList, ...results];
 }
 
 export function mergeKeyValueList(origkeyValues) {
@@ -903,9 +862,8 @@ export function mergeKeyValueList(origkeyValues) {
 
 export async function getKeyValuesFromTxid(ecl, transactions, txid, keyValueList, cb) {
   let result = await getNamespaceDataFromTx(ecl, transactions, txid);
-  let address = result.address;
   const namespaceId = kevaToJson(result.result).namespaceId;
-  return traverseKeyValues(ecl, address, namespaceId, transactions, keyValueList, cb);
+  return traverseKeyValues(ecl, namespaceId, transactions, keyValueList, cb);
 }
 
 export async function getKeyValuesFromShortCode(ecl, transactions, shortCode, keyValueList, cb) {
