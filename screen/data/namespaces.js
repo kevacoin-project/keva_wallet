@@ -1087,7 +1087,7 @@ var styles = StyleSheet.create({
     paddingVertical: 5,
     paddingHorizontal: 9,
     android: {
-      top: 1,
+      top: 4,
     },
     ios: {
       top: 3,
