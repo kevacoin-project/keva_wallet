@@ -905,13 +905,18 @@ export async function findMyNamespaces(wallet, ecl) {
   return namespaces;
 }
 
-export async function findOtherNamespace(ecl, txidOrShortCode) {
+export async function findOtherNamespace(ecl, nsidOrShortCode) {
   let txid;
-  if (txidOrShortCode.length > 20) {
-    // It is txid;
-    txid = txidOrShortCode;
+  if (nsidOrShortCode.length > 20) {
+    // It is nsid;
+    const nsid = nsidOrShortCode;
+    const history = await ecl.blockchainScripthash_getHistory(getNamespaceScriptHash(nsid));
+    if (!history || history.length == 0) {
+      return null;
+    }
+    txid = history[0].tx_hash;
   } else {
-    txid = await getTxIdFromShortCode(ecl, txidOrShortCode);
+    txid = await getTxIdFromShortCode(ecl, nsidOrShortCode);
   }
 
   const transactions = [];

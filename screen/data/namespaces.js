@@ -570,7 +570,7 @@ class OtherNamespaces extends React.Component {
       const order = otherNamespaceList.order;
       const namespaces = otherNamespaceList.namespaces;
       for (let ns of Object.keys(namespaces)) {
-        const namespace = await findOtherNamespace(BlueElectrum, namespaces[ns].rootTxid);
+        const namespace = await findOtherNamespace(BlueElectrum, namespaces[ns].shortCode);
         dispatch(setOtherNamespaceList(namespace, order));
       }
     } catch (err) {
@@ -735,17 +735,8 @@ class OtherNamespaces extends React.Component {
             }
           >
             <Image source={require('../../img/other_no_data.png')} style={{ width: SCREEN_WIDTH*0.33, height: SCREEN_WIDTH*0.33, marginBottom: 20 }} />
-            <Text style={[styles.emptyMessage, { marginBottom: 7 }]}>
+            <Text style={[styles.emptyMessage, { marginBottom: 7 }]} selectable>
               {loc.namespaces.click_search_btn}
-            </Text>
-            <Icon name={'md-search'}
-              style={[styles.addIcon, {color: KevaColors.inactiveText}]}
-              size={28} />
-            <Text style={[styles.emptyMessage, styles.help, {marginTop: 10}]}>
-              {loc.namespaces.explain_tx}
-            </Text>
-            <Text style={[styles.emptyMessage, styles.help, {marginTop: 10}]}>
-              {loc.namespaces.explain_ns}
             </Text>
           </ScrollView>
         }
