@@ -844,6 +844,7 @@ export async function fetchKeyValueList(ecl, completeHistory, currentkeyValueLis
     if (foundIndex >= 0) {
       // Update height in case it is different.
       c.height = results[foundIndex].height;
+      c.time = results[foundIndex].time;
       results.splice(foundIndex, 1);
     }
   }
