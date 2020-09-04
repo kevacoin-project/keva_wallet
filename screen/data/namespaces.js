@@ -1065,8 +1065,8 @@ var styles = StyleSheet.create({
   textInput:
   {
     flex: 1,
-    borderRadius: 8,
-    backgroundColor: '#e2e2e3',
+    borderRadius: 10,
+    backgroundColor: '#f1f3f4',
     android: {
       paddingTop: 5,
       paddingBottom: 5,
