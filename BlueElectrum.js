@@ -642,7 +642,15 @@ function txhexToElectrumTransaction(txhex) {
 
 
 module.exports.blockchainTransaction_get = async function(tx_hash, verbose) {
-  return await mainClient.blockchainTransaction_get(tx_hash, verbose);
+  const cachedTx = await BlueApp.getTxFromDisk(tx_hash);
+  if (cachedTx) {
+    return cachedTx;
+  }
+  const tx = await mainClient.blockchainTransaction_get(tx_hash, verbose);
+  if (tx) {
+    await BlueApp.saveTxToDisk(tx_hash, tx);
+  }
+  return tx;
 }
 
 module.exports.blockchainTransaction_getBatch = async function(tx_hash, verbose) {
