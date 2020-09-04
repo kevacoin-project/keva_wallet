@@ -981,14 +981,6 @@ var styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderRadius: 12,
     marginTop: 14,
-    shadowColor: "#aaa",
-    shadowOffset: {
-      width: 0,
-      height: 9,
-    },
-    shadowOpacity: 0.50,
-    shadowRadius: 12.35,
-    elevation: 10,
   },
   cardTitleText: {
     fontSize: 17,
