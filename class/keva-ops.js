@@ -782,13 +782,14 @@ const FAST_LOAD = 20;
 
 // Address is the root address, i.e. the address that is involved in
 // namespace creation.
-async function traverseKeyValues(ecl, namespaceId, currentkeyValueList, isFast, cb) {
-  const nsScriptHash = getNamespaceScriptHash(namespaceId);
-  let history = await ecl.blockchainScripthash_getHistory(nsScriptHash);
+export async function fetchKeyValueList(ecl, completeHistory, currentkeyValueList, isFast, cb) {
 
-  if (isFast && history.length > FAST_LOAD) {
+  let history;
+  if (isFast && completeHistory.length > FAST_LOAD) {
     // Only load some of the latest results.
-    history = history.slice(history.length - FAST_LOAD);
+    history = completeHistory.slice(completeHistory.length - FAST_LOAD);
+  } else {
+    history = completeHistory;
   }
 
   // Only need to fetch the txs that are not in the current list, or have different height.
@@ -865,30 +866,6 @@ export function mergeKeyValueList(origkeyValues) {
     }
   }
   return keyValues.reverse();
-}
-
-export async function getKeyValuesFromTxid(ecl, txid, keyValueList, cb) {
-  let result = await getNamespaceDataFromTx(ecl, [], txid);
-  const namespaceId = kevaToJson(result.result).namespaceId;
-  return traverseKeyValues(ecl, namespaceId, keyValueList, false, cb);
-}
-
-// Faster version of getKeyValuesFromTxid, only loads part of the results.
-export async function getKeyValuesFromTxidFast(ecl, txid, keyValueList, cb) {
-  let result = await getNamespaceDataFromTx(ecl, [], txid);
-  const namespaceId = kevaToJson(result.result).namespaceId;
-  return traverseKeyValues(ecl, namespaceId, keyValueList, true, cb);
-}
-
-export async function getKeyValuesFromShortCode(ecl, shortCode, keyValueList, cb) {
-  let txid = await getTxIdFromShortCode(ecl, shortCode);
-  return getKeyValuesFromTxid(ecl, txid, keyValueList, cb);
-}
-
-// Faster version of getKeyValuesFromShortCode, only loads part of the results.
-export async function getKeyValuesFromShortCodeFast(ecl, shortCode, keyValueList, cb) {
-  let txid = await getTxIdFromShortCode(ecl, shortCode);
-  return getKeyValuesFromTxidFast(ecl, txid, keyValueList, cb);
 }
 
 export async function findMyNamespaces(wallet, ecl) {

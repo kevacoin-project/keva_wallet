@@ -24,9 +24,9 @@ import MIcon from 'react-native-vector-icons/MaterialIcons';
 import ActionSheet from 'react-native-actionsheet';
 import { connect } from 'react-redux'
 import { setKeyValueList, CURRENT_KEYVALUE_LIST_VERSION } from '../../actions'
-import { getKeyValuesFromShortCode, getKeyValuesFromTxid,
-         getKeyValuesFromShortCodeFast, getKeyValuesFromTxidFast,
-         deleteKeyValue, mergeKeyValueList, getRepliesAndShares
+import {
+        fetchKeyValueList, getNamespaceScriptHash,
+        deleteKeyValue, mergeKeyValueList, getRepliesAndShares
         } from '../../class/keva-ops';
 import Toast from 'react-native-root-toast';
 import StepModal from "../../common/StepModalWizard";
@@ -194,14 +194,8 @@ class KeyValues extends React.Component {
     this.setState({totalToFetch, fetched});
   }
 
-  fastFetchKeyValues = async (dispatch, namespaceId, shortCode, txid, rootAddress, kvList, cb) => {
-    let keyValues;
-    if (shortCode) {
-      keyValues = await getKeyValuesFromShortCodeFast(BlueElectrum, shortCode.toString(), kvList, cb);
-    } else if (txid) {
-      keyValues = await getKeyValuesFromTxidFast(BlueElectrum, txid, kvList, cb);
-    }
-
+  fastFetchKeyValues = async (dispatch, namespaceId, history, rootAddress, kvList, cb) => {
+    let keyValues = await fetchKeyValueList(BlueElectrum, history, kvList, true, cb);
     if (!keyValues) {
       return;
     }
@@ -231,7 +225,7 @@ class KeyValues extends React.Component {
 
   fetchKeyValues = async () => {
     let {navigation, dispatch, keyValueList} = this.props;
-    const {namespaceId, shortCode, txid, rootAddress, walletId} = navigation.state.params;
+    const {namespaceId, rootAddress, walletId} = navigation.state.params;
     const wallets = BlueApp.getWallets();
     this.wallet = wallets.find(w => w.getID() == walletId);
     if (this.wallet) {
@@ -241,19 +235,15 @@ class KeyValues extends React.Component {
 
     let kvList = keyValueList.keyValues[namespaceId];
     let cb;
+
+    const history = await BlueElectrum.blockchainScripthash_getHistory(getNamespaceScriptHash(namespaceId));
     if (!kvList || kvList.length == 0) {
       cb = this.progressCallback;
       // Show some results ASAP.
-      await this.fastFetchKeyValues(dispatch, namespaceId, shortCode, txid, rootAddress, kvList, cb);
+      await this.fastFetchKeyValues(dispatch, namespaceId, history, rootAddress, kvList, cb);
     }
 
-    let keyValues;
-    if (shortCode) {
-      keyValues = await getKeyValuesFromShortCode(BlueElectrum, shortCode.toString(), kvList, cb);
-    } else if (txid) {
-      keyValues = await getKeyValuesFromTxid(BlueElectrum, txid, kvList, cb);
-    }
-
+    let keyValues = await fetchKeyValueList(BlueElectrum, history, kvList, false, cb);
     if (!keyValues) {
       return;
     }
