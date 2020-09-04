@@ -778,12 +778,19 @@ export async function getTxIdFromShortCode(ecl, shortCode) {
 }
 
 const VERBOSE = true;
+const FAST_LOAD = 20;
 
 // Address is the root address, i.e. the address that is involved in
 // namespace creation.
-async function traverseKeyValues(ecl, namespaceId, currentkeyValueList, cb) {
+async function traverseKeyValues(ecl, namespaceId, currentkeyValueList, isFast, cb) {
   const nsScriptHash = getNamespaceScriptHash(namespaceId);
-  const history = await ecl.blockchainScripthash_getHistory(nsScriptHash);
+  let history = await ecl.blockchainScripthash_getHistory(nsScriptHash);
+
+  if (isFast && history.length > FAST_LOAD) {
+    // Only load some of the latest results.
+    history = history.slice(history.length - FAST_LOAD);
+  }
+
   // Only need to fetch the txs that are not in the current list, or have different height.
   let txsToFetch = [];
   currentkeyValueList = currentkeyValueList || [];
@@ -863,12 +870,25 @@ export function mergeKeyValueList(origkeyValues) {
 export async function getKeyValuesFromTxid(ecl, txid, keyValueList, cb) {
   let result = await getNamespaceDataFromTx(ecl, [], txid);
   const namespaceId = kevaToJson(result.result).namespaceId;
-  return traverseKeyValues(ecl, namespaceId, keyValueList, cb);
+  return traverseKeyValues(ecl, namespaceId, keyValueList, false, cb);
+}
+
+// Faster version of getKeyValuesFromTxid, only loads part of the results.
+export async function getKeyValuesFromTxidFast(ecl, txid, keyValueList, cb) {
+  let result = await getNamespaceDataFromTx(ecl, [], txid);
+  const namespaceId = kevaToJson(result.result).namespaceId;
+  return traverseKeyValues(ecl, namespaceId, keyValueList, true, cb);
 }
 
 export async function getKeyValuesFromShortCode(ecl, shortCode, keyValueList, cb) {
   let txid = await getTxIdFromShortCode(ecl, shortCode);
   return getKeyValuesFromTxid(ecl, txid, keyValueList, cb);
+}
+
+// Faster version of getKeyValuesFromShortCode, only loads part of the results.
+export async function getKeyValuesFromShortCodeFast(ecl, shortCode, keyValueList, cb) {
+  let txid = await getTxIdFromShortCode(ecl, shortCode);
+  return getKeyValuesFromTxidFast(ecl, txid, keyValueList, cb);
 }
 
 export async function findMyNamespaces(wallet, ecl) {
@@ -960,7 +980,12 @@ export async function getRepliesAndShares(ecl, rootAddress) {
   let shares = [];
   const history = await ecl.blockchainScripthash_getHistory(toScriptHash(rootAddress));
   const txsToFetch = history.map(h => h.tx_hash);
-  const txs = await ecl.blockchainTransaction_getBatch(txsToFetch, VERBOSE);
+  const txsMap = await ecl.multiGetTransactionByTxid(txsToFetch, 20, VERBOSE);
+  let txs = [];
+  for (let t of txsToFetch) {
+    txs.push(txsMap[t]);
+  }
+
   for (let i = 0; i < txs.length; i++) {
     let tx = txs[i].result || txs[i];
     // From transactions, tx.outputs

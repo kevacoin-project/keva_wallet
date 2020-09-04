@@ -24,7 +24,10 @@ import MIcon from 'react-native-vector-icons/MaterialIcons';
 import ActionSheet from 'react-native-actionsheet';
 import { connect } from 'react-redux'
 import { setKeyValueList, CURRENT_KEYVALUE_LIST_VERSION } from '../../actions'
-import { getKeyValuesFromShortCode, getKeyValuesFromTxid, deleteKeyValue, mergeKeyValueList, getRepliesAndShares } from '../../class/keva-ops';
+import { getKeyValuesFromShortCode, getKeyValuesFromTxid,
+         getKeyValuesFromShortCodeFast, getKeyValuesFromTxidFast,
+         deleteKeyValue, mergeKeyValueList, getRepliesAndShares
+        } from '../../class/keva-ops';
 import Toast from 'react-native-root-toast';
 import StepModal from "../../common/StepModalWizard";
 import { timeConverter } from "../../util";
@@ -191,6 +194,41 @@ class KeyValues extends React.Component {
     this.setState({totalToFetch, fetched});
   }
 
+  fastFetchKeyValues = async (dispatch, namespaceId, shortCode, txid, rootAddress, kvList, cb) => {
+    let keyValues;
+    if (shortCode) {
+      keyValues = await getKeyValuesFromShortCodeFast(BlueElectrum, shortCode.toString(), kvList, cb);
+    } else if (txid) {
+      keyValues = await getKeyValuesFromTxidFast(BlueElectrum, txid, kvList, cb);
+    }
+
+    if (!keyValues) {
+      return;
+    }
+    dispatch(setKeyValueList(namespaceId, keyValues));
+
+    // Fetch replies.
+    const {replies, shares} = await getRepliesAndShares(BlueElectrum, rootAddress, namespaceId);
+
+    // Add the replies.
+    for (let kv of keyValues) {
+      const txReplies = replies.filter(r => kv.tx.startsWith(r.partialTxId));
+      if (txReplies && txReplies.length > 0) {
+        kv.replies = txReplies;
+      }
+    }
+
+    // Add the shares
+    for (let kv of keyValues) {
+      const txShares = shares.filter(r => kv.tx == r.sharedTxId);
+      if (txShares && txShares.length > 0) {
+        kv.shares = txShares;
+      }
+    }
+
+    dispatch(setKeyValueList(namespaceId, keyValues));
+  }
+
   fetchKeyValues = async () => {
     let {navigation, dispatch, keyValueList} = this.props;
     const {namespaceId, shortCode, txid, rootAddress, walletId} = navigation.state.params;
@@ -205,6 +243,8 @@ class KeyValues extends React.Component {
     let cb;
     if (!kvList || kvList.length == 0) {
       cb = this.progressCallback;
+      // Show some results ASAP.
+      await this.fastFetchKeyValues(dispatch, namespaceId, shortCode, txid, rootAddress, kvList, cb);
     }
 
     let keyValues;
