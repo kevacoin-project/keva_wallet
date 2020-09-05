@@ -447,6 +447,18 @@ export class AppStorage {
     return null;
   }
 
+  async getTxIdFromPos(height, pos) {
+    let txid = this.getItemStorage(height + '-' + pos);
+    if (txid) {
+      return txid;
+    }
+    return null;
+  }
+
+  async savePosTxId(height, pos, txid) {
+    await this.setItemStorage(height + '-' + pos, txid);
+  }
+
   splitIntoChunks(arr, chunkSize) {
     let groups = [];
     let i;

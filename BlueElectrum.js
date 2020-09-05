@@ -666,5 +666,13 @@ module.exports.blockchainTransaction_getMerkle = async function(txid, height, me
 }
 
 module.exports.blockchainTransaction_idFromPos = async function(height, pos) {
-  return await mainClient.blockchainTransaction_idFromPos(height, pos);
+  let txid = await BlueApp.getTxIdFromPos(height, pos);
+  if (txid) {
+    return txid;
+  }
+  txid = await mainClient.blockchainTransaction_idFromPos(height, pos);
+  if (txid) {
+    await BlueApp.savePosTxId(height, pos, txid);
+  }
+  return txid;
 }
