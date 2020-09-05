@@ -20,10 +20,14 @@ let BlueElectrum = require('../../BlueElectrum');
 import { FALLBACK_DATA_PER_BYTE_FEE } from '../../models/networkTransactionFees';
 
 import Icon from 'react-native-vector-icons/Ionicons';
+import MIcon from 'react-native-vector-icons/MaterialIcons';
 import ActionSheet from 'react-native-actionsheet';
 import { connect } from 'react-redux'
 import { setKeyValueList, CURRENT_KEYVALUE_LIST_VERSION } from '../../actions'
-import { getKeyValuesFromShortCode, getKeyValuesFromTxid, deleteKeyValue, mergeKeyValueList } from '../../class/keva-ops';
+import {
+        fetchKeyValueList, getNamespaceScriptHash,
+        deleteKeyValue, mergeKeyValueList, getRepliesAndShares
+        } from '../../class/keva-ops';
 import Toast from 'react-native-root-toast';
 import StepModal from "../../common/StepModalWizard";
 import { timeConverter } from "../../util";
@@ -54,13 +58,17 @@ class Item extends React.Component {
     }
   }
 
+  stripHtml = str => {
+    return str.replace(/(<([^>]+)>)/gi, "");
+  }
+
   render() {
-    let {item, onShow, namespaceId, navigation} = this.props;
+    let {item, onShow, onReply, onShare, namespaceId, navigation} = this.props;
     const {isOther} = navigation.state.params;
 
     return (
       <View style={styles.card}>
-        <TouchableOpacity onPress={() => onShow(item.key, item.value)}>
+        <TouchableOpacity onPress={() => onShow(item.key, item.value, item.tx, item.replies, item.shares, item.height)}>
           <View style={{flex:1,paddingHorizontal:10,paddingTop:2}}>
             <View style={{flexDirection:'row',alignItems:'center',justifyContent:'space-between'}}>
               <Text style={styles.keyDesc} numberOfLines={1} ellipsizeMode="tail">{item.key}</Text>
@@ -87,9 +95,19 @@ class Item extends React.Component {
               :
               <Text style={styles.timestamp}>{loc.general.unconfirmed}</Text>
             }
-            <Text style={styles.valueDesc} numberOfLines={3} ellipsizeMode="tail">{item.value}</Text>
+            <Text style={styles.valueDesc} numberOfLines={3} ellipsizeMode="tail">{this.stripHtml(item.value)}</Text>
           </View>
         </TouchableOpacity>
+        <View style={{flexDirection: 'row'}}>
+          <TouchableOpacity onPress={() => onReply(item.tx)} style={{flexDirection: 'row'}}>
+            <MIcon name="chat-bubble-outline" size={22} style={styles.talkIcon} />
+            {(item.replies && item.replies.length > 0) && <Text style={styles.count}>{item.replies.length}</Text>}
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => onShare(item.tx, item.key, item.value, item.height)} style={{flexDirection: 'row'}}>
+            <MIcon name="cached" size={22} style={styles.shareIcon} />
+            {(item.shares && item.shares.length > 0) && <Text style={styles.count}>{item.shares.length}</Text>}
+          </TouchableOpacity>
+        </View>
       </View>
     )
   }
@@ -105,7 +123,8 @@ class KeyValues extends React.Component {
       currentPage: 0,
       showDeleteModal: false,
       isRefreshing: false,
-      scanningHeight: 0,
+      totalToFetch: 0,
+      fetched: 0,
     };
   }
 
@@ -126,6 +145,7 @@ class KeyValues extends React.Component {
         <Icon name="ios-add-circle" type="octicon" size={30} color={KevaColors.actionText} />
       </TouchableOpacity>
     ),
+    headerStyle: { backgroundColor: '#fff', elevation:0, shadowColor: 'transparent', borderBottomWidth: THIN_BORDER, borderColor: KevaColors.cellBorder },
   });
 
   onDelete = (namespaceId, key) => {
@@ -170,42 +190,84 @@ class KeyValues extends React.Component {
     }
   }
 
-  progressCallback = (scanningHeight) => {
-    this.setState({scanningHeight});
+  progressCallback = (totalToFetch, fetched) => {
+    this.setState({totalToFetch, fetched});
+  }
+
+  fastFetchKeyValues = async (dispatch, namespaceId, history, rootAddress, kvList, cb) => {
+    let keyValues = await fetchKeyValueList(BlueElectrum, history, kvList, true, cb);
+    if (!keyValues) {
+      return;
+    }
+    dispatch(setKeyValueList(namespaceId, keyValues));
+
+    // Fetch replies.
+    const {replies, shares} = await getRepliesAndShares(BlueElectrum, rootAddress, namespaceId);
+
+    // Add the replies.
+    for (let kv of keyValues) {
+      const txReplies = replies.filter(r => kv.tx.startsWith(r.partialTxId));
+      if (txReplies && txReplies.length > 0) {
+        kv.replies = txReplies;
+      }
+    }
+
+    // Add the shares
+    for (let kv of keyValues) {
+      const txShares = shares.filter(r => kv.tx == r.sharedTxId);
+      if (txShares && txShares.length > 0) {
+        kv.shares = txShares;
+      }
+    }
+
+    dispatch(setKeyValueList(namespaceId, keyValues));
   }
 
   fetchKeyValues = async () => {
     let {navigation, dispatch, keyValueList} = this.props;
-    const namespaceId = navigation.getParam('namespaceId');
-    const shortCode = navigation.getParam('shortCode');
-    const txid = navigation.getParam('txid');
-    const walletId = navigation.getParam('walletId');
+    const {namespaceId, rootAddress, walletId} = navigation.state.params;
     const wallets = BlueApp.getWallets();
     this.wallet = wallets.find(w => w.getID() == walletId);
-    let transactions = [];
     if (this.wallet) {
       await this.wallet.fetchBalance();
       await this.wallet.fetchTransactions();
-      transactions = this.wallet.getTransactions();
     }
 
     let kvList = keyValueList.keyValues[namespaceId];
     let cb;
+
+    const history = await BlueElectrum.blockchainScripthash_getHistory(getNamespaceScriptHash(namespaceId));
     if (!kvList || kvList.length == 0) {
       cb = this.progressCallback;
+      // Show some results ASAP.
+      await this.fastFetchKeyValues(dispatch, namespaceId, history, rootAddress, kvList, cb);
     }
 
-    let keyValues;
-    if (shortCode) {
-      keyValues = await getKeyValuesFromShortCode(BlueElectrum, transactions, shortCode.toString(), kvList, cb);
-
-    } else if (txid) {
-      keyValues = await getKeyValuesFromTxid(BlueElectrum, transactions, txid, kvList, cb);
+    let keyValues = await fetchKeyValueList(BlueElectrum, history, kvList, false, cb);
+    if (!keyValues) {
+      return;
     }
 
-    if (keyValues) {
-      dispatch(setKeyValueList(namespaceId, keyValues));
+    // Fetch replies.
+    const {replies, shares} = await getRepliesAndShares(BlueElectrum, rootAddress, namespaceId);
+
+    // Add the replies.
+    for (let kv of keyValues) {
+      const txReplies = replies.filter(r => kv.tx.startsWith(r.partialTxId));
+      if (txReplies && txReplies.length > 0) {
+        kv.replies = txReplies;
+      }
     }
+
+    // Add the shares
+    for (let kv of keyValues) {
+      const txShares = shares.filter(r => kv.tx == r.sharedTxId);
+      if (txShares && txShares.length > 0) {
+        kv.shares = txShares;
+      }
+    }
+
+    dispatch(setKeyValueList(namespaceId, keyValues));
   }
 
   refreshKeyValues = async () => {
@@ -245,7 +307,8 @@ class KeyValues extends React.Component {
     this.isBiometricUseCapableAndEnabled = await Biometric.isBiometricUseCapableAndEnabled();
     this.subs = [
       this.props.navigation.addListener('willFocus', async (payload) => {
-        if (payload.lastState.routeName == "ShowKeyValue") {
+        const routeName = payload.lastState.routeName;
+        if (routeName == "ShowKeyValue") {
           return;
         }
         let toast;
@@ -410,13 +473,61 @@ class KeyValues extends React.Component {
     );
   }
 
-  onShow = (key, value) => {
-    const {navigation, namespaceId} = this.props;
+  onShow = (key, value, tx, replies, shares, height) => {
+    const {navigation} = this.props;
+    const rootAddress = navigation.getParam('rootAddress');
+    const isOther = navigation.getParam('isOther');
+    const namespaceId = navigation.getParam('namespaceId');
+    const shortCode = navigation.getParam('shortCode');
     navigation.navigate('ShowKeyValue', {
       namespaceId,
+      shortCode,
       key,
       value,
+      rootAddress,
+      replyTxid: tx,
+      shareTxid: tx,
+      replies,
+      shares,
+      isOther,
+      height,
     });
+  }
+
+  onReply = (replyTxid) => {
+    const {navigation, namespaceList} = this.props;
+    const {rootAddress, namespaceId} = navigation.state.params;
+    // Must have a namespace.
+    if (Object.keys(namespaceList).length == 0) {
+      Toast.show('Create a namespace first');
+      return;
+    }
+
+    navigation.navigate('ReplyKeyValue', {
+      rootAddress,
+      replyTxid
+    })
+  }
+
+  onShare = (shareTxid, key, value, height) => {
+    const {navigation, namespaceList} = this.props;
+    const rootAddress = navigation.getParam('rootAddress');
+    // Must have a namespace.
+    if (Object.keys(namespaceList).length == 0) {
+      Toast.show('Create a namespace first');
+      return;
+    }
+
+    const namespaceId = navigation.getParam('namespaceId');
+    const shortCode = navigation.getParam('shortCode');
+    navigation.navigate('ShareKeyValue', {
+      rootAddress,
+      shareTxid,
+      origKey: key,
+      origValue: value,
+      origShortCode: shortCode,
+      height,
+    })
   }
 
   render() {
@@ -437,7 +548,9 @@ class KeyValues extends React.Component {
         {this.getDeleteModal()}
         {
           (list.length == 0) &&
-          <Text style={{paddingTop: 20, alignSelf: 'center', color: KevaColors.okColor, fontSize: 16}}>{loc.namespaces.scanning_block} {this.state.scanningHeight} ...</Text>
+          <Text style={{paddingTop: 20, alignSelf: 'center', color: KevaColors.okColor, fontSize: 16}}>
+            {loc.namespaces.scanning_block} { this.state.fetched + ' / ' + this.state.totalToFetch } ...
+          </Text>
         }
         {
           mergeList &&
@@ -450,6 +563,8 @@ class KeyValues extends React.Component {
             renderItem={({item, index}) =>
               <Item item={item} key={index} dispatch={dispatch} onDelete={this.onDelete}
                 onShow={this.onShow} namespaceId={namespaceId}
+                onReply={this.onReply}
+                onShare={this.onShare}
                 navigation={navigation}
               />
             }
@@ -464,6 +579,7 @@ class KeyValues extends React.Component {
 function mapStateToProps(state) {
   return {
     keyValueList: state.keyValueList,
+    namespaceList: state.namespaceList,
   }
 }
 
@@ -472,19 +588,15 @@ export default KeyValuesScreen = connect(mapStateToProps)(KeyValues);
 var styles = StyleSheet.create({
   container: {
     flex:1,
-    backgroundColor: KevaColors.background,
   },
   listStyle: {
     flex: 1,
-    paddingTop:5,
     borderBottomWidth: 1,
     borderColor: KevaColors.cellBorder,
-    backgroundColor: KevaColors.background
   },
   card: {
     backgroundColor:'#fff',
-    marginVertical:3,
-    borderTopWidth: THIN_BORDER,
+    marginVertical:0,
     borderBottomWidth: THIN_BORDER,
     borderColor: KevaColors.cellBorder,
   },
@@ -502,6 +614,22 @@ var styles = StyleSheet.create({
   actionIcon: {
     color: KevaColors.arrowIcon,
     paddingHorizontal: 15,
+    paddingVertical: 7
+  },
+  talkIcon: {
+    color: KevaColors.arrowIcon,
+    paddingLeft: 15,
+    paddingRight: 2,
+    paddingVertical: 7
+  },
+  shareIcon: {
+    color: KevaColors.arrowIcon,
+    paddingLeft: 15,
+    paddingRight: 2,
+    paddingVertical: 7
+  },
+  count: {
+    color: KevaColors.arrowIcon,
     paddingVertical: 7
   },
   modal: {

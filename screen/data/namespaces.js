@@ -115,6 +115,7 @@ class Namespace extends React.Component {
       namespaceId: namespace.id,
       shortCode: namespace.shortCode,
       txid: namespace.txId,
+      rootAddress: namespace.rootAddress,
       walletId: namespace.walletId,
       isOther,
     });
@@ -569,7 +570,7 @@ class OtherNamespaces extends React.Component {
       const order = otherNamespaceList.order;
       const namespaces = otherNamespaceList.namespaces;
       for (let ns of Object.keys(namespaces)) {
-        const namespace = await findOtherNamespace(BlueElectrum, namespaces[ns].rootTxid);
+        const namespace = await findOtherNamespace(BlueElectrum, namespaces[ns].shortCode);
         dispatch(setOtherNamespaceList(namespace, order));
       }
     } catch (err) {
@@ -734,17 +735,8 @@ class OtherNamespaces extends React.Component {
             }
           >
             <Image source={require('../../img/other_no_data.png')} style={{ width: SCREEN_WIDTH*0.33, height: SCREEN_WIDTH*0.33, marginBottom: 20 }} />
-            <Text style={[styles.emptyMessage, { marginBottom: 7 }]}>
+            <Text style={[styles.emptyMessage, { marginBottom: 7 }]} selectable>
               {loc.namespaces.click_search_btn}
-            </Text>
-            <Icon name={'md-search'}
-              style={[styles.addIcon, {color: KevaColors.inactiveText}]}
-              size={28} />
-            <Text style={[styles.emptyMessage, styles.help, {marginTop: 10}]}>
-              {loc.namespaces.explain_tx}
-            </Text>
-            <Text style={[styles.emptyMessage, styles.help, {marginTop: 10}]}>
-              {loc.namespaces.explain_ns}
             </Text>
           </ScrollView>
         }
@@ -927,9 +919,7 @@ class Namespaces extends React.Component {
 function mapStateToProps(state) {
   return {
     namespaceList: state.namespaceList,
-    namespaceOrder: state.namespaceOrder,
     otherNamespaceList: state.otherNamespaceList,
-    otherNamespaceOrder: state.otherNamespaceOrder,
   }
 }
 
@@ -982,14 +972,6 @@ var styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderRadius: 12,
     marginTop: 14,
-    shadowColor: "#aaa",
-    shadowOffset: {
-      width: 0,
-      height: 9,
-    },
-    shadowOpacity: 0.50,
-    shadowRadius: 12.35,
-    elevation: 7,
   },
   cardTitleText: {
     fontSize: 17,
@@ -1066,8 +1048,8 @@ var styles = StyleSheet.create({
   textInput:
   {
     flex: 1,
-    borderRadius: 8,
-    backgroundColor: '#e2e2e3',
+    borderRadius: 10,
+    backgroundColor: '#f1f3f4',
     android: {
       paddingTop: 5,
       paddingBottom: 5,
@@ -1105,7 +1087,7 @@ var styles = StyleSheet.create({
     paddingVertical: 5,
     paddingHorizontal: 9,
     android: {
-      top: 1,
+      top: 4,
     },
     ios: {
       top: 3,
