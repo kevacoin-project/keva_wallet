@@ -13,6 +13,10 @@ const hexToUtf8 = convert('hex', 'utf8')
 
 const DUMMY_TXID = 'c70483b4613b18e750d0b1087ada28d713ad1e406ebc87d36f94063512c5f0dd';
 
+function waitPromise(milliseconds) {
+  return new Promise(resolve => setTimeout(resolve, milliseconds));
+}
+
 export function reverse(src) {
   let buffer = Buffer.alloc(src.length)
 
@@ -397,19 +401,24 @@ export async function scanForNamespaces(wallet) {
   return results;
 }
 
+const TRY_UTXO_COUNT = 2;
 export async function getNamespaceUtxo(wallet, namespaceId) {
-  // TODO: maybe fetch balance and transaction here?
-  await wallet.fetchUtxo();
-  const utxos = wallet.getUtxo();
-  const results = await scanForNamespaces(wallet);
-  for (let r of results) {
-    if (r.keva.namespaceId === namespaceId) {
-      for (let t of utxos) {
-        if (r.tx == t.txId && r.n == t.vout) {
-          return t;
+  for (let i = 0; i < TRY_UTXO_COUNT; i++) {
+    await wallet.fetchUtxo();
+    const utxos = wallet.getUtxo();
+    const results = await scanForNamespaces(wallet);
+    for (let r of results) {
+      if (r.keva.namespaceId === namespaceId) {
+        for (let t of utxos) {
+          if (r.tx == t.txId && r.n == t.vout) {
+            return t;
+          }
         }
       }
     }
+    // No namespace UXTO, try again.
+    await waitPromise(2000);
+    await wallet.fetchTransactions();
   }
   return null;
 }
