@@ -398,6 +398,7 @@ export async function scanForNamespaces(wallet) {
 }
 
 export async function getNamespaceUtxo(wallet, namespaceId) {
+  // TODO: maybe fetch balance and transaction here?
   await wallet.fetchUtxo();
   const utxos = wallet.getUtxo();
   const results = await scanForNamespaces(wallet);
@@ -629,7 +630,7 @@ export async function replyKeyValue(wallet, requestedSatPerByte, namespaceId, sh
 
   psbt.finalizeAllInputs();
   let hexTx = psbt.extractTransaction(true).toHex();
-  return {tx: hexTx, fee, cost: REPLY_COST};
+  return {tx: hexTx, fee, cost: REPLY_COST, key};
 }
 
 export async function deleteKeyValue(wallet, requestedSatPerByte, namespaceId, key) {

@@ -116,8 +116,8 @@ class ShowKeyValue extends React.Component {
     this.subs = [
       this.props.navigation.addListener('willFocus', async (payload) => {
         try {
-          if (payload.lastState.routeName == 'KeyValues') {
-            // No need to refresh when first entering this screen.
+          const routeName = payload.lastState.routeName;
+          if (routeName == 'KeyValues' || routeName == 'ReplyKeyValue') {
             return;
           }
           this.setState({isRefreshing: true});
@@ -177,6 +177,17 @@ class ShowKeyValue extends React.Component {
     }
   }
 
+  // Go back from the reply screen.
+  onGoBack = (reply) => {
+    // Perform an instant update. We will still fetch
+    // from the server.
+    let replies = this.state.replies;
+    replies.push(reply);
+    this.setState({
+      replies: this.sortReplies(replies),
+    });
+  }
+
   onReply = () => {
     const {navigation, namespaceList} = this.props;
     const {rootAddress, replyTxid, namespaceId} = navigation.state.params;
@@ -187,9 +198,9 @@ class ShowKeyValue extends React.Component {
     }
 
     navigation.navigate('ReplyKeyValue', {
-      targetNamespaceId: namespaceId,
       rootAddress,
-      replyTxid
+      replyTxid,
+      onGoBack: this.onGoBack,
     })
   }
 

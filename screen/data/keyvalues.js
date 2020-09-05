@@ -504,7 +504,6 @@ class KeyValues extends React.Component {
     }
 
     navigation.navigate('ReplyKeyValue', {
-      targetNamespaceId: namespaceId,
       rootAddress,
       replyTxid
     })

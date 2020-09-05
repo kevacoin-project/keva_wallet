@@ -28,7 +28,6 @@ import { connect } from 'react-redux'
 import { replyKeyValue } from '../../class/keva-ops';
 import StepModal from "../../common/StepModalWizard";
 import Biometric from '../../class/biometrics';
-import { setKeyValueList } from '../../actions'
 
 class ReplyKeyValue extends React.Component {
 
@@ -123,8 +122,8 @@ class ReplyKeyValue extends React.Component {
   }
 
   getReplyKeyValueModal = () => {
-    const { namespaceList, keyValueList, dispatch } = this.props;
-    const { targetNamespaceId, replyTxid, rootAddress } = this.props.navigation.state.params;
+    const { namespaceList } = this.props;
+    const { replyTxid, rootAddress, onGoBack } = this.props.navigation.state.params;
     if (!this.state.showKeyValueModal) {
       return null;
     }
@@ -171,9 +170,9 @@ class ReplyKeyValue extends React.Component {
                 return alert(loc.namespaces.multiaddress_wallet);
               }
               this.setState({ showNSCreationModal: true, currentPage: 1 });
-              const { tx, fee, cost } = await replyKeyValue(wallet, FALLBACK_DATA_PER_BYTE_FEE, namespaceId, shortCode, value, rootAddress, replyTxid);
+              const { tx, fee, cost, key } = await replyKeyValue(wallet, FALLBACK_DATA_PER_BYTE_FEE, namespaceId, shortCode, value, rootAddress, replyTxid);
               let feeKVA = (fee + cost) / 100000000;
-              this.setState({ showNSCreationModal: true, currentPage: 2, fee: feeKVA });
+              this.setState({ showNSCreationModal: true, currentPage: 2, fee: feeKVA, key });
               this.namespaceTx = tx;
             } catch (err) {
               console.warn(err);
@@ -291,9 +290,10 @@ class ReplyKeyValue extends React.Component {
               });
 
               // Insert the tx into the replies of the target namespace.
-              const {namespaceId, value} = this.state;
+              const {namespaceId, key, value} = this.state;
               const {shortCode, displayName} = namespaceList.namespaces[namespaceId];
               let reply = {
+                key,
                 value,
                 height: 0,
                 sender: {
@@ -301,15 +301,9 @@ class ReplyKeyValue extends React.Component {
                   displayName,
                 }
               }
-              const keyValues = keyValueList.keyValues[targetNamespaceId];
-              for (let kv of keyValues) {
-                if (kv.tx == replyTxid) {
-                  kv.replies = kv.replies || [];
-                  kv.replies.push(reply);
-                  dispatch(setKeyValueList(targetNamespaceId, keyValues));
-                  break;
-                }
-              }
+
+              // Update the previous screen.
+              onGoBack(reply);
               this.props.navigation.goBack();
             }}
           />
