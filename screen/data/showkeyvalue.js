@@ -181,7 +181,7 @@ class ShowKeyValue extends React.Component {
   onGoBack = (reply) => {
     // Perform an instant update. We will still fetch
     // from the server.
-    let replies = this.state.replies;
+    let replies = this.state.replies || [];
     replies.push(reply);
     this.setState({
       replies: this.sortReplies(replies),

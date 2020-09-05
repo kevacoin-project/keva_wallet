@@ -289,21 +289,22 @@ class ReplyKeyValue extends React.Component {
                 backgroundColor: "#53DD6C",
               });
 
-              // Insert the tx into the replies of the target namespace.
-              const {namespaceId, key, value} = this.state;
-              const {shortCode, displayName} = namespaceList.namespaces[namespaceId];
-              let reply = {
-                key,
-                value,
-                height: 0,
-                sender: {
-                  shortCode,
-                  displayName,
-                }
-              }
-
               // Update the previous screen.
-              onGoBack(reply);
+              if (onGoBack) {
+                // Insert the tx into the replies of the target namespace.
+                const {namespaceId, key, value} = this.state;
+                const {shortCode, displayName} = namespaceList.namespaces[namespaceId];
+                let reply = {
+                  key,
+                  value,
+                  height: 0,
+                  sender: {
+                    shortCode,
+                    displayName,
+                  }
+                }
+                onGoBack(reply);
+              }
               this.props.navigation.goBack();
             }}
           />
