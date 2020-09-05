@@ -42,6 +42,7 @@ module.exports = {
     scanning_block: '下载交易:',
     refreshing: '刷新数据...',
     default_share: '分享帖子',
+    namespace_unconfirmed: '命名空间尚未确认',
   },
   wallets: {
     select_wallet: '选择钱包',

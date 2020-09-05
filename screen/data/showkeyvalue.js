@@ -106,7 +106,6 @@ class ShowKeyValue extends React.Component {
 
   async componentDidMount() {
     const {key, value, replies, shares} = this.props.navigation.state.params;
-
     this.setState({
       key,
       value,
@@ -180,8 +179,7 @@ class ShowKeyValue extends React.Component {
 
   onReply = () => {
     const {navigation, namespaceList} = this.props;
-    const rootAddress = navigation.getParam('rootAddress');
-    const replyTxid = navigation.getParam('replyTxid');
+    const {rootAddress, replyTxid, namespaceId} = navigation.state.params;
     // Must have a namespace.
     if (Object.keys(namespaceList).length == 0) {
       Toast.show('Create a namespace first');
@@ -189,6 +187,7 @@ class ShowKeyValue extends React.Component {
     }
 
     navigation.navigate('ReplyKeyValue', {
+      targetNamespaceId: namespaceId,
       rootAddress,
       replyTxid
     })
@@ -196,9 +195,7 @@ class ShowKeyValue extends React.Component {
 
   fetchReplies = async () => {
     const {dispatch, navigation, keyValueList} = this.props;
-    const namespaceId = navigation.getParam('namespaceId');
-    const rootAddress = navigation.getParam('rootAddress');
-    const thisTxId = navigation.getParam('replyTxid');
+    const {rootAddress, replyTxid, namespaceId} = navigation.state.params;
 
     try {
       // Fetch replies.
@@ -225,7 +222,7 @@ class ShowKeyValue extends React.Component {
       dispatch(setKeyValueList(namespaceId, keyValues));
 
       // Update the replies and shares for this.
-      const thisKV = keyValues.find(kv => kv.tx == thisTxId);
+      const thisKV = keyValues.find(kv => kv.tx == replyTxid);
       this.setState({
         isRefreshing: false,
         replies: this.sortReplies(thisKV.replies),

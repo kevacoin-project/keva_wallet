@@ -28,6 +28,7 @@ import { connect } from 'react-redux'
 import { replyKeyValue } from '../../class/keva-ops';
 import StepModal from "../../common/StepModalWizard";
 import Biometric from '../../class/biometrics';
+import { setKeyValueList } from '../../actions'
 
 class ReplyKeyValue extends React.Component {
 
@@ -122,8 +123,8 @@ class ReplyKeyValue extends React.Component {
   }
 
   getReplyKeyValueModal = () => {
-    const { namespaceList } = this.props;
-    const { replyTxid, rootAddress } = this.props.navigation.state.params;
+    const { namespaceList, keyValueList, dispatch } = this.props;
+    const { targetNamespaceId, replyTxid, rootAddress } = this.props.navigation.state.params;
     if (!this.state.showKeyValueModal) {
       return null;
     }
@@ -154,6 +155,9 @@ class ReplyKeyValue extends React.Component {
               const {namespaceId, value} = this.state;
               const shortCode = namespaceList.namespaces[namespaceId].shortCode;
               if (!shortCode) {
+                Toast.show(loc.namespaces.namespace_unconfirmed, {
+                  position: Toast.positions.TOP,
+                });
                 throw new Error('Namespace not confirmed yet');
               }
               const walletId = namespaceList.namespaces[namespaceId].walletId;
@@ -285,6 +289,27 @@ class ReplyKeyValue extends React.Component {
                 position: Toast.positions.TOP,
                 backgroundColor: "#53DD6C",
               });
+
+              // Insert the tx into the replies of the target namespace.
+              const {namespaceId, value} = this.state;
+              const {shortCode, displayName} = namespaceList.namespaces[namespaceId];
+              let reply = {
+                value,
+                height: 0,
+                sender: {
+                  shortCode,
+                  displayName,
+                }
+              }
+              const keyValues = keyValueList.keyValues[targetNamespaceId];
+              for (let kv of keyValues) {
+                if (kv.tx == replyTxid) {
+                  kv.replies = kv.replies || [];
+                  kv.replies.push(reply);
+                  dispatch(setKeyValueList(targetNamespaceId, keyValues));
+                  break;
+                }
+              }
               this.props.navigation.goBack();
             }}
           />
@@ -331,6 +356,7 @@ class ReplyKeyValue extends React.Component {
 
 function mapStateToProps(state) {
   return {
+    keyValueList: state.keyValueList,
     namespaceList: state.namespaceList,
   }
 }

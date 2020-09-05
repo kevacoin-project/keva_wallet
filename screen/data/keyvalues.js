@@ -496,7 +496,7 @@ class KeyValues extends React.Component {
 
   onReply = (replyTxid) => {
     const {navigation, namespaceList} = this.props;
-    const rootAddress = navigation.getParam('rootAddress');
+    const {rootAddress, namespaceId} = navigation.state.params;
     // Must have a namespace.
     if (Object.keys(namespaceList).length == 0) {
       Toast.show('Create a namespace first');
@@ -504,6 +504,7 @@ class KeyValues extends React.Component {
     }
 
     navigation.navigate('ReplyKeyValue', {
+      targetNamespaceId: namespaceId,
       rootAddress,
       replyTxid
     })

@@ -42,6 +42,7 @@ module.exports = {
     scanning_block: 'Fetching transactions:',
     refreshing: 'Refreshing data ...',
     default_share: 'A post from',
+    namespace_unconfirmed: 'Namespace not confirmed yet',
   },
   wallets: {
     select_wallet: 'Select Wallet',
