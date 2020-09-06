@@ -418,6 +418,7 @@ export async function getNamespaceUtxo(wallet, namespaceId) {
     }
     // No namespace UXTO, try again.
     await waitPromise(2000);
+    await wallet.fetchBalance();
     await wallet.fetchTransactions();
   }
   return null;
