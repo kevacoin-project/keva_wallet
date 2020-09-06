@@ -168,7 +168,7 @@ class ShowKeyValue extends React.Component {
 
   renderNode = (node, index) => {
     if (!node.prev && !node.next && !node.parent && node.type == 'text') {
-      return (<Text key={index} style={{fontSize: 16, color: KevaColors.darkText, lineHeight: 25}}>{unescape(node.data)}</Text>);
+      return (<Text selectable={true} key={index} style={{fontSize: 16, color: KevaColors.darkText, lineHeight: 25}}>{unescape(node.data)}</Text>);
     } else if (node.name == 'img') {
       const a = node.attribs;
       const width = Dimensions.get('window').width;
@@ -370,6 +370,7 @@ class ShowKeyValue extends React.Component {
       <FlatList
         style={styles.listStyle}
         ListHeaderComponent={listHeader}
+        removeClippedSubviews={false}
         contentContainerStyle={{paddingBottom: 100}}
         data={replies}
         onRefresh={() => this.fetchReplies()}
