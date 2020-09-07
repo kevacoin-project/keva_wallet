@@ -68,7 +68,7 @@ class Item extends React.Component {
 
     return (
       <View style={styles.card}>
-        <TouchableOpacity onPress={() => onShow(item.key, item.value, item.tx, item.replies, item.shares, item.height)}>
+        <TouchableOpacity onPress={() => onShow(item.key, item.value, item.tx, item.replies, item.shares, item.rewards, item.height)}>
           <View style={{flex:1,paddingHorizontal:10,paddingTop:2}}>
             <View style={{flexDirection:'row',alignItems:'center',justifyContent:'space-between'}}>
               <Text style={styles.keyDesc} numberOfLines={1} ellipsizeMode="tail">{item.key}</Text>
@@ -109,7 +109,7 @@ class Item extends React.Component {
           </TouchableOpacity>
           <TouchableOpacity onPress={() => onReward(item.tx, item.key, item.value, item.height)} style={{flexDirection: 'row'}}>
             <MIcon name="favorite-border" size={22} style={styles.shareIcon} />
-            {/* (rewards && rewards.length > 0) && <Text style={styles.count}>{rewards.length}</Text> */}
+            {(item.rewards && item.rewards.length > 0) && <Text style={styles.count}>{item.rewards.length}</Text> }
           </TouchableOpacity>
         </View>
       </View>
@@ -206,13 +206,21 @@ class KeyValues extends React.Component {
     dispatch(setKeyValueList(namespaceId, keyValues));
 
     // Fetch replies.
-    const {replies, shares} = await getRepliesAndShares(BlueElectrum, rootAddress, namespaceId);
+    const {replies, shares, rewards} = await getRepliesAndShares(BlueElectrum, rootAddress, namespaceId);
 
     // Add the replies.
     for (let kv of keyValues) {
       const txReplies = replies.filter(r => kv.tx.startsWith(r.partialTxId));
       if (txReplies && txReplies.length > 0) {
         kv.replies = txReplies;
+      }
+    }
+
+    // Add the rewards
+    for (let kv of keyValues) {
+      const txRewards = rewards.filter(r => kv.tx == r.partialTxId);
+      if (txRewards && txRewards.length > 0) {
+        kv.rewards = txRewards;
       }
     }
 
@@ -253,13 +261,20 @@ class KeyValues extends React.Component {
     }
 
     // Fetch replies.
-    const {replies, shares} = await getRepliesAndShares(BlueElectrum, rootAddress, namespaceId);
-
+    const {replies, shares, rewards} = await getRepliesAndShares(BlueElectrum, rootAddress, namespaceId);
     // Add the replies.
     for (let kv of keyValues) {
       const txReplies = replies.filter(r => kv.tx.startsWith(r.partialTxId));
       if (txReplies && txReplies.length > 0) {
         kv.replies = txReplies;
+      }
+    }
+
+    // Add the rewards
+    for (let kv of keyValues) {
+      const txRewards = rewards.filter(r => kv.tx.startsWith(r.partialTxId));
+      if (txRewards && txRewards.length > 0) {
+        kv.rewards = txRewards;
       }
     }
 
@@ -477,7 +492,7 @@ class KeyValues extends React.Component {
     );
   }
 
-  onShow = (key, value, tx, replies, shares, height) => {
+  onShow = (key, value, tx, replies, shares, rewards, height) => {
     const {navigation} = this.props;
     const rootAddress = navigation.getParam('rootAddress');
     const isOther = navigation.getParam('isOther');
@@ -493,6 +508,7 @@ class KeyValues extends React.Component {
       shareTxid: tx,
       replies,
       shares,
+      rewards,
       isOther,
       height,
     });
@@ -522,7 +538,6 @@ class KeyValues extends React.Component {
       return;
     }
 
-    const namespaceId = navigation.getParam('namespaceId');
     const shortCode = navigation.getParam('shortCode');
     navigation.navigate('ShareKeyValue', {
       rootAddress,

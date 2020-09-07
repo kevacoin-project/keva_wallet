@@ -212,7 +212,7 @@ class ShowKeyValue extends React.Component {
     try {
       // Fetch replies.
       this.setState({isRefreshing: true});
-      const {replies, shares} = await getRepliesAndShares(BlueElectrum, rootAddress);
+      const {replies, shares, rewards} = await getRepliesAndShares(BlueElectrum, rootAddress);
       const keyValues = keyValueList.keyValues[namespaceId];
 
       // Add the replies.
@@ -220,6 +220,14 @@ class ShowKeyValue extends React.Component {
         const txReplies = replies.filter(r => kv.tx.startsWith(r.partialTxId));
         if (txReplies && txReplies.length > 0) {
           kv.replies = txReplies;
+        }
+      }
+
+      // Add the rewards
+      for (let kv of keyValues) {
+        const txRewards = rewards.filter(r => kv.tx == r.partialTxId);
+        if (txRewards && txRewards.length > 0) {
+          kv.rewards = txRewards;
         }
       }
 

@@ -533,12 +533,21 @@ function createReplyKey(txId, shortCode) {
   return `:${txId.substring(0, 8)}:${shortCode}`
 }
 
+export function parseReplyKey(key) {
+  const regexReply = /^:([0-9a-f]+):([0-9]+)$/gm;
+  let matches = regexReply.exec(key);
+  if (!matches) {
+    return false;
+  }
+  return {partialTxId: matches[1], shortCode: matches[2]};
+}
+
 function createRewardKey(txId, shortCode) {
   return `\$${txId.substring(0, 8)}:${shortCode}`
 }
 
-export function parseReplyKey(key) {
-  const regexReply = /^:([0-9a-f]+):([0-9]+)$/gm;
+export function parseRewardKey(key) {
+  const regexReply = /^\$([0-9a-f]+):([0-9]+)$/gm;
   let matches = regexReply.exec(key);
   if (!matches) {
     return false;
@@ -1079,6 +1088,7 @@ export async function findOtherNamespace(ecl, nsidOrShortCode) {
 export async function getRepliesAndShares(ecl, rootAddress) {
   let replies = [];
   let shares = [];
+  let rewards = []
   const history = await ecl.blockchainScripthash_getHistory(toScriptHash(rootAddress));
   const txsToFetch = history.map(h => h.tx_hash);
   const txsMap = await ecl.multiGetTransactionByTxid(txsToFetch, 20, VERBOSE);
@@ -1128,7 +1138,34 @@ export async function getRepliesAndShares(ecl, rootAddress) {
       }
 
       // Check if it is a reply
-      const {partialTxId, shortCode} = parseReplyKey(resultJson.key);
+      let partialTxId, shortCode;
+      ({partialTxId, shortCode} = parseReplyKey(resultJson.key));
+      if (partialTxId && shortCode) {
+        resultJson.time = tx.time;
+        const h = history.find(h => h.tx_hash == tx.txid);
+        resultJson.height = h.height;
+
+        const nsRootId = await getTxIdFromShortCode(ecl, shortCode);
+        let resultReplier = await getNamespaceDataFromTx(ecl, [], nsRootId);
+        if (!resultReplier) {
+          continue;
+        }
+        const replier = kevaToJson(resultReplier.result)
+        if (replier.namespaceId != resultJson.namespaceId) {
+          continue;
+        }
+        resultJson.partialTxId = partialTxId;
+        resultJson.sender = {
+          shortCode,
+          rootTxid: nsRootId,
+          displayName: replier.displayName,
+        }
+        replies.push(resultJson);
+        continue;
+      }
+
+      // Check if it is a reward.
+      ({partialTxId, shortCode} = parseRewardKey(resultJson.key));
       if (!partialTxId || !shortCode) {
         continue;
       }
@@ -1137,24 +1174,24 @@ export async function getRepliesAndShares(ecl, rootAddress) {
       resultJson.height = h.height;
 
       const nsRootId = await getTxIdFromShortCode(ecl, shortCode);
-      let resultReplier = await getNamespaceDataFromTx(ecl, [], nsRootId);
-      if (!resultReplier) {
+      let resultRewarder = await getNamespaceDataFromTx(ecl, [], nsRootId);
+      if (!resultRewarder) {
         continue;
       }
-      const replier = kevaToJson(resultReplier.result)
-      if (replier.namespaceId != resultJson.namespaceId) {
+      const rewarder = kevaToJson(resultRewarder.result)
+      if (rewarder.namespaceId != resultJson.namespaceId) {
         continue;
       }
       resultJson.partialTxId = partialTxId;
-      resultJson.sender = {
+      resultJson.rewarder = {
         shortCode,
         rootTxid: nsRootId,
-        displayName: replier.displayName,
+        displayName: rewarder.displayName,
       }
-      replies.push(resultJson);
+      rewards.push(resultJson);
     }
   }
-  return {replies, shares};
+  return {replies, shares, rewards};
 }
 
 const SHARE_COST = 1000000;
