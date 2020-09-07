@@ -13,6 +13,8 @@ module.exports = {
     delete: 'Delete',
     close: 'Close',
     reply: 'Reply',
+    reward: 'Reward',
+    other_amount: 'Other Amount',
     reply_sent: 'Reply sent',
     share: 'Share',
     share_sent: 'Shared successfully',
@@ -22,6 +24,7 @@ module.exports = {
     label_data: 'Data',
     label_settings: 'Settings',
     language_restart: 'After selecting a new language, restarting the app is required for the change to take effect.',
+    balance: 'Balance',
   },
   namespaces: {
     height: "block",

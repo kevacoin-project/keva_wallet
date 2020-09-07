@@ -533,6 +533,9 @@ function createReplyKey(txId, shortCode) {
   return `:${txId.substring(0, 8)}:${shortCode}`
 }
 
+function createRewardKey(txId, shortCode) {
+  return `\$${txId.substring(0, 8)}:${shortCode}`
+}
 
 export function parseReplyKey(key) {
   const regexReply = /^:([0-9a-f]+):([0-9]+)$/gm;
@@ -541,6 +544,110 @@ export function parseReplyKey(key) {
     return false;
   }
   return {partialTxId: matches[1], shortCode: matches[2]};
+}
+
+// Send a reward to a post(key/value pair).
+// rewardRootAddress: the root namespace of the post.
+// replyTxid: the txid of the post
+//
+export async function rewardKeyValue(wallet, requestedSatPerByte, namespaceId, shortCode, value, amount, rewardRootAddress, replyTxid) {
+  await wallet.fetchTransactions();
+  let nsUtxo = await getNamespaceUtxo(wallet, namespaceId);
+  if (!nsUtxo) {
+    throw new Error(loc.namespaces.update_key_err);
+  }
+
+  if (amount < REPLY_COST) {
+    throw new Error('Amount must be at least 0.01 KVA');
+  }
+
+  // To reward to a post, the key must be :replyTxid.
+  const key = createRewardKey(replyTxid, shortCode);
+  const namespaceAddress = await wallet.getAddressAsync();
+  const nsScript = getKeyValueUpdateScript(namespaceId, namespaceAddress, key, value);
+
+  // Namespace needs at least 0.01 KVA.
+  const namespaceValue = 1000000;
+  let targets = [{
+    address: namespaceAddress, value: namespaceValue,
+    script: nsScript
+  }, {
+    address: rewardRootAddress, value: amount,
+  }];
+
+  const transactions = wallet.getTransactions();
+  let utxos = wallet.getUtxo();
+  let nonNamespaceUtxos = getNonNamespaceUxtos(transactions, utxos);
+  // Move the nsUtxo to the first one, so that it will always be used.
+  nonNamespaceUtxos.unshift(nsUtxo);
+  let { inputs, outputs, fee } = coinSelectAccumulative(nonNamespaceUtxos, targets, requestedSatPerByte);
+
+  // inputs and outputs will be undefined if no solution was found
+  if (!inputs || !outputs) {
+    throw new Error('Not enough balance. Try sending smaller amount');
+  }
+
+  const psbt = new bitcoin.Psbt();
+  psbt.setVersion(0x7100); // Kevacoin transaction.
+  let keypairs = [];
+  for (let i = 0; i < inputs.length; i++) {
+    let input = inputs[i];
+    const pubkey = wallet._getPubkeyByAddress(input.address);
+    if (!pubkey) {
+      throw new Error('Failed to get pubKey');
+    }
+    const p2wpkh = bitcoin.payments.p2wpkh({ pubkey });
+    const p2sh = bitcoin.payments.p2sh({ redeem: p2wpkh });
+
+    psbt.addInput({
+      hash: input.txId,
+      index: input.vout,
+      witnessUtxo: {
+        script: p2sh.output,
+        value: input.value,
+      },
+      redeemScript: p2wpkh.output,
+    });
+
+    let keyPair = bitcoin.ECPair.fromWIF(input.wif);
+    keypairs.push(keyPair);
+  }
+
+  for (let i = 0; i < outputs.length; i++) {
+    let output = outputs[i];
+    if (!output.address) {
+      // Change address.
+      output.address = await wallet.getChangeAddressAsync();
+    }
+
+    if (i == 0) {
+      // The namespace creation script.
+      if (output.value != 1000000) {
+        throw new Error('Key update script has incorrect value.');
+      }
+      const nsScript = getKeyValueUpdateScript(namespaceId, namespaceAddress, key, value);
+      psbt.addOutput({
+        script: nsScript,
+        value: output.value,
+      });
+    } else {
+      psbt.addOutput({
+        address: output.address,
+        value: output.value,
+      });
+    }
+  }
+
+  for (let i = 0; i < keypairs.length; i++) {
+    psbt.signInput(i, keypairs[i]);
+    if (!psbt.validateSignaturesOfInput(i)) {
+      throw new Error('Invalid signature for input #' + i);
+    }
+  }
+
+  psbt.finalizeAllInputs();
+  let hexTx = psbt.extractTransaction(true).toHex();
+  return {tx: hexTx, fee, cost: REPLY_COST, key};
 }
 
 // Send a reply/comment to a post(key/value pair).

@@ -52,6 +52,7 @@ import AddKeyValue from './screen/data/addkeyvalue';
 import ReplyKeyValue from './screen/data/replykeyvalue';
 import ShareKeyValue from './screen/data/sharekeyvalue';
 import ShowKeyValue from './screen/data/showkeyvalue';
+import RewardKeyValue from './screen/data/rewardkeyvalue';
 
 import Ionicons from 'react-native-vector-icons/Ionicons';
 let loc = require('./loc');
@@ -331,6 +332,9 @@ const HomeStackNavigator = createStackNavigator({
   },
   ShowKeyValue: {
     screen: ShowKeyValue,
+  },
+  RewardKeyValue: {
+    screen: RewardKeyValue,
   },
   // Settings
   SelectWallet: {

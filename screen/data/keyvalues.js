@@ -63,7 +63,7 @@ class Item extends React.Component {
   }
 
   render() {
-    let {item, onShow, onReply, onShare, namespaceId, navigation} = this.props;
+    let {item, onShow, onReply, onShare, onReward, namespaceId, navigation} = this.props;
     const {isOther} = navigation.state.params;
 
     return (
@@ -106,6 +106,10 @@ class Item extends React.Component {
           <TouchableOpacity onPress={() => onShare(item.tx, item.key, item.value, item.height)} style={{flexDirection: 'row'}}>
             <MIcon name="cached" size={22} style={styles.shareIcon} />
             {(item.shares && item.shares.length > 0) && <Text style={styles.count}>{item.shares.length}</Text>}
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => onReward(item.tx, item.key, item.value, item.height)} style={{flexDirection: 'row'}}>
+            <MIcon name="favorite-border" size={22} style={styles.shareIcon} />
+            {/* (rewards && rewards.length > 0) && <Text style={styles.count}>{rewards.length}</Text> */}
           </TouchableOpacity>
         </View>
       </View>
@@ -530,6 +534,26 @@ class KeyValues extends React.Component {
     })
   }
 
+  onReward = (rewardTxid, key, value, height) => {
+    const {navigation, namespaceList} = this.props;
+    const rootAddress = navigation.getParam('rootAddress');
+    // Must have a namespace.
+    if (Object.keys(namespaceList).length == 0) {
+      Toast.show('Create a namespace first');
+      return;
+    }
+
+    const shortCode = navigation.getParam('shortCode');
+    navigation.navigate('RewardKeyValue', {
+      rootAddress,
+      rewardTxid,
+      origKey: key,
+      origValue: value,
+      origShortCode: shortCode,
+      height,
+    })
+  }
+
   render() {
     let {navigation, dispatch, keyValueList} = this.props;
     const namespaceId = navigation.getParam('namespaceId');
@@ -565,6 +589,7 @@ class KeyValues extends React.Component {
                 onShow={this.onShow} namespaceId={namespaceId}
                 onReply={this.onReply}
                 onShare={this.onShare}
+                onReward={this.onReward}
                 navigation={navigation}
               />
             }

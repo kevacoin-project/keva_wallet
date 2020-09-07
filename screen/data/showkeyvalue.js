@@ -105,12 +105,13 @@ class ShowKeyValue extends React.Component {
   }
 
   async componentDidMount() {
-    const {key, value, replies, shares} = this.props.navigation.state.params;
+    const {key, value, replies, shares, rewards} = this.props.navigation.state.params;
     this.setState({
       key,
       value,
       replies: this.sortReplies(replies),
-      shares
+      shares,
+      rewards,
     });
 
     this.subs = [
@@ -329,7 +330,7 @@ class ShowKeyValue extends React.Component {
   }
 
   render() {
-    let {isRaw, value, key, replies, shares} = this.state;
+    let {isRaw, value, key, replies, shares, rewards} = this.state;
 
     const listHeader = (
       <View style={styles.container}>
@@ -358,6 +359,10 @@ class ShowKeyValue extends React.Component {
             <TouchableOpacity onPress={() => this.onShare(key, value)} style={{flexDirection: 'row'}}>
               <MIcon name="cached" size={22} style={styles.shareIcon} />
               {(shares && shares.length > 0) && <Text style={styles.count}>{shares.length}</Text>}
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => this.onShare(key, value)} style={{flexDirection: 'row'}}>
+              <MIcon name="favorite-border" size={22} style={styles.shareIcon} />
+              {(rewards && rewards.length > 0) && <Text style={styles.count}>{rewards.length}</Text>}
             </TouchableOpacity>
           </View>
           <TouchableOpacity onPress={() => this.onToggleRaw()}>

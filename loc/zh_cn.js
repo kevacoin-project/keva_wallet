@@ -13,6 +13,8 @@ module.exports = {
     delete: '删除',
     close: '关闭',
     reply: '回复',
+    reward: '打赏',
+    other_amount: '其他金额',
     reply_sent: '回复已发送',
     share: '分享',
     share_sent: '共享成功',
@@ -22,6 +24,7 @@ module.exports = {
     label_data: '数据',
     label_settings: '设置',
     language_restart: '选择新语言后，需要重新启动应用程序才能使更改生效',
+    balance: '余额',
   },
   namespaces: {
     height: "区块",
