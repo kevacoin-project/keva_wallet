@@ -555,6 +555,8 @@ export function parseRewardKey(key) {
   return {partialTxId: matches[1], shortCode: matches[2]};
 }
 
+const MIN_REWARD = 10000000;
+
 // Send a reward to a post(key/value pair).
 // rewardRootAddress: the root namespace of the post.
 // replyTxid: the txid of the post
@@ -566,8 +568,8 @@ export async function rewardKeyValue(wallet, requestedSatPerByte, namespaceId, s
     throw new Error(loc.namespaces.update_key_err);
   }
 
-  if (amount < REPLY_COST) {
-    throw new Error('Amount must be at least 0.01 KVA');
+  if (amount < MIN_REWARD) {
+    throw new Error('Amount must be at least 0.1 KVA');
   }
 
   // To reward to a post, the key must be :replyTxid.
@@ -656,7 +658,7 @@ export async function rewardKeyValue(wallet, requestedSatPerByte, namespaceId, s
 
   psbt.finalizeAllInputs();
   let hexTx = psbt.extractTransaction(true).toHex();
-  return {tx: hexTx, fee, cost: REPLY_COST, key};
+  return {tx: hexTx, fee, cost: amount, key};
 }
 
 // Send a reply/comment to a post(key/value pair).

@@ -118,7 +118,7 @@ class ShowKeyValue extends React.Component {
       this.props.navigation.addListener('willFocus', async (payload) => {
         try {
           const routeName = payload.lastState.routeName;
-          if (routeName == 'KeyValues' || routeName == 'ReplyKeyValue') {
+          if (routeName == 'KeyValues' || routeName == 'ReplyKeyValue' || routeName == 'RewardKeyValue') {
             return;
           }
           this.setState({isRefreshing: true});
@@ -189,9 +189,20 @@ class ShowKeyValue extends React.Component {
     });
   }
 
+  // Go back from the reward screen.
+  onRewardGoBack = (reward) => {
+    // Perform an instant update. We will still fetch
+    // from the server.
+    let rewards = this.state.rewards || [];
+    rewards.push(reward);
+    this.setState({
+      rewards,
+    });
+  }
+
   onReply = () => {
     const {navigation, namespaceList} = this.props;
-    const {rootAddress, replyTxid, namespaceId} = navigation.state.params;
+    const {rootAddress, replyTxid} = navigation.state.params;
     // Must have a namespace.
     if (Object.keys(namespaceList).length == 0) {
       Toast.show('Create a namespace first');
@@ -202,6 +213,22 @@ class ShowKeyValue extends React.Component {
       rootAddress,
       replyTxid,
       onGoBack: this.onGoBack,
+    })
+  }
+
+  onReward = () => {
+    const {navigation, namespaceList} = this.props;
+    const {rootAddress, rewardTxid} = navigation.state.params;
+    // Must have a namespace.
+    if (Object.keys(namespaceList).length == 0) {
+      Toast.show('Create a namespace first');
+      return;
+    }
+
+    navigation.navigate('RewardKeyValue', {
+      rootAddress,
+      rewardTxid,
+      onGoBack: this.onRewardGoBack,
     })
   }
 
@@ -368,7 +395,7 @@ class ShowKeyValue extends React.Component {
               <MIcon name="cached" size={22} style={styles.shareIcon} />
               {(shares && shares.length > 0) && <Text style={styles.count}>{shares.length}</Text>}
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => this.onShare(key, value)} style={{flexDirection: 'row'}}>
+            <TouchableOpacity onPress={() => this.onReward()} style={{flexDirection: 'row'}}>
               <MIcon name="favorite-border" size={22} style={styles.shareIcon} />
               {(rewards && rewards.length > 0) && <Text style={styles.count}>{rewards.length}</Text>}
             </TouchableOpacity>

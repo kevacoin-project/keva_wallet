@@ -506,6 +506,7 @@ class KeyValues extends React.Component {
       rootAddress,
       replyTxid: tx,
       shareTxid: tx,
+      rewardTxid: tx,
       replies,
       shares,
       rewards,

@@ -16,6 +16,7 @@ module.exports = {
     reward: '打赏',
     other_amount: '其他金额',
     reply_sent: '回复已发送',
+    reward_sent: '打赏已发送',
     share: '分享',
     share_sent: '共享成功',
     copiedToClipboard: '已复制到剪贴板',
