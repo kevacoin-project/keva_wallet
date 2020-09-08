@@ -29,13 +29,6 @@ const Settings = () => {
           chevron
         />
         <BlueListItem title={loc.settings.network} component={TouchableOpacity} onPress={() => navigate('NetworkSettings')} chevron />
-        <BlueListItem
-          title={loc.settings.about}
-          component={TouchableOpacity}
-          onPress={() => navigate('About')}
-          testID="AboutButton"
-          chevron
-        />
       </ScrollView>
     </SafeBlueArea>
   );

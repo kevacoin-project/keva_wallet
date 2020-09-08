@@ -35,7 +35,7 @@ module.exports = {
     shortcode_id: "Shortcode or namespace Id",
     no_data: "No Data",
     click_add_btn: "Enter name and click the 'add' button to create your first namespace",
-    click_search_btn: "Enter namespace shortcode (e.g. 5570511) and click the 'search' button to see other namespaces",
+    click_search_btn: "Enter namespace shortcode (e.g. 5777101) and click the 'search' button to see other namespaces",
     explain: "A namespace is a data container where you can add key-value pairs",
     namespace_creation_err: 'Cannot create namespace. Please wait a few minutes until your last change is confirmed in the blockchain.',
     update_key_err: 'Cannot update or add key-value. Please wait a few minutes until your last change is confirmed in the blockchain.',
@@ -52,7 +52,7 @@ module.exports = {
     select_wallet: 'Select Wallet',
     options: 'options',
     createBitcoinWallet:
-      'You currently do not have a Kevacoin wallet. In order to fund a Lightning wallet, a Kevacoin wallet needs to be created or imported. Would you like to continue anyway?',
+      'You currently do not have a novacoin wallet. In order to fund a Lightning wallet, a novacoin wallet needs to be created or imported. Would you like to continue anyway?',
     list: {
       app_name: 'KevaWallet',
       title: 'Wallets',
@@ -68,7 +68,7 @@ module.exports = {
       empty_txs1_lightning:
         'Lightning wallet should be used for your daily transactions. Fees are unfairly cheap and speed is blazing fast.',
       empty_txs2_lightning: '\nTo start using it tap on "manage funds" and topup your balance.',
-      tap_here_to_buy: 'Tap here to buy Kevacoin',
+      tap_here_to_buy: 'Tap here to buy novacoin',
       single_address: 'Single Address',
       hd_multi_address: 'HD Multi-Address',
     },
@@ -90,7 +90,7 @@ module.exports = {
       imported: 'Imported',
       coming_soon: 'Coming soon',
       lightning: 'Lightning',
-      bitcoin: 'Kevacoin',
+      bitcoin: 'novacoin',
       multi_address: 'Multiple addresses',
       single_address: 'Single address',
     },
@@ -109,7 +109,7 @@ module.exports = {
       save: 'Save',
       delete_this_wallet: 'Delete this wallet',
       export_backup: 'Export / backup',
-      buy_bitcoin: 'Buy Kevacoin',
+      buy_bitcoin: 'Buy novacoin',
       show_xpub: 'Show wallet XPUB',
       connected_to: 'Connected to',
       advanced: 'Advanced',
@@ -219,7 +219,7 @@ module.exports = {
     scan_lnurl: 'Scan to receive',
   },
   buyBitcoin: {
-    header: 'Buy Kevacoin',
+    header: 'Buy novacoin',
     tap_your_address: 'Tap your address to copy it to clipboard:',
     copied: 'Copied to Clipboard!',
   },

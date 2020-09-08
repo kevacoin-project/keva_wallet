@@ -35,7 +35,7 @@ module.exports = {
     shortcode_id: "短码或命名空间Id",
     no_data: "无数据",
     click_add_btn: "输入名称，然后单击“添加”按钮以创建您的第一个名称空间",
-    click_search_btn: "输入名称空间短代码（例如5577271），然后单击“搜索”按钮以查看其他名称空间",
+    click_search_btn: "输入名称空间短代码（例如5777101），然后单击“搜索”按钮以查看其他名称空间",
     explain: "名称空间是一个数据容器，您可以在其中添加键值对",
     namespace_creation_err: '无法创建名称空间. 请等待几分钟，直到您的最后一次更改在区块链中得到确认.',
     update_key_err: '无法更新或添加键值.请等待几分钟，直到您的最后一次更改在区块链中得到确认.',
@@ -51,7 +51,7 @@ module.exports = {
   wallets: {
     select_wallet: '选择钱包',
     options: '选项',
-    createBitcoinWallet: '您当前没有kevacoin钱包. 为了支持闪电钱包, 我们需要创建或者导入一个Kevacoin钱包. 是否需要继续?',
+    createBitcoinWallet: '您当前没有novacoin钱包. 为了支持闪电钱包, 我们需要创建或者导入一个novacoin钱包. 是否需要继续?',
     list: {
       general: '常规',
       app_name: 'KevaWallet',
@@ -68,7 +68,7 @@ module.exports = {
       empty_txs1_lightning:
         'Lightning wallet should be used for your daily transactions. Fees are unfairly cheap and speed is blazing fast.',
       empty_txs2_lightning: '\nTo start using it tap on "manage funds" and topup your balance.',
-      tap_here_to_buy: '点击购买Kevacoin',
+      tap_here_to_buy: '点击购买novacoin',
       single_address: '单地址',
       hd_multi_address: 'HD 多地址',
     },
@@ -89,7 +89,7 @@ module.exports = {
       imported: '已经导入',
       coming_soon: '即将来临',
       lightning: '闪电',
-      bitcoin: 'Kevacoin',
+      bitcoin: 'novacoin',
       multi_address: '多地址',
       single_address: '单地址',
     },
@@ -108,7 +108,7 @@ module.exports = {
       save: '保存',
       delete_this_wallet: '删除这个钱包',
       export_backup: '导出备份',
-      buy_bitcoin: '购买Kevacoin',
+      buy_bitcoin: '购买novacoin',
       show_xpub: '展示钱包 XPUB',
       connected_to: 'Connected to',
       advanced: 'Advanced',
@@ -217,7 +217,7 @@ module.exports = {
     scan_lnurl: 'Scan to receive',
   },
   buyBitcoin: {
-    header: '购买Kevacoin',
+    header: '购买novacoin',
     tap_your_address: '点击地址复制到粘贴板:',
     copied: '复制到粘贴板!',
   },
@@ -251,7 +251,7 @@ module.exports = {
     title: '可否认性',
     help:
       '在某些情况下, 你不得不暴露 ' +
-      '密码. 为了让你的Kevacoin更加安全, KevaWallet可以创建一些 ' +
+      '密码. 为了让你的novacoin更加安全, KevaWallet可以创建一些 ' +
       '加密空间, 用不同的密码. 在压力之下, ' +
       '你可以暴露这个钱包密码. 再次进入 ' +
       'KevaWallet, 我们会解锁一些虚拟空间. 对第三方来说看上去' +
