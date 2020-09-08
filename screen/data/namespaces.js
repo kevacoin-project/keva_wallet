@@ -147,7 +147,7 @@ class Namespace extends React.Component {
               </TouchableOpacity>
               { canDelete &&
               <TouchableOpacity onPress={() => onDelete(namespace.id)}>
-                <Icon name="ios-trash" size={20} style={styles.actionIcon} />
+                <Icon name="ios-close-circle-outline" size={20} style={styles.actionIcon} />
               </TouchableOpacity>
               }
             </View>
