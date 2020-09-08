@@ -1031,6 +1031,13 @@ export async function findMyNamespaces(wallet, ecl) {
     namespaces[nsId].shortCode = shortCode;
     namespaces[nsId].rootTxid = rootTxid;
     namespaces[nsId].rootAddress = rootAddress;
+    if (!namespaces[nsId].displayName) {
+      // This namespace may be transferred from different wallet.
+      const nsInfo = getNamespaceInfoFromShortCode(ecl, shortCode);
+      if (nsInfo) {
+        namespaces[nsId].displayName = (await nsInfo).displayName;
+      }
+    }
   }
   return namespaces;
 }
