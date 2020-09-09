@@ -147,7 +147,7 @@ class Namespace extends React.Component {
               </TouchableOpacity>
               { canDelete &&
               <TouchableOpacity onPress={() => onDelete(namespace.id)}>
-                <Icon name="ios-close-circle-outline" size={20} style={styles.actionIcon} />
+                <Icon name="ios-eye-off" size={20} style={styles.actionIcon} />
               </TouchableOpacity>
               }
             </View>
@@ -669,8 +669,8 @@ class OtherNamespaces extends React.Component {
       <View style={styles.container}>
         <ActionSheet
           ref={ref => this._actionDelete = ref}
-          title={'Delete the namespace?'}
-          options={[loc.general.delete, loc.general.cancel]}
+          title={loc.namespaces.hide_namespace}
+          options={[loc.namespaces.hide, loc.general.cancel]}
           cancelButtonIndex={1}
           destructiveButtonIndex={0}
           onPress={this.onDeleteConfirm}

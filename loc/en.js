@@ -47,6 +47,8 @@ module.exports = {
     refreshing: 'Refreshing data ...',
     default_share: 'A post from',
     namespace_unconfirmed: 'Namespace not confirmed yet',
+    hide_namespace: 'Hide this namespace?',
+    hide: 'Hide',
   },
   wallets: {
     select_wallet: 'Select Wallet',
