@@ -357,7 +357,7 @@ class MyNamespaces extends React.Component {
                 showNSCreationModal: false,
                 nsName: '',
               });
-              await this.refreshNamespaces(this.state.walletId);
+              await this.refreshNamespaces();
             }}
           />
         </View>
@@ -414,12 +414,14 @@ class MyNamespaces extends React.Component {
     }
 
     const order = this.props.namespaceList.order;
+    // Remove the order that are not in the namespace list.
+    let newOrder = order.filter(nsid => namespaces[nsid]);
     for (let id of Object.keys(namespaces)) {
-      if (!order.find(nsid => nsid == id)) {
-        order.unshift(id);
+      if (!newOrder.find(nsid => nsid == id)) {
+        newOrder.unshift(id);
       }
     }
-    dispatch(setNamespaceList(namespaces, order));
+    dispatch(setNamespaceList(namespaces, newOrder));
   }
 
   async componentDidMount() {
@@ -432,18 +434,10 @@ class MyNamespaces extends React.Component {
     this.isBiometricUseCapableAndEnabled = await Biometric.isBiometricUseCapableAndEnabled();
   }
 
-  refreshNamespaces = async (walletId) => {
+  refreshNamespaces = async () => {
     this.setState({isRefreshing: true});
     try {
       await BlueElectrum.ping();
-      if (walletId) {
-        const wallets = BlueApp.getWallets();
-        const wallet = wallets.find(w => w.getID() == walletId);
-        if (wallet) {
-          await wallet.fetchBalance();
-          await wallet.fetchTransactions();
-        }
-      }
       await this.fetchNamespaces();
     } catch (err) {
       console.error(err);

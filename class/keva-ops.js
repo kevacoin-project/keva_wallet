@@ -1009,12 +1009,18 @@ export function mergeKeyValueList(origkeyValues) {
 export async function findMyNamespaces(wallet, ecl) {
   await wallet.fetchBalance();
   await wallet.fetchTransactions();
+  await wallet.fetchUtxo();
   const transactions = wallet.getTransactions();
   if (transactions.length == 0) {
     return;
   }
+  const UTXOs = wallet.getUtxo();
   let namespaces = {};
   for (let tx of transactions) {
+    const isUnspent = UTXOs.find(u => u.txId == tx.hash);
+    if (!isUnspent) {
+      continue;
+    }
     for (let v of tx.outputs) {
       let result = parseKeva(v.scriptPubKey.asm);
       if (!result) {
