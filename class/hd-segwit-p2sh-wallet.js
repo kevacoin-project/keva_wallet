@@ -11,7 +11,7 @@ const ypub_VERSION_HEX  = 0x049d7cb2;
 
 // To cache the seed returned by bip39.mnemonicToSeed,
 // which take a long time.
-let secretSeedCache = null;
+let secretSeedCache = {};
 
 /**
  * HD Wallet (BIP39).
@@ -39,9 +39,10 @@ export class HDSegwitP2SHWallet extends AbstractHDElectrumWallet {
    */
   _getWIFByIndex(internal, index) {
     const mnemonic = this.secret;
-    const seed = secretSeedCache || bip39.mnemonicToSeed(mnemonic);
-    if (!secretSeedCache) {
-      secretSeedCache = seed;
+    const cachedSeed = secretSeedCache[mnemonic];
+    const seed = cachedSeed || bip39.mnemonicToSeed(mnemonic);
+    if (!cachedSeed) {
+      secretSeedCache[mnemonic] = seed;
     }
     const root = bitcoin.bip32.fromSeed(seed);
     const path = `m/49'/0'/0'/${internal ? 1 : 0}/${index}`;
