@@ -32,6 +32,8 @@ module.exports = {
     my_data: "My Spaces",
     others: "Others",
     namespace_name: "Name of namespace",
+    name: 'name',
+    shortcode: "Short Code",
     shortcode_id: "Shortcode or namespace ID",
     no_data: "No Data",
     click_add_btn: "Enter name and click the '+' button to create your first namespace",

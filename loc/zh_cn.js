@@ -32,6 +32,8 @@ module.exports = {
     my_data: "我的空间",
     others: "其他",
     namespace_name: "命名空间名称",
+    name: '名称',
+    shortcode: "短码",
     shortcode_id: "短码或命名空间ID",
     no_data: "无数据",
     click_add_btn: "输入名称，然后单击“+”按钮以创建您的第一个名称空间",

@@ -821,7 +821,7 @@ class Namespaces extends React.Component {
           <Text style={[titleStyle, {marginTop: 5}]}>{'Name'}</Text>
           <Text style={contentStyle}>{nsData.displayName}</Text>
 
-          <Text style={titleStyle}>{'Id'}</Text>
+          <Text style={titleStyle}>{'ID'}</Text>
           <View style={container}>
             <Text style={contentStyle}>{nsData.id}</Text>
             <TouchableOpacity onPress={() => {this.copyString(nsData.id)}}>
@@ -829,7 +829,7 @@ class Namespaces extends React.Component {
             </TouchableOpacity>
           </View>
 
-          <Text style={titleStyle}>{'Short Code'}</Text>
+          <Text style={titleStyle}>{loc.namespaces.shortcode}</Text>
           <View style={container}>
             {nsData.shortCode ?
               <>
@@ -843,7 +843,7 @@ class Namespaces extends React.Component {
             }
           </View>
 
-          <Text style={titleStyle}>{'Tx Id'}</Text>
+          <Text style={titleStyle}>{'Tx ID'}</Text>
           <View style={container}>
             <Text style={contentStyle}>{nsData.txId}</Text>
             <TouchableOpacity onPress={() => {this.copyString(nsData.txId)}}>
@@ -1011,13 +1011,16 @@ var styles = StyleSheet.create({
     }
   },
   modalHeader: {
-    paddingHorizontal: 10,
-    paddingVertical: 5,
+    paddingHorizontal: 15,
+    paddingVertical: 10,
+    marginBottom: 10,
     borderTopLeftRadius: 10,
     borderTopRightRadius: 10,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    borderBottomWidth: THIN_BORDER,
+    borderColor: KevaColors.cellBorder,
   },
   codeErr: {
     marginTop: 20,
