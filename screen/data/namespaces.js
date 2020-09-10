@@ -45,7 +45,7 @@ let BlueElectrum = require('../../BlueElectrum');
 const StyleSheet = require('../../PlatformStyleSheet');
 const KevaButton = require('../../common/KevaButton');
 const KevaColors = require('../../common/KevaColors');
-import { THIN_BORDER, SCREEN_WIDTH, ModalHandle } from '../../util';
+import { THIN_BORDER, SCREEN_WIDTH, ModalHandle, toastError } from '../../util';
 import Toast from 'react-native-root-toast';
 import StepModal from "../../common/StepModalWizard";
 
@@ -381,7 +381,7 @@ class MyNamespaces extends React.Component {
   onAddNamespace = () => {
     const wallets = BlueApp.getWallets();
     if (wallets.length == 0) {
-      return Toast.show('No wallet available');
+      return toastError(loc.namespaces.no_wallet);
     }
 
     Keyboard.dismiss();
@@ -428,7 +428,7 @@ class MyNamespaces extends React.Component {
     try {
       await this.fetchNamespaces();
     } catch (err) {
-      Toast.show('Cannot fetch namespaces');
+      toastError('Cannot fetch namespaces');
       console.error(err);
     }
     this.isBiometricUseCapableAndEnabled = await Biometric.isBiometricUseCapableAndEnabled();
@@ -568,7 +568,7 @@ class OtherNamespaces extends React.Component {
         dispatch(setOtherNamespaceList(namespace, order));
       }
     } catch (err) {
-      Toast.show('Cannot find namespace');
+      toastError('Cannot find namespace');
       console.log(err);
     }
   }
@@ -577,7 +577,7 @@ class OtherNamespaces extends React.Component {
     try {
       await this.fetchOtherNamespaces();
     } catch (err) {
-      Toast.show('Cannot fetch namespaces');
+      toastError('Cannot fetch namespaces');
       console.error(err);
     }
   }
@@ -619,7 +619,7 @@ class OtherNamespaces extends React.Component {
       this.closeItemAni();
     } catch (err) {
       this.setState({saving: false});
-      Toast.show('Cannot find namespace');
+      toastError('Cannot find namespace');
       console.log(err);
     }
   }

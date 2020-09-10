@@ -9,6 +9,7 @@ import {
 import Toast from 'react-native-root-toast';
 import { NavigationActions } from 'react-navigation'
 import OverlaySpinner from 'react-native-loading-spinner-overlay'
+import KevaColors from './common/KevaColors';
 
 export const IS_ANDROID = Platform.OS === 'android';
 
@@ -59,6 +60,19 @@ export function hideStatus(toast) {
   if (toast) {
       Toast.hide(toast);
   }
+}
+
+export function toastError(message) {
+  return Toast.show(message, {
+    duration: Toast.durations.LONG,
+    position: Toast.positions.TOP,
+    backgroundColor: KevaColors.errColor,
+    opacity: 0.9,
+    shadow: true,
+    animation: false,
+    hideOnPress: true,
+    delay: 0
+  });
 }
 
 export const THIN_BORDER = 1 / PixelRatio.get();

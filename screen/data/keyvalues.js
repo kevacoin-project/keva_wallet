@@ -8,7 +8,7 @@ import {
 const StyleSheet = require('../../PlatformStyleSheet');
 const KevaButton = require('../../common/KevaButton');
 const KevaColors = require('../../common/KevaColors');
-import { THIN_BORDER, showStatusAlways, hideStatus } from '../../util';
+import { THIN_BORDER, showStatusAlways, hideStatus, toastError } from '../../util';
 import {
   BlueNavigationStyle,
   BlueLoading,
@@ -520,7 +520,7 @@ class KeyValues extends React.Component {
     const {rootAddress, namespaceId} = navigation.state.params;
     // Must have a namespace.
     if (Object.keys(namespaceList).length == 0) {
-      Toast.show('Create a namespace first');
+      toastError(loc.namespaces.create_namespace_first);
       return;
     }
 
@@ -535,7 +535,7 @@ class KeyValues extends React.Component {
     const rootAddress = navigation.getParam('rootAddress');
     // Must have a namespace.
     if (Object.keys(namespaceList).length == 0) {
-      Toast.show('Create a namespace first');
+      toastError(loc.namespaces.create_namespace_first);
       return;
     }
 
@@ -555,7 +555,7 @@ class KeyValues extends React.Component {
     const rootAddress = navigation.getParam('rootAddress');
     // Must have a namespace.
     if (Object.keys(namespaceList).length == 0) {
-      Toast.show('Create a namespace first');
+      toastError(loc.namespaces.create_namespace_first);
       return;
     }
 

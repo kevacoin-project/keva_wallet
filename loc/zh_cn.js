@@ -49,6 +49,8 @@ module.exports = {
     namespace_unconfirmed: '命名空间尚未确认',
     hide_namespace: '隐藏这个名称空间？',
     hide: '隐藏',
+    no_wallet: '需要一个有余额的钱包',
+    create_namespace_first: '先创建名称空间',
   },
   wallets: {
     select_wallet: '选择钱包',

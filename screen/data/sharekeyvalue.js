@@ -15,7 +15,7 @@ import Icon from 'react-native-vector-icons/Ionicons';
 const StyleSheet = require('../../PlatformStyleSheet');
 const KevaButton = require('../../common/KevaButton');
 const KevaColors = require('../../common/KevaColors');
-import { THIN_BORDER, SCREEN_WIDTH } from '../../util';
+import { THIN_BORDER, SCREEN_WIDTH, toastError } from '../../util';
 import { HDSegwitP2SHWallet, } from '../../class';
 import { htmlStyles } from './showkeyvalue';
 import {
@@ -84,7 +84,6 @@ class ShareKeyValue extends React.Component {
   }
 
   onSave = async () => {
-    const { value } = this.state;
     const { namespaceList } = this.props;
 
     const wallets = BlueApp.getWallets();
@@ -156,6 +155,7 @@ class ShareKeyValue extends React.Component {
               const { namespaceId, value } = this.state;
               const shortCode = namespaceList.namespaces[namespaceId].shortCode;
               if (!shortCode) {
+                toastError(loc.namespaces.namespace_unconfirmed);
                 throw new Error('Namespace not confirmed yet');
               }
               const walletId = namespaceList.namespaces[namespaceId].walletId;

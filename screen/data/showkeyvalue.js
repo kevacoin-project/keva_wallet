@@ -14,7 +14,7 @@ import Toast from 'react-native-root-toast';
 import MIcon from 'react-native-vector-icons/MaterialIcons';
 const StyleSheet = require('../../PlatformStyleSheet');
 const KevaColors = require('../../common/KevaColors');
-import { THIN_BORDER, timeConverter } from "../../util";
+import { THIN_BORDER, timeConverter, toastError } from "../../util";
 import { getRepliesAndShares, parseShareKey, getKeyValueFromTxid,
         getNamespaceInfoFromShortCode, getHeightFromShortCode,
         getTxIdFromShortCode } from '../../class/keva-ops';
@@ -205,7 +205,7 @@ class ShowKeyValue extends React.Component {
     const {rootAddress, replyTxid} = navigation.state.params;
     // Must have a namespace.
     if (Object.keys(namespaceList).length == 0) {
-      Toast.show('Create a namespace first');
+      toastError('Create a namespace first');
       return;
     }
 
@@ -221,7 +221,7 @@ class ShowKeyValue extends React.Component {
     const {rootAddress, rewardTxid} = navigation.state.params;
     // Must have a namespace.
     if (Object.keys(namespaceList).length == 0) {
-      Toast.show('Create a namespace first');
+      toastError('Create a namespace first');
       return;
     }
 
@@ -279,7 +279,7 @@ class ShowKeyValue extends React.Component {
     } catch(err) {
       console.warn(err);
       this.setState({isRefreshing: false});
-      Toast.show('Cannot fetch replies');
+      toastError('Cannot fetch replies');
     }
   }
 
@@ -331,7 +331,7 @@ class ShowKeyValue extends React.Component {
     const {navigation, namespaceList} = this.props;
     // Must have a namespace.
     if (Object.keys(namespaceList).length == 0) {
-      Toast.show('Create a namespace first');
+      toastError(loc.namespaces.create_namespace_first);
       return;
     }
 

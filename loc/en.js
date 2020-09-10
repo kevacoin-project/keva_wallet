@@ -49,6 +49,8 @@ module.exports = {
     namespace_unconfirmed: 'Namespace not confirmed yet',
     hide_namespace: 'Hide this namespace?',
     hide: 'Hide',
+    no_wallet: 'Need a wallet with a balance',
+    create_namespace_first: 'Create a namespace first',
   },
   wallets: {
     select_wallet: 'Select Wallet',
