@@ -19,6 +19,7 @@ import {
 const loc = require('../../loc');
 let BlueApp = require('../../BlueApp');
 let BlueElectrum = require('../../BlueElectrum');
+import { BlueBitcoinAmount } from '../../BlueComponents';
 import { FALLBACK_DATA_PER_BYTE_FEE } from '../../models/networkTransactionFees';
 import { TransitionPresets } from 'react-navigation-stack';
 
@@ -79,8 +80,11 @@ class RewardKeyValue extends React.Component {
   }
 
   onSave = async () => {
-    const { value } = this.state;
     const { namespaceList } = this.props;
+    if (this.state.amount < 0.1) {
+      toastError('Must be at least 0.1 KVA');
+      return;
+    }
 
     const wallets = BlueApp.getWallets();
     if (wallets.length == 0) {
@@ -344,22 +348,30 @@ class RewardKeyValue extends React.Component {
     return (
       <View style={styles.container}>
         {this.getRewardKeyValueModal()}
-        <View style={{flexDirection: 'row', backgroundColor: '#fff', justifyContent: 'center', }}>
-          <Text style={styles.modalReward}>{this.state.amount + ' KVA'}</Text>
-        </View>
-        <View style={styles.inputValue1}>
-          { amountList.slice(0, amountList.length/2) }
-        </View>
-        <View style={styles.inputValue2}>
-        { amountList.slice(amountList.length/2, amountList.length) }
-        </View>
-        { false &&
+        {this.state.otherAmount ?
+          <View style={{flexDirection: 'row', justifyContent: 'center'}}>
+            <BlueBitcoinAmount amount={this.state.amount} onChangeText={v => {this.setState({amount: v})}} />
+          </View>
+          :
+          <>
+            <View style={{flexDirection: 'row', justifyContent: 'center'}}>
+              <Text style={styles.modalReward}>{this.state.amount + ' KVA'}</Text>
+            </View>
+            <View style={styles.inputValue1}>
+              { amountList.slice(0, amountList.length/2) }
+            </View>
+            <View style={styles.inputValue2}>
+              { amountList.slice(amountList.length/2, amountList.length) }
+            </View>
+          </>
+        }
+        {this.state.otherAmount ||
           <View style={styles.inputValue3}>
             <KevaButton
               type={'bordered'}
               style={{margin:10, marginTop: 40, width: 180}}
               caption={'Other Amount'}
-              onPress={() => {this.setState({amount: -1})}}
+              onPress={() => {this.setState({otherAmount: true})}}
             />
           </View>
         }
@@ -381,7 +393,7 @@ export default RewardKeyValueScreen = connect(mapStateToProps)(RewardKeyValue);
 var styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: KevaColors.background,
+    backgroundColor: '#fff',
   },
   inputValue1: {
     flexDirection: 'row',
@@ -398,8 +410,6 @@ var styles = StyleSheet.create({
     justifyContent: 'space-around',
     backgroundColor: '#fff',
     paddingBottom: 20,
-    borderBottomColor: KevaColors.cellBorder,
-    borderBottomWidth: THIN_BORDER,
   },
   modalNS: {
     height: 300,
@@ -417,9 +427,8 @@ var styles = StyleSheet.create({
     alignSelf: 'center',
   },
   modalReward: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: KevaColors.statusColor,
+    fontSize: 26,
+    color: BlueApp.settings.alternativeTextColor2,
     letterSpacing: 2,
   },
   modalFee: {
