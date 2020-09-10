@@ -241,6 +241,7 @@ function getNamespaceCreationScript(nsName, address, txId, n) {
 }
 
 export async function createKevaNamespace(wallet, requestedSatPerByte, nsName) {
+  await wallet.fetchBalance();
   await wallet.fetchTransactions();
   await wallet.fetchUtxo();
   const utxos = wallet.getUtxo();
@@ -255,7 +256,7 @@ export async function createKevaNamespace(wallet, requestedSatPerByte, nsName) {
   }];
 
   const transactions = wallet.getTransactions();
-  let nonNamespaceUtxos = getNonNamespaceUxtos(transactions, utxos);
+  let nonNamespaceUtxos = await getNonNamespaceUxtos(wallet, transactions, utxos);
   let { inputs, outputs, fee } = coinSelectAccumulative(nonNamespaceUtxos, targets, requestedSatPerByte);
 
   // inputs and outputs will be undefined if no solution was found
@@ -365,7 +366,7 @@ function getKeyValueDeleteScript(namespaceId, address, key) {
   return nsScript;
 }
 
-export function getNonNamespaceUxtos(transactions, utxos) {
+export async function getNonNamespaceUxtos(wallet, transactions, utxos, tryAgain) {
   let nonNSutxos = [];
   for (let u of utxos) {
     const tx = transactions.find(t => t.txid == u.txId);
@@ -378,6 +379,18 @@ export function getNonNamespaceUxtos(transactions, utxos) {
     if (!isNSTx) {
       nonNSutxos.push(u);
     }
+  }
+
+  if (nonNSutxos.length == 0 && !tryAgain) {
+    // Try again.
+    console.log('Try again for getNonNamespaceUxtos')
+    await waitPromise(2000);
+    await wallet.fetchBalance();
+    await wallet.fetchTransactions();
+    await wallet.fetchUtxo();
+    const transactions = wallet.getTransactions();
+    let utxos = wallet.getUtxo();
+    return await getNonNamespaceUxtos(wallet, transactions, utxos, true);
   }
   return nonNSutxos;
 }
@@ -424,18 +437,8 @@ export async function getNamespaceUtxo(wallet, namespaceId) {
   return null;
 }
 
-function reorderUtxos(utxos, nsUtxo) {
-  let newUtxos = [nsUtxo];
-  for (let t of utxos) {
-    if (t.txId == nsUtxo.txId && t.vout == nsUtxo.vout) {
-      continue;
-    }
-    newUtxos.push(t);
-  }
-  return newUtxos;
-}
-
 export async function updateKeyValue(wallet, requestedSatPerByte, namespaceId, key, value) {
+  await wallet.fetchBalance();
   await wallet.fetchTransactions();
   let nsUtxo = await getNamespaceUtxo(wallet, namespaceId);
   if (!nsUtxo) {
@@ -454,7 +457,7 @@ export async function updateKeyValue(wallet, requestedSatPerByte, namespaceId, k
 
   const transactions = wallet.getTransactions();
   let utxos = wallet.getUtxo();
-  let nonNamespaceUtxos = getNonNamespaceUxtos(transactions, utxos);
+  let nonNamespaceUtxos = await getNonNamespaceUxtos(wallet, transactions, utxos);
   // Move the nsUtxo to the first one, so that it will always be used.
   nonNamespaceUtxos.unshift(nsUtxo);
   let { inputs, outputs, fee } = coinSelectAccumulative(nonNamespaceUtxos, targets, requestedSatPerByte);
@@ -562,6 +565,7 @@ const MIN_REWARD = 10000000;
 // replyTxid: the txid of the post
 //
 export async function rewardKeyValue(wallet, requestedSatPerByte, namespaceId, shortCode, value, amount, rewardRootAddress, replyTxid) {
+  await wallet.fetchBalance();
   await wallet.fetchTransactions();
   let nsUtxo = await getNamespaceUtxo(wallet, namespaceId);
   if (!nsUtxo) {
@@ -588,7 +592,7 @@ export async function rewardKeyValue(wallet, requestedSatPerByte, namespaceId, s
 
   const transactions = wallet.getTransactions();
   let utxos = wallet.getUtxo();
-  let nonNamespaceUtxos = getNonNamespaceUxtos(transactions, utxos);
+  let nonNamespaceUtxos = await getNonNamespaceUxtos(wallet, transactions, utxos);
   // Move the nsUtxo to the first one, so that it will always be used.
   nonNamespaceUtxos.unshift(nsUtxo);
   let { inputs, outputs, fee } = coinSelectAccumulative(nonNamespaceUtxos, targets, requestedSatPerByte);
@@ -666,6 +670,7 @@ export async function rewardKeyValue(wallet, requestedSatPerByte, namespaceId, s
 // replyTxid: the txid of the post
 //
 export async function replyKeyValue(wallet, requestedSatPerByte, namespaceId, shortCode, value, replyRootAddress, replyTxid) {
+  await wallet.fetchBalance();
   await wallet.fetchTransactions();
   let nsUtxo = await getNamespaceUtxo(wallet, namespaceId);
   if (!nsUtxo) {
@@ -688,11 +693,13 @@ export async function replyKeyValue(wallet, requestedSatPerByte, namespaceId, sh
 
   const transactions = wallet.getTransactions();
   let utxos = wallet.getUtxo();
-  let nonNamespaceUtxos = getNonNamespaceUxtos(transactions, utxos);
+  let nonNamespaceUtxos = await getNonNamespaceUxtos(wallet, transactions, utxos);
+  if (!nonNamespaceUtxos || nonNamespaceUtxos.length == 0) {
+    throw new Error('No nonNamespaceUtxos');
+  }
   // Move the nsUtxo to the first one, so that it will always be used.
   nonNamespaceUtxos.unshift(nsUtxo);
   let { inputs, outputs, fee } = coinSelectAccumulative(nonNamespaceUtxos, targets, requestedSatPerByte);
-
   // inputs and outputs will be undefined if no solution was found
   if (!inputs || !outputs) {
     throw new Error('Not enough balance. Try sending smaller amount');
@@ -762,6 +769,7 @@ export async function replyKeyValue(wallet, requestedSatPerByte, namespaceId, sh
 }
 
 export async function deleteKeyValue(wallet, requestedSatPerByte, namespaceId, key) {
+  await wallet.fetchBalance();
   await wallet.fetchTransactions();
   let nsUtxo = await getNamespaceUtxo(wallet, namespaceId);
   if (!nsUtxo) {
@@ -780,7 +788,7 @@ export async function deleteKeyValue(wallet, requestedSatPerByte, namespaceId, k
 
   let utxos = wallet.getUtxo();
   const transactions = wallet.getTransactions();
-  let nonNamespaceUtxos = getNonNamespaceUxtos(transactions, utxos);
+  let nonNamespaceUtxos = await getNonNamespaceUxtos(wallet, transactions, utxos);
   // Move the nsUtxo to the first one, so that it will always be used.
   nonNamespaceUtxos.unshift(nsUtxo);
   let { inputs, outputs, fee } = coinSelectAccumulative(nonNamespaceUtxos, targets, requestedSatPerByte);
@@ -1001,12 +1009,18 @@ export function mergeKeyValueList(origkeyValues) {
 export async function findMyNamespaces(wallet, ecl) {
   await wallet.fetchBalance();
   await wallet.fetchTransactions();
+  await wallet.fetchUtxo();
   const transactions = wallet.getTransactions();
   if (transactions.length == 0) {
     return;
   }
+  const UTXOs = wallet.getUtxo();
   let namespaces = {};
   for (let tx of transactions) {
+    const isUnspent = UTXOs.find(u => u.txId == tx.hash);
+    if (!isUnspent) {
+      continue;
+    }
     for (let v of tx.outputs) {
       let result = parseKeva(v.scriptPubKey.asm);
       if (!result) {
@@ -1031,6 +1045,13 @@ export async function findMyNamespaces(wallet, ecl) {
     namespaces[nsId].shortCode = shortCode;
     namespaces[nsId].rootTxid = rootTxid;
     namespaces[nsId].rootAddress = rootAddress;
+    if (!namespaces[nsId].displayName) {
+      // This namespace may be transferred from different wallet.
+      const nsInfo = getNamespaceInfoFromShortCode(ecl, shortCode);
+      if (nsInfo) {
+        namespaces[nsId].displayName = (await nsInfo).displayName;
+      }
+    }
   }
   return namespaces;
 }
@@ -1220,6 +1241,7 @@ export function parseShareKey(key) {
 // replyTxid: the txid of the post
 //
 export async function shareKeyValue(ecl, wallet, requestedSatPerByte, namespaceId, shortCode, origShortCode, value, shareRootAddress, shareTxid, height) {
+  await wallet.fetchBalance();
   await wallet.fetchTransactions();
   let nsUtxo = await getNamespaceUtxo(wallet, namespaceId);
   if (!nsUtxo) {
@@ -1244,7 +1266,7 @@ export async function shareKeyValue(ecl, wallet, requestedSatPerByte, namespaceI
 
   const transactions = wallet.getTransactions();
   let utxos = wallet.getUtxo();
-  let nonNamespaceUtxos = getNonNamespaceUxtos(transactions, utxos);
+  let nonNamespaceUtxos = await getNonNamespaceUxtos(wallet, transactions, utxos);
   // Move the nsUtxo to the first one, so that it will always be used.
   nonNamespaceUtxos.unshift(nsUtxo);
   let { inputs, outputs, fee } = coinSelectAccumulative(nonNamespaceUtxos, targets, requestedSatPerByte);

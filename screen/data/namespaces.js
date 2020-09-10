@@ -45,7 +45,7 @@ let BlueElectrum = require('../../BlueElectrum');
 const StyleSheet = require('../../PlatformStyleSheet');
 const KevaButton = require('../../common/KevaButton');
 const KevaColors = require('../../common/KevaColors');
-import { THIN_BORDER, SCREEN_WIDTH, ModalHandle } from '../../util';
+import { THIN_BORDER, SCREEN_WIDTH, ModalHandle, toastError } from '../../util';
 import Toast from 'react-native-root-toast';
 import StepModal from "../../common/StepModalWizard";
 
@@ -147,7 +147,7 @@ class Namespace extends React.Component {
               </TouchableOpacity>
               { canDelete &&
               <TouchableOpacity onPress={() => onDelete(namespace.id)}>
-                <Icon name="ios-close-circle-outline" size={20} style={styles.actionIcon} />
+                <Icon name="ios-eye-off" size={20} style={styles.actionIcon} />
               </TouchableOpacity>
               }
             </View>
@@ -357,7 +357,7 @@ class MyNamespaces extends React.Component {
                 showNSCreationModal: false,
                 nsName: '',
               });
-              await this.refreshNamespaces(this.state.walletId);
+              await this.refreshNamespaces();
             }}
           />
         </View>
@@ -381,7 +381,7 @@ class MyNamespaces extends React.Component {
   onAddNamespace = () => {
     const wallets = BlueApp.getWallets();
     if (wallets.length == 0) {
-      return Toast.show('No wallet available');
+      return toastError(loc.namespaces.no_wallet);
     }
 
     Keyboard.dismiss();
@@ -414,36 +414,30 @@ class MyNamespaces extends React.Component {
     }
 
     const order = this.props.namespaceList.order;
+    // Remove the order that are not in the namespace list.
+    let newOrder = order.filter(nsid => namespaces[nsid]);
     for (let id of Object.keys(namespaces)) {
-      if (!order.find(nsid => nsid == id)) {
-        order.unshift(id);
+      if (!newOrder.find(nsid => nsid == id)) {
+        newOrder.unshift(id);
       }
     }
-    dispatch(setNamespaceList(namespaces, order));
+    dispatch(setNamespaceList(namespaces, newOrder));
   }
 
   async componentDidMount() {
     try {
       await this.fetchNamespaces();
     } catch (err) {
-      Toast.show('Cannot fetch namespaces');
+      toastError('Cannot fetch namespaces');
       console.error(err);
     }
     this.isBiometricUseCapableAndEnabled = await Biometric.isBiometricUseCapableAndEnabled();
   }
 
-  refreshNamespaces = async (walletId) => {
+  refreshNamespaces = async () => {
     this.setState({isRefreshing: true});
     try {
       await BlueElectrum.ping();
-      if (walletId) {
-        const wallets = BlueApp.getWallets();
-        const wallet = wallets.find(w => w.getID() == walletId);
-        if (wallet) {
-          await wallet.fetchBalance();
-          await wallet.fetchTransactions();
-        }
-      }
       await this.fetchNamespaces();
     } catch (err) {
       console.error(err);
@@ -500,7 +494,7 @@ class MyNamespaces extends React.Component {
             <ActivityIndicator size="small" color={KevaColors.actionText} style={{ width: 42, height: 42 }} />
             :
             <TouchableOpacity onPress={this.onAddNamespace} disabled={!canAdd}>
-              <Icon name={'md-add-circle'}
+              <Icon name={'md-add'}
                     style={[styles.addIcon, !canAdd && {color: KevaColors.inactiveText}]}
                     size={28} />
             </TouchableOpacity>
@@ -532,9 +526,7 @@ class MyNamespaces extends React.Component {
             <Text style={[styles.emptyMessage, { marginBottom: 7 }]}>
               {loc.namespaces.click_add_btn}
             </Text>
-            <Icon name={'md-add-circle'}
-              style={[styles.addIcon, {color: KevaColors.inactiveText}]}
-              size={28} />
+
             <Text style={[styles.emptyMessage, styles.help, {marginTop: 10}]}>
               {loc.namespaces.explain}
             </Text>
@@ -574,7 +566,7 @@ class OtherNamespaces extends React.Component {
         dispatch(setOtherNamespaceList(namespace, order));
       }
     } catch (err) {
-      Toast.show('Cannot find namespace');
+      toastError('Cannot find namespace');
       console.log(err);
     }
   }
@@ -583,7 +575,7 @@ class OtherNamespaces extends React.Component {
     try {
       await this.fetchOtherNamespaces();
     } catch (err) {
-      Toast.show('Cannot fetch namespaces');
+      toastError('Cannot fetch namespaces');
       console.error(err);
     }
   }
@@ -625,7 +617,7 @@ class OtherNamespaces extends React.Component {
       this.closeItemAni();
     } catch (err) {
       this.setState({saving: false});
-      Toast.show('Cannot find namespace');
+      toastError('Cannot find namespace');
       console.log(err);
     }
   }
@@ -675,8 +667,8 @@ class OtherNamespaces extends React.Component {
       <View style={styles.container}>
         <ActionSheet
           ref={ref => this._actionDelete = ref}
-          title={'Delete the namespace?'}
-          options={[loc.general.delete, loc.general.cancel]}
+          title={loc.namespaces.hide_namespace}
+          options={[loc.namespaces.hide, loc.general.cancel]}
           cancelButtonIndex={1}
           destructiveButtonIndex={0}
           onPress={this.onDeleteConfirm}
@@ -829,7 +821,7 @@ class Namespaces extends React.Component {
           <Text style={[titleStyle, {marginTop: 5}]}>{'Name'}</Text>
           <Text style={contentStyle}>{nsData.displayName}</Text>
 
-          <Text style={titleStyle}>{'Id'}</Text>
+          <Text style={titleStyle}>{'ID'}</Text>
           <View style={container}>
             <Text style={contentStyle}>{nsData.id}</Text>
             <TouchableOpacity onPress={() => {this.copyString(nsData.id)}}>
@@ -837,7 +829,7 @@ class Namespaces extends React.Component {
             </TouchableOpacity>
           </View>
 
-          <Text style={titleStyle}>{'Short Code'}</Text>
+          <Text style={titleStyle}>{loc.namespaces.shortcode}</Text>
           <View style={container}>
             {nsData.shortCode ?
               <>
@@ -851,7 +843,7 @@ class Namespaces extends React.Component {
             }
           </View>
 
-          <Text style={titleStyle}>{'Tx Id'}</Text>
+          <Text style={titleStyle}>{'Tx ID'}</Text>
           <View style={container}>
             <Text style={contentStyle}>{nsData.txId}</Text>
             <TouchableOpacity onPress={() => {this.copyString(nsData.txId)}}>
@@ -1019,13 +1011,16 @@ var styles = StyleSheet.create({
     }
   },
   modalHeader: {
-    paddingHorizontal: 10,
-    paddingVertical: 5,
+    paddingHorizontal: 15,
+    paddingVertical: 10,
+    marginBottom: 10,
     borderTopLeftRadius: 10,
     borderTopRightRadius: 10,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    borderBottomWidth: THIN_BORDER,
+    borderColor: KevaColors.cellBorder,
   },
   codeErr: {
     marginTop: 20,

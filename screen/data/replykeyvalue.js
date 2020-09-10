@@ -11,7 +11,7 @@ import Icon from 'react-native-vector-icons/Ionicons';
 const StyleSheet = require('../../PlatformStyleSheet');
 const KevaButton = require('../../common/KevaButton');
 const KevaColors = require('../../common/KevaColors');
-import { THIN_BORDER, SCREEN_WIDTH } from '../../util';
+import { THIN_BORDER, SCREEN_WIDTH, toastError } from '../../util';
 import { HDSegwitP2SHWallet,  } from '../../class';
 import {
   BlueNavigationStyle,
@@ -82,7 +82,7 @@ class ReplyKeyValue extends React.Component {
     const { namespaceList } = this.props;
 
     if (value.length == 0) {
-      Toast.show('Write something to reply');
+      toastError('Write something to reply');
       return;
     }
     const wallets = BlueApp.getWallets();
@@ -154,9 +154,7 @@ class ReplyKeyValue extends React.Component {
               const {namespaceId, value} = this.state;
               const shortCode = namespaceList.namespaces[namespaceId].shortCode;
               if (!shortCode) {
-                Toast.show(loc.namespaces.namespace_unconfirmed, {
-                  position: Toast.positions.TOP,
-                });
+                toastError(loc.namespaces.namespace_unconfirmed);
                 throw new Error('Namespace not confirmed yet');
               }
               const walletId = namespaceList.namespaces[namespaceId].walletId;

@@ -1,7 +1,6 @@
 import React from 'react';
 import {
   Text,
-  TextInput,
   View,
   TouchableOpacity,
 } from 'react-native';
@@ -11,8 +10,7 @@ import Icon from 'react-native-vector-icons/Ionicons';
 const StyleSheet = require('../../PlatformStyleSheet');
 const KevaButton = require('../../common/KevaButton');
 const KevaColors = require('../../common/KevaColors');
-import { THIN_BORDER, SCREEN_WIDTH } from '../../util';
-import { HDSegwitP2SHWallet,  } from '../../class';
+import { THIN_BORDER, SCREEN_WIDTH, toastError } from '../../util';
 import {
   BlueNavigationStyle,
   BlueLoading,
@@ -84,7 +82,7 @@ class RewardKeyValue extends React.Component {
 
     const wallets = BlueApp.getWallets();
     if (wallets.length == 0) {
-      Toast.show("You don't have wallet");
+      toastError("You don't have wallet");
       return;
     }
 
@@ -160,9 +158,7 @@ class RewardKeyValue extends React.Component {
               const {namespaceId, value, amount} = this.state;
               const shortCode = namespaceList.namespaces[namespaceId].shortCode;
               if (!shortCode) {
-                Toast.show(loc.namespaces.namespace_unconfirmed, {
-                  position: Toast.positions.TOP,
-                });
+                toastError(loc.namespaces.namespace_unconfirmed);
                 throw new Error('Namespace not confirmed yet');
               }
               if (!wallet) {

@@ -8,7 +8,7 @@ import {
 const StyleSheet = require('../../PlatformStyleSheet');
 const KevaButton = require('../../common/KevaButton');
 const KevaColors = require('../../common/KevaColors');
-import { THIN_BORDER, showStatusAlways, hideStatus } from '../../util';
+import { THIN_BORDER, showStatusAlways, hideStatus, toastError } from '../../util';
 import {
   BlueNavigationStyle,
   BlueLoading,
@@ -146,7 +146,7 @@ class KeyValues extends React.Component {
           })
         }
       >
-        <Icon name="ios-add-circle" type="octicon" size={30} color={KevaColors.actionText} />
+        <Icon name="md-add" type="octicon" size={30} color={KevaColors.actionText} />
       </TouchableOpacity>
     ),
     headerStyle: { backgroundColor: '#fff', elevation:0, shadowColor: 'transparent', borderBottomWidth: THIN_BORDER, borderColor: KevaColors.cellBorder },
@@ -238,12 +238,6 @@ class KeyValues extends React.Component {
   fetchKeyValues = async () => {
     let {navigation, dispatch, keyValueList} = this.props;
     const {namespaceId, rootAddress, walletId} = navigation.state.params;
-    const wallets = BlueApp.getWallets();
-    this.wallet = wallets.find(w => w.getID() == walletId);
-    if (this.wallet) {
-      await this.wallet.fetchBalance();
-      await this.wallet.fetchTransactions();
-    }
 
     let kvList = keyValueList.keyValues[namespaceId];
     let cb;
@@ -520,7 +514,7 @@ class KeyValues extends React.Component {
     const {rootAddress, namespaceId} = navigation.state.params;
     // Must have a namespace.
     if (Object.keys(namespaceList).length == 0) {
-      Toast.show('Create a namespace first');
+      toastError(loc.namespaces.create_namespace_first);
       return;
     }
 
@@ -535,7 +529,7 @@ class KeyValues extends React.Component {
     const rootAddress = navigation.getParam('rootAddress');
     // Must have a namespace.
     if (Object.keys(namespaceList).length == 0) {
-      Toast.show('Create a namespace first');
+      toastError(loc.namespaces.create_namespace_first);
       return;
     }
 
@@ -555,7 +549,7 @@ class KeyValues extends React.Component {
     const rootAddress = navigation.getParam('rootAddress');
     // Must have a namespace.
     if (Object.keys(namespaceList).length == 0) {
-      Toast.show('Create a namespace first');
+      toastError(loc.namespaces.create_namespace_first);
       return;
     }
 
