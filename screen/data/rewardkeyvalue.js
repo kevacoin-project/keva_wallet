@@ -51,7 +51,9 @@ class RewardKeyValue extends React.Component {
         style={{ marginHorizontal: 16, minWidth: 150, justifyContent: 'center', alignItems: 'flex-end' }}
         onPress={navigation.state.params.onPress}
       >
-        <Text style={{ color: '#FFF', fontSize: 16, borderRadius: 20, backgroundColor: KevaColors.actionText, paddingVertical: 4, paddingHorizontal: 15 }}>{loc.general.reward}</Text>
+        <View style={{ borderRadius: 20, backgroundColor: KevaColors.actionText, paddingVertical: 4, paddingHorizontal: 15 }}>
+          <Text style={{color: '#FFF', fontSize: 16}}>{loc.general.reward}</Text>
+        </View>
       </TouchableOpacity>
     ),
     headerLeft: () => (
