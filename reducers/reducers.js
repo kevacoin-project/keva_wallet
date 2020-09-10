@@ -19,7 +19,7 @@ function namespaceList(state = initNamespaceList, action) {
         return {...initNamespaceList};
       }
       return {
-        namespaces: {...state.namespaces, ...action.namespaceList},
+        namespaces: {...action.namespaceList},
         order: [...action.order]
       }
     case SET_NAMESPACES_ORDER:
