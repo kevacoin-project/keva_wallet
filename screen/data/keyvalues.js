@@ -238,12 +238,6 @@ class KeyValues extends React.Component {
   fetchKeyValues = async () => {
     let {navigation, dispatch, keyValueList} = this.props;
     const {namespaceId, rootAddress, walletId} = navigation.state.params;
-    const wallets = BlueApp.getWallets();
-    this.wallet = wallets.find(w => w.getID() == walletId);
-    if (this.wallet) {
-      await this.wallet.fetchBalance();
-      await this.wallet.fetchTransactions();
-    }
 
     let kvList = keyValueList.keyValues[namespaceId];
     let cb;
