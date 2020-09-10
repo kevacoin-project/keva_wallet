@@ -83,7 +83,7 @@ export function getOverlaySpinner(visible) {
 
 export const SCREEN_WIDTH = Dimensions.get('window').width;
 
-export const ModalHandle = <View style={{height: 6, width: 40, marginVertical: 10, borderRadius: 3, backgroundColor: '#ddd'}}/>;
+export const ModalHandle = <View style={{height: 6, width: 40, borderRadius: 3, backgroundColor: '#ddd', alignSelf: 'flex-start'}}/>;
 
 export function timeConverter(UNIX_timestamp) {
   let a = new Date(UNIX_timestamp * 1000);
