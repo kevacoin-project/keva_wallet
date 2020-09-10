@@ -146,7 +146,7 @@ class KeyValues extends React.Component {
           })
         }
       >
-        <Icon name="ios-add-circle" type="octicon" size={30} color={KevaColors.actionText} />
+        <Icon name="md-add" type="octicon" size={30} color={KevaColors.actionText} />
       </TouchableOpacity>
     ),
     headerStyle: { backgroundColor: '#fff', elevation:0, shadowColor: 'transparent', borderBottomWidth: THIN_BORDER, borderColor: KevaColors.cellBorder },

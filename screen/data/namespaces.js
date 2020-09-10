@@ -494,7 +494,7 @@ class MyNamespaces extends React.Component {
             <ActivityIndicator size="small" color={KevaColors.actionText} style={{ width: 42, height: 42 }} />
             :
             <TouchableOpacity onPress={this.onAddNamespace} disabled={!canAdd}>
-              <Icon name={'md-add-circle'}
+              <Icon name={'md-add'}
                     style={[styles.addIcon, !canAdd && {color: KevaColors.inactiveText}]}
                     size={28} />
             </TouchableOpacity>
@@ -526,9 +526,7 @@ class MyNamespaces extends React.Component {
             <Text style={[styles.emptyMessage, { marginBottom: 7 }]}>
               {loc.namespaces.click_add_btn}
             </Text>
-            <Icon name={'md-add-circle'}
-              style={[styles.addIcon, {color: KevaColors.inactiveText}]}
-              size={28} />
+
             <Text style={[styles.emptyMessage, styles.help, {marginTop: 10}]}>
               {loc.namespaces.explain}
             </Text>
