@@ -23,10 +23,9 @@ import {
   BlueNavigationStyle,
 } from '../../BlueComponents';
 const loc = require('../../loc');
+import { connect } from 'react-redux'
 
 const MAX_TIME = 3147483647;
-
-import { connect } from 'react-redux'
 
 class Reply extends React.Component {
 
@@ -198,6 +197,7 @@ class ShowKeyValue extends React.Component {
     rewards.push(reward);
     this.setState({
       rewards,
+      favorite: true,
     });
   }
 
