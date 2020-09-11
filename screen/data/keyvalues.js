@@ -68,7 +68,7 @@ class Item extends React.Component {
 
     return (
       <View style={styles.card}>
-        <TouchableOpacity onPress={() => onShow(item.key, item.value, item.tx, item.replies, item.shares, item.rewards, item.height)}>
+        <TouchableOpacity onPress={() => onShow(item.key, item.value, item.tx, item.replies, item.shares, item.rewards, item.height, item.favorite)}>
           <View style={{flex:1,paddingHorizontal:10,paddingTop:2}}>
             <View style={{flexDirection:'row',alignItems:'center',justifyContent:'space-between'}}>
               <Text style={styles.keyDesc} numberOfLines={1} ellipsizeMode="tail">{item.key}</Text>
@@ -108,7 +108,12 @@ class Item extends React.Component {
             {(item.shares && item.shares.length > 0) && <Text style={styles.count}>{item.shares.length}</Text>}
           </TouchableOpacity>
           <TouchableOpacity onPress={() => onReward(item.tx, item.key, item.value, item.height)} style={{flexDirection: 'row'}}>
-            <MIcon name="favorite-border" size={22} style={styles.shareIcon} />
+            {
+              item.favorite ?
+                <MIcon name="favorite" size={22} style={[styles.shareIcon, {color: KevaColors.favorite}]} />
+              :
+                <MIcon name="favorite-border" size={22} style={styles.shareIcon} />
+            }
             {(item.rewards && item.rewards.length > 0) && <Text style={styles.count}>{item.rewards.length}</Text> }
           </TouchableOpacity>
         </View>
@@ -199,6 +204,9 @@ class KeyValues extends React.Component {
   }
 
   fastFetchKeyValues = async (dispatch, namespaceId, history, rootAddress, kvList, cb) => {
+    const {namespaceList} = this.props;
+    const myNamespaces = namespaceList.namespaces;
+
     let keyValues = await fetchKeyValueList(BlueElectrum, history, kvList, true, cb);
     if (!keyValues) {
       return;
@@ -221,6 +229,7 @@ class KeyValues extends React.Component {
       const txRewards = rewards.filter(r => kv.tx == r.partialTxId);
       if (txRewards && txRewards.length > 0) {
         kv.rewards = txRewards;
+        kv.favorite = txRewards.find(r => Object.keys(myNamespaces).find(n => myNamespaces[n].shortCode == r.rewarder.shortCode));
       }
     }
 
@@ -236,8 +245,9 @@ class KeyValues extends React.Component {
   }
 
   fetchKeyValues = async () => {
-    let {navigation, dispatch, keyValueList} = this.props;
-    const {namespaceId, rootAddress, walletId} = navigation.state.params;
+    const {navigation, dispatch, keyValueList, namespaceList} = this.props;
+    const myNamespaces = namespaceList.namespaces;
+    const {namespaceId, rootAddress} = navigation.state.params;
 
     let kvList = keyValueList.keyValues[namespaceId];
     let cb;
@@ -269,6 +279,7 @@ class KeyValues extends React.Component {
       const txRewards = rewards.filter(r => kv.tx.startsWith(r.partialTxId));
       if (txRewards && txRewards.length > 0) {
         kv.rewards = txRewards;
+        kv.favorite = txRewards.find(r => Object.keys(myNamespaces).find(n => myNamespaces[n].shortCode == r.rewarder.shortCode));
       }
     }
 
@@ -486,7 +497,7 @@ class KeyValues extends React.Component {
     );
   }
 
-  onShow = (key, value, tx, replies, shares, rewards, height) => {
+  onShow = (key, value, tx, replies, shares, rewards, height, favorite) => {
     const {navigation} = this.props;
     const rootAddress = navigation.getParam('rootAddress');
     const isOther = navigation.getParam('isOther');
@@ -504,6 +515,7 @@ class KeyValues extends React.Component {
       replies,
       shares,
       rewards,
+      favorite,
       isOther,
       height,
     });

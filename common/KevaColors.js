@@ -75,4 +75,5 @@ module.exports = {
   selectColor: '#f25656',
   background: '#f0f0f0',
   backgroundLight: '#f8f8f8',
+  favorite: '#FF4041',
 };

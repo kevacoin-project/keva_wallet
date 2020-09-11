@@ -105,13 +105,14 @@ class ShowKeyValue extends React.Component {
   }
 
   async componentDidMount() {
-    const {key, value, replies, shares, rewards} = this.props.navigation.state.params;
+    const {key, value, replies, shares, rewards, favorite} = this.props.navigation.state.params;
     this.setState({
       key,
       value,
       replies: this.sortReplies(replies),
       shares,
       rewards,
+      favorite
     });
 
     this.subs = [
@@ -255,6 +256,7 @@ class ShowKeyValue extends React.Component {
         const txRewards = rewards.filter(r => kv.tx == r.partialTxId);
         if (txRewards && txRewards.length > 0) {
           kv.rewards = txRewards;
+          kv.favorite = txRewards.find(r => Object.keys(myNamespaces).find(n => myNamespaces[n].shortCode == r.rewarder.shortCode));
         }
       }
 
@@ -274,6 +276,8 @@ class ShowKeyValue extends React.Component {
         isRefreshing: false,
         replies: this.sortReplies(thisKV.replies),
         shares: thisKV.shares,
+        rewards: thisKV.rewards,
+        favorite: thisKV.favorite,
       });
 
     } catch(err) {
@@ -365,7 +369,7 @@ class ShowKeyValue extends React.Component {
   }
 
   render() {
-    let {isRaw, value, key, replies, shares, rewards} = this.state;
+    let {isRaw, value, key, replies, shares, rewards, favorite} = this.state;
 
     const listHeader = (
       <View style={styles.container}>
@@ -396,7 +400,12 @@ class ShowKeyValue extends React.Component {
               {(shares && shares.length > 0) && <Text style={styles.count}>{shares.length}</Text>}
             </TouchableOpacity>
             <TouchableOpacity onPress={() => this.onReward()} style={{flexDirection: 'row'}}>
-              <MIcon name="favorite-border" size={22} style={styles.shareIcon} />
+              {
+                favorite ?
+                  <MIcon name="favorite" size={22} style={[styles.shareIcon, {color: KevaColors.favorite}]} />
+                :
+                  <MIcon name="favorite-border" size={22} style={styles.shareIcon} />
+              }
               {(rewards && rewards.length > 0) && <Text style={styles.count}>{rewards.length}</Text>}
             </TouchableOpacity>
           </View>
