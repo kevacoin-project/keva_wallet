@@ -36,7 +36,8 @@ import showPopupMenu from 'react-native-popup-menu-android';
 import NetworkTransactionFees, { NetworkTransactionFeeType } from './models/networkTransactionFees';
 import Biometric from './class/biometrics';
 let loc = require('./loc/');
-import { IS_ANDROID } from './util';
+import { IS_ANDROID, THIN_BORDER } from './util';
+import KevaColors from './common/KevaColors';
 
 /** @type {AppStorage} */
 let BlueApp = require('./BlueApp');
@@ -2197,8 +2198,9 @@ export class BlueBitcoinAmount extends Component {
     return (
       <TouchableWithoutFeedback disabled={this.props.pointerEvents === 'none'} onPress={() => this.textInput.focus()}>
         <View>
-          <View style={{ flexDirection: 'row', justifyContent: 'center', paddingTop: 16, paddingBottom: 2 }}>
+          <View style={{ flexDirection: 'row', justifyContent: 'center', margin:20, borderColor: KevaColors.cellBorder, borderWidth: 1, borderRadius: 5 }}>
             <TextInput
+              autoFocus
               {...this.props}
               testID={'BitcoinAmountInput'}
               keyboardType="numeric"
@@ -2253,9 +2255,6 @@ export class BlueBitcoinAmount extends Component {
             >
               {' ' + this.props.unit}
             </Text>
-          </View>
-          <View style={{ alignItems: 'center', marginBottom: 22, marginTop: 4 }}>
-            {/* <Text style={{ fontSize: 18, color: '#d4d4d4', fontWeight: '600' }}>{localCurrency}</Text> */}
           </View>
         </View>
       </TouchableWithoutFeedback>

@@ -219,7 +219,7 @@ class RewardKeyValue extends React.Component {
 
     let confirmPage = (
       <View style={styles.modalNS}>
-        <Text style={styles.modalText}>{"Transaction fee:  "}
+        <Text style={styles.modalText}>{"Total:  "}
           <Text style={styles.modalFee}>{this.state.fee + ' KVA'}</Text>
         </Text>
         <KevaButton
@@ -349,9 +349,7 @@ class RewardKeyValue extends React.Component {
       <View style={styles.container}>
         {this.getRewardKeyValueModal()}
         {this.state.otherAmount ?
-          <View style={{flexDirection: 'row', justifyContent: 'center'}}>
-            <BlueBitcoinAmount amount={this.state.amount} onChangeText={v => {this.setState({amount: v})}} />
-          </View>
+          <BlueBitcoinAmount amount={this.state.amount.toString()} onChangeText={v => {this.setState({amount: v})}} />
           :
           <>
             <View style={{flexDirection: 'row', justifyContent: 'center'}}>
@@ -371,7 +369,7 @@ class RewardKeyValue extends React.Component {
               type={'bordered'}
               style={{margin:10, marginTop: 40, width: 180}}
               caption={'Other Amount'}
-              onPress={() => {this.setState({otherAmount: true})}}
+              onPress={() => {this.setState({otherAmount: true, amount: 0})}}
             />
           </View>
         }
