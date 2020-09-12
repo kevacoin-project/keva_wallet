@@ -53,6 +53,8 @@ module.exports = {
     hide: 'Hide',
     no_wallet: 'Need a wallet with a balance',
     create_namespace_first: 'Create a namespace first',
+    check_again: 'Check Again',
+    pending_confirmation: 'Pending confirmation. This will take a few minutes.',
   },
   wallets: {
     select_wallet: 'Select Wallet',

@@ -131,8 +131,13 @@ class Namespace extends React.Component {
     }
   }
 
+  onWait = () => {
+    const {data, onWait, refresh} = this.props;
+    onWait(data.displayName, refresh);
+  }
+
   render() {
-    let namespace = this.props.data;
+    const namespace = this.props.data;
     const {canDelete, onDelete} = this.props;
     return (
       <Animated.View style={this._style}>
@@ -142,6 +147,12 @@ class Namespace extends React.Component {
               <Text style={styles.cardTitleText} numberOfLines={1} ellipsizeMode="tail">{namespace.displayName}</Text>
             </View>
             <View style={styles.actionContainer}>
+              {
+                !namespace.shortCode &&
+                <TouchableOpacity onPress={this.onWait}>
+                  <Icon name="ios-hourglass" size={20} style={[styles.actionIcon, {color: KevaColors.warnColor}]} />
+                </TouchableOpacity>
+              }
               <TouchableOpacity onPress={this.onInfo}>
                 <Icon name="ios-information-circle-outline" size={20} style={styles.actionIcon} />
               </TouchableOpacity>
@@ -465,7 +476,7 @@ class MyNamespaces extends React.Component {
   }
 
   render() {
-    const { navigation, namespaceList, onInfo } = this.props;
+    const { navigation, namespaceList, onInfo, onWait } = this.props;
     const canAdd = this.state.nsName && this.state.nsName.length > 0;
     const inputMode = this.state.inputMode;
     return (
@@ -512,7 +523,7 @@ class MyNamespaces extends React.Component {
               <RefreshControl onRefresh={() => this.refreshNamespaces()} refreshing={this.state.isRefreshing} />
             }
             renderRow={({data, active, key}) => {
-              return <Namespace onInfo={onInfo} data={data} active={active} navigation={navigation} key={key}/>
+              return <Namespace onInfo={onInfo} onWait={onWait} refresh={this.refreshNamespaces} data={data} active={active} navigation={navigation} key={key}/>
             }}
           />
           :
@@ -770,6 +781,14 @@ class Namespaces extends React.Component {
     });
   }
 
+  onWait = (displayName, refresh) => {
+    this.setState({
+      pendingDisplayName: displayName,
+      refresh,
+      pendingModalVisible: true,
+    });
+  }
+
   copyString = (str) => {
     Clipboard.setString(str);
     Toast.show(loc.general.copiedToClipboard, {
@@ -859,6 +878,63 @@ class Namespaces extends React.Component {
     this.setState({ codeErr: null, isModalVisible: false });
   }
 
+  getPendingModal() {
+    const {pendingDisplayName, refresh} = this.state;
+
+    const titleStyle ={
+      fontSize: 17,
+      fontWeight: '700',
+      marginTop: 10,
+      marginBottom: 0,
+      color: KevaColors.darkText,
+    };
+    const contentStyle ={
+      fontSize: 16,
+      color: KevaColors.lightText,
+      paddingTop: 15,
+    };
+    return (
+      <Modal style={styles.modalPending} backdrop={true}
+        swipeDirection="down"
+        coverScreen={false}
+        onSwipeComplete={this.closePendingModal}
+        isVisible={this.state.pendingModalVisible}>
+        <View style={styles.modalHeader}>
+          <TouchableOpacity onPress={this.closePendingModal}>
+            <Text style={{color: KevaColors.actionText, fontSize: 16, paddingVertical: 5}}>
+              {loc.general.close}
+            </Text>
+          </TouchableOpacity>
+          {ModalHandle}
+          <Text style={{color: '#fff', fontSize: 16}}>
+              {loc.general.close}
+          </Text>
+        </View>
+        <View style={{ marginHorizontal: 10}}>
+          <Text style={titleStyle}>{pendingDisplayName}</Text>
+          <Text style={contentStyle}>{loc.namespaces.pending_confirmation}</Text>
+
+          <KevaButton
+            type='secondary'
+            style={{margin:10, marginTop: 40}}
+            caption={loc.namespaces.check_again}
+            onPress={async () => {
+              this.closePendingModal();
+              await refresh();
+            }}
+          />
+        </View>
+      </Modal>
+    )
+  }
+
+  closePendingModal = () => {
+    this.setState({
+      pendingModalVisible: false,
+      pendingDisplayName: "",
+    });
+  }
+
   render() {
     const { dispatch, navigation, namespaceList, otherNamespaceList } = this.props;
     const labelStyle = focused => ({
@@ -869,12 +945,13 @@ class Namespaces extends React.Component {
     return (
       <SafeAreaView style={styles.topContainer}>
         {this.getNSModal()}
+        {this.getPendingModal()}
         <TabView
           navigationState={this.state}
           renderScene={({ route }) => {
             switch (route.key) {
               case 'first':
-                return <MyNamespaces dispatch={dispatch} navigation={navigation} namespaceList={namespaceList} onInfo={this.onNSInfo}/>;
+                return <MyNamespaces dispatch={dispatch} navigation={navigation} namespaceList={namespaceList} onInfo={this.onNSInfo} onWait={this.onWait}/>;
               case 'second':
                 return <OtherNamespaces dispatch={dispatch} navigation={navigation} otherNamespaceList={otherNamespaceList} onInfo={this.onNSInfo} />;
             }
@@ -996,6 +1073,14 @@ var styles = StyleSheet.create({
     borderRadius: 10,
     backgroundColor: '#fff',
     justifyContent: 'flex-start',
+  },
+  modalPending: {
+    borderRadius: 10,
+    backgroundColor: '#fff',
+    justifyContent: 'flex-start',
+    marginHorizontal: 0,
+    marginVertical: 100,
+    marginHorizontal: 20,
   },
   modalShow: {
     borderRadius: 10,

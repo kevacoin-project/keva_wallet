@@ -810,8 +810,6 @@ export class AbstractHDElectrumWallet extends AbstractHDWallet {
 
     const transactions = this.getTransactions();
     let nonNamespaceUtxos = getNonNamespaceUxtosSync(transactions, utxos);
-    console.log('JWU getNonNamespaceUxtosSync')
-    console.log(nonNamespaceUtxos)
     let { inputs, outputs, fee } = algo(nonNamespaceUtxos, targets, feeRate);
 
     // .inputs and .outputs will be undefined if no solution was found

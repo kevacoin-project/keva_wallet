@@ -53,6 +53,8 @@ module.exports = {
     hide: '隐藏',
     no_wallet: '需要一个有余额的钱包',
     create_namespace_first: '先创建名称空间',
+    check_again: '再次刷新',
+    pending_confirmation: '待确认。这将需要几分钟。',
   },
   wallets: {
     select_wallet: '选择钱包',
