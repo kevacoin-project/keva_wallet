@@ -366,6 +366,23 @@ function getKeyValueDeleteScript(namespaceId, address, key) {
   return nsScript;
 }
 
+export function getNonNamespaceUxtosSync(transactions, utxos) {
+  let nonNSutxos = [];
+  for (let u of utxos) {
+    const tx = transactions.find(t => t.txid == u.txId);
+    if (!tx) {
+      continue;
+    }
+    const v = tx.outputs[u.vout];
+    let result = parseKeva(v.scriptPubKey.asm);
+    let isNSTx = !!result;
+    if (!isNSTx) {
+      nonNSutxos.push(u);
+    }
+  }
+  return nonNSutxos;
+}
+
 export async function getNonNamespaceUxtos(wallet, transactions, utxos, tryAgain) {
   let nonNSutxos = [];
   for (let u of utxos) {

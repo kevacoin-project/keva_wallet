@@ -2200,7 +2200,6 @@ export class BlueBitcoinAmount extends Component {
         <View>
           <View style={{ flexDirection: 'row', justifyContent: 'center', margin:20, borderColor: KevaColors.cellBorder, borderWidth: 1, borderRadius: 5 }}>
             <TextInput
-              autoFocus
               {...this.props}
               testID={'BitcoinAmountInput'}
               keyboardType="numeric"

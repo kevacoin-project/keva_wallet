@@ -1,5 +1,5 @@
 import { LegacyWallet } from './legacy-wallet';
-import { getNonNamespaceUxtos } from './keva-ops';
+import { getNonNamespaceUxtosSync } from './keva-ops';
 const bitcoin = require('bitcoinjs-lib');
 const coinSelectAccumulative = require('coinselect/accumulative');
 const coinSelectSplit = require('coinselect/split');
@@ -90,7 +90,7 @@ export class SegwitP2SHWallet extends LegacyWallet {
     }
 
     const transactions = this.getTransactions();
-    let nonNamespaceUtxos = getNonNamespaceUxtos(transactions, utxos);
+    let nonNamespaceUtxos = getNonNamespaceUxtosSync(transactions, utxos);
     let { inputs, outputs, fee } = algo(nonNamespaceUtxos, targets, feeRate);
 
     // .inputs and .outputs will be undefined if no solution was found

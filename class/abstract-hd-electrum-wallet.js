@@ -3,7 +3,7 @@ import BigNumber from 'bignumber.js';
 import b58 from 'bs58check';
 import { randomBytes } from './rng';
 import { AbstractHDWallet } from './abstract-hd-wallet';
-import { getNonNamespaceUxtos } from './keva-ops';
+import { getNonNamespaceUxtosSync } from './keva-ops';
 const bitcoin = require('bitcoinjs-lib');
 const BlueElectrum = require('../BlueElectrum');
 const HDNode = require('bip32');
@@ -809,7 +809,9 @@ export class AbstractHDElectrumWallet extends AbstractHDWallet {
     }
 
     const transactions = this.getTransactions();
-    let nonNamespaceUtxos = getNonNamespaceUxtos(transactions, utxos);
+    let nonNamespaceUtxos = getNonNamespaceUxtosSync(transactions, utxos);
+    console.log('JWU getNonNamespaceUxtosSync')
+    console.log(nonNamespaceUtxos)
     let { inputs, outputs, fee } = algo(nonNamespaceUtxos, targets, feeRate);
 
     // .inputs and .outputs will be undefined if no solution was found
