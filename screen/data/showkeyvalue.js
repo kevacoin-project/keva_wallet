@@ -22,6 +22,7 @@ import { setKeyValueList } from '../../actions'
 import {
   BlueNavigationStyle,
 } from '../../BlueComponents';
+import VideoPlayer from 'react-native-video-player';
 const loc = require('../../loc');
 import { connect } from 'react-redux'
 
@@ -175,6 +176,36 @@ class ShowKeyValue extends React.Component {
       const width = Dimensions.get('window').width;
       const height = (a.height && a.width) ? (a.height / a.width) * width : width;
       return (<Image style={{ width, height, alignSelf: 'center'}} source={{ uri: a.src }} key={index} resizeMode="contain"/>);
+    } else if (node.name == 'video') {
+      const { width, height, poster } = node.attribs; // <video width="320" height="240" poster="http://link.com/image.jpg">...</video>
+
+      // Check if node has children
+      if (node.children.length === 0) return;
+
+      // Get all children <source> nodes
+      // <video><source src="movie.mp4" type="video/mp4"><source src="movie.ogg" type="video/ogg"></video>
+      const sourceNodes = node.children.filter((node) => node.type === 'tag' && node.name === 'source')
+      // Get a list of source URLs (<source src="movie.mp4">)
+      const sources = sourceNodes.map((node) => node.attribs.src);
+      let displayWidth = Dimensions.get('window').width;
+      let displayHeight;
+      if (height && width) {
+        displayHeight = (Number(height) / Number(width)) * displayWidth;
+      } else {
+        displayHeight = (225/400)*displayWidth;
+      }
+      return (
+        <VideoPlayer
+          key={index}
+          disableFullscreen={false}
+          fullScreenOnLongPress={true}
+          resizeMode="contain"
+          video={{ uri: sources[0] }} // Select one of the video sources
+          videoWidth={displayWidth}
+          videoHeight={displayHeight}
+          thumbnail={poster}
+        />
+      );
     }
   }
 
@@ -370,7 +401,6 @@ class ShowKeyValue extends React.Component {
 
   render() {
     let {isRaw, value, key, replies, shares, rewards, favorite} = this.state;
-
     const listHeader = (
       <View style={styles.container}>
         <View style={styles.keyContainer}>

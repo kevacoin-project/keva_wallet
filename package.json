@@ -150,6 +150,8 @@
     "react-native-tcp-socket": "^4.1.0",
     "react-native-tooltip": "git+https://github.com/marcosrdz/react-native-tooltip.git",
     "react-native-vector-icons": "6.6.0",
+    "react-native-video": "^5.1.0-alpha8",
+    "react-native-video-player": "^0.10.1",
     "react-native-watch-connectivity": "0.4.2",
     "react-navigation": "^4.4.0",
     "react-navigation-hooks": "^1.1.0",
