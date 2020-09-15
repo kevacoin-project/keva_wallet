@@ -23,6 +23,7 @@ import {
   BlueNavigationStyle,
   BlueLoading,
   BlueBigCheckmark,
+  BlueBigWait,
 } from '../../BlueComponents';
 import Modal from 'react-native-modal';
 import ActionSheet from 'react-native-actionsheet';
@@ -133,7 +134,7 @@ class Namespace extends React.Component {
 
   onWait = () => {
     const {data, onWait, refresh} = this.props;
-    onWait(data.displayName, refresh);
+    onWait(data.id, data.displayName, refresh);
   }
 
   render() {
@@ -781,9 +782,10 @@ class Namespaces extends React.Component {
     });
   }
 
-  onWait = (displayName, refresh) => {
+  onWait = (namespaceId, displayName, refresh) => {
     this.setState({
       pendingDisplayName: displayName,
+      pendingNamespaceId: namespaceId,
       refresh,
       pendingModalVisible: true,
     });
@@ -879,8 +881,12 @@ class Namespaces extends React.Component {
   }
 
   getPendingModal() {
-    const {pendingDisplayName, refresh} = this.state;
-
+    const {pendingDisplayName, pendingNamespaceId, pendingModalVisible, refresh} = this.state;
+    const {namespaceList} = this.props;
+    if (!pendingModalVisible || !pendingNamespaceId) {
+      return;
+    }
+    const nsData = namespaceList.namespaces[pendingNamespaceId];
     const titleStyle ={
       fontSize: 17,
       fontWeight: '700',
@@ -888,10 +894,19 @@ class Namespaces extends React.Component {
       marginBottom: 0,
       color: KevaColors.darkText,
     };
-    const contentStyle ={
-      fontSize: 16,
-      color: KevaColors.lightText,
+    const contentStyle = {
+      fontSize: 18,
+      color: KevaColors.darkText,
       paddingTop: 15,
+      alignSelf: 'center',
+      textAlign: 'center',
+    };
+    const confirmStyle = {
+      fontSize: 24,
+      color: KevaColors.okColor,
+      paddingTop: 15,
+      alignSelf: 'center',
+      textAlign: 'center',
     };
     return (
       <Modal style={styles.modalPending} backdrop={true}
@@ -912,15 +927,30 @@ class Namespaces extends React.Component {
         </View>
         <View style={{ marginHorizontal: 10}}>
           <Text style={titleStyle}>{pendingDisplayName}</Text>
-          <Text style={contentStyle}>{loc.namespaces.pending_confirmation}</Text>
-
+          {!nsData.shortCode &&
+            <>
+              <BlueBigWait style={{marginHorizontal: 50}}/>
+              <Text style={contentStyle}>{loc.namespaces.pending_confirmation}</Text>
+            </>
+          }
+          {nsData.shortCode &&
+            <>
+              <BlueBigCheckmark style={{marginHorizontal: 50}}/>
+              <Text style={confirmStyle}>{loc.namespaces.confirmed}</Text>
+            </>
+          }
           <KevaButton
             type='secondary'
+            loading={this.state.checking}
             style={{margin:10, marginTop: 40}}
-            caption={loc.namespaces.check_again}
+            caption={nsData.shortCode ? loc.general.done: loc.namespaces.check_again}
             onPress={async () => {
-              this.closePendingModal();
+              if (nsData.shortCode) {
+                return this.closePendingModal();
+              }
+              this.setState({checking: true});
               await refresh();
+              this.setState({checking: false});
             }}
           />
         </View>
@@ -932,6 +962,7 @@ class Namespaces extends React.Component {
     this.setState({
       pendingModalVisible: false,
       pendingDisplayName: "",
+      pendingNamespaceId: "",
     });
   }
 

@@ -2299,3 +2299,22 @@ export function BlueBigCheckmark({ style }) {
     </View>
   );
 }
+
+export function BlueBigWait({ style }) {
+  const defaultStyles = {
+    backgroundColor: KevaColors.warnColor,
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    alignSelf: 'center',
+    justifyContent: 'center',
+    marginTop: 0,
+    marginBottom: 0,
+  };
+  const mergedStyles = { ...defaultStyles, ...style };
+  return (
+    <View style={mergedStyles}>
+      <Icon name="hourglass-start" size={50} type="font-awesome" color="#fff" />
+    </View>
+  );
+}

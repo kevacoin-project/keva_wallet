@@ -26,6 +26,7 @@ module.exports = {
     label_settings: 'Settings',
     language_restart: 'After selecting a new language, restarting the app is required for the change to take effect.',
     balance: 'Balance',
+    done: 'Done',
   },
   namespaces: {
     height: "block",
@@ -54,7 +55,8 @@ module.exports = {
     no_wallet: 'Need a wallet with a balance',
     create_namespace_first: 'Create a namespace first',
     check_again: 'Check Again',
-    pending_confirmation: 'Pending confirmation. This will take a few minutes.',
+    pending_confirmation: 'Pending confirmation. This will take a few minutes. You can start adding content to your namespace.',
+    confirmed: 'Namespace Confirmed',
   },
   wallets: {
     select_wallet: 'Select Wallet',

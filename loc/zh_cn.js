@@ -26,6 +26,7 @@ module.exports = {
     label_settings: '设置',
     language_restart: '选择新语言后，需要重新启动应用程序才能使更改生效',
     balance: '余额',
+    done: '完成',
   },
   namespaces: {
     height: "区块",
@@ -54,7 +55,8 @@ module.exports = {
     no_wallet: '需要一个有余额的钱包',
     create_namespace_first: '先创建名称空间',
     check_again: '再次刷新',
-    pending_confirmation: '待确认。这将需要几分钟。',
+    pending_confirmation: '待确认。这将需要几分钟。您可以开始向内容空间添加内容。',
+    confirmed: '命名空间确认',
   },
   wallets: {
     select_wallet: '选择钱包',
