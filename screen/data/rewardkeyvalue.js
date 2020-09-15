@@ -459,6 +459,7 @@ var styles = StyleSheet.create({
     fontSize: 16,
     borderWidth: THIN_BORDER,
     borderColor: KevaColors.lightText,
-    borderRadius: 4
+    borderRadius: 4,
+    height: 46,
   },
 });
