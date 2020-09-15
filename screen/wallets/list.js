@@ -441,10 +441,17 @@ export default class WalletsList extends Component {
     return (
       <SafeBlueArea>
         <NavigationEvents
-          onDidFocus={() => {
+          onDidFocus={(payload) => {
+            const lastState = payload.lastState;
+            if (lastState) {
+              const routeName = lastState.routeName;
+              if (routeName == 'Namespaces' || routeName == 'Settings') {
+                return;
+              }
+            }
             setTimeout(() => {
               this.redrawScreen();
-            }, 200);
+            }, 150);
           }}
         />
         <View
