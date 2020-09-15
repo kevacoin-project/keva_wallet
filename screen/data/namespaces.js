@@ -912,7 +912,7 @@ class Namespaces extends React.Component {
       color: KevaColors.darkText,
     };
     const contentStyle = {
-      fontSize: 18,
+      fontSize: 16,
       color: KevaColors.darkText,
       paddingTop: 15,
       alignSelf: 'center',
