@@ -53,6 +53,7 @@ import StepModal from "../../common/StepModalWizard";
 import {
   createKevaNamespace, findMyNamespaces,
   findOtherNamespace,
+  waitPromise
 } from '../../class/keva-ops';
 
 const COPY_ICON = (<Icon name="ios-copy" size={22} color={KevaColors.extraLightText}
@@ -259,6 +260,7 @@ class MyNamespaces extends React.Component {
               let feeKVA = fee / 100000000;
               this.setState({ showNSCreationModal: true, currentPage: 2, fee: feeKVA });
               this.namespaceTx = tx;
+              this.newNamespaceId = namespaceId;
             } catch (err) {
               this.setState({createTransactionErr: loc.namespaces.namespace_creation_err + ' [' + err.message + ']'});
             }
@@ -321,6 +323,21 @@ class MyNamespaces extends React.Component {
                   broadcastErr: result.message,
                 });
               }
+              // Wait until the namespace is available in the mempool.
+              let totalWait = 0;
+              while (true) {
+                await this.fetchNamespaces();
+                if (!this.props.namespaceList.namespaces[this.newNamespaceId]) {
+                  waitPromise(2000);
+                  totalWait += 2000;
+                  if (totalWait > 20000) {
+                    break;
+                  }
+                } else {
+                  break;
+                }
+              }
+              this.newNamespaceId = '';
               this.setState({isBroadcasting: false, showSkip: false});
               this.closeItemAni();
               await BlueApp.saveToDisk();

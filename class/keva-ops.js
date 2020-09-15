@@ -13,7 +13,7 @@ const hexToUtf8 = convert('hex', 'utf8')
 
 const DUMMY_TXID = 'c70483b4613b18e750d0b1087ada28d713ad1e406ebc87d36f94063512c5f0dd';
 
-function waitPromise(milliseconds) {
+export function waitPromise(milliseconds) {
   return new Promise(resolve => setTimeout(resolve, milliseconds));
 }
 
@@ -326,7 +326,7 @@ export async function createKevaNamespace(wallet, requestedSatPerByte, nsName) {
 
   psbt.finalizeAllInputs();
   let hexTx = psbt.extractTransaction(true).toHex();
-  return {tx: hexTx, namespaceId: returnNamespaceId, fee};
+  return {tx: hexTx, namespaceId: hexToNamespace(returnNamespaceId), fee};
 }
 
 function getKeyValueUpdateScript(namespaceId, address, key, value) {
