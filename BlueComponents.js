@@ -12,7 +12,6 @@ import {
   View,
   KeyboardAvoidingView,
   UIManager,
-  StyleSheet,
   Dimensions,
   Image,
   Keyboard,
@@ -36,8 +35,9 @@ import showPopupMenu from 'react-native-popup-menu-android';
 import NetworkTransactionFees, { NetworkTransactionFeeType } from './models/networkTransactionFees';
 import Biometric from './class/biometrics';
 let loc = require('./loc/');
-import { IS_ANDROID, THIN_BORDER } from './util';
+import { IS_ANDROID } from './util';
 import KevaColors from './common/KevaColors';
+const StyleSheet = require('./PlatformStyleSheet');
 
 /** @type {AppStorage} */
 let BlueApp = require('./BlueApp');
@@ -2198,7 +2198,7 @@ export class BlueBitcoinAmount extends Component {
     return (
       <TouchableWithoutFeedback disabled={this.props.pointerEvents === 'none'} onPress={() => this.textInput.focus()}>
         <View>
-          <View style={{ flexDirection: 'row', justifyContent: 'center', margin:20, borderColor: KevaColors.cellBorder, borderWidth: 1, borderRadius: 5 }}>
+          <View style={styles.bitcoinAmount}>
             <TextInput
               {...this.props}
               testID={'BitcoinAmountInput'}
@@ -2267,6 +2267,18 @@ const styles = StyleSheet.create({
     width: 100,
     marginRight: 16,
   },
+  bitcoinAmount:
+  {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    margin:20,
+    borderColor: KevaColors.cellBorder,
+    borderWidth: 1,
+    borderRadius: 5,
+    ios: {
+      paddingVertical: 10,
+    },
+  }
 });
 
 export function BlueBigCheckmark({ style }) {

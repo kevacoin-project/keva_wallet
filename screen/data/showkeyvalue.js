@@ -58,7 +58,7 @@ class Reply extends React.Component {
               </Text>
             </TouchableOpacity>
           </View>
-          <Text style={styles.replyValue}>{item.value}</Text>
+          <Text style={styles.replyValue} selectable={true}>{item.value}</Text>
           {(item.height > 0) ?
             <Text style={styles.timestamp}>{timeConverter(item.time) + ' ' + item.height}</Text>
             :
