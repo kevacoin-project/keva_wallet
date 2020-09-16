@@ -907,8 +907,7 @@ class Namespaces extends React.Component {
     const titleStyle ={
       fontSize: 17,
       fontWeight: '700',
-      marginTop: 10,
-      marginBottom: 0,
+      marginBottom: 5,
       color: KevaColors.darkText,
     };
     const contentStyle = {
@@ -919,7 +918,7 @@ class Namespaces extends React.Component {
       textAlign: 'center',
     };
     const confirmStyle = {
-      fontSize: 24,
+      fontSize: 20,
       color: KevaColors.okColor,
       paddingTop: 15,
       alignSelf: 'center',
@@ -1127,7 +1126,7 @@ var styles = StyleSheet.create({
     backgroundColor: '#fff',
     justifyContent: 'flex-start',
     marginHorizontal: 0,
-    marginVertical: 100,
+    marginVertical: 60,
     marginHorizontal: 20,
   },
   modalShow: {
