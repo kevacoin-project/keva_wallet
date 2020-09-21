@@ -985,7 +985,7 @@ export async function fetchKeyValueList(ecl, completeHistory, currentkeyValueLis
       resultJson.height = h.height;
       resultJson.n = v.n;
       resultJson.time = tx.time;
-      address = v.scriptPubKey.addresses[0];
+      let address = v.scriptPubKey.addresses[0];
       resultJson.address = address;
       results.push(resultJson);
     }
@@ -1147,7 +1147,6 @@ export async function getRepliesAndShares(ecl, rootAddress) {
       if (!result || result[0] == KEVA_OP_NAMESPACE) {
         continue;
       }
-      address = v.scriptPubKey.addresses[0];
       let resultJson = kevaToJson(result);
 
       // Check if it is a share

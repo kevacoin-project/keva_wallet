@@ -170,6 +170,7 @@ class ReplyKeyValue extends React.Component {
                 return alert(loc.namespaces.multiaddress_wallet);
               }
               this.setState({ showNSCreationModal: true, currentPage: 1 });
+              await BlueElectrum.ping();
               const { tx, fee, cost, key } = await replyKeyValue(wallet, FALLBACK_DATA_PER_BYTE_FEE, namespaceId, shortCode, value, rootAddress, replyTxid);
               let feeKVA = (fee + cost) / 100000000;
               this.setState({ showNSCreationModal: true, currentPage: 2, fee: feeKVA, key });
