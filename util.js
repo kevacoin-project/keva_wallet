@@ -96,3 +96,15 @@ export function timeConverter(UNIX_timestamp) {
   let timeStr = year + '-' + month + '-' + date + ' ' + hour + ':' + min + ':' + sec ;
   return timeStr;
 }
+
+export function getImageSize(uri) {
+  return new Promise((resolve, reject) => {
+    Image.getSize(uri, (width, height) => {
+      console.log(`The image dimensions are ${width}x${height}`);
+      resolve({width, height});
+    }, error => {
+      console.error(`Couldn't get the image size: ${error.message}`);
+      reject(error);
+    });
+  });
+}

@@ -24,6 +24,14 @@ import { updateKeyValue } from '../../class/keva-ops';
 import FloatTextInput from '../../common/FloatTextInput';
 import StepModal from "../../common/StepModalWizard";
 import Biometric from '../../class/biometrics';
+import Icon from 'react-native-vector-icons/MaterialIcons';
+import ImagePicker from 'react-native-image-picker';
+import ImageResizer from 'react-native-image-resizer';
+import * as IPFSManager from '../../common/IPFSManager'
+
+//const CAMERA_ICON   = <Icon name="photo-camera" size={27} color={KevaColors.actionText}/>;
+const LIBRARY_ICON  = <Icon name="insert-photo" size={27} color={KevaColors.actionText}/>;
+const IMAGE_SIZE = 1200;
 
 class AddKeyValue extends React.Component {
 
@@ -248,6 +256,49 @@ class AddKeyValue extends React.Component {
     );
   }
 
+  onUpload = async (image, size) => {
+    try {
+      await IPFSManager.startIpfs();
+      let peers = await IPFSManager.checkPeers();
+      while (peers.length == 0) {
+        await BlueApp.sleep(2000);
+        peers = await IPFSManager.checkPeers();
+      }
+      await IPFSManager.upload(image);
+    } catch (err) {
+      console.warn(err);
+    }
+  }
+
+  onImageDone = (response) => {
+    if (response.didCancel) {
+      return;
+    }
+
+    let image = response.uri;
+    try {
+      if (response.width > IMAGE_SIZE || response.height > IMAGE_SIZE) {
+        let resizedImage = await ImageResizer.createResizedImage(image, IMAGE_SIZE, IMAGE_SIZE, 'JPEG', 90);
+        image = resizedImage.uri;
+      }
+      const size = await utils.getImageSize(image);
+      this.onUpload(image, size);
+    } catch (err) {
+      console.warn(err);
+    }
+  }
+
+  onImage = () => {
+    const pickerOptions = {
+      title: 'Select Pictures',
+      storageOptions: {
+        skipBackup: true
+      },
+      noData: true
+    };
+    ImagePicker.launchImageLibrary(pickerOptions, response => this.onImageDone(response));
+  }
+
   render() {
     let {navigation, dispatch} = this.props;
     return (
@@ -266,6 +317,11 @@ class AddKeyValue extends React.Component {
             onChangeTextValue={key => {this.setState({key})}}
           />
         </View>
+        <TouchableOpacity onPress={this.onImage}>
+          <View elevation={1} style={styles.iconBtn}>
+            {LIBRARY_ICON}
+          </View>
+        </TouchableOpacity>
         <View style={styles.inputValue}>
           <FloatTextInput
             multiline={true}
@@ -308,7 +364,6 @@ var styles = StyleSheet.create({
   },
   inputValue: {
     height:215,
-    marginTop: 10,
     borderWidth: utils.THIN_BORDER,
     borderColor: KevaColors.cellBorder,
     backgroundColor: '#fff',
@@ -336,5 +391,10 @@ var styles = StyleSheet.create({
   modalErr: {
     fontSize: 16,
     marginTop: 20,
+  },
+  iconBtn: {
+    alignSelf: 'flex-end',
+    marginVertical: 5,
+    marginRight: 15,
   },
 });
