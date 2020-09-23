@@ -270,7 +270,7 @@ class AddKeyValue extends React.Component {
     }
   }
 
-  onImageDone = (response) => {
+  onImageDone = async (response) => {
     if (response.didCancel) {
       return;
     }
