@@ -12,6 +12,8 @@ const coinSelectSplit = require('coinselect/split');
 const reverse = require('buffer-reverse');
 let BlueApp = require('../BlueApp');
 
+const ABSURD_FEE = 10000000;
+
 /**
  * Electrum - means that it utilizes Electrum protocol for blockchain data
  */
@@ -811,6 +813,19 @@ export class AbstractHDElectrumWallet extends AbstractHDWallet {
     const transactions = this.getTransactions();
     let nonNamespaceUtxos = getNonNamespaceUxtosSync(transactions, utxos);
     let { inputs, outputs, fee } = algo(nonNamespaceUtxos, targets, feeRate);
+
+    if (fee >= ABSURD_FEE) {
+      // The network rule doesn't allow fee more than ABSURD_FEE. We
+      // have to reduce the feeRate.
+      feeRate = Math.floor((ABSURD_FEE / fee) * feeRate);
+      ({ inputs, outputs, fee } = algo(nonNamespaceUtxos, targets, feeRate))
+    }
+
+    while (fee >= ABSURD_FEE) {
+      // Still too big - brute force it.
+      feeRate = feeRate - 20;
+      ({ inputs, outputs, fee } = algo(nonNamespaceUtxos, targets, feeRate))
+    }
 
     // .inputs and .outputs will be undefined if no solution was found
     if (!inputs || !outputs) {
