@@ -1032,27 +1032,32 @@ export async function findMyNamespaces(wallet, ecl) {
     return;
   }
   const UTXOs = wallet.getUtxo();
+
   let namespaces = {};
   for (let tx of transactions) {
-    const isUnspent = UTXOs.find(u => u.txId == tx.hash);
-    if (!isUnspent) {
+    const unspentTx = UTXOs.find(u => u.txId == tx.hash);
+    if (!unspentTx) {
       continue;
     }
-    for (let v of tx.outputs) {
-      let result = parseKeva(v.scriptPubKey.asm);
-      if (!result) {
-          continue;
-      }
-      const keva = kevaToJson(result);
-      const nsId = keva.namespaceId;
-      namespaces[nsId] = namespaces[nsId] || {
-        id: nsId,
-        walletId: wallet.getID(),
-        txId: tx.hash,
-      }
-      if (keva.displayName) {
-        namespaces[nsId].displayName = keva.displayName;
-      }
+
+    let v = tx.outputs[unspentTx.vout];
+    if (!v) {
+      // This should not happen.
+      continue;
+    }
+    let result = parseKeva(v.scriptPubKey.asm);
+    if (!result) {
+        continue;
+    }
+    const keva = kevaToJson(result);
+    const nsId = keva.namespaceId;
+    namespaces[nsId] = namespaces[nsId] || {
+      id: nsId,
+      walletId: wallet.getID(),
+      txId: tx.hash,
+    }
+    if (keva.displayName) {
+      namespaces[nsId].displayName = keva.displayName;
     }
   }
 
