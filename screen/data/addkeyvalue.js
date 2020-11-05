@@ -102,6 +102,7 @@ class AddKeyValue extends React.Component {
     }, () => {
       setTimeout(async () => {
         try {
+          await BlueElectrum.ping();
           const { tx, fee } = await updateKeyValue(this.wallet, FALLBACK_DATA_PER_BYTE_FEE, namespaceId, key, value);
           let feeKVA = fee / 100000000;
           this.setState({ showKeyValueModal: true, currentPage: 1, fee: feeKVA });
