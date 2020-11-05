@@ -4,6 +4,7 @@ import {
   Dimensions,
   View,
   Platform,
+  Image,
 } from 'react-native';
 
 import Toast from 'react-native-root-toast';
@@ -95,4 +96,16 @@ export function timeConverter(UNIX_timestamp) {
   let sec = a.getSeconds() < 10 ? '0' + a.getSeconds() : a.getSeconds();
   let timeStr = year + '-' + month + '-' + date + ' ' + hour + ':' + min + ':' + sec ;
   return timeStr;
+}
+
+export function getImageSize(uri) {
+  return new Promise((resolve, reject) => {
+    Image.getSize(uri, (width, height) => {
+      console.log(`The image dimensions are ${width}x${height}`);
+      resolve({width, height});
+    }, error => {
+      console.error(`Couldn't get the image size: ${error.message}`);
+      reject(error);
+    });
+  });
 }
