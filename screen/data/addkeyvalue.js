@@ -2,6 +2,7 @@ import React from 'react';
 import {
   Text,
   View,
+  Image,
   TouchableOpacity,
 } from 'react-native';
 import Toast from 'react-native-root-toast';
@@ -28,9 +29,9 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import ImagePicker from 'react-native-image-crop-picker';
 import ImageResizer from 'react-native-image-resizer';
 
-//const CAMERA_ICON   = <Icon name="photo-camera" size={27} color={KevaColors.actionText}/>;
+const CLOSE_ICON    = <Icon name="close" size={27} color={KevaColors.actionText}/>;
 const LIBRARY_ICON  = <Icon name="insert-photo" size={27} color={KevaColors.actionText}/>;
-const IMAGE_SIZE = 1200;
+const IMAGE_SIZE = 300;
 
 class AddKeyValue extends React.Component {
 
@@ -45,6 +46,7 @@ class AddKeyValue extends React.Component {
       showKeyValueModal: false,
       valueOnly: false,
       createTransactionErr: null,
+      imagePreview: null,
     };
   }
 
@@ -281,10 +283,10 @@ class AddKeyValue extends React.Component {
     try {
       if (response.width > IMAGE_SIZE || response.height > IMAGE_SIZE) {
         let resizedImage = await ImageResizer.createResizedImage(image, IMAGE_SIZE, IMAGE_SIZE, 'JPEG', 90);
-        console.log(resizedImage)
         image = resizedImage.uri;
       }
       const size = await utils.getImageSize(image);
+      this.setState({imagePreview: image});
       this.onUpload(image, size);
     } catch (err) {
       console.warn(err);
@@ -304,9 +306,12 @@ class AddKeyValue extends React.Component {
     */
     ImagePicker.openPicker({
     }).then(image => {
-      console.log(image);
       this.onImageDone(image)
     });
+  }
+
+  onRemoveImage = () => {
+    this.setState({imagePreview: null});
   }
 
   render() {
@@ -321,17 +326,27 @@ class AddKeyValue extends React.Component {
             autoCorrect={false}
             value={this.state.key}
             underlineColorAndroid='rgba(0,0,0,0)'
-            style={{fontSize:15,flex:1}}
+            style={{fontSize:15}}
             placeholder={'Key'}
             clearButtonMode="while-editing"
             onChangeTextValue={key => {this.setState({key})}}
           />
+          {
+            this.state.imagePreview ?
+            <View>
+              <TouchableOpacity onPress={this.onRemoveImage} style={styles.closePicture}>
+                <Icon name="close" size={27} color={KevaColors.actionText}/>
+              </TouchableOpacity>
+              <Image source={{uri: this.state.imagePreview}} style={{width: 56, height: 56 }} resizeMode="contain" />
+            </View>
+            :
+            <TouchableOpacity onPress={this.onImage}>
+              <View elevation={1} style={styles.iconBtn}>
+                {LIBRARY_ICON}
+              </View>
+            </TouchableOpacity>
+          }
         </View>
-        <TouchableOpacity onPress={this.onImage}>
-          <View elevation={1} style={styles.iconBtn}>
-            {LIBRARY_ICON}
-          </View>
-        </TouchableOpacity>
         <View style={styles.inputValue}>
           <FloatTextInput
             multiline={true}
@@ -339,7 +354,7 @@ class AddKeyValue extends React.Component {
             autoCorrect={false}
             value={this.state.value}
             underlineColorAndroid='rgba(0,0,0,0)'
-            style={{fontSize:15,flex:1}}
+            style={{fontSize:15}}
             placeholder={'Value'}
             clearButtonMode="while-editing"
             onChangeTextValue={value => {this.setState({value})}}
@@ -365,19 +380,23 @@ var styles = StyleSheet.create({
     backgroundColor: KevaColors.background,
   },
   inputKey: {
-    height:45,
+    height:56,
     marginTop: 10,
+    marginBottom: 10,
     borderWidth: utils.THIN_BORDER,
     borderColor: KevaColors.cellBorder,
     backgroundColor: '#fff',
-    paddingHorizontal: 10
+    paddingHorizontal: 10,
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+    alignItems: 'center',
   },
   inputValue: {
     height:215,
     borderWidth: utils.THIN_BORDER,
     borderColor: KevaColors.cellBorder,
     backgroundColor: '#fff',
-    paddingHorizontal: 10
+    paddingHorizontal: 10,
   },
   modalNS: {
     height: 300,
@@ -406,5 +425,11 @@ var styles = StyleSheet.create({
     alignSelf: 'flex-end',
     marginVertical: 5,
     marginRight: 15,
+  },
+  closePicture: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    zIndex: 100,
   },
 });
