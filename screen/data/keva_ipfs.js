@@ -59,3 +59,28 @@ export async function uploadMedia(image) {
     throw err;
   }
 }
+
+export async function publishMedia(tx) {
+  try {
+    let host = await getHost();
+    const url = host + '/v1/pin';
+
+    let requestOptions = {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({tx})
+    }
+
+    let response = await fetch(url, requestOptions);
+    if (response.status != 200) {
+      let json = await response.json();
+      console.log(json)
+      throw new Error(json.message);
+    }
+  } catch (err) {
+    console.error(err);
+    throw err;
+  }
+}

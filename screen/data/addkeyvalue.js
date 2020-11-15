@@ -28,8 +28,9 @@ import Biometric from '../../class/biometrics';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import ImagePicker from 'react-native-image-crop-picker';
 import ImageResizer from 'react-native-image-resizer';
+import * as mime from 'react-native-mime-types';
 
-import { getServerInfo, uploadMedia } from './keva_ipfs'
+import { getServerInfo, uploadMedia, publishMedia } from './keva_ipfs'
 
 const CLOSE_ICON    = <Icon name="close" size={27} color={KevaColors.actionText}/>;
 const LIBRARY_ICON  = <Icon name="insert-photo" size={27} color={KevaColors.actionText}/>;
@@ -113,8 +114,9 @@ class AddKeyValue extends React.Component {
             serverIPFS = await getServerInfo();
             const result = await uploadMedia(imagePreview)
             CID = result.CID;
+            const mimeType = mime.lookup(imagePreview)
             // Added the image CID at the beginning of key.
-            key = `{{${CID}}}` + key;
+            key = `{{${CID}|${mimeType}}}` + key;
           }
 
           await BlueElectrum.ping();
@@ -123,7 +125,7 @@ class AddKeyValue extends React.Component {
           if (serverIPFS) {
             feeKVA += parseInt(serverIPFS.min_payment);
           }
-          this.setState({ showKeyValueModal: true, currentPage: 1, fee: feeKVA });
+          this.setState({ showKeyValueModal: true, currentPage: 1, fee: feeKVA, serverIPFS });
           this.namespaceTx = tx;
         } catch (err) {
           console.warn(err);
@@ -207,9 +209,14 @@ class AddKeyValue extends React.Component {
                 });
               }
               await BlueApp.saveToDisk();
+              // Pin the media to IPFS.
+              if (this.state.serverIPFS) {
+                console.log('tx to publish: ' + result)
+                await publishMedia(result);
+              }
               this.setState({isBroadcasting: false, showSkip: false});
             } catch (err) {
-              this.setState({isBroadcasting: false});
+              this.setState({isBroadcasting: false, broadcastErr: err.message});
               console.warn(err);
             }
           }}
@@ -274,24 +281,6 @@ class AddKeyValue extends React.Component {
     );
   }
 
-  onUpload = async (image, size) => {
-    try {
-      /*
-      await IPFSManager.startIpfs();
-      let peers = await IPFSManager.checkPeers();
-      while (peers.length == 0) {
-        await BlueApp.sleep(2000);
-        peers = await IPFSManager.checkPeers();
-      }
-      await IPFSManager.upload(image);
-      */
-      //let serverInfo = await getServerInfo();
-      //console.log(serverInfo)
-    } catch (err) {
-      console.warn(err);
-    }
-  }
-
   onImageDone = async (response) => {
     if (response.didCancel) {
       return;
@@ -305,23 +294,12 @@ class AddKeyValue extends React.Component {
       }
       const size = await utils.getImageSize(image);
       this.setState({imagePreview: image});
-      this.onUpload(image, size);
     } catch (err) {
       console.warn(err);
     }
   }
 
   onImage = () => {
-    /*
-    const pickerOptions = {
-      title: 'Select Pictures',
-      storageOptions: {
-        skipBackup: true
-      },
-      noData: true
-    };
-    ImagePicker.launchImageLibrary(pickerOptions, response => this.onImageDone(response));
-    */
     ImagePicker.openPicker({
     }).then(image => {
       this.onImageDone(image)
