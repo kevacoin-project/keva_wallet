@@ -29,6 +29,8 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import ImagePicker from 'react-native-image-crop-picker';
 import ImageResizer from 'react-native-image-resizer';
 
+import { getServerInfo, uploadMedia } from './keva_ipfs'
+
 const CLOSE_ICON    = <Icon name="close" size={27} color={KevaColors.actionText}/>;
 const LIBRARY_ICON  = <Icon name="insert-photo" size={27} color={KevaColors.actionText}/>;
 const IMAGE_SIZE = 300;
@@ -81,7 +83,7 @@ class AddKeyValue extends React.Component {
 
   onSave = async () => {
     const {namespaceId, walletId} = this.props.navigation.state.params;
-    const {key, value} = this.state;
+    let {key, value, imagePreview} = this.state;
     if (key.length == 0 || value.length == 0) {
       Toast.show('Key and value must be set');
       return;
@@ -104,9 +106,23 @@ class AddKeyValue extends React.Component {
     }, () => {
       setTimeout(async () => {
         try {
+          // Check if there is an image to upload.
+          let serverIPFS = null;
+          let CID;
+          if (imagePreview) {
+            serverIPFS = await getServerInfo();
+            const result = await uploadMedia(imagePreview)
+            CID = result.CID;
+            // Added the image CID at the beginning of key.
+            key = `{{${CID}}}` + key;
+          }
+
           await BlueElectrum.ping();
-          const { tx, fee } = await updateKeyValue(this.wallet, FALLBACK_DATA_PER_BYTE_FEE, namespaceId, key, value);
+          const { tx, fee } = await updateKeyValue(this.wallet, FALLBACK_DATA_PER_BYTE_FEE, namespaceId, key, value, serverIPFS);
           let feeKVA = fee / 100000000;
+          if (serverIPFS) {
+            feeKVA += parseInt(serverIPFS.min_payment);
+          }
           this.setState({ showKeyValueModal: true, currentPage: 1, fee: feeKVA });
           this.namespaceTx = tx;
         } catch (err) {
@@ -269,6 +285,8 @@ class AddKeyValue extends React.Component {
       }
       await IPFSManager.upload(image);
       */
+      //let serverInfo = await getServerInfo();
+      //console.log(serverInfo)
     } catch (err) {
       console.warn(err);
     }

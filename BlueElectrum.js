@@ -676,3 +676,5 @@ module.exports.blockchainTransaction_idFromPos = async function(height, pos) {
   }
   return txid;
 }
+
+module.exports.getSavedPeer = getSavedPeer;

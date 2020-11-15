@@ -454,7 +454,7 @@ export async function getNamespaceUtxo(wallet, namespaceId) {
   return null;
 }
 
-export async function updateKeyValue(wallet, requestedSatPerByte, namespaceId, key, value) {
+export async function updateKeyValue(wallet, requestedSatPerByte, namespaceId, key, value, serverIPFS) {
   await wallet.fetchBalance();
   await wallet.fetchTransactions();
   let nsUtxo = await getNamespaceUtxo(wallet, namespaceId);
@@ -471,6 +471,14 @@ export async function updateKeyValue(wallet, requestedSatPerByte, namespaceId, k
     address: namespaceAddress, value: namespaceValue,
     script: nsScript
   }];
+
+  // Check if we need to pay the IPFS server.
+  if (serverIPFS) {
+    targets.push({
+      address: serverIPFS.payment_address,
+      value: Math.floor(serverIPFS.min_payment * 100000000),
+    });
+  }
 
   const transactions = wallet.getTransactions();
   let utxos = wallet.getUtxo();
