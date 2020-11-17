@@ -546,12 +546,22 @@ class KeyValues extends React.Component {
     })
   }
 
-  onShare = (shareTxid, key, value, height) => {
+  onShare = (shareTxid, key, value, blockHeight, CIDHeight, CIDWidth) => {
     const {navigation, namespaceList} = this.props;
     const rootAddress = navigation.getParam('rootAddress');
     // Must have a namespace.
     if (Object.keys(namespaceList).length == 0) {
       toastError(loc.namespaces.create_namespace_first);
+      return;
+    }
+
+    const {keyDisplay, mediaCID, mimeType} = extractMedia(key);
+    if (mediaCID && !CIDWidth && !CIDHeight) {
+      const url = getImageGatewayURL(mediaCID);
+      Image.getSize(url, (width, height) => {
+        value += `<br/><img src="${getImageGatewayURL(mediaCID)}" height="${height}" width="${width}"/>`
+        this.onShare(shareTxid, key, value, blockHeight, height, width);
+      });
       return;
     }
 
@@ -562,7 +572,7 @@ class KeyValues extends React.Component {
       origKey: key,
       origValue: value,
       origShortCode: shortCode,
-      height,
+      height: blockHeight,
     })
   }
 

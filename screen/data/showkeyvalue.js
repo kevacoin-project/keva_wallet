@@ -161,6 +161,14 @@ class ShowKeyValue extends React.Component {
         myShortCode,
         origName: origInfo.displayName,
       });
+
+      const {keyDisplay, mediaCID, mimeType} = extractMedia(kevaResult.key);
+      if (mediaCID) {
+        Image.getSize(getImageGatewayURL(mediaCID), (width, height) => {
+          this.setState({CIDHeight: height, CIDWidth: width});
+        });
+      }
+
     } catch (err) {
       console.warn(err);
     }
@@ -181,7 +189,7 @@ class ShowKeyValue extends React.Component {
       return (<Text selectable={true} key={index} style={{fontSize: 16, color: KevaColors.darkText, lineHeight: 25}}>{unescape(node.data)}</Text>);
     } else if (node.name == 'img') {
       const a = node.attribs;
-      const width = Dimensions.get('window').width;
+      const width = Dimensions.get('window').width * 0.9;
       const height = (a.height && a.width) ? (a.height / a.width) * width : width;
       return (<Image style={{ width, height, alignSelf: 'center'}} source={{ uri: a.src }} key={index} resizeMode="contain"/>);
     } else if (node.name == 'video') {
@@ -338,7 +346,14 @@ class ShowKeyValue extends React.Component {
     if (!this.state.shareValue) {
       return null;
     }
-    const {shareValue, shareTime, shareHeight, origName, origShortCode} = this.state;
+    const {shareKey, shareValue, shareTime, shareHeight, origName, origShortCode, CIDHeight, CIDWidth} = this.state;
+
+    let displayValue = shareValue;
+    const {keyDisplay, mediaCID, mimeType} = extractMedia(shareKey);
+    if (mediaCID && CIDHeight && CIDWidth)  {
+      displayValue += `<br/><img src="${getImageGatewayURL(mediaCID)}" height="${CIDHeight}" width="${CIDWidth}"/>`
+    }
+
     return (
       <View style={{backgroundColor: '#fff'}}>
         <View style={styles.shareContainer}>
@@ -359,7 +374,7 @@ class ShowKeyValue extends React.Component {
               }
             </View>
           </View>
-          <HTMLView value={`${shareValue}`}
+          <HTMLView value={`${displayValue}`}
             addLineBreaks={false}
             stylesheet={htmlStyles}
             nodeComponentProps={{selectable: true}}
