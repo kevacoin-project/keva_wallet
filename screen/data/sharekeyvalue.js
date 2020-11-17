@@ -34,6 +34,7 @@ import { shareKeyValue, getTxIdFromShortCode, getNamespaceDataFromTx,
          getNamespaceInfoFromShortCode } from '../../class/keva-ops';
 import StepModal from "../../common/StepModalWizard";
 import Biometric from '../../class/biometrics';
+import { extractMedia } from './mediaManager';
 
 class ShareKeyValue extends React.Component {
 
@@ -76,9 +77,15 @@ class ShareKeyValue extends React.Component {
 
   async componentDidMount() {
     const { shareTxid, origKey, origValue } = this.props.navigation.state.params;
+    const {mediaCID, mimeType} = extractMedia(origKey);
+    let mediaInfo;
+    if (mediaCID) {
+      mediaInfo = `{{${mediaCID}|${mimeType}}}`;
+    }
     this.setState({
-      shareTxid, origKey, origValue
+      shareTxid, origKey, origValue, mediaInfo
     });
+
     this.props.navigation.setParams({
       onPress: this.onSave
     });
@@ -201,7 +208,7 @@ class ShareKeyValue extends React.Component {
                 }
                 actualValue = `${loc.namespaces.default_share} ${authorName}@${origShortCode}`;
               }
-              const { tx, fee, cost } = await shareKeyValue(BlueElectrum, wallet, FALLBACK_DATA_PER_BYTE_FEE, namespaceId, shortCode, origShortCode, actualValue, actualRootAddress, actualShareTxid, height);
+              const { tx, fee, cost } = await shareKeyValue(BlueElectrum, wallet, FALLBACK_DATA_PER_BYTE_FEE, namespaceId, shortCode, origShortCode, actualValue, actualRootAddress, actualShareTxid, height, this.state.mediaInfo);
               let feeKVA = (fee + cost) / 100000000;
               this.setState({ showNSCreationModal: true, currentPage: 2, fee: feeKVA });
               this.namespaceTx = tx;

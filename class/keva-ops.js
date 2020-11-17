@@ -1042,20 +1042,20 @@ export async function findMyNamespaces(wallet, ecl) {
   const UTXOs = wallet.getUtxo();
 
   let namespaces = {};
-  for (let tx of transactions) {
-    const unspentTx = UTXOs.find(u => u.txId == tx.hash);
-    if (!unspentTx) {
+  for (let utxo of UTXOs) {
+    const tx = transactions.find(t => utxo.txId == t.hash);
+    if (!tx) {
       continue;
     }
 
-    let v = tx.outputs[unspentTx.vout];
+    let v = tx.outputs[utxo.vout];
     if (!v) {
       // This should not happen.
       continue;
     }
     let result = parseKeva(v.scriptPubKey.asm);
     if (!result) {
-        continue;
+      continue;
     }
     const keva = kevaToJson(result);
     const nsId = keva.namespaceId;
@@ -1269,7 +1269,7 @@ export function parseShareKey(key) {
 // replyRootAddress: the root namespace of the post.
 // replyTxid: the txid of the post
 //
-export async function shareKeyValue(ecl, wallet, requestedSatPerByte, namespaceId, shortCode, origShortCode, value, shareRootAddress, shareTxid, height) {
+export async function shareKeyValue(ecl, wallet, requestedSatPerByte, namespaceId, shortCode, origShortCode, value, shareRootAddress, shareTxid, height, mediaInfo) {
   await wallet.fetchBalance();
   await wallet.fetchTransactions();
   let nsUtxo = await getNamespaceUtxo(wallet, namespaceId);
@@ -1280,7 +1280,11 @@ export async function shareKeyValue(ecl, wallet, requestedSatPerByte, namespaceI
   // To share a post, key must be:
   // "[shortcode of tx to share]:[shortcode of original namespace]:[shortcode of my namespace]
   const shareTxidShortCode = await getTxShortCode(ecl, shareTxid, height);
-  const key = createShareKey(shareTxidShortCode, origShortCode, shortCode);
+  let key = createShareKey(shareTxidShortCode, origShortCode, shortCode);
+  if (mediaInfo) {
+    key = mediaInfo + key;
+  }
+
   const namespaceAddress = await wallet.getAddressAsync();
   const nsScript = getKeyValueUpdateScript(namespaceId, namespaceAddress, key, value);
 

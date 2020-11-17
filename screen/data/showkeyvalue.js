@@ -107,7 +107,7 @@ class ShowKeyValue extends React.Component {
 
   async componentDidMount() {
     const {key, value, replies, shares, rewards, favorite} = this.props.navigation.state.params;
-    const {mediaCID} = extractMedia(key);
+    const {keyDisplay, mediaCID} = extractMedia(key);
     if (mediaCID) {
       Image.getSize(getImageGatewayURL(mediaCID), (width, height) => {
         this.setState({CIDHeight: height, CIDWidth: width});
@@ -141,7 +141,7 @@ class ShowKeyValue extends React.Component {
     ];
 
     // Check if it is a shared post.
-    const shareInfo = parseShareKey(key);
+    const shareInfo = parseShareKey(keyDisplay);
     if (!shareInfo) {
       return;
     }
@@ -423,9 +423,9 @@ class ShowKeyValue extends React.Component {
   }
 
   render() {
-    let {isRaw, value, key, replies, shares, rewards, favorite, CIDHeight, CIDWidth} = this.state;
+    let {isRaw, value, key, replies, shares, rewards, favorite, shareValue, CIDHeight, CIDWidth} = this.state;
     const {keyDisplay, mediaCID, mimeType} = extractMedia(key)
-    if (mediaCID && CIDHeight && CIDWidth) {
+    if (mediaCID && CIDHeight && CIDWidth && !shareValue) {
       value = value + `<br/><img src="${getImageGatewayURL(mediaCID)}" height="${CIDHeight}" width="${CIDWidth}"/>`;
     }
 
@@ -453,7 +453,7 @@ class ShowKeyValue extends React.Component {
               <MIcon name="chat-bubble-outline" size={22} style={styles.talkIcon} />
               {(replies && replies.length > 0) && <Text style={styles.count}>{replies.length}</Text>}
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => this.onShare(key, value)} style={{flexDirection: 'row'}}>
+            <TouchableOpacity onPress={() => this.onShare(keyDisplay, value)} style={{flexDirection: 'row'}}>
               <MIcon name="cached" size={22} style={styles.shareIcon} />
               {(shares && shares.length > 0) && <Text style={styles.count}>{shares.length}</Text>}
             </TouchableOpacity>
