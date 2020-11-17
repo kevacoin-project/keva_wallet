@@ -24,7 +24,8 @@ import {
 } from '../../BlueComponents';
 import VideoPlayer from 'react-native-video-player';
 const loc = require('../../loc');
-import { connect } from 'react-redux'
+import { connect } from 'react-redux';
+import { extractMedia, getImageGatewayURL } from './mediaManager';
 
 const MAX_TIME = 3147483647;
 
@@ -106,6 +107,13 @@ class ShowKeyValue extends React.Component {
 
   async componentDidMount() {
     const {key, value, replies, shares, rewards, favorite} = this.props.navigation.state.params;
+    const {mediaCID} = extractMedia(key);
+    if (mediaCID) {
+      Image.getSize(getImageGatewayURL(mediaCID), (width, height) => {
+        this.setState({CIDHeight: height, CIDWidth: width});
+      });
+    }
+
     this.setState({
       key,
       value,
@@ -400,11 +408,16 @@ class ShowKeyValue extends React.Component {
   }
 
   render() {
-    let {isRaw, value, key, replies, shares, rewards, favorite} = this.state;
+    let {isRaw, value, key, replies, shares, rewards, favorite, CIDHeight, CIDWidth} = this.state;
+    const {keyDisplay, mediaCID, mimeType} = extractMedia(key)
+    if (mediaCID && CIDHeight && CIDWidth) {
+      value = value + `<br/><img src="${getImageGatewayURL(mediaCID)}" height="${CIDHeight}" width="${CIDWidth}"/>`;
+    }
+
     const listHeader = (
       <View style={styles.container}>
         <View style={styles.keyContainer}>
-          <Text style={styles.key} selectable>{key}</Text>
+          <Text style={styles.key} selectable>{keyDisplay}</Text>
         </View>
         <View style={styles.valueContainer}>
           { isRaw ?
