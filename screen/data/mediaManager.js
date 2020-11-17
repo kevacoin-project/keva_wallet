@@ -12,7 +12,7 @@ export function extractMedia(keyStr) {
       let mimeType = mediaMatches[2];
       return {keyDisplay, mediaCID, mimeType};
     }
-    return {keyStr};
+    return {keyDisplay: keyStr};
 }
 
 export function getImageGatewayURL(CID) {
