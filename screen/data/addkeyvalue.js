@@ -115,8 +115,8 @@ class AddKeyValue extends React.Component {
             const result = await uploadMedia(imagePreview)
             CID = result.CID;
             const mimeType = mime.lookup(imagePreview)
-            // Added the image CID at the beginning of key.
-            key = `{{${CID}|${mimeType}}}` + key;
+            // Added the image CID at the end of the value.
+            value = value + `{{${CID}|${mimeType}}}`;
           }
 
           await BlueElectrum.ping();

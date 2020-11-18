@@ -1269,7 +1269,7 @@ export function parseShareKey(key) {
 // replyRootAddress: the root namespace of the post.
 // replyTxid: the txid of the post
 //
-export async function shareKeyValue(ecl, wallet, requestedSatPerByte, namespaceId, shortCode, origShortCode, value, shareRootAddress, shareTxid, height, mediaInfo) {
+export async function shareKeyValue(ecl, wallet, requestedSatPerByte, namespaceId, shortCode, origShortCode, value, shareRootAddress, shareTxid, height) {
   await wallet.fetchBalance();
   await wallet.fetchTransactions();
   let nsUtxo = await getNamespaceUtxo(wallet, namespaceId);
@@ -1281,9 +1281,6 @@ export async function shareKeyValue(ecl, wallet, requestedSatPerByte, namespaceI
   // "[shortcode of tx to share]:[shortcode of original namespace]:[shortcode of my namespace]
   const shareTxidShortCode = await getTxShortCode(ecl, shareTxid, height);
   let key = createShareKey(shareTxidShortCode, origShortCode, shortCode);
-  if (mediaInfo) {
-    key = mediaInfo + key;
-  }
 
   const namespaceAddress = await wallet.getAddressAsync();
   const nsScript = getKeyValueUpdateScript(namespaceId, namespaceAddress, key, value);

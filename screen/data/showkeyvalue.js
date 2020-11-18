@@ -25,7 +25,7 @@ import {
 import VideoPlayer from 'react-native-video-player';
 const loc = require('../../loc');
 import { connect } from 'react-redux';
-import { extractMedia, getImageGatewayURL } from './mediaManager';
+import { extractMedia, getImageGatewayURL, replaceMedia } from './mediaManager';
 
 const MAX_TIME = 3147483647;
 
@@ -81,6 +81,8 @@ class ShowKeyValue extends React.Component {
       key: '',
       value: '',
       isRaw: false,
+      CIDHeight: 1,
+      CIDWidth: 1,
     };
   }
 
@@ -107,7 +109,7 @@ class ShowKeyValue extends React.Component {
 
   async componentDidMount() {
     const {key, value, replies, shares, rewards, favorite} = this.props.navigation.state.params;
-    const {keyDisplay, mediaCID} = extractMedia(key);
+    const {mediaCID} = extractMedia(value);
     if (mediaCID) {
       Image.getSize(getImageGatewayURL(mediaCID), (width, height) => {
         this.setState({CIDHeight: height, CIDWidth: width});
@@ -141,7 +143,7 @@ class ShowKeyValue extends React.Component {
     ];
 
     // Check if it is a shared post.
-    const shareInfo = parseShareKey(keyDisplay);
+    const shareInfo = parseShareKey(key);
     if (!shareInfo) {
       return;
     }
@@ -162,7 +164,7 @@ class ShowKeyValue extends React.Component {
         origName: origInfo.displayName,
       });
 
-      const {keyDisplay, mediaCID, mimeType} = extractMedia(kevaResult.key);
+      const {mediaCID, mimeType} = extractMedia(kevaResult.value);
       if (mediaCID) {
         Image.getSize(getImageGatewayURL(mediaCID), (width, height) => {
           this.setState({CIDHeight: height, CIDWidth: width});
@@ -347,12 +349,7 @@ class ShowKeyValue extends React.Component {
       return null;
     }
     const {shareKey, shareValue, shareTime, shareHeight, origName, origShortCode, CIDHeight, CIDWidth} = this.state;
-
-    let displayValue = shareValue;
-    const {keyDisplay, mediaCID, mimeType} = extractMedia(shareKey);
-    if (mediaCID && CIDHeight && CIDWidth)  {
-      displayValue += `<br/><img src="${getImageGatewayURL(mediaCID)}" height="${CIDHeight}" width="${CIDWidth}"/>`
-    }
+    let displayValue = replaceMedia(shareValue, CIDHeight, CIDWidth);
 
     return (
       <View style={{backgroundColor: '#fff'}}>
@@ -410,7 +407,7 @@ class ShowKeyValue extends React.Component {
 
     // This is a share post, share the shared post instead.
     const {txIdShortCode, origShortCode} = shareInfo;
-    const {shareValue} = this.state;
+    let {shareValue} = this.state;
     const height = getHeightFromShortCode(txIdShortCode);
     navigation.navigate('ShareKeyValue', {
       rootAddress: null, // Must get it from origShortCode.
@@ -424,15 +421,12 @@ class ShowKeyValue extends React.Component {
 
   render() {
     let {isRaw, value, key, replies, shares, rewards, favorite, shareValue, CIDHeight, CIDWidth} = this.state;
-    const {keyDisplay, mediaCID, mimeType} = extractMedia(key)
-    if (mediaCID && CIDHeight && CIDWidth && !shareValue) {
-      value = value + `<br/><img src="${getImageGatewayURL(mediaCID)}" height="${CIDHeight}" width="${CIDWidth}"/>`;
-    }
+    value = replaceMedia(value, CIDHeight, CIDWidth);
 
     const listHeader = (
       <View style={styles.container}>
         <View style={styles.keyContainer}>
-          <Text style={styles.key} selectable>{keyDisplay}</Text>
+          <Text style={styles.key} selectable>{key}</Text>
         </View>
         <View style={styles.valueContainer}>
           { isRaw ?
@@ -453,7 +447,7 @@ class ShowKeyValue extends React.Component {
               <MIcon name="chat-bubble-outline" size={22} style={styles.talkIcon} />
               {(replies && replies.length > 0) && <Text style={styles.count}>{replies.length}</Text>}
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => this.onShare(keyDisplay, value)} style={{flexDirection: 'row'}}>
+            <TouchableOpacity onPress={() => this.onShare(key, value)} style={{flexDirection: 'row'}}>
               <MIcon name="cached" size={22} style={styles.shareIcon} />
               {(shares && shares.length > 0) && <Text style={styles.count}>{shares.length}</Text>}
             </TouchableOpacity>

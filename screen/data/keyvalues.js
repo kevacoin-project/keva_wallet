@@ -33,7 +33,7 @@ import Toast from 'react-native-root-toast';
 import StepModal from "../../common/StepModalWizard";
 import { timeConverter } from "../../util";
 import Biometric from '../../class/biometrics';
-import { extractMedia, getImageGatewayURL } from './mediaManager';
+import { extractMedia, getImageGatewayURL, removeMedia } from './mediaManager';
 
 class Item extends React.Component {
 
@@ -68,16 +68,14 @@ class Item extends React.Component {
     let {item, onShow, onReply, onShare, onReward, namespaceId, navigation} = this.props;
     const {isOther} = navigation.state.params;
 
-    // Check if the key contains media, e.g.
-    // {{QmfPwecQ6hgtNRD1S8NtYQfMKYwBRWJcrteazKJTBejifB|image/jpeg}}
-    const {keyDisplay, mediaCID, mimeType} = extractMedia(item.key);
+    const {mediaCID, mimeType} = extractMedia(item.value);
 
     return (
       <View style={styles.card}>
         <TouchableOpacity onPress={() => onShow(item.key, item.value, item.tx, item.replies, item.shares, item.rewards, item.height, item.favorite)}>
           <View style={{flex:1,paddingHorizontal:10,paddingTop:2}}>
             <View style={{flexDirection:'row',alignItems:'center',justifyContent:'space-between'}}>
-              <Text style={styles.keyDesc} numberOfLines={1} ellipsizeMode="tail">{keyDisplay}</Text>
+              <Text style={styles.keyDesc} numberOfLines={1} ellipsizeMode="tail">{item.key}</Text>
               <View style={{flexDirection: 'row', alignItems:'center',justifyContent:'flex-start'}}>
                 {
                   !isOther &&
@@ -101,7 +99,7 @@ class Item extends React.Component {
               :
               <Text style={styles.timestamp}>{loc.general.unconfirmed}</Text>
             }
-            <Text style={styles.valueDesc} numberOfLines={3} ellipsizeMode="tail">{this.stripHtml(item.value)}</Text>
+            <Text style={styles.valueDesc} numberOfLines={3} ellipsizeMode="tail">{this.stripHtml(removeMedia(item.value))}</Text>
             {
               mediaCID &&
               <Image style={styles.previewImage} source={{uri: getImageGatewayURL(mediaCID)}} />
@@ -546,22 +544,12 @@ class KeyValues extends React.Component {
     })
   }
 
-  onShare = (shareTxid, key, value, blockHeight, CIDHeight, CIDWidth) => {
+  onShare = (shareTxid, key, value, blockHeight) => {
     const {navigation, namespaceList} = this.props;
     const rootAddress = navigation.getParam('rootAddress');
     // Must have a namespace.
     if (Object.keys(namespaceList).length == 0) {
       toastError(loc.namespaces.create_namespace_first);
-      return;
-    }
-
-    const {keyDisplay, mediaCID, mimeType} = extractMedia(key);
-    if (mediaCID && !CIDWidth && !CIDHeight) {
-      const url = getImageGatewayURL(mediaCID);
-      Image.getSize(url, (width, height) => {
-        value += `<br/><img src="${getImageGatewayURL(mediaCID)}" height="${height}" width="${width}"/>`
-        this.onShare(shareTxid, key, value, blockHeight, height, width);
-      });
       return;
     }
 
