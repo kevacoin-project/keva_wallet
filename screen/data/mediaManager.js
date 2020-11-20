@@ -39,3 +39,7 @@ export function removeMedia(value) {
     }
     return value;
 }
+
+export function constructMedia(mediaCID, mimeType) {
+    return `{{${mediaCID}|${mimeType}}}`;
+}

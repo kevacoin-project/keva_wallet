@@ -25,7 +25,7 @@ import {
 import VideoPlayer from 'react-native-video-player';
 const loc = require('../../loc');
 import { connect } from 'react-redux';
-import { extractMedia, getImageGatewayURL, replaceMedia } from './mediaManager';
+import { extractMedia, getImageGatewayURL, removeMedia, replaceMedia } from './mediaManager';
 
 const MAX_TIME = 3147483647;
 
@@ -421,6 +421,11 @@ class ShowKeyValue extends React.Component {
 
   render() {
     let {isRaw, value, key, replies, shares, rewards, favorite, shareValue, CIDHeight, CIDWidth} = this.state;
+    if (shareValue) {
+      // The shareValue contains the shared media for preview.
+      // We should remove it here otherwise it will be shown twice.
+      value = removeMedia(value);
+    }
     value = replaceMedia(value, CIDHeight, CIDWidth);
 
     const listHeader = (
