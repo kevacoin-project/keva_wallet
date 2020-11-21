@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   FlatList,
   Clipboard,
+  TouchableHighlight,
 } from 'react-native';
 import HTMLView from 'react-native-htmlview';
 const BlueElectrum = require('../../BlueElectrum');
@@ -23,6 +24,7 @@ import {
   BlueNavigationStyle,
 } from '../../BlueComponents';
 import VideoPlayer from 'react-native-video-player';
+import ImageView from "react-native-image-viewing";
 const loc = require('../../loc');
 import { connect } from 'react-redux';
 import { extractMedia, getImageGatewayURL, removeMedia, replaceMedia } from './mediaManager';
@@ -193,7 +195,20 @@ class ShowKeyValue extends React.Component {
       const a = node.attribs;
       const width = Dimensions.get('window').width * 0.9;
       const height = (a.height && a.width) ? (a.height / a.width) * width : width;
-      return (<Image style={{ width, height, alignSelf: 'center'}} source={{ uri: a.src }} key={index} resizeMode="contain"/>);
+      return (
+        <View key={index}>
+          <ImageView
+            images={[{uri: a.src}]}
+            imageIndex={0}
+            presentationStyle="overFullScreen"
+            visible={this.state.lightboxVisible}
+            onRequestClose={() => this.setState({lightboxVisible: false})}
+          />
+          <TouchableHighlight onPress={() => this.setState({lightboxVisible: true})}>
+            <Image style={{ width, height, alignSelf: 'center'}} source={{ uri: a.src }} resizeMode="contain"/>
+          </TouchableHighlight>
+        </View>
+      );
     } else if (node.name == 'video') {
       const { width, height, poster } = node.attribs; // <video width="320" height="240" poster="http://link.com/image.jpg">...</video>
 
