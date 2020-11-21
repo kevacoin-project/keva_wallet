@@ -7,7 +7,8 @@ import {
   TouchableOpacity,
   FlatList,
   Clipboard,
-  TouchableHighlight,
+  Modal,
+  StatusBar,
 } from 'react-native';
 import HTMLView from 'react-native-htmlview';
 const BlueElectrum = require('../../BlueElectrum');
@@ -24,7 +25,7 @@ import {
   BlueNavigationStyle,
 } from '../../BlueComponents';
 import VideoPlayer from 'react-native-video-player';
-import ImageView from "react-native-image-viewing";
+import ImageViewer from 'react-native-image-zoom-viewer';
 const loc = require('../../loc');
 import { connect } from 'react-redux';
 import { extractMedia, getImageGatewayURL, removeMedia, replaceMedia } from './mediaManager';
@@ -85,6 +86,7 @@ class ShowKeyValue extends React.Component {
       isRaw: false,
       CIDHeight: 1,
       CIDWidth: 1,
+      showPicModal: false,
     };
   }
 
@@ -188,6 +190,16 @@ class ShowKeyValue extends React.Component {
     this.setState({isRaw: !this.state.isRaw});
   }
 
+  showModal = () => {
+    this.setState({showPicModal: true});
+    StatusBar.setHidden(true);
+  }
+
+  closeModal = () => {
+    StatusBar.setHidden(false);
+    this.setState({showPicModal: false});
+  }
+
   renderNode = (node, index) => {
     if (!node.prev && !node.next && !node.parent && node.type == 'text') {
       return (<Text selectable={true} key={index} style={{fontSize: 16, color: KevaColors.darkText, lineHeight: 25}}>{unescape(node.data)}</Text>);
@@ -195,18 +207,19 @@ class ShowKeyValue extends React.Component {
       const a = node.attribs;
       const width = Dimensions.get('window').width * 0.9;
       const height = (a.height && a.width) ? (a.height / a.width) * width : width;
+      const images = [{
+        url: a.src,
+        width: width/0.9,
+        height: height/0.9,
+      }];
       return (
         <View key={index}>
-          <ImageView
-            images={[{uri: a.src}]}
-            imageIndex={0}
-            presentationStyle="overFullScreen"
-            visible={this.state.lightboxVisible}
-            onRequestClose={() => this.setState({lightboxVisible: false})}
-          />
-          <TouchableHighlight onPress={() => this.setState({lightboxVisible: true})}>
+          <Modal visible={this.state.showPicModal} transparent={true} onRequestClose={this.closeModal}>
+            <ImageViewer key={index} imageUrls={images} onCancel={this.closeModal} enableSwipeDown={true}/>
+          </Modal>
+          <TouchableOpacity onPress={this.showModal}>
             <Image style={{ width, height, alignSelf: 'center'}} source={{ uri: a.src }} resizeMode="contain"/>
-          </TouchableHighlight>
+          </TouchableOpacity>
         </View>
       );
     } else if (node.name == 'video') {
