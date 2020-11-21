@@ -215,7 +215,7 @@ class ShowKeyValue extends React.Component {
       return (
         <View key={index}>
           <Modal visible={this.state.showPicModal} transparent={true} onRequestClose={this.closeModal}>
-            <ImageViewer key={index} imageUrls={images} onCancel={this.closeModal} enableSwipeDown={true}/>
+            <ImageViewer key={index} imageUrls={images} onCancel={this.closeModal} enableSwipeDown={true} swipeDownThreshold={100}/>
           </Modal>
           <TouchableOpacity onPress={this.showModal}>
             <Image style={{ width, height, alignSelf: 'center'}} source={{ uri: a.src }} resizeMode="contain"/>

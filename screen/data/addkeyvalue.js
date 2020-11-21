@@ -34,7 +34,7 @@ import { getServerInfo, uploadMedia, publishMedia } from './keva_ipfs'
 
 const CLOSE_ICON    = <Icon name="close" size={27} color={KevaColors.actionText}/>;
 const LIBRARY_ICON  = <Icon name="insert-photo" size={27} color={KevaColors.actionText}/>;
-const IMAGE_SIZE = 300;
+const IMAGE_SIZE = 1200;
 
 class AddKeyValue extends React.Component {
 
