@@ -1,7 +1,7 @@
 let BlueElectrum = require('../../BlueElectrum');
 
 async function getHost() {
-  let {host, tcp, ssl} = await BlueElectrum.getSavedPeer();
+  let {host, tcp, ssl} = BlueElectrum.getCurrentPeer();
   let ipfsProxyPort = ssl ? parseInt(ssl) + 10 : parseInt(tcp) + 10;
   let prefix = ssl ? 'https://' : 'http://';
   return prefix + host + ':' + ipfsProxyPort;

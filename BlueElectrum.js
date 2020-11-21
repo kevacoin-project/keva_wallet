@@ -22,6 +22,11 @@ let mainConnected = false;
 let wasConnectedAtLeastOnce = false;
 let serverName = false;
 let disableBatching = false;
+let currentPeer = null;
+
+function getCurrentPeer() {
+  return currentPeer;
+}
 
 let txhashHeightCache = {};
 
@@ -31,6 +36,7 @@ async function connectMain() {
   if (savedPeer && savedPeer.host && (savedPeer.tcp || savedPeer.ssl)) {
     usingPeer = savedPeer;
   }
+  currentPeer = usingPeer;
 
   try {
     console.log('begin connection:', JSON.stringify(usingPeer));
@@ -677,4 +683,4 @@ module.exports.blockchainTransaction_idFromPos = async function(height, pos) {
   return txid;
 }
 
-module.exports.getSavedPeer = getSavedPeer;
+module.exports.getCurrentPeer = getCurrentPeer;
