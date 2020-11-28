@@ -34,7 +34,7 @@ import { getServerInfo, uploadMedia, publishMedia } from './keva_ipfs'
 
 const CLOSE_ICON    = <Icon name="close" size={27} color={KevaColors.actionText}/>;
 const LIBRARY_ICON  = <Icon name="insert-photo" size={27} color={KevaColors.actionText}/>;
-const IMAGE_SIZE = 1200;
+const IMAGE_SIZE = 2400;
 
 class AddKeyValue extends React.Component {
 
@@ -288,9 +288,13 @@ class AddKeyValue extends React.Component {
 
     let image = response.path;
     try {
-      if (response.width > IMAGE_SIZE || response.height > IMAGE_SIZE) {
-        let resizedImage = await ImageResizer.createResizedImage(image, IMAGE_SIZE, IMAGE_SIZE, 'JPEG', 90);
-        image = resizedImage.uri;
+      const mimeType = mime.lookup(image);
+      if (mimeType.startsWith('image')) {
+        // Resize image if it is too big.
+        if (response.width > IMAGE_SIZE || response.height > IMAGE_SIZE) {
+          let resizedImage = await ImageResizer.createResizedImage(image, IMAGE_SIZE, IMAGE_SIZE, 'JPEG', 90);
+          image = resizedImage.uri;
+        }
       }
       const size = await utils.getImageSize(image);
       this.setState({imagePreview: image});

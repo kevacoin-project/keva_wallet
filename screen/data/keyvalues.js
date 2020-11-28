@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   FlatList,
 } from 'react-native';
+import VideoPlayer from 'react-native-video-player';
 const StyleSheet = require('../../PlatformStyleSheet');
 const KevaButton = require('../../common/KevaButton');
 const KevaColors = require('../../common/KevaColors');
@@ -101,8 +102,21 @@ class Item extends React.Component {
             }
             <Text style={styles.valueDesc} numberOfLines={3} ellipsizeMode="tail">{this.stripHtml(removeMedia(item.value))}</Text>
             {
-              mediaCID &&
-              <Image style={styles.previewImage} source={{uri: getImageGatewayURL(mediaCID)}} />
+              mediaCID && (
+                mimeType.startsWith('video') ?
+                <View style={{width: 200, height: 120, marginBottom: 5}}>
+                  <VideoPlayer
+                    disableFullscreen={false}
+                    fullScreenOnLongPress={true}
+                    resizeMode="contain"
+                    video={{ uri: getImageGatewayURL(mediaCID) }}
+                    videoWidth={200}
+                    videoHeight={120}
+                  />
+                </View>
+                :
+                <Image style={styles.previewImage} source={{uri: getImageGatewayURL(mediaCID)}} />
+              )
             }
           </View>
         </TouchableOpacity>
