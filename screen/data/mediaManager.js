@@ -18,15 +18,20 @@ export function getImageGatewayURL(CID) {
     return `https://gateway.temporal.cloud/ipfs/${CID}`;
 }
 
-export function replaceMedia(value, CIDHeight, CIDWidth) {
+export function replaceMedia(value, CIDHeight, CIDWidth, poster) {
     let mediaMatches = mediaReg.exec(value);
     if (mediaMatches && mediaMatches.length >= 3) {
       let mediaStr = mediaMatches[0];
       let mediaCID = mediaMatches[1];
       let mimeType = mediaMatches[2];
       const mediaURL = getImageGatewayURL(mediaCID);
-      const img = `<br/><img src="${mediaURL}" height="${CIDHeight}" width="${CIDWidth}" />`
-      return value.replace(mediaStr, img);
+      if (mimeType.startsWith('image')) {
+        const img = `<br/><img src="${mediaURL}" height="${CIDHeight}" width="${CIDWidth}" />`
+        return value.replace(mediaStr, img);
+      } else if (mimeType.startsWith('video')) {
+        const video = `<br/><video height="${CIDHeight}" width="${CIDWidth}" poster="${poster}"><source src="${mediaURL}" type="${mimeType}"></video>`
+        return value.replace(mediaStr, video);
+      }
     }
     return value;
 }

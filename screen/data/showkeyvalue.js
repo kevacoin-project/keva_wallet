@@ -11,6 +11,7 @@ import {
   StatusBar,
 } from 'react-native';
 import HTMLView from 'react-native-htmlview';
+import { createThumbnail } from "react-native-create-thumbnail";
 const BlueElectrum = require('../../BlueElectrum');
 import Toast from 'react-native-root-toast';
 import MIcon from 'react-native-vector-icons/MaterialIcons';
@@ -87,6 +88,7 @@ class ShowKeyValue extends React.Component {
       CIDHeight: 1,
       CIDWidth: 1,
       showPicModal: false,
+      thumbnail: null,
     };
   }
 
@@ -113,11 +115,26 @@ class ShowKeyValue extends React.Component {
 
   async componentDidMount() {
     const {key, value, replies, shares, rewards, favorite} = this.props.navigation.state.params;
-    const {mediaCID} = extractMedia(value);
-    if (mediaCID) {
+    const {mediaCID, mimeType} = extractMedia(value);
+    if (!mediaCID) {
+      return;
+    }
+
+    if (mimeType.startsWith('image')) {
       Image.getSize(getImageGatewayURL(mediaCID), (width, height) => {
         this.setState({CIDHeight: height, CIDWidth: width});
       });
+    } else if (mimeType.startsWith('video')) {
+      try {
+        let response = await createThumbnail({
+          url: getImageGatewayURL(mediaCID),
+          timeStamp: 5000,
+        });
+        console.log(response)
+        this.setState({thumbnail: response.path, CIDHeight: response.height, CIDWidth: response.width});
+      } catch (err) {
+        console.warn(err);
+      }
     }
 
     this.setState({
@@ -249,7 +266,7 @@ class ShowKeyValue extends React.Component {
           video={{ uri: sources[0] }} // Select one of the video sources
           videoWidth={displayWidth}
           videoHeight={displayHeight}
-          thumbnail={poster}
+          thumbnail={{uri: poster}}
         />
       );
     }
@@ -376,8 +393,8 @@ class ShowKeyValue extends React.Component {
     if (!this.state.shareValue) {
       return null;
     }
-    const {shareKey, shareValue, shareTime, shareHeight, origName, origShortCode, CIDHeight, CIDWidth} = this.state;
-    let displayValue = replaceMedia(shareValue, CIDHeight, CIDWidth);
+    const {shareKey, shareValue, shareTime, shareHeight, origName, origShortCode, CIDHeight, CIDWidth, thumbnail} = this.state;
+    let displayValue = replaceMedia(shareValue, CIDHeight, CIDWidth, thumbnail);
 
     return (
       <View style={{backgroundColor: '#fff'}}>
@@ -448,13 +465,13 @@ class ShowKeyValue extends React.Component {
   }
 
   render() {
-    let {isRaw, value, key, replies, shares, rewards, favorite, shareValue, CIDHeight, CIDWidth} = this.state;
+    let {isRaw, value, key, replies, shares, rewards, favorite, shareValue, CIDHeight, CIDWidth, thumbnail} = this.state;
     if (shareValue) {
       // The shareValue contains the shared media for preview.
       // We should remove it here otherwise it will be shown twice.
       value = removeMedia(value);
     }
-    value = replaceMedia(value, CIDHeight, CIDWidth);
+    value = replaceMedia(value, CIDHeight, CIDWidth, thumbnail);
 
     const listHeader = (
       <View style={styles.container}>

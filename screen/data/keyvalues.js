@@ -25,6 +25,7 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import MIcon from 'react-native-vector-icons/MaterialIcons';
 import ActionSheet from 'react-native-actionsheet';
 import { connect } from 'react-redux'
+import { createThumbnail } from "react-native-create-thumbnail";
 import { setKeyValueList, CURRENT_KEYVALUE_LIST_VERSION } from '../../actions'
 import {
         fetchKeyValueList, getNamespaceScriptHash,
@@ -40,7 +41,7 @@ class Item extends React.Component {
 
   constructor(props) {
     super(props);
-    this.state = { loading: false, selectedImage: null, isRefreshing: false };
+    this.state = { loading: false, selectedImage: null, isRefreshing: false, thumbnail: null };
   }
 
   onEdit = () => {
@@ -65,8 +66,28 @@ class Item extends React.Component {
     return str.replace(/(<([^>]+)>)/gi, "");
   }
 
+  async componentDidMount() {
+    let {item} = this.props;
+    const {mediaCID, mimeType} = extractMedia(item.value);
+    if (!mediaCID || !mimeType.startsWith('video')) {
+      return;
+    }
+
+    try {
+      let response = await createThumbnail({
+        url: getImageGatewayURL(mediaCID),
+        timeStamp: 5000,
+      });
+      console.log(response)
+      this.setState({thumbnail: response.path});
+    } catch (err) {
+      console.warn(err);
+    }
+  }
+
   render() {
     let {item, onShow, onReply, onShare, onReward, namespaceId, navigation} = this.props;
+    let {thumbnail} = this.state;
     const {isOther} = navigation.state.params;
 
     const {mediaCID, mimeType} = extractMedia(item.value);
@@ -104,14 +125,15 @@ class Item extends React.Component {
             {
               mediaCID && (
                 mimeType.startsWith('video') ?
-                <View style={{width: 200, height: 120, marginBottom: 5}}>
+                <View style={{width: 160, height: 120, marginBottom: 5}}>
                   <VideoPlayer
                     disableFullscreen={false}
                     fullScreenOnLongPress={true}
                     resizeMode="contain"
                     video={{ uri: getImageGatewayURL(mediaCID) }}
-                    videoWidth={200}
+                    videoWidth={160}
                     videoHeight={120}
+                    thumbnail={{uri: thumbnail}}
                   />
                 </View>
                 :
