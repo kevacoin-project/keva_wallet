@@ -9,6 +9,7 @@ import {
   Clipboard,
   Modal,
   StatusBar,
+  InteractionManager,
 } from 'react-native';
 import HTMLView from 'react-native-htmlview';
 import { createThumbnail } from "react-native-create-thumbnail";
@@ -113,7 +114,13 @@ class ShowKeyValue extends React.Component {
     });
   }
 
-  async componentDidMount() {
+  componentDidMount() {
+    InteractionManager.runAfterInteractions(async () => {
+      await this._componentDidMount();
+    });
+  }
+
+  async _componentDidMount() {
     const {key, value, replies, shares, rewards, favorite} = this.props.navigation.state.params;
     const {mediaCID, mimeType} = extractMedia(value);
 
@@ -126,7 +133,7 @@ class ShowKeyValue extends React.Component {
         try {
           let response = await createThumbnail({
             url: getImageGatewayURL(mediaCID),
-            timeStamp: 5000,
+            timeStamp: 2000,
           });
           console.log(response)
           this.setState({thumbnail: response.path, CIDHeight: response.height, CIDWidth: response.width});
@@ -194,7 +201,7 @@ class ShowKeyValue extends React.Component {
           try {
             let response = await createThumbnail({
               url: getImageGatewayURL(mediaCID),
-              timeStamp: 5000,
+              timeStamp: 2000,
             });
             console.log(response)
             this.setState({thumbnail: response.path, CIDHeight: response.height, CIDWidth: response.width});

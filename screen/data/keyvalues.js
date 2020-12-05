@@ -5,6 +5,7 @@ import {
   View,
   TouchableOpacity,
   FlatList,
+  InteractionManager,
 } from 'react-native';
 import VideoPlayer from 'react-native-video-player';
 const StyleSheet = require('../../PlatformStyleSheet');
@@ -67,6 +68,12 @@ class Item extends React.Component {
   }
 
   async componentDidMount() {
+    InteractionManager.runAfterInteractions(async () => {
+      await this._componentDidMount();
+    });
+  }
+
+  async _componentDidMount() {
     let {item} = this.props;
     const {mediaCID, mimeType} = extractMedia(item.value);
     if (!mediaCID || !mimeType.startsWith('video')) {
@@ -76,7 +83,7 @@ class Item extends React.Component {
     try {
       let response = await createThumbnail({
         url: getImageGatewayURL(mediaCID),
-        timeStamp: 5000,
+        timeStamp: 2000,
       });
       console.log(response)
       this.setState({thumbnail: response.path});

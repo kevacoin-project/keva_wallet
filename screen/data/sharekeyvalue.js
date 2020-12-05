@@ -101,7 +101,7 @@ class ShareKeyValue extends React.Component {
       try {
         let response = await createThumbnail({
           url: getImageGatewayURL(mediaCID),
-          timeStamp: 5000,
+          timeStamp: 2000,
         });
         console.log(response)
         this.setState({thumbnail: response.path, CIDHeight: response.height, CIDWidth: response.width});
