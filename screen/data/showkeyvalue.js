@@ -116,24 +116,23 @@ class ShowKeyValue extends React.Component {
   async componentDidMount() {
     const {key, value, replies, shares, rewards, favorite} = this.props.navigation.state.params;
     const {mediaCID, mimeType} = extractMedia(value);
-    if (!mediaCID) {
-      return;
-    }
 
-    if (mimeType.startsWith('image')) {
-      Image.getSize(getImageGatewayURL(mediaCID), (width, height) => {
-        this.setState({CIDHeight: height, CIDWidth: width});
-      });
-    } else if (mimeType.startsWith('video')) {
-      try {
-        let response = await createThumbnail({
-          url: getImageGatewayURL(mediaCID),
-          timeStamp: 5000,
+    if (mediaCID) {
+      if (mimeType.startsWith('image')) {
+        Image.getSize(getImageGatewayURL(mediaCID), (width, height) => {
+          this.setState({CIDHeight: height, CIDWidth: width});
         });
-        console.log(response)
-        this.setState({thumbnail: response.path, CIDHeight: response.height, CIDWidth: response.width});
-      } catch (err) {
-        console.warn(err);
+      } else if (mimeType.startsWith('video')) {
+        try {
+          let response = await createThumbnail({
+            url: getImageGatewayURL(mediaCID),
+            timeStamp: 5000,
+          });
+          console.log(response)
+          this.setState({thumbnail: response.path, CIDHeight: response.height, CIDWidth: response.width});
+        } catch (err) {
+          console.warn(err);
+        }
       }
     }
 
@@ -187,9 +186,22 @@ class ShowKeyValue extends React.Component {
 
       const {mediaCID, mimeType} = extractMedia(kevaResult.value);
       if (mediaCID) {
-        Image.getSize(getImageGatewayURL(mediaCID), (width, height) => {
-          this.setState({CIDHeight: height, CIDWidth: width});
-        });
+        if (mimeType.startsWith('image')) {
+          Image.getSize(getImageGatewayURL(mediaCID), (width, height) => {
+            this.setState({CIDHeight: height, CIDWidth: width});
+          });
+        } else if (mimeType.startsWith('video')) {
+          try {
+            let response = await createThumbnail({
+              url: getImageGatewayURL(mediaCID),
+              timeStamp: 5000,
+            });
+            console.log(response)
+            this.setState({thumbnail: response.path, CIDHeight: response.height, CIDWidth: response.width});
+          } catch (err) {
+            console.warn(err);
+          }
+        }
       }
 
     } catch (err) {
@@ -466,7 +478,8 @@ class ShowKeyValue extends React.Component {
 
   render() {
     let {isRaw, value, key, replies, shares, rewards, favorite, shareValue, CIDHeight, CIDWidth, thumbnail} = this.state;
-    if (shareValue) {
+    const shareInfo = parseShareKey(key);
+    if (shareInfo) {
       // The shareValue contains the shared media for preview.
       // We should remove it here otherwise it will be shown twice.
       value = removeMedia(value);

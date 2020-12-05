@@ -28,6 +28,8 @@ let BlueApp = require('../../BlueApp');
 let BlueElectrum = require('../../BlueElectrum');
 import { FALLBACK_DATA_PER_BYTE_FEE } from '../../models/networkTransactionFees';
 import { TransitionPresets } from 'react-navigation-stack';
+import { createThumbnail } from "react-native-create-thumbnail";
+import VideoPlayer from 'react-native-video-player';
 
 import { connect } from 'react-redux'
 import { shareKeyValue, getTxIdFromShortCode, getNamespaceDataFromTx,
@@ -49,6 +51,7 @@ class ShareKeyValue extends React.Component {
       createTransactionErr: null,
       CIDHeight: 1,
       CIDWidth: 1,
+      thumbnail: null,
     };
   }
 
@@ -83,17 +86,29 @@ class ShareKeyValue extends React.Component {
       shareTxid, origKey, origValue
     });
 
-    const {mediaCID} = extractMedia(origValue);
-    if (mediaCID) {
-      Image.getSize(getImageGatewayURL(mediaCID), (width, height) => {
-        this.setState({CIDHeight: height, CIDWidth: width});
-      });
-    }
-
     this.props.navigation.setParams({
       onPress: this.onSave
     });
     this.isBiometricUseCapableAndEnabled = await Biometric.isBiometricUseCapableAndEnabled();
+
+    const {mediaCID, mimeType} = extractMedia(origValue);
+
+    if (mimeType.startsWith('image')) {
+      Image.getSize(getImageGatewayURL(mediaCID), (width, height) => {
+        this.setState({CIDHeight: height, CIDWidth: width});
+      });
+    } else if (mimeType.startsWith('video')) {
+      try {
+        let response = await createThumbnail({
+          url: getImageGatewayURL(mediaCID),
+          timeStamp: 5000,
+        });
+        console.log(response)
+        this.setState({thumbnail: response.path, CIDHeight: response.height, CIDWidth: response.width});
+      } catch (err) {
+        console.warn(err);
+      }
+    }
   }
 
   onSave = async () => {
@@ -366,12 +381,42 @@ class ShareKeyValue extends React.Component {
       const width = Dimensions.get('window').width * 0.9;
       const height = (a.height && a.width) ? (a.height / a.width) * width : width;
       return (<Image style={{ width, height, alignSelf: 'center'}} source={{ uri: a.src }} key={index} resizeMode="contain"/>);
+    } else if (node.name == 'video') {
+      const { width, height, poster } = node.attribs; // <video width="320" height="240" poster="http://link.com/image.jpg">...</video>
+
+      // Check if node has children
+      if (node.children.length === 0) return;
+
+      // Get all children <source> nodes
+      // <video><source src="movie.mp4" type="video/mp4"><source src="movie.ogg" type="video/ogg"></video>
+      const sourceNodes = node.children.filter((node) => node.type === 'tag' && node.name === 'source')
+      // Get a list of source URLs (<source src="movie.mp4">)
+      const sources = sourceNodes.map((node) => node.attribs.src);
+      let displayWidth = Dimensions.get('window').width * 0.9;
+      let displayHeight;
+      if (height && width) {
+        displayHeight = (Number(height) / Number(width)) * displayWidth;
+      } else {
+        displayHeight = (225/400)*displayWidth;
+      }
+      return (
+        <VideoPlayer
+          key={index}
+          disableFullscreen={false}
+          fullScreenOnLongPress={true}
+          resizeMode="contain"
+          video={{ uri: sources[0] }} // Select one of the video sources
+          videoWidth={displayWidth}
+          videoHeight={displayHeight}
+          thumbnail={{uri: poster}}
+        />
+      );
     }
   }
 
   getContent = () => {
-    const {origValue, CIDHeight, CIDWidth} = this.state;
-    let value = replaceMedia(origValue, CIDHeight, CIDWidth);
+    const {origValue, CIDHeight, CIDWidth, thumbnail} = this.state;
+    let value = replaceMedia(origValue, CIDHeight, CIDWidth, thumbnail);
 
     const content = (
       <View style={styles.origContainer}>
