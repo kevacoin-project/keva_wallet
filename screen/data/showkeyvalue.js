@@ -22,7 +22,7 @@ import { THIN_BORDER, timeConverter, toastError } from "../../util";
 import { getRepliesAndShares, parseShareKey, getKeyValueFromTxid,
         getNamespaceInfoFromShortCode, getHeightFromShortCode,
         getTxIdFromShortCode } from '../../class/keva-ops';
-import { setKeyValueList } from '../../actions'
+import { setKeyValueList, setMediaInfo } from '../../actions'
 import {
   BlueNavigationStyle,
   BlueLoading,
@@ -118,26 +118,37 @@ class ShowKeyValue extends React.Component {
   async componentDidMount() {
     const {key, value, replies, shares, rewards, favorite} = this.props.navigation.state.params;
     const {mediaCID, mimeType} = extractMedia(value);
+    const {mediaInfoList, dispatch} = this.props;
 
     if (mediaCID) {
-      InteractionManager.runAfterInteractions(async () => {
+      const mediaInfo = mediaInfoList[mediaCID];
+      if (mediaInfo) {
         if (mimeType.startsWith('image')) {
-          Image.getSize(getImageGatewayURL(mediaCID), (width, height) => {
-            this.setState({CIDHeight: height, CIDWidth: width});
-          });
+          this.setState({CIDHeight: mediaInfo.height, CIDWidth: mediaInfo.width});
         } else if (mimeType.startsWith('video')) {
-          try {
-            let response = await createThumbnail({
-              url: getImageGatewayURL(mediaCID),
-              timeStamp: 2000,
-            });
-            console.log(response)
-            this.setState({thumbnail: response.path, CIDHeight: response.height, CIDWidth: response.width});
-          } catch (err) {
-            console.warn(err);
-          }
+          this.setState({thumbnail: mediaInfo.thumbnail, CIDWidth: mediaInfo.width, CIDHeight: mediaInfo.height});
         }
-      });
+      } else {
+        InteractionManager.runAfterInteractions(async () => {
+          if (mimeType.startsWith('image')) {
+            Image.getSize(getImageGatewayURL(mediaCID), (width, height) => {
+              this.setState({CIDHeight: height, CIDWidth: width});
+            });
+          } else if (mimeType.startsWith('video')) {
+            try {
+              let response = await createThumbnail({
+                url: getImageGatewayURL(mediaCID),
+                timeStamp: 2000,
+              });
+
+              dispatch(setMediaInfo(mediaCID, {thumbnail: response.path, width: response.width, height: response.height}));
+              this.setState({thumbnail: response.path, CIDHeight: response.height, CIDWidth: response.width});
+            } catch (err) {
+              console.warn(err);
+            }
+          }
+        });
+      }
     }
 
     this.setState({
@@ -195,12 +206,18 @@ class ShowKeyValue extends React.Component {
             this.setState({CIDHeight: height, CIDWidth: width});
           });
         } else if (mimeType.startsWith('video')) {
+          const mediaInfo = mediaInfoList[mediaCID];
+          if (mediaInfo) {
+            this.setState({thumbnail: mediaInfo.thumbnail, CIDWidth: mediaInfo.width, CIDHeight: mediaInfo.height});
+            return;
+          }
+
           try {
             let response = await createThumbnail({
               url: getImageGatewayURL(mediaCID),
               timeStamp: 2000,
             });
-            console.log(response)
+            dispatch(setMediaInfo(mediaCID, {thumbnail: response.path, width: response.width, height: response.height}));
             this.setState({thumbnail: response.path, CIDHeight: response.height, CIDWidth: response.width});
           } catch (err) {
             console.warn(err);
@@ -561,6 +578,7 @@ function mapStateToProps(state) {
   return {
     keyValueList: state.keyValueList,
     namespaceList: state.namespaceList,
+    mediaInfoList: state.mediaInfoList,
   }
 }
 

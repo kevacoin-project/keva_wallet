@@ -27,6 +27,7 @@ const loc = require('../../loc');
 let BlueApp = require('../../BlueApp');
 let BlueElectrum = require('../../BlueElectrum');
 import { FALLBACK_DATA_PER_BYTE_FEE } from '../../models/networkTransactionFees';
+import { setMediaInfo } from '../../actions'
 import { TransitionPresets } from 'react-navigation-stack';
 import { createThumbnail } from "react-native-create-thumbnail";
 import VideoPlayer from 'react-native-video-player';
@@ -81,6 +82,7 @@ class ShareKeyValue extends React.Component {
   });
 
   async componentDidMount() {
+    const {mediaInfoList, dispatch} = this.props;
     const { shareTxid, origKey, origValue } = this.props.navigation.state.params;
     this.setState({
       shareTxid, origKey, origValue
@@ -96,6 +98,16 @@ class ShareKeyValue extends React.Component {
       return;
     }
 
+    const mediaInfo = mediaInfoList[mediaCID];
+    if (mediaInfo) {
+      if (mimeType.startsWith('image')) {
+        this.setState({CIDHeight: mediaInfo.height, CIDWidth: mediaInfo.width});
+      } else if (mimeType.startsWith('video')) {
+        this.setState({thumbnail: mediaInfo.thumbnail, CIDWidth: mediaInfo.width, CIDHeight: mediaInfo.height});
+      }
+      return;
+    }
+
     if (mimeType.startsWith('image')) {
       Image.getSize(getImageGatewayURL(mediaCID), (width, height) => {
         this.setState({CIDHeight: height, CIDWidth: width});
@@ -106,7 +118,7 @@ class ShareKeyValue extends React.Component {
           url: getImageGatewayURL(mediaCID),
           timeStamp: 2000,
         });
-        console.log(response)
+        dispatch(setMediaInfo(mediaCID, {thumbnail: response.path, width: response.width, height: response.height}));
         this.setState({thumbnail: response.path, CIDHeight: response.height, CIDWidth: response.width});
       } catch (err) {
         console.warn(err);
@@ -462,6 +474,7 @@ class ShareKeyValue extends React.Component {
 function mapStateToProps(state) {
   return {
     namespaceList: state.namespaceList,
+    mediaInfoList: state.mediaInfoList,
   }
 }
 

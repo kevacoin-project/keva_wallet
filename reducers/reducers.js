@@ -6,7 +6,7 @@ import {
   DELETE_OTHER_NAMESPACE,
   SET_OTHER_NAMESPACES_ORDER,
   SET_KEYVALUE_LIST,
-
+  SET_MEDIA_INFO,
   CURRENT_KEYVALUE_LIST_VERSION,
 } from '../actions'
 
@@ -96,8 +96,30 @@ function keyValueList(state = initKeyValueList, action) {
   }
 }
 
+const initMediaInfoList = {};
+
+function mediaInfoList(state = initMediaInfoList, action) {
+  switch (action.type) {
+    case SET_MEDIA_INFO:
+      if (action.CID) {
+        if (action.info) {
+          return {...state, [action.CID]: action.info}
+        } else {
+          let resultList = {...state};
+          delete resultList[action.CID];
+          return resultList;
+        }
+      }
+      // Remove all the old data
+      return {}
+    default:
+      return state;
+  }
+}
+
 export const appReducer = combineReducers({
   namespaceList,
   otherNamespaceList,
   keyValueList,
+  mediaInfoList,
 });

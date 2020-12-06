@@ -27,7 +27,7 @@ import MIcon from 'react-native-vector-icons/MaterialIcons';
 import ActionSheet from 'react-native-actionsheet';
 import { connect } from 'react-redux'
 import { createThumbnail } from "react-native-create-thumbnail";
-import { setKeyValueList, CURRENT_KEYVALUE_LIST_VERSION } from '../../actions'
+import { setKeyValueList, setMediaInfo, CURRENT_KEYVALUE_LIST_VERSION } from '../../actions'
 import {
         fetchKeyValueList, getNamespaceScriptHash,
         deleteKeyValue, mergeKeyValueList, getRepliesAndShares
@@ -74,9 +74,15 @@ class Item extends React.Component {
   }
 
   async _componentDidMount() {
-    let {item} = this.props;
+    let {item, mediaInfoList, dispatch} = this.props;
     const {mediaCID, mimeType} = extractMedia(item.value);
     if (!mediaCID || !mimeType.startsWith('video')) {
+      return;
+    }
+
+    const mediaInfo = mediaInfoList[mediaCID];
+    if (mediaInfo) {
+      this.setState({thumbnail: mediaInfo.thumbnail, width: mediaInfo.width, height: mediaInfo.height});
       return;
     }
 
@@ -85,7 +91,7 @@ class Item extends React.Component {
         url: getImageGatewayURL(mediaCID),
         timeStamp: 2000,
       });
-      console.log(response)
+      dispatch(setMediaInfo(mediaCID, {thumbnail: response.path, width: response.width, height: response.height}));
       this.setState({thumbnail: response.path});
     } catch (err) {
       console.warn(err);
@@ -628,7 +634,7 @@ class KeyValues extends React.Component {
   }
 
   render() {
-    let {navigation, dispatch, keyValueList} = this.props;
+    let {navigation, dispatch, keyValueList, mediaInfoList} = this.props;
     const namespaceId = navigation.getParam('namespaceId');
     const list = keyValueList.keyValues[namespaceId] || [];
     const mergeList = mergeKeyValueList(list);
@@ -664,6 +670,7 @@ class KeyValues extends React.Component {
                 onShare={this.onShare}
                 onReward={this.onReward}
                 navigation={navigation}
+                mediaInfoList={mediaInfoList}
               />
             }
           />
@@ -678,6 +685,7 @@ function mapStateToProps(state) {
   return {
     keyValueList: state.keyValueList,
     namespaceList: state.namespaceList,
+    mediaInfoList: state.mediaInfoList,
   }
 }
 
