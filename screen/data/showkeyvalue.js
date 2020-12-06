@@ -25,6 +25,7 @@ import { getRepliesAndShares, parseShareKey, getKeyValueFromTxid,
 import { setKeyValueList } from '../../actions'
 import {
   BlueNavigationStyle,
+  BlueLoading,
 } from '../../BlueComponents';
 import VideoPlayer from 'react-native-video-player';
 import ImageViewer from 'react-native-image-zoom-viewer';
@@ -114,33 +115,29 @@ class ShowKeyValue extends React.Component {
     });
   }
 
-  componentDidMount() {
-    InteractionManager.runAfterInteractions(async () => {
-      await this._componentDidMount();
-    });
-  }
-
-  async _componentDidMount() {
+  async componentDidMount() {
     const {key, value, replies, shares, rewards, favorite} = this.props.navigation.state.params;
     const {mediaCID, mimeType} = extractMedia(value);
 
     if (mediaCID) {
-      if (mimeType.startsWith('image')) {
-        Image.getSize(getImageGatewayURL(mediaCID), (width, height) => {
-          this.setState({CIDHeight: height, CIDWidth: width});
-        });
-      } else if (mimeType.startsWith('video')) {
-        try {
-          let response = await createThumbnail({
-            url: getImageGatewayURL(mediaCID),
-            timeStamp: 2000,
+      InteractionManager.runAfterInteractions(async () => {
+        if (mimeType.startsWith('image')) {
+          Image.getSize(getImageGatewayURL(mediaCID), (width, height) => {
+            this.setState({CIDHeight: height, CIDWidth: width});
           });
-          console.log(response)
-          this.setState({thumbnail: response.path, CIDHeight: response.height, CIDWidth: response.width});
-        } catch (err) {
-          console.warn(err);
+        } else if (mimeType.startsWith('video')) {
+          try {
+            let response = await createThumbnail({
+              url: getImageGatewayURL(mediaCID),
+              timeStamp: 2000,
+            });
+            console.log(response)
+            this.setState({thumbnail: response.path, CIDHeight: response.height, CIDWidth: response.width});
+          } catch (err) {
+            console.warn(err);
+          }
         }
-      }
+      });
     }
 
     this.setState({
@@ -410,7 +407,7 @@ class ShowKeyValue extends React.Component {
 
   getShareContent = () => {
     if (!this.state.shareValue) {
-      return null;
+      return <BlueLoading style={{paddingTop: 30}}/>;
     }
     const {shareKey, shareValue, shareTime, shareHeight, origName, origShortCode, CIDHeight, CIDWidth, thumbnail} = this.state;
     let displayValue = replaceMedia(shareValue, CIDHeight, CIDWidth, thumbnail);
