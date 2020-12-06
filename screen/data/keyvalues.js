@@ -144,7 +144,7 @@ class Item extends React.Component {
                   <Image source={{uri: thumbnail}}
                     style={styles.previewVideo}
                   />
-                  <View style={{position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, justifyContent: 'center', alignItems: 'center'}}>
+                  <View style={styles.playIcon}>
                     {PLAY_ICON}
                   </View>
                 </View>
@@ -818,5 +818,14 @@ var styles = StyleSheet.create({
     height: 120,
     alignSelf: 'flex-start',
     borderRadius: 0,
-  }
+  },
+  playIcon: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
 });

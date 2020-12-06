@@ -10,6 +10,7 @@ import {
   Modal,
   StatusBar,
   InteractionManager,
+  ActivityIndicator,
 } from 'react-native';
 import HTMLView from 'react-native-htmlview';
 import { createThumbnail } from "react-native-create-thumbnail";
@@ -91,6 +92,7 @@ class ShowKeyValue extends React.Component {
       CIDWidth: 1,
       showPicModal: false,
       thumbnail: null,
+      opacity: 0,
     };
   }
 
@@ -250,6 +252,18 @@ class ShowKeyValue extends React.Component {
     this.setState({showPicModal: false});
   }
 
+  onLoadStart = () => {
+    this.setState({opacity: 1});
+  }
+
+  onLoad = () => {
+    this.setState({opacity: 0});
+  }
+
+  onBuffer = ({isBuffering}) => {
+    this.setState({opacity: isBuffering ? 1 : 0});
+  }
+
   renderNode = (node, index) => {
     if (!node.prev && !node.next && !node.parent && node.type == 'text') {
       return (<Text selectable={true} key={index} style={{fontSize: 16, color: KevaColors.darkText, lineHeight: 25}}>{unescape(node.data)}</Text>);
@@ -291,16 +305,32 @@ class ShowKeyValue extends React.Component {
         displayHeight = (225/400)*displayWidth;
       }
       return (
-        <VideoPlayer
-          key={index}
-          disableFullscreen={false}
-          fullScreenOnLongPress={true}
-          resizeMode="contain"
-          video={{ uri: sources[0] }} // Select one of the video sources
-          videoWidth={displayWidth}
-          videoHeight={displayHeight}
-          thumbnail={{uri: poster}}
-        />
+        <View>
+          <VideoPlayer
+            key={index}
+            disableFullscreen={false}
+            fullScreenOnLongPress={true}
+            resizeMode="contain"
+            video={{ uri: sources[0] }} // Select one of the video sources
+            videoWidth={displayWidth}
+            videoHeight={displayHeight}
+            thumbnail={{uri: poster}}
+            onBuffer={this.onBuffer}
+            onLoadStart={this.onLoadStart}
+            onLoad={this.onLoad}
+            customStyles={{
+              video : {backgroundColor: 'black'},
+            }}
+          />
+          <View pointerEvents="none" style={styles.videoContainer}>
+            <ActivityIndicator
+              animating
+              size="large"
+              color="#ddd"
+              style={[styles.activityIndicator, {opacity: this.state.opacity}]}
+            />
+          </View>
+        </View>
       );
     }
   }
@@ -699,6 +729,22 @@ var styles = StyleSheet.create({
     borderColor: KevaColors.cellBorder,
     borderRadius: 12,
     margin: 10,
+  },
+  videoContainer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  activityIndicator: {
+    position: 'absolute',
+    top: 70,
+    left: 70,
+    right: 70,
+    height: 50,
   },
 });
 

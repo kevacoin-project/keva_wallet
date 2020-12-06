@@ -424,6 +424,9 @@ class ShareKeyValue extends React.Component {
           videoWidth={displayWidth}
           videoHeight={displayHeight}
           thumbnail={{uri: poster}}
+          customStyles={{
+            video : {backgroundColor: 'black'},
+          }}
         />
       );
     }
