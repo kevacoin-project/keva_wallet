@@ -92,6 +92,9 @@ class ShareKeyValue extends React.Component {
     this.isBiometricUseCapableAndEnabled = await Biometric.isBiometricUseCapableAndEnabled();
 
     const {mediaCID, mimeType} = extractMedia(origValue);
+    if (!mimeType) {
+      return;
+    }
 
     if (mimeType.startsWith('image')) {
       Image.getSize(getImageGatewayURL(mediaCID), (width, height) => {
@@ -425,7 +428,7 @@ class ShareKeyValue extends React.Component {
           stylesheet={htmlStyles}
           nodeComponentProps={{ selectable: true }}
           renderNode={this.renderNode}
-          style={{borderWidth: THIN_BORDER, borderColor: KevaColors.cellBorder, borderRadius: 12, padding: 10,}}
+          style={{borderWidth: THIN_BORDER, borderColor: KevaColors.cellBorder, borderRadius: 6, padding: 10, width: "100%"}}
         />
       </View>
     );
