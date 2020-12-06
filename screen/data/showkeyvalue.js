@@ -305,9 +305,8 @@ class ShowKeyValue extends React.Component {
         displayHeight = (225/400)*displayWidth;
       }
       return (
-        <View>
+        <View key={index}>
           <VideoPlayer
-            key={index}
             disableFullscreen={false}
             fullScreenOnLongPress={true}
             resizeMode="contain"
