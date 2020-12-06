@@ -405,10 +405,16 @@ class ShowKeyValue extends React.Component {
     });
   }
 
-  getShareContent = () => {
+  getShareContent = (key) => {
+    const shareInfo = parseShareKey(key);
+    if (!shareInfo) {
+      return null;
+    }
+
     if (!this.state.shareValue) {
       return <BlueLoading style={{paddingTop: 30}}/>;
     }
+
     const {shareKey, shareValue, shareTime, shareHeight, origName, origShortCode, CIDHeight, CIDWidth, thumbnail} = this.state;
     let displayValue = replaceMedia(shareValue, CIDHeight, CIDWidth, thumbnail);
 
@@ -507,7 +513,7 @@ class ShowKeyValue extends React.Component {
             />
           }
         </View>
-        { this.getShareContent() }
+        { this.getShareContent(key) }
         <View style={styles.actionContainer}>
           <View style={{flexDirection: 'row'}}>
             <TouchableOpacity onPress={() => this.onReply()} style={{flexDirection: 'row'}}>
