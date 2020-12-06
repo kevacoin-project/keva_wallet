@@ -38,6 +38,8 @@ import { timeConverter } from "../../util";
 import Biometric from '../../class/biometrics';
 import { extractMedia, getImageGatewayURL, removeMedia } from './mediaManager';
 
+const PLAY_ICON  = <MIcon name="play-arrow" size={50} color="#fff"/>;
+
 class Item extends React.Component {
 
   constructor(props) {
@@ -139,15 +141,12 @@ class Item extends React.Component {
               mediaCID && (
                 mimeType.startsWith('video') ?
                 <View style={{width: 160, height: 120, marginBottom: 5}}>
-                  <VideoPlayer
-                    disableFullscreen={false}
-                    fullScreenOnLongPress={true}
-                    resizeMode="contain"
-                    video={{ uri: getImageGatewayURL(mediaCID) }}
-                    videoWidth={160}
-                    videoHeight={120}
-                    thumbnail={{uri: thumbnail}}
+                  <Image source={{uri: thumbnail}}
+                    style={styles.previewVideo}
                   />
+                  <View style={{position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, justifyContent: 'center', alignItems: 'center'}}>
+                    {PLAY_ICON}
+                  </View>
                 </View>
                 :
                 <Image style={styles.previewImage} source={{uri: getImageGatewayURL(mediaCID)}} />
@@ -814,4 +813,10 @@ var styles = StyleSheet.create({
     alignSelf: 'flex-start',
     borderRadius: 6,
   },
+  previewVideo: {
+    width: 160,
+    height: 120,
+    alignSelf: 'flex-start',
+    borderRadius: 0,
+  }
 });
