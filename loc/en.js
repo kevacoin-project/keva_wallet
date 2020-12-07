@@ -27,6 +27,7 @@ module.exports = {
     language_restart: 'After selecting a new language, restarting the app is required for the change to take effect.',
     balance: 'Balance',
     done: 'Done',
+    video_too_big: 'File bigger than 30MB. Please trim or compress it.',
   },
   namespaces: {
     height: "block",

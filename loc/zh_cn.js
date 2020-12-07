@@ -27,6 +27,7 @@ module.exports = {
     language_restart: '选择新语言后，需要重新启动应用程序才能使更改生效',
     balance: '余额',
     done: '完成',
+    video_too_big: '文件大于30MB。请修剪或压缩它。',
   },
   namespaces: {
     height: "区块",

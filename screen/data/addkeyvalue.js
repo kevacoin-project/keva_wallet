@@ -29,12 +29,14 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import ImagePicker from 'react-native-image-crop-picker';
 import ImageResizer from 'react-native-image-resizer';
 import * as mime from 'react-native-mime-types';
+import { stat } from 'react-native-fs';
 
 import { getServerInfo, uploadMedia, publishMedia } from './keva_ipfs'
 
 const CLOSE_ICON    = <Icon name="close" size={27} color={KevaColors.actionText}/>;
 const LIBRARY_ICON  = <Icon name="insert-photo" size={27} color={KevaColors.actionText}/>;
 const IMAGE_SIZE = 2400;
+const MAX_FILE_SIZE = 30000000;
 
 class AddKeyValue extends React.Component {
 
@@ -296,7 +298,13 @@ class AddKeyValue extends React.Component {
           image = resizedImage.uri;
         }
       }
-      const size = await utils.getImageSize(image);
+      //const size = await utils.getImageSize(image);
+      const statResult = await stat(image);
+      console.log('file size: ' + statResult.size);
+      if (statResult.size > MAX_FILE_SIZE) {
+        utils.toastError(loc.general.video_too_big);
+        return;
+      }
       this.setState({imagePreview: image});
     } catch (err) {
       console.warn(err);
