@@ -172,6 +172,21 @@ export function getNamespaceScriptHash(namespaceId) {
   return reversedHash.toString('hex');
 }
 
+export function getKeyScriptHash(key) {
+  let emptyBuffer = Buffer.alloc(0);
+  let bscript = bitcoin.script;
+  let nsScript = bscript.compile([
+    KEVA_OP_PUT,
+    Buffer.from(key, 'utf8'),
+    emptyBuffer,
+    bscript.OPS.OP_2DROP,
+    bscript.OPS.OP_DROP,
+    bscript.OPS.OP_RETURN]);
+  let hash = bitcoin.crypto.sha256(nsScript);
+  let reversedHash = Buffer.from(reverse(hash));
+  return reversedHash.toString('hex');
+}
+
 export async function getNamespaceDataFromTx(ecl, transactions, txidStart, nsStart) {
   let stack = [];
   stack.push([txidStart, nsStart]);
