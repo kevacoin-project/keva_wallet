@@ -540,7 +540,9 @@ export async function updateKeyValue(wallet, requestedSatPerByte, namespaceId, k
     let output = outputs[i];
     if (!output.address) {
       // Change address.
-      output.address = await wallet.getChangeAddressAsync();
+      // IMPORTANT: we will use the same namespace address. See the
+      // previous IMPORANT comment.
+      output.address = namespaceAddress;
     }
 
     if (i == 0) {
