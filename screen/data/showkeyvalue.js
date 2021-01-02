@@ -20,9 +20,9 @@ import MIcon from 'react-native-vector-icons/MaterialIcons';
 const StyleSheet = require('../../PlatformStyleSheet');
 const KevaColors = require('../../common/KevaColors');
 import { THIN_BORDER, timeConverter, toastError } from "../../util";
-import { getRepliesAndShares, parseShareKey, getKeyValueFromTxid,
+import { getRepliesAndShares, parseSpecialKey, getKeyValueFromTxid,
         getNamespaceInfoFromShortCode, getHeightFromShortCode,
-        getTxIdFromShortCode } from '../../class/keva-ops';
+        getTxIdFromShortCode, getKeyScriptHash } from '../../class/keva-ops';
 import { setKeyValueList, setMediaInfo } from '../../actions'
 import {
   BlueNavigationStyle,
@@ -180,7 +180,7 @@ class ShowKeyValue extends React.Component {
     ];
 
     // Check if it is a shared post.
-    const shareInfo = parseShareKey(key);
+    const shareInfo = parseSpecialKey(key);
     if (!shareInfo) {
       return;
     }
@@ -452,7 +452,7 @@ class ShowKeyValue extends React.Component {
   }
 
   getShareContent = (key) => {
-    const shareInfo = parseShareKey(key);
+    const shareInfo = parseSpecialKey(key);
     if (!shareInfo) {
       return null;
     }
@@ -503,7 +503,7 @@ class ShowKeyValue extends React.Component {
       return;
     }
 
-    const shareInfo = parseShareKey(key);
+    const shareInfo = parseSpecialKey(key);
     if (!shareInfo) {
       // This is not a share post.
       const {rootAddress, shortCode, shareTxid, height} = navigation.state.params;
@@ -534,7 +534,7 @@ class ShowKeyValue extends React.Component {
 
   render() {
     let {isRaw, value, key, replies, shares, rewards, favorite, shareValue, CIDHeight, CIDWidth, thumbnail} = this.state;
-    const shareInfo = parseShareKey(key);
+    const shareInfo = parseSpecialKey(key);
     if (shareInfo) {
       // The shareValue contains the shared media for preview.
       // We should remove it here otherwise it will be shown twice.

@@ -477,7 +477,10 @@ export async function updateKeyValue(wallet, requestedSatPerByte, namespaceId, k
     throw new Error(loc.namespaces.update_key_err);
   }
 
-  const namespaceAddress = await wallet.getAddressAsync();
+  // IMPORTANT: we will use the same namespace address. Ideally, for
+  // security/privacy reason, it is better to use a new address. But that
+  // would create many addresses and slow down the update.
+  const namespaceAddress = nsUtxo.address;
   const nsScript = getKeyValueUpdateScript(namespaceId, namespaceAddress, key, value);
 
   // Namespace needs at least 0.01 KVA.
@@ -1178,7 +1181,7 @@ export async function getRepliesAndShares(ecl, rootAddress) {
       let resultJson = kevaToJson(result);
 
       // Check if it is a share
-      const {txIdShortCode, origShortCode, myShortCode} = parseShareKey(resultJson.key);
+      const {txIdShortCode, origShortCode, myShortCode} = parseSpecialKey(resultJson.key);
       if (txIdShortCode && origShortCode && myShortCode) {
         // It is a share.
         resultJson.time = tx.time;
@@ -1264,20 +1267,27 @@ export async function getRepliesAndShares(ecl, rootAddress) {
 const SHARE_COST = 1000000;
 
 // Format:
-// "[shortcode of tx to share]:[shortcode of original namespace]:[shortcode of my namespace]
+// ":[16 characters of tx]:s
 // Original namespace is the one that owns the tx.
-function createShareKey(txIdShortCode, origShortCode, myShortCode) {
-  return `"${txIdShortCode}:${origShortCode}:${myShortCode}`
+function createShareKey(txId) {
+  return `:${txId.substring(0, 16)}:s`
 }
 
-// See createShareKey for format.
-export function parseShareKey(key) {
-  const regexShare = /^"([0-9]+):([0-9]+):([0-9]+)$/gm;
-  let matches = regexShare.exec(key);
+export function parseSpecialKey(key) {
+  const regexSpecial = /^:([0-9a-z]{16}):([scr])$/gm;
+  let matches = regexSpecial.exec(key);
   if (!matches) {
     return false;
   }
-  return {txIdShortCode: matches[1], origShortCode: matches[2], myShortCode: matches[3]};
+  if (matches[2] === 's') {
+    return 'shared';
+  } else if (matches[2] === 'c') {
+    return 'comment';
+  } else if (matches[2] === 'r') {
+    return 'reward';
+  } else {
+    return false;
+  }
 }
 
 // Share a post (key/value pair).
@@ -1292,8 +1302,6 @@ export async function shareKeyValue(ecl, wallet, requestedSatPerByte, namespaceI
     throw new Error(loc.namespaces.update_key_err);
   }
 
-  // To share a post, key must be:
-  // "[shortcode of tx to share]:[shortcode of original namespace]:[shortcode of my namespace]
   const shareTxidShortCode = await getTxShortCode(ecl, shareTxid, height);
   let key = createShareKey(shareTxidShortCode, origShortCode, shortCode);
 
