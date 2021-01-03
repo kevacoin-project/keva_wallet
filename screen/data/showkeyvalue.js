@@ -20,9 +20,10 @@ import MIcon from 'react-native-vector-icons/MaterialIcons';
 const StyleSheet = require('../../PlatformStyleSheet');
 const KevaColors = require('../../common/KevaColors');
 import { THIN_BORDER, timeConverter, toastError } from "../../util";
-import { getRepliesAndShares, parseSpecialKey, getKeyValueFromTxid,
-        getNamespaceInfoFromShortCode, getHeightFromShortCode,
-        getTxIdFromShortCode, getKeyScriptHash } from '../../class/keva-ops';
+import {
+  getRepliesAndShares, parseSpecialKey, getKeyValueFromTxid,
+  getHeightFromShortCode, findNamespaceShortCode,
+} from '../../class/keva-ops';
 import { setKeyValueList, setMediaInfo } from '../../actions'
 import {
   BlueNavigationStyle,
@@ -180,28 +181,20 @@ class ShowKeyValue extends React.Component {
     ];
 
     // Check if it is a shared post.
-    const {keyType} = parseSpecialKey(key);
+    const {partialTxId, keyType} = parseSpecialKey(key);
     if (keyType != 'share') {
       return;
     }
 
     try {
-      const {txIdShortCode, origShortCode, myShortCode} = shareInfo;
-
-      const txId = await getTxIdFromShortCode(BlueElectrum, txIdShortCode);
-      const kevaResult = await getKeyValueFromTxid(BlueElectrum, txId);
-
-
-      const height = getHeightFromShortCode(txIdShortCode);
-      const origInfo = await getNamespaceInfoFromShortCode(BlueElectrum, origShortCode);
+      const kevaResult = await getKeyValueFromTxid(BlueElectrum, partialTxId);
+      let nsData = await findNamespaceShortCode(BlueElectrum, [], partialTxId);
       this.setState({
         shareKey: kevaResult.key,
         shareValue: kevaResult.value,
         shareTime: kevaResult.time,
-        shareHeight: height,
-        origShortCode,
-        myShortCode,
-        origName: origInfo.displayName,
+        origShortCode: nsData.shortCode,
+        origName: nsData.displayName,
       });
 
       const {mediaCID, mimeType} = extractMedia(kevaResult.value);
@@ -464,7 +457,7 @@ class ShowKeyValue extends React.Component {
       return <BlueLoading style={{paddingTop: 30}}/>;
     }
 
-    const {shareKey, shareValue, shareTime, shareHeight, origName, origShortCode, CIDHeight, CIDWidth, thumbnail} = this.state;
+    const {shareValue, shareTime, origName, origShortCode, CIDHeight, CIDWidth, thumbnail} = this.state;
     let displayValue = replaceMedia(shareValue, CIDHeight, CIDWidth, thumbnail);
 
     return (
