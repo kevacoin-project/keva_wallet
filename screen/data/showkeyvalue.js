@@ -180,15 +180,18 @@ class ShowKeyValue extends React.Component {
     ];
 
     // Check if it is a shared post.
-    const shareInfo = parseSpecialKey(key);
-    if (!shareInfo) {
+    const {keyType} = parseSpecialKey(key);
+    if (keyType != 'share') {
       return;
     }
 
     try {
       const {txIdShortCode, origShortCode, myShortCode} = shareInfo;
+
       const txId = await getTxIdFromShortCode(BlueElectrum, txIdShortCode);
       const kevaResult = await getKeyValueFromTxid(BlueElectrum, txId);
+
+
       const height = getHeightFromShortCode(txIdShortCode);
       const origInfo = await getNamespaceInfoFromShortCode(BlueElectrum, origShortCode);
       this.setState({
@@ -452,8 +455,8 @@ class ShowKeyValue extends React.Component {
   }
 
   getShareContent = (key) => {
-    const shareInfo = parseSpecialKey(key);
-    if (!shareInfo) {
+    const {keyType} = parseSpecialKey(key);
+    if (keyType != 'share') {
       return null;
     }
 

@@ -578,20 +578,11 @@ export async function updateKeyValue(wallet, requestedSatPerByte, namespaceId, k
 const REPLY_COST = 1000000;
 
 function createReplyKey(txId) {
-  return `:${txId.substring(0, 16)}:c`
+  return `${txIdToBase64(txId)}c`
 }
 
 function createRewardKey(txId) {
-  return `:${txId.substring(0, 16)}:r`
-}
-
-export function parseRewardKey(key) {
-  const regexReply = /^\$([0-9a-f]+):([0-9]+)$/gm;
-  let matches = regexReply.exec(key);
-  if (!matches) {
-    return false;
-  }
-  return {partialTxId: matches[1], shortCode: matches[2]};
+  return `${txIdToBase64(txId)}r`
 }
 
 const MIN_REWARD = 10000000;
@@ -713,7 +704,7 @@ export async function replyKeyValue(wallet, requestedSatPerByte, namespaceId, sh
     throw new Error(loc.namespaces.update_key_err);
   }
 
-  // To reply to a post, the key must be :replyTxid:c.
+  // To reply to a post, the key must be <base64 of replyTxid>c.
   const key = createReplyKey(replyTxid);
   // IMPORANT: reuse address - trade-off between secuity and performance.
   const namespaceAddress = nsUtxo.address;
@@ -1207,21 +1198,13 @@ export async function getRepliesAndShares(ecl, historyTxList) {
         resultJson.time = tx.time;
         const h = history.find(h => h.tx_hash == tx.txid);
         resultJson.height = h.height;
-        resultJson.sharedTxId = await getTxIdFromShortCode(ecl, txIdShortCode);
+        resultJson.sharedTxId = partialTxId;
 
-        const nsRootId = await getTxIdFromShortCode(ecl, myShortCode);
-        let resultSharer = await getNamespaceDataFromTx(ecl, [], nsRootId);
-        if (!resultSharer) {
-          continue;
-        }
-        const sharer = kevaToJson(resultSharer.result)
-        if (sharer.namespaceId != resultJson.namespaceId) {
-          continue;
-        }
+        //TODO: optimize this - this requires slow tracing of the tx history!
+        let {shortCode, displayName} = await findNamespaceShortCode(ecl, [], h.tx_hash);
         resultJson.sharer = {
-          shortCode: myShortCode,
-          rootTxid: nsRootId,
-          displayName: sharer.displayName,
+          shortCode,
+          displayName
         }
         shares.push(resultJson);
       } else if (keyType == 'comment') {
@@ -1269,27 +1252,33 @@ export async function getRepliesAndShares(ecl, historyTxList) {
   return {replies, shares, rewards};
 }
 
+function txIdToBase64(txId) {
+  return Buffer.from(txId, 'hex').toString('base64');
+}
+
 const SHARE_COST = 1000000;
 
 // Format:
-// ":[16 characters of tx]:s
+// "<bas64 of txid>s
 // Original namespace is the one that owns the tx.
 function createShareKey(txId) {
-  return `:${txId.substring(0, 16)}:s`
+  return `${txIdToBase64(txId)}s`
 }
 
 export function parseSpecialKey(key) {
-  const regexSpecial = /^:([0-9a-z]{16}):([scr])$/gm;
+  const regexSpecial = /^([0-9a-zA-Z+/]{43}=)([scr])$/gm;
   let matches = regexSpecial.exec(key);
   if (!matches) {
     return false;
   }
+
+  const txId = Buffer.from(matches[1], 'base64').toString('hex');
   if (matches[2] === 's') {
-    return {partialTxId: matches[1], keyType: 'shared'};
+    return {partialTxId: txId, keyType: 'share'};
   } else if (matches[2] === 'c') {
-    return {partialTxId: matches[1], keyType: 'comment'};
+    return {partialTxId: txId, keyType: 'comment'};
   } else if (matches[2] === 'r') {
-    return {partialTxId: matches[1], keyType: 'reward'};
+    return {partialTxId: txId, keyType: 'reward'};
   } else {
     return false;
   }
@@ -1307,10 +1296,9 @@ export async function shareKeyValue(ecl, wallet, requestedSatPerByte, namespaceI
     throw new Error(loc.namespaces.update_key_err);
   }
 
-  const shareTxidShortCode = await getTxShortCode(ecl, shareTxid, height);
-  let key = createShareKey(shareTxidShortCode, origShortCode, shortCode);
-
-  const namespaceAddress = await wallet.getAddressAsync();
+  let key = createShareKey(shareTxid);
+  // IMPORTANT: we will use the same namespace address - privacy/security trade-off.
+  const namespaceAddress = nsUtxo.address;
   const nsScript = getKeyValueUpdateScript(namespaceId, namespaceAddress, key, value);
 
   // Namespace needs at least 0.01 KVA.
@@ -1364,7 +1352,9 @@ export async function shareKeyValue(ecl, wallet, requestedSatPerByte, namespaceI
     let output = outputs[i];
     if (!output.address) {
       // Change address.
-      output.address = await wallet.getChangeAddressAsync();
+      //output.address = await wallet.getChangeAddressAsync();
+      // IMPORTANT: we will use the same namespace address - privacy/security trade-off.
+      output.address = namespaceAddress;
     }
 
     if (i == 0) {
