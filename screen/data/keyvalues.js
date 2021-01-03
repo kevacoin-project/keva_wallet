@@ -104,7 +104,6 @@ class Item extends React.Component {
     let {item, onShow, onReply, onShare, onReward, namespaceId, navigation} = this.props;
     let {thumbnail} = this.state;
     const {isOther} = navigation.state.params;
-
     const {mediaCID, mimeType} = extractMedia(item.value);
 
     return (
@@ -270,7 +269,7 @@ class KeyValues extends React.Component {
     dispatch(setKeyValueList(namespaceId, keyValues));
 
     // Fetch replies.
-    const {replies, shares, rewards} = await getRepliesAndShares(BlueElectrum, rootAddress, namespaceId);
+    const {replies, shares, rewards} = await getRepliesAndShares(BlueElectrum, history);
 
     // Add the replies.
     for (let kv of keyValues) {
@@ -321,7 +320,7 @@ class KeyValues extends React.Component {
     }
 
     // Fetch replies.
-    const {replies, shares, rewards} = await getRepliesAndShares(BlueElectrum, rootAddress, namespaceId);
+    const {replies, shares, rewards} = await getRepliesAndShares(BlueElectrum, history);
     // Add the replies.
     for (let kv of keyValues) {
       const txReplies = replies.filter(r => kv.tx.startsWith(r.partialTxId));
@@ -346,7 +345,6 @@ class KeyValues extends React.Component {
         kv.shares = txShares;
       }
     }
-
     dispatch(setKeyValueList(namespaceId, keyValues));
   }
 

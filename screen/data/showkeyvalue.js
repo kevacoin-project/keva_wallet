@@ -396,7 +396,7 @@ class ShowKeyValue extends React.Component {
     try {
       // Fetch replies.
       this.setState({isRefreshing: true});
-      const {replies, shares, rewards} = await getRepliesAndShares(BlueElectrum, rootAddress);
+      const {replies, shares, rewards} = await getRepliesAndShares(BlueElectrum, [{tx_hash: replyTxid}]);
       const keyValues = keyValueList.keyValues[namespaceId];
 
       // Add the replies.

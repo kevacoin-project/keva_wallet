@@ -671,6 +671,10 @@ module.exports.blockchainTransaction_getMerkle = async function(txid, height, me
   return await mainClient.blockchainTransaction_getMerkle(txid, height, merkel);
 }
 
+module.exports.blockchainScripthash_getHistoryBatch = async function(scriptHashes) {
+  return await mainClient.blockchainScripthash_getHistoryBatch(scriptHashes);
+}
+
 module.exports.blockchainTransaction_idFromPos = async function(height, pos) {
   let txid = await BlueApp.getTxIdFromPos(height, pos);
   if (txid) {
