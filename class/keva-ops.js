@@ -591,7 +591,7 @@ const MIN_REWARD = 10000000;
 // rewardRootAddress: the root namespace of the post.
 // replyTxid: the txid of the post
 //
-export async function rewardKeyValue(wallet, requestedSatPerByte, namespaceId, shortCode, value, amount, rewardRootAddress, replyTxid) {
+export async function rewardKeyValue(ecl, wallet, requestedSatPerByte, namespaceId, value, amount, replyTxid) {
   await wallet.fetchBalance();
   await wallet.fetchTransactions();
   let nsUtxo = await getNamespaceUtxo(wallet, namespaceId);
@@ -603,10 +603,29 @@ export async function rewardKeyValue(wallet, requestedSatPerByte, namespaceId, s
     throw new Error('Amount must be at least 0.1 KVA');
   }
 
-  // To reward to a post, the key must be :replyTxid.
   const key = createRewardKey(replyTxid);
-  const namespaceAddress = await wallet.getAddressAsync();
+  // IMPORTANT: re-use the namespace address, security/privacy trade-off.
+  const namespaceAddress = nsUtxo.address;
   const nsScript = getKeyValueUpdateScript(namespaceId, namespaceAddress, key, value);
+
+  // rewardRootAddress from replyTxid
+  const tx = await ecl.blockchainTransaction_get(replyTxid, true);
+  const vout = tx.outputs || tx.vout;
+  let rewardAddress;
+  for (let v of vout) {
+    let result = parseKeva(v.scriptPubKey.asm);
+    if (!result) {
+      continue;
+    }
+
+    if (result[0] === KEVA_OP_PUT) {
+      rewardAddress = v.scriptPubKey.addresses[0];
+    }
+  }
+
+  if (!rewardAddress) {
+    throw new Error('rewardAddress not found');
+  }
 
   // Namespace needs at least 0.01 KVA.
   const namespaceValue = 1000000;
@@ -614,7 +633,7 @@ export async function rewardKeyValue(wallet, requestedSatPerByte, namespaceId, s
     address: namespaceAddress, value: namespaceValue,
     script: nsScript
   }, {
-    address: rewardRootAddress, value: amount,
+    address: rewardAddress, value: amount,
   }];
 
   const transactions = wallet.getTransactions();
@@ -659,7 +678,8 @@ export async function rewardKeyValue(wallet, requestedSatPerByte, namespaceId, s
     let output = outputs[i];
     if (!output.address) {
       // Change address.
-      output.address = await wallet.getChangeAddressAsync();
+      // IMPORANT: re-use namespace address, security/privacy trade-off.
+      output.address = namespaceAddress;
     }
 
     if (i == 0) {
@@ -1221,29 +1241,17 @@ export async function getRepliesAndShares(ecl, historyTxList) {
         }
         replies.push(resultJson);
       } else if (keyType == 'reward') {
-        // Check if it is a reward.
-        ({partialTxId, shortCode} = parseRewardKey(resultJson.key));
-        if (!partialTxId || !shortCode) {
-          continue;
-        }
         resultJson.time = tx.time;
         const h = history.find(h => h.tx_hash == tx.txid);
         resultJson.height = h.height;
 
-        const nsRootId = await getTxIdFromShortCode(ecl, shortCode);
-        let resultRewarder = await getNamespaceDataFromTx(ecl, [], nsRootId);
-        if (!resultRewarder) {
-          continue;
-        }
-        const rewarder = kevaToJson(resultRewarder.result)
-        if (rewarder.namespaceId != resultJson.namespaceId) {
-          continue;
-        }
+        //TODO: optimize this - this requires slow tracing of the tx history!
+        let {shortCode, displayName} = await findNamespaceShortCode(ecl, [], h.tx_hash);
+
         resultJson.partialTxId = partialTxId;
         resultJson.rewarder = {
           shortCode,
-          rootTxid: nsRootId,
-          displayName: rewarder.displayName,
+          displayName
         }
         rewards.push(resultJson);
       }

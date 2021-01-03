@@ -177,8 +177,8 @@ class RewardKeyValue extends React.Component {
               }
 
               this.setState({ showNSCreationModal: true, currentPage: 1 });
-              const { tx, fee, cost, key } = await rewardKeyValue(wallet, FALLBACK_DATA_PER_BYTE_FEE,
-                namespaceId, shortCode, value, acutalAmount, rootAddress, rewardTxid);
+              const { tx, fee, cost, key } = await rewardKeyValue(BlueElectrum, wallet, FALLBACK_DATA_PER_BYTE_FEE,
+                namespaceId, value, acutalAmount, rewardTxid);
               let feeKVA = (fee + cost) / 100000000;
               this.setState({ showNSCreationModal: true, currentPage: 2, fee: feeKVA, key });
               this.namespaceTx = tx;
