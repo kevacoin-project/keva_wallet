@@ -345,7 +345,13 @@ export async function createKevaNamespace(wallet, requestedSatPerByte, nsName) {
 }
 
 function getKeyValueUpdateScript(namespaceId, address, key, value) {
-  const keyBuf = Buffer.from(utf8ToHex(key), 'hex');
+  const isKeyString = (typeof key) === 'string';
+  let keyBuf;
+  if (isKeyString) {
+    keyBuf = Buffer.from(utf8ToHex(key), 'hex');
+  } else {
+    keyBuf = key;
+  }
   const valueBuf = Buffer.from(utf8ToHex(value), 'hex');
 
   let bscript = bitcoin.script;
@@ -365,7 +371,13 @@ function getKeyValueUpdateScript(namespaceId, address, key, value) {
 }
 
 function getKeyValueDeleteScript(namespaceId, address, key) {
-  const keyBuf = Buffer.from(utf8ToHex(key), 'hex');
+  const isKeyString = (typeof key) === 'string';
+  let keyBuf;
+  if (isKeyString) {
+    keyBuf = Buffer.from(utf8ToHex(key), 'hex');
+  } else {
+    keyBuf = key;
+  }
 
   let bscript = bitcoin.script;
   let baddress = bitcoin.address;
@@ -577,12 +589,14 @@ export async function updateKeyValue(wallet, requestedSatPerByte, namespaceId, k
 
 const REPLY_COST = 1000000;
 
+// prefix 0x0001
 function createReplyKey(txId) {
-  return `${txIdToBase64(txId)}c`
+  return Buffer.concat([Buffer.from('0001', 'hex'), Buffer.from(txId, 'hex')]);
 }
 
+// prefix 0x0003
 function createRewardKey(txId) {
-  return `${txIdToBase64(txId)}r`
+  return Buffer.concat([Buffer.from('0003', 'hex'), Buffer.from(txId, 'hex')]);
 }
 
 const MIN_REWARD = 10000000;
@@ -1260,32 +1274,27 @@ export async function getRepliesAndShares(ecl, historyTxList) {
   return {replies, shares, rewards};
 }
 
-function txIdToBase64(txId) {
-  return Buffer.from(txId, 'hex').toString('base64');
-}
-
 const SHARE_COST = 1000000;
 
-// Format:
-// "<bas64 of txid>s
-// Original namespace is the one that owns the tx.
+// Prefix 0x0002
 function createShareKey(txId) {
-  return `${txIdToBase64(txId)}s`
+  return Buffer.concat([Buffer.from('0002', 'hex'), Buffer.from(txId, 'hex')]);
 }
 
 export function parseSpecialKey(key) {
-  const regexSpecial = /^([0-9a-zA-Z+/]{43}=)([scr])$/gm;
-  let matches = regexSpecial.exec(key);
-  if (!matches) {
+  keyHex = utf8ToHex(key)
+  // 2 bytes prefix, plus 32 bytes txId, is the minimal length.
+  // 4 + 64 = 68.
+  if (!keyHex.startsWith('00') || keyHex.length < 68) {
     return false;
   }
 
-  const txId = Buffer.from(matches[1], 'base64').toString('hex');
-  if (matches[2] === 's') {
-    return {partialTxId: txId, keyType: 'share'};
-  } else if (matches[2] === 'c') {
+  let txId = keyHex.substring(4, 68);
+  if (keyHex.startsWith('0001')) {
     return {partialTxId: txId, keyType: 'comment'};
-  } else if (matches[2] === 'r') {
+  } else if (keyHex.startsWith('0002')) {
+    return {partialTxId: txId, keyType: 'share'};
+  } else if (keyHex.startsWith('0003')) {
     return {partialTxId: txId, keyType: 'reward'};
   } else {
     return false;

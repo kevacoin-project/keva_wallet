@@ -7,7 +7,6 @@ import {
   FlatList,
   InteractionManager,
 } from 'react-native';
-import VideoPlayer from 'react-native-video-player';
 const StyleSheet = require('../../PlatformStyleSheet');
 const KevaButton = require('../../common/KevaButton');
 const KevaColors = require('../../common/KevaColors');
@@ -29,7 +28,7 @@ import { connect } from 'react-redux'
 import { createThumbnail } from "react-native-create-thumbnail";
 import { setKeyValueList, setMediaInfo, CURRENT_KEYVALUE_LIST_VERSION } from '../../actions'
 import {
-        fetchKeyValueList, getNamespaceScriptHash,
+        fetchKeyValueList, getNamespaceScriptHash, parseSpecialKey,
         deleteKeyValue, mergeKeyValueList, getRepliesAndShares
         } from '../../class/keva-ops';
 import Toast from 'react-native-root-toast';
@@ -632,9 +631,20 @@ class KeyValues extends React.Component {
 
   render() {
     let {navigation, dispatch, keyValueList, mediaInfoList} = this.props;
-    const namespaceId = navigation.getParam('namespaceId');
+    //const namespaceId = navigation.getParam('namespaceId');
+    const {isOther, namespaceId} = navigation.state.params;
     const list = keyValueList.keyValues[namespaceId] || [];
-    const mergeList = mergeKeyValueList(list);
+    const mergeListAll = mergeKeyValueList(list);
+    let mergeList;
+    if (isOther) {
+      mergeList = mergeListAll.filter(m => {
+        const {keyType} = parseSpecialKey(m.key);
+        return !keyType || keyType === 'share';
+      });
+    } else {
+      mergeList = mergeListAll;
+    }
+
     return (
       <View style={styles.container}>
         <ActionSheet
