@@ -28,7 +28,7 @@ export function getSpecialKeyText(keyType) {
   let displayKey = "";
   if (keyType === 'comment') {
     displayKey = 'Comment';
-  } else if (keyType === 'Share') {
+  } else if (keyType === 'share') {
     displayKey = 'Share';
   } else if (keyType === 'reward') {
     displayKey = 'Reward';

@@ -105,12 +105,9 @@ class Item extends React.Component {
     const {isOther} = navigation.state.params;
     const {mediaCID, mimeType} = extractMedia(item.value);
     let displayKey = item.key;
-    const {partialTxId, keyType} = parseSpecialKey(item.key);
+    const {keyType} = parseSpecialKey(item.key);
     if (keyType) {
       displayKey = getSpecialKeyText(keyType);
-    }
-    if (typeof displayKey !== 'string') {
-      displayKey = '';
     }
 
     return (
@@ -678,6 +675,7 @@ class KeyValues extends React.Component {
             data={mergeList}
             onRefresh={() => this.refreshKeyValues()}
             refreshing={this.state.isRefreshing}
+            keyExtractor={(item, index) => item.key + index}
             renderItem={({item, index}) =>
               <Item item={item} key={index} dispatch={dispatch} onDelete={this.onDelete}
                 onShow={this.onShow} namespaceId={namespaceId}

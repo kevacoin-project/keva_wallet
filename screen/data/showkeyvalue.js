@@ -539,7 +539,7 @@ class ShowKeyValue extends React.Component {
     value = replaceMedia(value, CIDHeight, CIDWidth, thumbnail);
 
     let displayKey = key;
-    const {partialTxId, keyType} = parseSpecialKey(key);
+    const {keyType} = parseSpecialKey(key);
     if (keyType) {
       displayKey = getSpecialKeyText(keyType);
     }
