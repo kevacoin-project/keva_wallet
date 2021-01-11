@@ -270,7 +270,7 @@ class ShowKeyValue extends React.Component {
     return textList.map((t, i) => {
       if (t.startsWith('#')) {
         return (
-          <Text selectable={true} key={i} style={styles.htmlLink} onPress={() => this.onHashtag(t)}>
+          <Text selectable={true} key={i} style={styles.htmlLink} onPress={() => this.onHashtag(t.toLowerCase())}>
             {t}
           </Text>
         )
