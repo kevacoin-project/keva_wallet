@@ -260,9 +260,30 @@ class ShowKeyValue extends React.Component {
     this.setState({opacity: isBuffering ? 1 : 0});
   }
 
+  onHashtag = hashtag => {
+    const {navigation} = this.props;
+    navigation.navigate('HashtagKeyValues', {hashtag});
+  }
+
+  renderText = (text) => {
+    const textList = text.split(/(#(?:\[[^\]]+\]|\w+))/);
+    return textList.map((t, i) => {
+      if (t.startsWith('#')) {
+        return (
+          <Text selectable={true} key={i} style={styles.htmlLink} onPress={() => this.onHashtag(t)}>
+            {t}
+          </Text>
+        )
+      }
+      return (
+        <Text selectable={true} key={i} style={styles.htmlText}>{t}</Text>
+      )
+    });
+  }
+
   renderNode = (node, index) => {
     if (!node.prev && !node.next && !node.parent && node.type == 'text') {
-      return (<Text selectable={true} key={index} style={{fontSize: 16, color: KevaColors.darkText, lineHeight: 25}}>{unescape(node.data)}</Text>);
+      return <Text key={index}>{this.renderText(unescape(node.data), index)}</Text>;
     } else if (node.name == 'img') {
       const a = node.attribs;
       const width = Dimensions.get('window').width * 0.9;
@@ -747,6 +768,16 @@ var styles = StyleSheet.create({
     right: 70,
     height: 50,
   },
+  htmlText: {
+    fontSize: 16,
+    color: KevaColors.darkText,
+    lineHeight: 25
+  },
+  htmlLink: {
+    fontSize: 16,
+    color: KevaColors.actionText,
+    lineHeight: 25
+  }
 });
 
 export const htmlStyles = StyleSheet.create({

@@ -27,11 +27,11 @@ const DUMMY_TXID = 'c70483b4613b18e750d0b1087ada28d713ad1e406ebc87d36f94063512c5
 export function getSpecialKeyText(keyType) {
   let displayKey = "";
   if (keyType === 'comment') {
-    displayKey = 'Comment';
+    displayKey = 'Commented on a Post';
   } else if (keyType === 'share') {
-    displayKey = 'Share';
+    displayKey = 'Shared a Post';
   } else if (keyType === 'reward') {
-    displayKey = 'Reward';
+    displayKey = 'Rewarded a Post';
   }
   return displayKey;
 }
@@ -201,6 +201,24 @@ export function getKeyScriptHash(key) {
   let nsScript = bscript.compile([
     KEVA_OP_PUT,
     Buffer.from(key, 'utf8'),
+    emptyBuffer,
+    bscript.OPS.OP_2DROP,
+    bscript.OPS.OP_DROP,
+    bscript.OPS.OP_RETURN]);
+  let hash = bitcoin.crypto.sha256(nsScript);
+  let reversedHash = Buffer.from(reverse(hash));
+  return reversedHash.toString('hex');
+}
+
+export function getHashtagScriptHash(hashtag) {
+  let emptyBuffer = Buffer.alloc(0);
+  let bscript = bitcoin.script;
+  if (hashtag.startsWith('#')) {
+    hashtag = hashtag.substring(1);
+  }
+  let nsScript = bscript.compile([
+    KEVA_OP_PUT,
+    Buffer.from(hashtag, 'utf8'),
     emptyBuffer,
     bscript.OPS.OP_2DROP,
     bscript.OPS.OP_DROP,
@@ -999,7 +1017,7 @@ const FAST_LOAD = 20;
 
 // Address is the root address, i.e. the address that is involved in
 // namespace creation.
-export async function fetchKeyValueList(ecl, completeHistory, currentkeyValueList, isFast, cb) {
+export async function fetchKeyValueList(ecl, completeHistory, currentkeyValueList, isFast) {
 
   let history;
   if (isFast && completeHistory.length > FAST_LOAD) {
@@ -1026,7 +1044,7 @@ export async function fetchKeyValueList(ecl, completeHistory, currentkeyValueLis
     return currentkeyValueList;
   }
 
-  const txsMap = await ecl.multiGetTransactionByTxid(txsToFetch, 20, VERBOSE, cb);
+  const txsMap = await ecl.multiGetTransactionByTxid(txsToFetch, 20, VERBOSE);
   let txs = [];
   for (let t of txsToFetch) {
     txs.push(txsMap[t]);
