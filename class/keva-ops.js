@@ -11,7 +11,30 @@ const convert = (from, to) => str => Buffer.from(str, from).toString(to)
 const utf8ToHex = convert('utf8', 'hex')
 const hexToUtf8 = convert('hex', 'utf8')
 
+// Check if a hex string represents a valid utf-8 string.
+// If yes, convert it into utf-8 string. Otherwise, convert
+// it to binary buffer.
+function hexToUtf8OrBuffer(hexStr) {
+  const utf8Str = hexToUtf8(hexStr);
+  if (utf8ToHex(utf8Str).length === hexStr.length) {
+    return utf8Str;
+  }
+  return Buffer.from(hexStr, 'hex');
+}
+
 const DUMMY_TXID = 'c70483b4613b18e750d0b1087ada28d713ad1e406ebc87d36f94063512c5f0dd';
+
+export function getSpecialKeyText(keyType) {
+  let displayKey = "";
+  if (keyType === 'comment') {
+    displayKey = 'Comment';
+  } else if (keyType === 'Share') {
+    displayKey = 'Share';
+  } else if (keyType === 'reward') {
+    displayKey = 'Reward';
+  }
+  return displayKey;
+}
 
 export function waitPromise(milliseconds) {
   return new Promise(resolve => setTimeout(resolve, milliseconds));
@@ -92,20 +115,20 @@ function kevaToJson(result) {
       return {
           op: 'KEVA_OP_NAMESPACE',
           namespaceId: hexToNamespace(result[1]),
-          displayName: hexToUtf8(fixInt(result[2]))
+          displayName: hexToUtf8OrBuffer(fixInt(result[2]))
       }
   } else if (result[0] === KEVA_OP_PUT) {
       return {
           op: 'KEVA_OP_PUT',
           namespaceId: hexToNamespace(result[1]),
-          key: hexToUtf8(fixInt(result[2])),
+          key: hexToUtf8OrBuffer(fixInt(result[2])),
           value: hexToUtf8(fixInt(result[3]))
       }
   } else if (result[0] === KEVA_OP_DELETE) {
       return {
           op: 'KEVA_OP_DELETE',
           namespaceId: hexToNamespace(result[1]),
-          key: hexToUtf8(fixInt(result[2]))
+          key: hexToUtf8OrBuffer(fixInt(result[2]))
       }
   } else {
       return null;
@@ -344,14 +367,17 @@ export async function createKevaNamespace(wallet, requestedSatPerByte, nsName) {
   return {tx: hexTx, namespaceId: hexToNamespace(returnNamespaceId), fee};
 }
 
-function getKeyValueUpdateScript(namespaceId, address, key, value) {
+function keyToBuffer(key) {
   const isKeyString = (typeof key) === 'string';
-  let keyBuf;
   if (isKeyString) {
-    keyBuf = Buffer.from(utf8ToHex(key), 'hex');
-  } else {
-    keyBuf = key;
+    return Buffer.from(utf8ToHex(key), 'hex');
   }
+  // It is already a buffer.
+  return key;
+}
+
+function getKeyValueUpdateScript(namespaceId, address, key, value) {
+  const keyBuf = keyToBuffer(key);
   const valueBuf = Buffer.from(utf8ToHex(value), 'hex');
 
   let bscript = bitcoin.script;
@@ -371,14 +397,7 @@ function getKeyValueUpdateScript(namespaceId, address, key, value) {
 }
 
 function getKeyValueDeleteScript(namespaceId, address, key) {
-  const isKeyString = (typeof key) === 'string';
-  let keyBuf;
-  if (isKeyString) {
-    keyBuf = Buffer.from(utf8ToHex(key), 'hex');
-  } else {
-    keyBuf = key;
-  }
-
+  let keyBuf = keyToBuffer(key);
   let bscript = bitcoin.script;
   let baddress = bitcoin.address;
   let nsScript = bscript.compile([
@@ -1281,8 +1300,25 @@ function createShareKey(txId) {
   return Buffer.concat([Buffer.from('0002', 'hex'), Buffer.from(txId, 'hex')]);
 }
 
+function toHexString(byteArray) {
+  return Array.from(byteArray, function(byte) {
+    return ('0' + (byte & 0xFF).toString(16)).slice(-2);
+  }).join('')
+}
+
 export function parseSpecialKey(key) {
-  keyHex = utf8ToHex(key)
+  const isKeyString = (typeof key) === 'string';
+  let keyHex;
+  if (isKeyString) {
+    keyHex = utf8ToHex(key)
+  } else if (key.data) {
+    // Buffer deserilized from JSON.
+    keyHex = toHexString(key.data)
+  } else {
+    // Buffer object.
+    keyHex = key.toString('hex');
+  }
+
   // 2 bytes prefix, plus 32 bytes txId, is the minimal length.
   // 4 + 64 = 68.
   if (!keyHex.startsWith('00') || keyHex.length < 68) {

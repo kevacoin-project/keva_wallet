@@ -29,7 +29,7 @@ import { createThumbnail } from "react-native-create-thumbnail";
 import { setKeyValueList, setMediaInfo, CURRENT_KEYVALUE_LIST_VERSION } from '../../actions'
 import {
         fetchKeyValueList, getNamespaceScriptHash, parseSpecialKey,
-        deleteKeyValue, mergeKeyValueList, getRepliesAndShares
+        deleteKeyValue, mergeKeyValueList, getRepliesAndShares, getSpecialKeyText
         } from '../../class/keva-ops';
 import Toast from 'react-native-root-toast';
 import StepModal from "../../common/StepModalWizard";
@@ -104,13 +104,21 @@ class Item extends React.Component {
     let {thumbnail} = this.state;
     const {isOther} = navigation.state.params;
     const {mediaCID, mimeType} = extractMedia(item.value);
+    let displayKey = item.key;
+    const {partialTxId, keyType} = parseSpecialKey(item.key);
+    if (keyType) {
+      displayKey = getSpecialKeyText(keyType);
+    }
+    if (typeof displayKey !== 'string') {
+      displayKey = '';
+    }
 
     return (
       <View style={styles.card}>
         <TouchableOpacity onPress={() => onShow(item.key, item.value, item.tx, item.replies, item.shares, item.rewards, item.height, item.favorite)}>
           <View style={{flex:1,paddingHorizontal:10,paddingTop:2}}>
             <View style={{flexDirection:'row',alignItems:'center',justifyContent:'space-between'}}>
-              <Text style={styles.keyDesc} numberOfLines={1} ellipsizeMode="tail">{item.key}</Text>
+              <Text style={styles.keyDesc} numberOfLines={1} ellipsizeMode="tail">{displayKey}</Text>
               <View style={{flexDirection: 'row', alignItems:'center',justifyContent:'flex-start'}}>
                 {
                   !isOther &&

@@ -22,7 +22,7 @@ const KevaColors = require('../../common/KevaColors');
 import { THIN_BORDER, timeConverter, toastError } from "../../util";
 import {
   getRepliesAndShares, parseSpecialKey, getKeyValueFromTxid,
-  getHeightFromShortCode, findNamespaceShortCode,
+  getHeightFromShortCode, findNamespaceShortCode, getSpecialKeyText
 } from '../../class/keva-ops';
 import { setKeyValueList, setMediaInfo } from '../../actions'
 import {
@@ -538,10 +538,16 @@ class ShowKeyValue extends React.Component {
     }
     value = replaceMedia(value, CIDHeight, CIDWidth, thumbnail);
 
+    let displayKey = key;
+    const {partialTxId, keyType} = parseSpecialKey(key);
+    if (keyType) {
+      displayKey = getSpecialKeyText(keyType);
+    }
+
     const listHeader = (
       <View style={styles.container}>
         <View style={styles.keyContainer}>
-          <Text style={styles.key} selectable>{key}</Text>
+          <Text style={styles.key} selectable>{displayKey}</Text>
         </View>
         <View style={styles.valueContainer}>
           { isRaw ?
