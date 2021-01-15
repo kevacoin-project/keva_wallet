@@ -267,7 +267,8 @@ class ShowKeyValue extends React.Component {
 
   renderText = (text) => {
     const textList = text.split(/(#(?:\[[^\]]+\]|\w+))/);
-    return textList.map((t, i) => {
+    return textList.map((text, i) => {
+      const t = text.trim();
       if (t.startsWith('#')) {
         return (
           <Text selectable={true} key={i} style={styles.htmlLink} onPress={() => this.onHashtag(t.toLowerCase())}>
@@ -275,6 +276,7 @@ class ShowKeyValue extends React.Component {
           </Text>
         )
       }
+
       return (
         <Text selectable={true} key={i} style={styles.htmlText}>{t}</Text>
       )
@@ -282,7 +284,12 @@ class ShowKeyValue extends React.Component {
   }
 
   renderNode = (node, index) => {
-    if (!node.prev && !node.next && !node.parent && node.type == 'text') {
+    const isNewline = node.type == 'text' && node.data && node.data.trim().length === 0;
+    if (isNewline) {
+      return <Text key={index}></Text>;
+    }
+
+    if (node.type == 'text') {
       return <Text key={index}>{this.renderText(unescape(node.data), index)}</Text>;
     } else if (node.name == 'img') {
       const a = node.attribs;
@@ -785,12 +792,12 @@ var styles = StyleSheet.create({
   htmlText: {
     fontSize: 16,
     color: KevaColors.darkText,
-    lineHeight: 25
+    lineHeight: 23
   },
   htmlLink: {
     fontSize: 16,
     color: KevaColors.actionText,
-    lineHeight: 25
+    lineHeight: 23
   }
 });
 
