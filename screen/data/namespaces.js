@@ -38,8 +38,8 @@ import {
 } from '../../actions'
 import { HDSegwitP2SHWallet,  } from '../../class';
 import { FALLBACK_DATA_PER_BYTE_FEE } from '../../models/networkTransactionFees';
-import UserAvatar from 'react-native-user-avatar';
 import Biometric from '../../class/biometrics';
+import { Avatar } from 'react-native-elements';
 
 let BlueApp = require('../../BlueApp');
 let loc = require('../../loc');
@@ -139,14 +139,42 @@ class Namespace extends React.Component {
     onWait(data.id, data.displayName, refresh);
   }
 
+  stringToColor = str =>  {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+      hash = str.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    let color = '#';
+    for (let i = 0; i < 3; i++) {
+      let value = (hash >> (i * 8)) & 0xFF;
+      color += ('00' + value.toString(16)).substr(-2);
+    }
+    return color;
+  }
+
+  getInitials = name => {
+    const names = name.split(' ');
+    let initials = names[0].substring(0, 1).toUpperCase();
+
+    if (names.length > 1) {
+        initials += names[names.length - 1].substring(0, 1).toUpperCase();
+    }
+    return initials;
+  }
+
+  getAvatar = name => {
+    return {titleAvatar: this.getInitials(name), colorAvatar: this.stringToColor(name)}
+  }
+
   render() {
     const namespace = this.props.data;
     const {canDelete, onDelete} = this.props;
+    const {titleAvatar, colorAvatar} = this.getAvatar(namespace.displayName);
     return (
       <Animated.View style={this._style}>
         <View style={styles.cardTitle} >
           <View style={{padding: 5}}>
-            <UserAvatar size={46} name={namespace.displayName} />
+            <Avatar rounded size="medium" title={titleAvatar} containerStyle={{backgroundColor: colorAvatar}}/>
           </View>
           <View style={{ flex: 1, justifyContent: 'space-between', paddingHorizontal: 7, paddingTop: 10 }}>
             <View style={{ flex: 1 }} >
