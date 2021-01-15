@@ -653,7 +653,7 @@ class OtherNamespaces extends React.Component {
   }
 
   onSearchNamespace =async () => {
-    const { dispatch, otherNamespaceList } = this.props;
+    const { dispatch, otherNamespaceList, navigation } = this.props;
     try {
       Keyboard.dismiss();
       if (!this.state.nsName || this.state.nsName.length == 0) {
@@ -662,6 +662,15 @@ class OtherNamespaces extends React.Component {
       }
       this.setState({saving: true, inputMode: false});
       await BlueElectrum.ping();
+      // Check if it is hashtag
+      if (this.state.nsName.startsWith('#')) {
+        const hashtag = this.state.nsName;
+        this.setState({nsName: '', saving: false});
+        this.closeItemAni();
+        navigation.push('HashtagKeyValues', {hashtag});
+        return;
+      }
+
       const namespace = await findOtherNamespace(BlueElectrum, this.state.nsName);
       if (!namespace) {
         return;

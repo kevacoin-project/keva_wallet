@@ -36,7 +36,7 @@ module.exports = {
     namespace_name: "Name of namespace",
     name: 'name',
     shortcode: "Short Code",
-    shortcode_id: "Shortcode or namespace ID",
+    shortcode_id: "Shortcode or #hashtag",
     no_data: "No Data",
     click_add_btn: "Enter name and click the '+' button to create your first namespace",
     click_search_btn: "Enter namespace shortcode (e.g. 5570511) and click the 'search' button to see other namespaces",

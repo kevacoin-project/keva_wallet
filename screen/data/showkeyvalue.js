@@ -262,13 +262,12 @@ class ShowKeyValue extends React.Component {
 
   onHashtag = hashtag => {
     const {navigation} = this.props;
-    navigation.navigate('HashtagKeyValues', {hashtag});
+    navigation.push('HashtagKeyValues', {hashtag});
   }
 
   renderText = (text) => {
     const textList = text.split(/(#(?:\[[^\]]+\]|\w+))/);
-    return textList.map((text, i) => {
-      const t = text.trim();
+    return textList.map((t, i) => {
       if (t.startsWith('#')) {
         return (
           <Text selectable={true} key={i} style={styles.htmlLink} onPress={() => this.onHashtag(t.toLowerCase())}>
