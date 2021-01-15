@@ -407,13 +407,27 @@ class ShowKeyValue extends React.Component {
   }
 
   fetchReplies = async () => {
-    const {dispatch, navigation, keyValueList} = this.props;
-    const {rootAddress, replyTxid, namespaceId} = navigation.state.params;
+    const {dispatch, navigation, keyValueList, namespaceList} = this.props;
+    const {replyTxid, namespaceId} = navigation.state.params;
+    const myNamespaces = namespaceList.namespaces;
 
     try {
       // Fetch replies.
       this.setState({isRefreshing: true});
       const {replies, shares, rewards} = await getRepliesAndShares(BlueElectrum, [{tx_hash: replyTxid}]);
+
+      if (!namespaceId) {
+        const favorite = !!rewards.find(r => Object.keys(myNamespaces).find(n => myNamespaces[n].shortCode == r.rewarder.shortCode));
+        this.setState({
+          isRefreshing: false,
+          replies: this.sortReplies(replies),
+          shares: shares,
+          rewards: rewards,
+          favorite: favorite,
+        });
+        return;
+      }
+
       const keyValues = keyValueList.keyValues[namespaceId];
 
       // Add the replies.
@@ -429,7 +443,7 @@ class ShowKeyValue extends React.Component {
         const txRewards = rewards.filter(r => kv.tx == r.partialTxId);
         if (txRewards && txRewards.length > 0) {
           kv.rewards = txRewards;
-          kv.favorite = txRewards.find(r => Object.keys(myNamespaces).find(n => myNamespaces[n].shortCode == r.rewarder.shortCode));
+          kv.favorite = !!txRewards.find(r => Object.keys(myNamespaces).find(n => myNamespaces[n].shortCode == r.rewarder.shortCode));
         }
       }
 

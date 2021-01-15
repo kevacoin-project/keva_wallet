@@ -343,7 +343,7 @@ class HashtagKeyValues extends React.Component {
     const isOther = navigation.getParam('isOther');
     const namespaceId = navigation.getParam('namespaceId');
     const shortCode = navigation.getParam('shortCode');
-    navigation.navigate('ShowKeyValue', {
+    navigation.push('ShowKeyValue', {
       namespaceId,
       shortCode,
       key,
