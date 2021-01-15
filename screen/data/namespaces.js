@@ -120,6 +120,7 @@ class Namespace extends React.Component {
     this.props.navigation.navigate('KeyValues', {
       namespaceId: namespace.id,
       shortCode: namespace.shortCode,
+      displayName: namespace.displayName,
       txid: namespace.txId,
       rootAddress: namespace.rootAddress,
       walletId: namespace.walletId,

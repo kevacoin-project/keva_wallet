@@ -561,9 +561,11 @@ class KeyValues extends React.Component {
     const isOther = navigation.getParam('isOther');
     const namespaceId = navigation.getParam('namespaceId');
     const shortCode = navigation.getParam('shortCode');
+    const displayName = navigation.getParam('displayName');
     navigation.push('ShowKeyValue', {
       namespaceId,
       shortCode,
+      displayName,
       key,
       value,
       rootAddress,

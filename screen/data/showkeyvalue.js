@@ -19,7 +19,7 @@ import Toast from 'react-native-root-toast';
 import MIcon from 'react-native-vector-icons/MaterialIcons';
 const StyleSheet = require('../../PlatformStyleSheet');
 const KevaColors = require('../../common/KevaColors');
-import { THIN_BORDER, timeConverter, toastError } from "../../util";
+import { THIN_BORDER, timeConverter, toastError, getInitials, stringToColor } from "../../util";
 import {
   getRepliesAndShares, parseSpecialKey, getKeyValueFromTxid,
   getHeightFromShortCode, findNamespaceShortCode, getSpecialKeyText
@@ -31,6 +31,7 @@ import {
 } from '../../BlueComponents';
 import VideoPlayer from 'react-native-video-player';
 import ImageViewer from 'react-native-image-zoom-viewer';
+import { Avatar } from 'react-native-elements';
 const loc = require('../../loc');
 import { connect } from 'react-redux';
 import { extractMedia, getImageGatewayURL, removeMedia, replaceMedia } from './mediaManager';
@@ -119,7 +120,7 @@ class ShowKeyValue extends React.Component {
   }
 
   async componentDidMount() {
-    const {key, value, replies, shares, rewards, favorite} = this.props.navigation.state.params;
+    const {key, value, replies, shares, rewards, favorite, shortCode, displayName} = this.props.navigation.state.params;
     const {mediaCID, mimeType} = extractMedia(value);
     const {mediaInfoList, dispatch} = this.props;
 
@@ -160,7 +161,9 @@ class ShowKeyValue extends React.Component {
       replies: this.sortReplies(replies),
       shares,
       rewards,
-      favorite
+      favorite,
+      shortCode,
+      displayName
     });
 
     this.subs = [
@@ -570,7 +573,7 @@ class ShowKeyValue extends React.Component {
   }
 
   render() {
-    let {isRaw, value, key, replies, shares, rewards, favorite, shareValue, CIDHeight, CIDWidth, thumbnail} = this.state;
+    let {isRaw, value, key, replies, shares, rewards, favorite, CIDHeight, CIDWidth, thumbnail, shortCode, displayName} = this.state;
     const shareInfo = parseSpecialKey(key);
     if (shareInfo) {
       // The shareValue contains the shared media for preview.
@@ -588,7 +591,22 @@ class ShowKeyValue extends React.Component {
     const listHeader = (
       <View style={styles.container}>
         <View style={styles.keyContainer}>
-          <Text style={styles.key} selectable>{displayKey}</Text>
+          <View style={{paddingRight: 10}}>
+            <Avatar rounded size="medium" title={getInitials(displayName)} containerStyle={{backgroundColor: stringToColor(displayName)}}/>
+          </View>
+          <View style={{paddingRight: 10, flexShrink: 1}}>
+            <View style={{flexDirection: 'row'}}>
+              <Text style={styles.sender} numberOfLines={1} ellipsizeMode="tail">
+                {displayName + ' '}
+              </Text>
+              <TouchableOpacity onPress={() => this.copyString(shortCode)}>
+                <Text style={styles.shortCode}>
+                  {`@${shortCode}`}
+                </Text>
+              </TouchableOpacity>
+            </View>
+            <Text style={styles.key} selectable>{displayKey}</Text>
+          </View>
         </View>
         <View style={styles.valueContainer}>
           { isRaw ?
@@ -666,10 +684,13 @@ var styles = StyleSheet.create({
     borderColor: KevaColors.cellBorder,
     backgroundColor: '#fff',
     padding: 10,
+    flexDirection: 'row',
   },
   key: {
     fontSize: 16,
     color: KevaColors.darkText,
+    flex: 1,
+    flexWrap: 'wrap',
   },
   value: {
     fontSize: 16,
