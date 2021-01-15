@@ -180,12 +180,12 @@ export function toScriptHash(addr) {
   return reversedHash.toString('hex');
 }
 
-export function getNamespaceScriptHash(namespaceId) {
+export function getNamespaceScriptHash(namespaceId, isBase58 = true) {
   let emptyBuffer = Buffer.alloc(0);
   let bscript = bitcoin.script;
   let nsScript = bscript.compile([
     KEVA_OP_PUT,
-    namespaceToHex(namespaceId),
+    isBase58 ? namespaceToHex(namespaceId) : Buffer.from(namespaceId, "hex"),
     emptyBuffer,
     bscript.OPS.OP_2DROP,
     bscript.OPS.OP_DROP,
@@ -270,6 +270,23 @@ export async function getNamespaceDataFromTx(ecl, transactions, txidStart, nsSta
         }
       }
     }
+  }
+  return null;
+}
+
+export async function getNamespaceIdFromTx(ecl, txid) {
+  const tx = await ecl.blockchainTransaction_get(txid, true);
+
+  // From transactions, tx.outputs
+  // From server: tx.vout
+  const vout = tx.outputs || tx.vout;
+  for (let v of vout) {
+    let result = parseKeva(v.scriptPubKey.asm);
+    if (!result) {
+      continue;
+    }
+
+    return result[1];
   }
   return null;
 }
@@ -961,27 +978,33 @@ export async function deleteKeyValue(wallet, requestedSatPerByte, namespaceId, k
 
 // nsTx: any tx that contains namespace operation.
 export async function findNamespaceShortCode(ecl, transctions, nsTx) {
-  // Find the "root" tx, the first tx that creates the namespace.
-  let result = await getNamespaceDataFromTx(ecl, transctions, nsTx);
-  let txid = result.txid;
-  let rootAddress = result.address;
-  let history = await ecl.blockchainScripthash_getHistory(toScriptHash(result.address));
-  let foundTx = history.find(h => h.tx_hash == txid);
+  let nsId = await getNamespaceIdFromTx(ecl, nsTx);
+  let history = await ecl.blockchainScripthash_getHistory(getNamespaceScriptHash(nsId, false));
+  if (history.length == 0) {
+    return {};
+  }
+  let foundTx = history[0];
   if (foundTx) {
     if (foundTx.height <= 0) {
       // Still in mempool.
-      return { rootTxid: txid, rootAddress };
+      return {};
     }
+    const txid = foundTx.tx_hash;
     let merkle = await ecl.blockchainTransaction_getMerkle(txid, foundTx.height, false);
     if (merkle) {
       // The first digit is the length of the block height.
       let strHeight = merkle.block_height.toString();
       let prefix = strHeight.length;
       let shortCode = prefix + strHeight + merkle.pos.toString();
-      return { shortCode, rootTxid: txid, rootAddress, displayName: kevaToJson(result.result).displayName };
+      let nsData = await getNamespaceDataFromTx(ecl, [], txid);
+      return {
+        shortCode,
+        displayName: kevaToJson(nsData.result).displayName,
+        rootTxid: nsData.txid
+      };
     }
   }
-  return { rootTxid: txid, rootAddress };
+  return {};
 }
 
 export async function getTxShortCode(ecl, txid, height) {
@@ -1174,9 +1197,9 @@ export async function findOtherNamespace(ecl, nsidOrShortCode) {
   }
 
   const transactions = [];
-  const { shortCode, rootTxid, rootAddress } = await findNamespaceShortCode(ecl, transactions, txid);
+  const { shortCode, rootTxid } = await findNamespaceShortCode(ecl, transactions, txid);
 
-  if (!rootTxid) {
+  if (!shortCode) {
     return null;
   }
 
@@ -1204,7 +1227,6 @@ export async function findOtherNamespace(ecl, nsidOrShortCode) {
   if (nsId) {
     namespaces[nsId].shortCode = shortCode;
     namespaces[nsId].rootTxid = rootTxid;
-    namespaces[nsId].rootAddress = rootAddress;
   }
   return namespaces;
 }

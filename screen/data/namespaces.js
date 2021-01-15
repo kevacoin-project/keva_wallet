@@ -634,7 +634,7 @@ class OtherNamespaces extends React.Component {
 
   async componentDidMount() {
     try {
-      await this.fetchOtherNamespaces();
+      //await this.fetchOtherNamespaces();
     } catch (err) {
       toastError('Cannot fetch namespaces');
       console.error(err);
@@ -644,7 +644,7 @@ class OtherNamespaces extends React.Component {
   refreshNamespaces = async () => {
     this.setState({isRefreshing: true});
     try {
-      this.fetchOtherNamespaces();
+      //this.fetchOtherNamespaces();
     } catch (err) {
       console.error(err);
       this.setState({isRefreshing: false});
