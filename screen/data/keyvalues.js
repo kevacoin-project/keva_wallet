@@ -33,8 +33,9 @@ import {
         } from '../../class/keva-ops';
 import Toast from 'react-native-root-toast';
 import StepModal from "../../common/StepModalWizard";
-import { timeConverter } from "../../util";
+import { timeConverter, getInitials, stringToColor } from "../../util";
 import Biometric from '../../class/biometrics';
+import { Avatar } from 'react-native-elements';
 import { extractMedia, getImageGatewayURL, removeMedia } from './mediaManager';
 
 const PLAY_ICON  = <MIcon name="play-arrow" size={50} color="#fff"/>;
@@ -102,7 +103,7 @@ class Item extends React.Component {
   render() {
     let {item, onShow, onReply, onShare, onReward, namespaceId, navigation} = this.props;
     let {thumbnail} = this.state;
-    const {isOther} = navigation.state.params;
+    const {isOther, displayName} = navigation.state.params;
     const {mediaCID, mimeType} = extractMedia(item.value);
     let displayKey = item.key;
     const {keyType} = parseSpecialKey(item.key);
@@ -115,6 +116,9 @@ class Item extends React.Component {
         <TouchableOpacity onPress={() => onShow(item.key, item.value, item.tx, item.replies, item.shares, item.rewards, item.height, item.favorite)}>
           <View style={{flex:1,paddingHorizontal:10,paddingTop:2}}>
             <View style={{flexDirection:'row',alignItems:'center',justifyContent:'space-between'}}>
+              <View style={{paddingRight: 10, paddingTop: 5, paddingBottom: 8}}>
+                <Avatar rounded size="small" title={getInitials(displayName)} containerStyle={{backgroundColor: stringToColor(displayName)}}/>
+              </View>
               <Text style={styles.keyDesc} numberOfLines={1} ellipsizeMode="tail">{displayKey}</Text>
               <View style={{flexDirection: 'row', alignItems:'center',justifyContent:'flex-start'}}>
                 {
@@ -730,7 +734,7 @@ var styles = StyleSheet.create({
     flex: 1,
     fontSize:15,
     marginBottom: 10,
-    color: KevaColors.lightText
+    color: KevaColors.darkText
   },
   actionIcon: {
     color: KevaColors.arrowIcon,
