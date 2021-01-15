@@ -109,3 +109,32 @@ export function getImageSize(uri) {
     });
   });
 }
+
+export function stringToColor(str) {
+  if (!str) {
+    return '#aaa';
+  }
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    hash = str.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  let color = '#';
+  for (let i = 0; i < 3; i++) {
+    let value = (hash >> (i * 8)) & 0xFF;
+    color += ('00' + value.toString(16)).substr(-2);
+  }
+  return color;
+}
+
+export function getInitials(name) {
+  if (!name) {
+    return ' ';
+  }
+  const names = name.split(' ');
+  let initials = names[0].substring(0, 1).toUpperCase();
+
+  if (names.length > 1) {
+      initials += names[names.length - 1].substring(0, 1).toUpperCase();
+  }
+  return initials;
+}

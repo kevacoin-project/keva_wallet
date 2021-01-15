@@ -47,7 +47,10 @@ let BlueElectrum = require('../../BlueElectrum');
 const StyleSheet = require('../../PlatformStyleSheet');
 const KevaButton = require('../../common/KevaButton');
 const KevaColors = require('../../common/KevaColors');
-import { THIN_BORDER, SCREEN_WIDTH, ModalHandle, toastError } from '../../util';
+import {
+  THIN_BORDER, SCREEN_WIDTH, ModalHandle, toastError,
+  stringToColor, getInitials,
+} from '../../util';
 import Toast from 'react-native-root-toast';
 import StepModal from "../../common/StepModalWizard";
 
@@ -139,31 +142,8 @@ class Namespace extends React.Component {
     onWait(data.id, data.displayName, refresh);
   }
 
-  stringToColor = str =>  {
-    let hash = 0;
-    for (let i = 0; i < str.length; i++) {
-      hash = str.charCodeAt(i) + ((hash << 5) - hash);
-    }
-    let color = '#';
-    for (let i = 0; i < 3; i++) {
-      let value = (hash >> (i * 8)) & 0xFF;
-      color += ('00' + value.toString(16)).substr(-2);
-    }
-    return color;
-  }
-
-  getInitials = name => {
-    const names = name.split(' ');
-    let initials = names[0].substring(0, 1).toUpperCase();
-
-    if (names.length > 1) {
-        initials += names[names.length - 1].substring(0, 1).toUpperCase();
-    }
-    return initials;
-  }
-
   getAvatar = name => {
-    return {titleAvatar: this.getInitials(name), colorAvatar: this.stringToColor(name)}
+    return {titleAvatar: getInitials(name), colorAvatar: stringToColor(name)}
   }
 
   render() {
@@ -687,8 +667,8 @@ class OtherNamespaces extends React.Component {
       this.closeItemAni();
     } catch (err) {
       this.setState({saving: false});
-      toastError('Cannot find namespace');
-      console.log(err);
+      console.log(err)
+      toastError('Cannot find namespace 111');
     }
   }
 
@@ -762,7 +742,6 @@ class OtherNamespaces extends React.Component {
             onSubmitEditing={this.onSearchNamespace}
             style={styles.textInput}
             returnKeyType={ 'done' }
-            onEndEditing={this.onSearchNamespace}
             clearButtonMode='while-editing'
           />
           {this.state.saving ?

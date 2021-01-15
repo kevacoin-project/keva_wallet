@@ -8,30 +8,26 @@ import {
   InteractionManager,
 } from 'react-native';
 const StyleSheet = require('../../PlatformStyleSheet');
-const KevaButton = require('../../common/KevaButton');
 const KevaColors = require('../../common/KevaColors');
 import { THIN_BORDER, showStatusAlways, hideStatus, toastError } from '../../util';
 import {
   BlueNavigationStyle,
-  BlueLoading,
-  BlueBigCheckmark,
 } from '../../BlueComponents';
 const loc = require('../../loc');
 let BlueApp = require('../../BlueApp');
 let BlueElectrum = require('../../BlueElectrum');
-import { FALLBACK_DATA_PER_BYTE_FEE } from '../../models/networkTransactionFees';
 
-import Icon from 'react-native-vector-icons/Ionicons';
 import MIcon from 'react-native-vector-icons/MaterialIcons';
 import { connect } from 'react-redux'
 import { createThumbnail } from "react-native-create-thumbnail";
-import { setKeyValueList, setMediaInfo, CURRENT_KEYVALUE_LIST_VERSION } from '../../actions'
+import { Avatar } from 'react-native-elements';
+import { setMediaInfo, } from '../../actions'
 import {
         fetchKeyValueList, getHashtagScriptHash, parseSpecialKey,
-        deleteKeyValue, mergeKeyValueList, getRepliesAndShares, getSpecialKeyText
+        findNamespaceShortCode, getRepliesAndShares, getSpecialKeyText
         } from '../../class/keva-ops';
 import Toast from 'react-native-root-toast';
-import { timeConverter } from "../../util";
+import { timeConverter, stringToColor, getInitials, } from "../../util";
 import Biometric from '../../class/biometrics';
 import { extractMedia, getImageGatewayURL, removeMedia } from './mediaManager';
 
@@ -98,9 +94,8 @@ class Item extends React.Component {
   }
 
   render() {
-    let {item, onShow, onReply, onShare, onReward, navigation} = this.props;
+    let {item, onShow, onReply, onShare, onReward} = this.props;
     let {thumbnail} = this.state;
-    const {isOther} = navigation.state.params;
     const {mediaCID, mimeType} = extractMedia(item.value);
     let displayKey = item.key;
     const {keyType} = parseSpecialKey(item.key);
@@ -110,12 +105,15 @@ class Item extends React.Component {
 
     return (
       <View style={styles.card}>
-        <TouchableOpacity onPress={() => onShow(item.key, item.value, item.tx, item.replies, item.shares, item.rewards, item.height, item.favorite)}>
+        <TouchableOpacity onPress={() => onShow(item.key, item.value, item.tx, item.replies, item.shares, item.rewards, item.height, item.favorite, item.shortCode, item.displayName)}>
           <View style={{flex:1,paddingHorizontal:10,paddingTop:2}}>
             <View style={{flexDirection:'row',alignItems:'center',justifyContent:'space-between'}}>
+              <View style={{paddingRight: 10}}>
+                <Avatar rounded size="small" title={getInitials(item.displayName)} containerStyle={{backgroundColor: stringToColor(item.displayName)}}/>
+              </View>
               <Text style={styles.keyDesc} numberOfLines={1} ellipsizeMode="tail">{displayKey}</Text>
               <View style={{flexDirection: 'row', alignItems:'center',justifyContent:'flex-start'}}>
-                <View style={{height: 40}}/>
+                <View style={{height: 50}}/>
               </View>
             </View>
             {(item.height > 0) ?
@@ -200,6 +198,16 @@ class HashtagKeyValues extends React.Component {
     if (!keyValues) {
       return;
     }
+
+    // Get namespace info.
+    for (let kv of keyValues) {
+      if (!kv.shortCode || !kv.displayName) {
+        let {shortCode, displayName} = await findNamespaceShortCode(BlueElectrum, [], kv.tx);
+        kv.shortCode = shortCode;
+        kv.displayName = displayName;
+      }
+    }
+
     this.setState({hashtagkeyValueList: keyValues});
 
     // Fetch replies.
@@ -253,8 +261,18 @@ class HashtagKeyValues extends React.Component {
       return;
     }
 
+    // Get namespace info.
+    for (let kv of keyValues) {
+      if (!kv.shortCode || !kv.displayName) {
+        let {shortCode, displayName} = await findNamespaceShortCode(BlueElectrum, [], kv.tx);
+        kv.shortCode = shortCode;
+        kv.displayName = displayName;
+      }
+    }
+
     // Fetch replies.
     const {replies, shares, rewards} = await getRepliesAndShares(BlueElectrum, history);
+
     // Add the replies.
     for (let kv of keyValues) {
       const txReplies = replies.filter(r => kv.tx.startsWith(r.partialTxId));
@@ -337,15 +355,14 @@ class HashtagKeyValues extends React.Component {
     }
   }
 
-  onShow = (key, value, tx, replies, shares, rewards, height, favorite) => {
+  onShow = (key, value, tx, replies, shares, rewards, height, favorite, shortCode, displayName) => {
     const {navigation} = this.props;
     const rootAddress = navigation.getParam('rootAddress');
-    const isOther = navigation.getParam('isOther');
     const namespaceId = navigation.getParam('namespaceId');
-    const shortCode = navigation.getParam('shortCode');
     navigation.push('ShowKeyValue', {
       namespaceId,
       shortCode,
+      displayName,
       key,
       value,
       rootAddress,
@@ -356,7 +373,6 @@ class HashtagKeyValues extends React.Component {
       shares,
       rewards,
       favorite,
-      isOther,
       height,
     });
   }
@@ -419,26 +435,9 @@ class HashtagKeyValues extends React.Component {
   render() {
     let {navigation, dispatch, mediaInfoList} = this.props;
     const mergeList = this.state.hashtagkeyValueList;
-    /*
-    let mergeList;
-    if (isOther) {
-      mergeList = mergeListAll.filter(m => {
-        const {keyType} = parseSpecialKey(m.key);
-        return !keyType || keyType === 'share';
-      });
-    } else {
-      mergeList = mergeListAll;
-    }
-    */
 
     return (
       <View style={styles.container}>
-        {/*
-          (list.length == 0) &&
-          <Text style={{paddingTop: 20, alignSelf: 'center', color: KevaColors.okColor, fontSize: 16}}>
-            {loc.namespaces.scanning_block} { this.state.fetched + ' / ' + this.state.totalToFetch } ...
-          </Text>
-        */}
         {
           mergeList &&
           <FlatList
