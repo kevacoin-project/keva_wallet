@@ -12,6 +12,7 @@ const KevaColors = require('../../common/KevaColors');
 import { THIN_BORDER, showStatusAlways, hideStatus, toastError } from '../../util';
 import {
   BlueNavigationStyle,
+  BlueLoading,
 } from '../../BlueComponents';
 const loc = require('../../loc');
 let BlueApp = require('../../BlueApp');
@@ -27,7 +28,7 @@ import {
         findNamespaceShortCode, getRepliesAndShares, getSpecialKeyText
         } from '../../class/keva-ops';
 import Toast from 'react-native-root-toast';
-import { timeConverter, stringToColor, getInitials, } from "../../util";
+import { timeConverter, stringToColor, getInitials, SCREEN_WIDTH, } from "../../util";
 import Biometric from '../../class/biometrics';
 import { extractMedia, getImageGatewayURL, removeMedia } from './mediaManager';
 
@@ -436,10 +437,14 @@ class HashtagKeyValues extends React.Component {
     let {navigation, dispatch, mediaInfoList} = this.props;
     const mergeList = this.state.hashtagkeyValueList;
 
+    if (this.state.isRefreshing && (!mergeList || mergeList.length == 0)) {
+      return <BlueLoading />;
+    }
+
     return (
       <View style={styles.container}>
         {
-          mergeList &&
+          (mergeList && mergeList.length > 0 ) ?
           <FlatList
             style={styles.listStyle}
             contentContainerStyle={{paddingBottom: 400}}
@@ -458,6 +463,13 @@ class HashtagKeyValues extends React.Component {
               />
             }
           />
+          :
+          <View style={{justifyContent: 'center', alignItems: 'center'}}>
+            <Image source={require('../../img/other_no_data.png')} style={{ width: SCREEN_WIDTH*0.33, height: SCREEN_WIDTH*0.33, marginVertical: 50 }} />
+            <Text style={{padding: 20, fontSize: 24, textAlign: 'center', color: KevaColors.lightText}}>
+              {loc.namespaces.no_hashtag}
+            </Text>
+          </View>
         }
       </View>
     );

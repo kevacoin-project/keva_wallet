@@ -633,7 +633,20 @@ class OtherNamespaces extends React.Component {
     this.setState({isRefreshing: false});
   }
 
-  onSearchNamespace =async () => {
+  isHashtag = str => {
+    if (str.startsWith('#')) {
+      return true;
+    }
+    if (str.startsWith('N') && str.length === 34) {
+      return false;
+    }
+    if (str.match(/[^$,.\d]/)) {
+      return true;
+    }
+    return false;
+  }
+
+  onSearchNamespace = async () => {
     const { dispatch, otherNamespaceList, navigation } = this.props;
     try {
       Keyboard.dismiss();
@@ -644,7 +657,7 @@ class OtherNamespaces extends React.Component {
       this.setState({saving: true, inputMode: false});
       await BlueElectrum.ping();
       // Check if it is hashtag
-      if (this.state.nsName.startsWith('#')) {
+      if (this.isHashtag(this.state.nsName)) {
         const hashtag = this.state.nsName;
         this.setState({nsName: '', saving: false});
         this.closeItemAni();
@@ -669,7 +682,7 @@ class OtherNamespaces extends React.Component {
     } catch (err) {
       this.setState({saving: false});
       console.log(err)
-      toastError('Cannot find namespace 111');
+      toastError('Cannot find namespace');
     }
   }
 
