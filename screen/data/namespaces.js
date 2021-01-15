@@ -38,6 +38,7 @@ import {
 } from '../../actions'
 import { HDSegwitP2SHWallet,  } from '../../class';
 import { FALLBACK_DATA_PER_BYTE_FEE } from '../../models/networkTransactionFees';
+import UserAvatar from 'react-native-user-avatar';
 import Biometric from '../../class/biometrics';
 
 let BlueApp = require('../../BlueApp');
@@ -144,6 +145,9 @@ class Namespace extends React.Component {
     return (
       <Animated.View style={this._style}>
         <View style={styles.cardTitle} >
+          <View style={{padding: 5}}>
+            <UserAvatar size={46} name={namespace.displayName} />
+          </View>
           <View style={{ flex: 1, justifyContent: 'space-between', paddingHorizontal: 7, paddingTop: 10 }}>
             <View style={{ flex: 1 }} >
               <Text style={styles.cardTitleText} numberOfLines={1} ellipsizeMode="tail">{namespace.displayName}</Text>
