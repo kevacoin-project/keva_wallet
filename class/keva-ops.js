@@ -218,7 +218,7 @@ export function getHashtagScriptHash(hashtag) {
   }
   let nsScript = bscript.compile([
     KEVA_OP_PUT,
-    Buffer.from(hashtag, 'utf8'),
+    Buffer.from(hashtag.toLowerCase(), 'utf8'),
     emptyBuffer,
     bscript.OPS.OP_2DROP,
     bscript.OPS.OP_DROP,
