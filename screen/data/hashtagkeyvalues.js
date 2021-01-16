@@ -60,7 +60,7 @@ class Item extends React.Component {
   }
 
   stripHtml = str => {
-    return str.replace(/(<([^>]+)>)/gi, "");
+    return str.replace(/(<([^>]+)>)/gi, "").replace(/(\r\n|\n|\r)/gm, "");
   }
 
   async componentDidMount() {
