@@ -269,18 +269,18 @@ class ShowKeyValue extends React.Component {
   }
 
   renderText = (text) => {
-    const textList = text.split(/(#(?:\[[^\]]+\]|\w+))/);
+    const textList = text.split(/(#(?:\[[^\]]+\]|[\p{L}\p{N}\p{Pc}\p{M}]+))/u);
     return textList.map((t, i) => {
       if (t.startsWith('#')) {
         return (
-          <Text selectable={true} key={i} style={styles.htmlLink} onPress={() => this.onHashtag(t.toLowerCase())}>
+          <Text selectable key={i} style={styles.htmlLink} onPress={() => this.onHashtag(t.toLowerCase())}>
             {t}
           </Text>
         )
       }
 
       return (
-        <Text selectable={true} key={i} style={styles.htmlText}>{t}</Text>
+        <Text selectable key={i} style={styles.htmlText}>{t}</Text>
       )
     });
   }
@@ -288,11 +288,11 @@ class ShowKeyValue extends React.Component {
   renderNode = (node, index) => {
     const isNewline = node.type == 'text' && node.data && node.data.trim().length === 0;
     if (isNewline) {
-      return <Text key={index}></Text>;
+      return <Text key={index} selectable></Text>;
     }
 
     if (node.type == 'text') {
-      return <Text key={index}>{this.renderText(unescape(node.data), index)}</Text>;
+      return <Text key={index} selectable>{this.renderText(unescape(node.data), index)}</Text>;
     } else if (node.name == 'img') {
       const a = node.attribs;
       const width = Dimensions.get('window').width * 0.9;
