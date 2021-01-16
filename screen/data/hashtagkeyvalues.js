@@ -247,10 +247,11 @@ class HashtagKeyValues extends React.Component {
     const {hashtag} = navigation.state.params;
 
     let kvList = [];
-    const history = await BlueElectrum.blockchainScripthash_getHistory(getHashtagScriptHash(hashtag));
+    let history = await BlueElectrum.blockchainScripthash_getHistory(getHashtagScriptHash(hashtag));
     if (history.length == 0) {
         return [];
     }
+    history.reverse();
 
     if (!kvList || kvList.length == 0) {
       // Show some results ASAP.
