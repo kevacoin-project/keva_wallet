@@ -110,6 +110,7 @@ class Item extends React.Component {
     if (keyType) {
       displayKey = getSpecialKeyText(keyType);
     }
+    const canEdit = !isOther && item.op !== 'KEVA_OP_NAMESPACE';
 
     return (
       <View style={styles.card}>
@@ -122,19 +123,19 @@ class Item extends React.Component {
               <Text style={styles.keyDesc} numberOfLines={1} ellipsizeMode="tail">{displayKey}</Text>
               <View style={{flexDirection: 'row', alignItems:'center',justifyContent:'flex-start'}}>
                 {
-                  !isOther &&
+                  canEdit &&
                   <TouchableOpacity onPress={this.onEdit}>
                     <Icon name="ios-create" size={22} style={styles.actionIcon} />
                   </TouchableOpacity>
                 }
                 {
-                  !isOther &&
+                  canEdit &&
                   <TouchableOpacity onPress={() => this.props.onDelete(namespaceId, item.key)}>
                     <Icon name="ios-trash" size={22} style={styles.actionIcon} />
                   </TouchableOpacity>
                 }
                 {
-                  isOther && <View style={{height: 40}}/>
+                  !canEdit && <View style={{height: 40}}/>
                 }
               </View>
             </View>
