@@ -25,7 +25,7 @@ import { Avatar } from 'react-native-elements';
 import { setMediaInfo, } from '../../actions'
 import {
         fetchKeyValueList, getHashtagScriptHash, parseSpecialKey,
-        findNamespaceShortCode, getRepliesAndShares, getSpecialKeyText
+        getNamespaceInfo, getRepliesAndShares, getSpecialKeyText
         } from '../../class/keva-ops';
 import Toast from 'react-native-root-toast';
 import { timeConverter, stringToColor, getInitials, SCREEN_WIDTH, } from "../../util";
@@ -203,8 +203,7 @@ class HashtagKeyValues extends React.Component {
     // Get namespace info.
     for (let kv of keyValues) {
       if (!kv.shortCode || !kv.displayName) {
-        let {shortCode, displayName} = await findNamespaceShortCode(BlueElectrum, [], kv.tx);
-        kv.shortCode = shortCode;
+        let {displayName} = await getNamespaceInfo(BlueElectrum, kv.namespaceId);
         kv.displayName = displayName;
       }
     }
@@ -227,7 +226,7 @@ class HashtagKeyValues extends React.Component {
       const txRewards = rewards.filter(r => kv.tx == r.partialTxId);
       if (txRewards && txRewards.length > 0) {
         kv.rewards = txRewards;
-        kv.favorite = txRewards.find(r => Object.keys(myNamespaces).find(n => myNamespaces[n].shortCode == r.rewarder.shortCode));
+        kv.favorite = txRewards.find(r => Object.keys(myNamespaces).find(n => myNamespaces[n].id == r.rewarder.namespaceId));
       }
     }
 
@@ -266,8 +265,7 @@ class HashtagKeyValues extends React.Component {
     // Get namespace info.
     for (let kv of keyValues) {
       if (!kv.shortCode || !kv.displayName) {
-        let {shortCode, displayName} = await findNamespaceShortCode(BlueElectrum, [], kv.tx);
-        kv.shortCode = shortCode;
+        let {displayName} = await getNamespaceInfo(BlueElectrum, kv.namespaceId);
         kv.displayName = displayName;
       }
     }
@@ -288,7 +286,7 @@ class HashtagKeyValues extends React.Component {
       const txRewards = rewards.filter(r => kv.tx.startsWith(r.partialTxId));
       if (txRewards && txRewards.length > 0) {
         kv.rewards = txRewards;
-        kv.favorite = txRewards.find(r => Object.keys(myNamespaces).find(n => myNamespaces[n].shortCode == r.rewarder.shortCode));
+        kv.favorite = txRewards.find(r => Object.keys(myNamespaces).find(n => myNamespaces[n].id == r.rewarder.namespaceId));
       }
     }
 

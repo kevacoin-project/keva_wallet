@@ -423,10 +423,10 @@ class ShowKeyValue extends React.Component {
     try {
       // Fetch replies.
       this.setState({isRefreshing: true});
-      const {replies, shares, rewards} = await getRepliesAndShares(BlueElectrum, [{tx_hash: replyTxid}]);
+      const {replies, shares, rewards} = await getRepliesAndShares(BlueElectrum, [{tx_hash: replyTxid}], true);
 
       if (!namespaceId) {
-        const favorite = !!rewards.find(r => Object.keys(myNamespaces).find(n => myNamespaces[n].shortCode == r.rewarder.shortCode));
+        const favorite = !!rewards.find(r => Object.keys(myNamespaces).find(n => myNamespaces[n].id == r.rewarder.namespaceId));
         this.setState({
           isRefreshing: false,
           replies: this.sortReplies(replies),
@@ -452,7 +452,7 @@ class ShowKeyValue extends React.Component {
         const txRewards = rewards.filter(r => kv.tx == r.partialTxId);
         if (txRewards && txRewards.length > 0) {
           kv.rewards = txRewards;
-          kv.favorite = !!txRewards.find(r => Object.keys(myNamespaces).find(n => myNamespaces[n].shortCode == r.rewarder.shortCode));
+          kv.favorite = !!txRewards.find(r => Object.keys(myNamespaces).find(n => myNamespaces[n].id == r.rewarder.namespaceId));
         }
       }
 

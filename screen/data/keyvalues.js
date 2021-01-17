@@ -292,7 +292,7 @@ class KeyValues extends React.Component {
       const txRewards = rewards.filter(r => kv.tx == r.partialTxId);
       if (txRewards && txRewards.length > 0) {
         kv.rewards = txRewards;
-        kv.favorite = txRewards.find(r => Object.keys(myNamespaces).find(n => myNamespaces[n].shortCode == r.rewarder.shortCode));
+        kv.favorite = txRewards.find(r => Object.keys(myNamespaces).find(n => myNamespaces[n].id == r.rewarder.namespaceId));
       }
     }
 
@@ -342,7 +342,7 @@ class KeyValues extends React.Component {
       const txRewards = rewards.filter(r => kv.tx.startsWith(r.partialTxId));
       if (txRewards && txRewards.length > 0) {
         kv.rewards = txRewards;
-        kv.favorite = txRewards.find(r => Object.keys(myNamespaces).find(n => myNamespaces[n].shortCode == r.rewarder.shortCode));
+        kv.favorite = txRewards.find(r => Object.keys(myNamespaces).find(n => myNamespaces[n].id == r.rewarder.namespaceId));
       }
     }
 
