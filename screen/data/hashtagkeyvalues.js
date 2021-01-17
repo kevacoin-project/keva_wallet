@@ -203,8 +203,9 @@ class HashtagKeyValues extends React.Component {
     // Get namespace info.
     for (let kv of keyValues) {
       if (!kv.shortCode || !kv.displayName) {
-        let {displayName} = await getNamespaceInfo(BlueElectrum, kv.namespaceId);
+        let {displayName, shortCode} = await getNamespaceInfo(BlueElectrum, kv.namespaceId);
         kv.displayName = displayName;
+        kv.shortCode = shortCode;
       }
     }
 
@@ -265,8 +266,9 @@ class HashtagKeyValues extends React.Component {
     // Get namespace info.
     for (let kv of keyValues) {
       if (!kv.shortCode || !kv.displayName) {
-        let {displayName} = await getNamespaceInfo(BlueElectrum, kv.namespaceId);
+        let {displayName, shortCode} = await getNamespaceInfo(BlueElectrum, kv.namespaceId);
         kv.displayName = displayName;
+        kv.shortCode = shortCode;
       }
     }
 

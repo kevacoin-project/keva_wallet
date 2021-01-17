@@ -1523,7 +1523,7 @@ export async function getNamespaceInfoFromShortCode(ecl, shortCode) {
   return nsInfo;
 }
 
-export async function getNamespaceInfo(ecl, namespaceId, needShortcode) {
+export async function getNamespaceInfo(ecl, namespaceId, needShortcode = true) {
   let history = await ecl.blockchainScripthash_getHistory(getRootNamespaceScriptHash(namespaceId));
   if (history.length == 0) {
     return {}
