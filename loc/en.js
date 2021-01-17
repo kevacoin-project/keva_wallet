@@ -58,7 +58,10 @@ module.exports = {
     check_again: 'Check Again',
     pending_confirmation: 'Pending confirmation. This will take a few minutes. You can start adding content to your namespace.',
     confirmed: 'Namespace Confirmed',
-    no_hashtag: 'Hashtag not found, please try other ones.'
+    no_hashtag: 'Hashtag not found, please try other ones.',
+    submit: 'Submit',
+    title: 'Title',
+    content: 'Content',
   },
   wallets: {
     select_wallet: 'Select Wallet',

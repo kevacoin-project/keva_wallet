@@ -64,7 +64,7 @@ class AddKeyValue extends React.Component {
         style={{ marginHorizontal: 16, minWidth: 150, justifyContent: 'center', alignItems: 'flex-end' }}
         onPress={navigation.state.params.onPress}
       >
-        <Text style={{color: KevaColors.actionText, fontSize: 16}}>Save</Text>
+        <Text style={{color: KevaColors.actionText, fontSize: 16}}>{loc.namespaces.submit}</Text>
       </TouchableOpacity>
     ),
   });
@@ -335,7 +335,7 @@ class AddKeyValue extends React.Component {
             value={this.state.key}
             underlineColorAndroid='rgba(0,0,0,0)'
             style={{fontSize:15}}
-            placeholder={'Key'}
+            placeholder={loc.namespaces.title}
             clearButtonMode="while-editing"
             onChangeTextValue={key => {this.setState({key})}}
           />
@@ -363,7 +363,7 @@ class AddKeyValue extends React.Component {
             value={this.state.value}
             underlineColorAndroid='rgba(0,0,0,0)'
             style={{fontSize:15}}
-            placeholder={'Value'}
+            placeholder={loc.namespaces.content}
             clearButtonMode="while-editing"
             onChangeTextValue={value => {this.setState({value})}}
           />

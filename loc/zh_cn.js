@@ -59,6 +59,9 @@ module.exports = {
     pending_confirmation: '待确认。这将需要几分钟。您可以开始向内容空间添加内容。',
     confirmed: '命名空间确认',
     no_hashtag: '找不到标签，请尝试其他标签。',
+    submit: '提交',
+    title: '标题',
+    content: '内容',
   },
   wallets: {
     select_wallet: '选择钱包',
