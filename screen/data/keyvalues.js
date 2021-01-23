@@ -671,7 +671,7 @@ class KeyValues extends React.Component {
         {
           (list.length == 0) &&
           <Text style={{paddingTop: 20, alignSelf: 'center', color: KevaColors.okColor, fontSize: 16}}>
-            {loc.namespaces.scanning_block} { this.state.fetched + ' / ' + this.state.totalToFetch } ...
+            {loc.namespaces.scanning_block} {/* this.state.fetched + ' / ' + this.state.totalToFetch */} ...
           </Text>
         }
         {

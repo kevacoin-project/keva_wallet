@@ -47,7 +47,7 @@ module.exports = {
     multiaddress_wallet: '仅支持多地址钱包.',
     creating_tx: '创建交易 ...',
     please_wait: '大约需要10秒钟, 请稍候',
-    scanning_block: '下载交易:',
+    scanning_block: '下载数据',
     refreshing: '刷新数据...',
     default_share: '分享帖子',
     namespace_unconfirmed: '命名空间尚未确认',

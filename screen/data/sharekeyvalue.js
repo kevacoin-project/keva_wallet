@@ -33,8 +33,7 @@ import { createThumbnail } from "react-native-create-thumbnail";
 import VideoPlayer from 'react-native-video-player';
 
 import { connect } from 'react-redux'
-import { shareKeyValue, getTxIdFromShortCode, getNamespaceDataFromTx,
-         getNamespaceInfoFromShortCode } from '../../class/keva-ops';
+import { shareKeyValue, getTxIdFromShortCode, getNamespaceDataFromNSTx } from '../../class/keva-ops';
 import StepModal from "../../common/StepModalWizard";
 import Biometric from '../../class/biometrics';
 import { extractMedia, replaceMedia, getImageGatewayURL, constructMedia } from './mediaManager';
@@ -219,8 +218,10 @@ class ShareKeyValue extends React.Component {
                 actualRootAddress = rootAddress;
               } else {
                 // We are sharing a shared post. Get the rootAddress from origShortCode.
+                // TODO: this is not right!
+                throw new Error("Not implemented yet");
                 const nsRootId = await getTxIdFromShortCode(BlueElectrum, origShortCode);
-                let nsData = await getNamespaceDataFromTx(BlueElectrum, [], nsRootId);
+                let nsData = await getNamespaceDataFromNSTx(BlueElectrum, nsRootId);
                 actualRootAddress = nsData.address;
                 authorName = nsData.result.displayName;
               }
@@ -236,10 +237,6 @@ class ShareKeyValue extends React.Component {
               if (value.length > 0) {
                 actualValue = value;
               } else {
-                if (!authorName) {
-                  let nsResult = await getNamespaceInfoFromShortCode(BlueElectrum, origShortCode);
-                  authorName = nsResult.displayName;
-                }
                 actualValue = `${loc.namespaces.default_share} ${authorName}@${origShortCode}`;
               }
               // Append image preview.
@@ -248,7 +245,7 @@ class ShareKeyValue extends React.Component {
                 actualValue += constructMedia(mediaCID, mimeType);
               }
 
-              const { tx, fee, cost } = await shareKeyValue(BlueElectrum, wallet, FALLBACK_DATA_PER_BYTE_FEE, namespaceId, shortCode, origShortCode, actualValue, actualRootAddress, actualShareTxid, height);
+              const { tx, fee, cost } = await shareKeyValue(wallet, FALLBACK_DATA_PER_BYTE_FEE, namespaceId, actualValue, actualRootAddress, actualShareTxid);
               let feeKVA = (fee + cost) / 100000000;
               this.setState({ showNSCreationModal: true, currentPage: 2, fee: feeKVA });
               this.namespaceTx = tx;

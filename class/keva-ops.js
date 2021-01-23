@@ -197,9 +197,9 @@ export function getNamespaceScriptHash(namespaceId, isBase58 = true) {
 
 const _KEVA_NS_BUF = Buffer.from('\x01_KEVA_NS_', 'utf8');
 
-export function getRootNamespaceScriptHash(namespaceId, isBase58 = true) {
+export function getRootNamespaceScriptHash(namespaceId) {
   const emptyBuffer = Buffer.alloc(0);
-  const nsBuf = isBase58 ? namespaceToHex(namespaceId) : Buffer.from(namespaceId, "hex");
+  const nsBuf = namespaceId.startsWith('N') ? namespaceToHex(namespaceId) : Buffer.from(namespaceId, "hex");
   const totalBuf = Buffer.concat([nsBuf, _KEVA_NS_BUF]);
   let bscript = bitcoin.script;
   let nsScript = bscript.compile([
@@ -247,47 +247,55 @@ export function getHashtagScriptHash(hashtag) {
   return reversedHash.toString('hex');
 }
 
-export async function getNamespaceDataFromTx(ecl, transactions, txidStart, nsStart) {
-  let stack = [];
-  stack.push([txidStart, nsStart]);
-  while (stack.length > 0) {
-    let [txid, ns] = stack.pop();
-    let tx = transactions.find(t => t.txid == txid);
-    if (!tx) {
-      // Not found in the cache, try to fetch it from the server.
-      tx = await ecl.blockchainTransaction_get(txid, true);
+// \0x_KEVA_NS_
+const KEY_PUT_NAMESPACE = '015f4b4556415f4e535f';
+
+/*
+ The profile is in json format.
+ {
+   displayName: <display name>,
+   bio: <short bio>
+ }
+*/
+function parseProfile(value) {
+  try {
+    return JSON.parse(value);
+  } catch(err) {
+    return {}
+  }
+}
+
+// If the transaction is KEVA_OP_PUT, The txid must contain a keva transaction
+// with the key value in the following format:
+// \x01_KEVA_NS_
+// That is, this transaction is used to set the namespace info.
+// Or, it must be KEVA_OP_NAMESPACE.
+export async function getNamespaceDataFromNSTx(ecl, txid) {
+  const tx = await ecl.blockchainTransaction_get(txid, true);
+  // From transactions, tx.outputs
+  // From server: tx.vout
+  const vout = tx.outputs || tx.vout;
+  for (let v of vout) {
+    let result = parseKeva(v.scriptPubKey.asm);
+    if (!result) {
+      continue;
     }
 
-    // From transactions, tx.outputs
-    // From server: tx.vout
-    const vout = tx.outputs || tx.vout;
-    for (let v of vout) {
-      let result = parseKeva(v.scriptPubKey.asm);
-      if (!result) {
-        continue;
+    const op = result[0];
+    if (op === KEVA_OP_NAMESPACE) {
+      return kevaToJson(result);
+    } else if (op === KEVA_OP_PUT) {
+      // Check the key format.
+      const key = result[1];
+      if (key.startsWith(KEY_PUT_NAMESPACE)) {
+        let info = kevaToJson(result);
+        const {displayName, bio} = parseProfile(info.value);
+        return {...info, displayName, bio};
       }
-
-      if (result[0] === KEVA_OP_NAMESPACE) {
-        if (!ns || ns === result[1]) {
-          return {
-            txid,
-            result,
-            address: v.scriptPubKey.addresses[0],
-          };
-        }
-      }
-
-      let nextns = result[1];
-      if (!ns || nextns === ns) {
-        // From transactions, tx.inputs
-        // From server: tx.vin
-        const vin = tx.inputs || tx.vin;
-        let txIds = vin.map(t => t.txid);
-        let uniqueTxIds = txIds.filter((v, i, a) => a.indexOf(v) === i);
-        for (let t of uniqueTxIds) {
-          stack.push([t, nextns]);
-        }
-      }
+      return null;
+    } else if (op === KEVA_OP_DELETE) {
+      // TODO: how to handle this?
+      return null;
     }
   }
   return null;
@@ -996,54 +1004,9 @@ export async function deleteKeyValue(wallet, requestedSatPerByte, namespaceId, k
 }
 
 // nsTx: any tx that contains namespace operation.
-export async function findNamespaceShortCode(ecl, transctions, nsTx) {
+export async function getNamespaceInfoFromTx(ecl, nsTx) {
   let nsId = await getNamespaceIdFromTx(ecl, nsTx);
-  let history = await ecl.blockchainScripthash_getHistory(getNamespaceScriptHash(nsId, false));
-  if (history.length == 0) {
-    return {};
-  }
-  let foundTx = history[0];
-  if (foundTx) {
-    if (foundTx.height <= 0) {
-      // Still in mempool.
-      return {};
-    }
-    const txid = foundTx.tx_hash;
-    let merkle = await ecl.blockchainTransaction_getMerkle(txid, foundTx.height, false);
-    if (merkle) {
-      // The first digit is the length of the block height.
-      let strHeight = merkle.block_height.toString();
-      let prefix = strHeight.length;
-      let shortCode = prefix + strHeight + merkle.pos.toString();
-      let nsData = await getNamespaceDataFromTx(ecl, [], txid);
-      return {
-        shortCode,
-        displayName: kevaToJson(nsData.result).displayName,
-        rootTxid: nsData.txid
-      };
-    }
-  }
-  return {};
-}
-
-export async function getTxShortCode(ecl, txid, height) {
-  let merkle = await ecl.blockchainTransaction_getMerkle(txid, height, false);
-  if (!merkle) {
-    return -1;
-  }
-
-  // The first digit is the length of the block height.
-  let strHeight = merkle.block_height.toString();
-  let prefix = strHeight.length;
-  let shortCode = prefix + strHeight + merkle.pos.toString();
-  return shortCode;
-}
-
-export function getHeightFromShortCode(shortCode) {
-  // The first digit is the length of the block height.
-  let len = parseInt(shortCode.charAt(0));
-  let height = parseInt(shortCode.substring(1, len + 1));
-  return height;
+  return await getNamespaceInfo(ecl, nsId);
 }
 
 export async function getTxIdFromShortCode(ecl, shortCode) {
@@ -1179,24 +1142,13 @@ export async function findMyNamespaces(wallet, ecl) {
       walletId: wallet.getID(),
       txId: tx.hash,
     }
-    if (keva.displayName) {
-      namespaces[nsId].displayName = keva.displayName;
-    }
   }
 
   for (let nsId of Object.keys(namespaces)) {
-    // Find the root txid and short code for each namespace.
-    const { shortCode, rootTxid, rootAddress } = await findNamespaceShortCode(ecl, transactions, namespaces[nsId].txId);
+    const { shortCode, displayName, bio } = await getNamespaceInfoFromTx(ecl, namespaces[nsId].txId);
     namespaces[nsId].shortCode = shortCode;
-    namespaces[nsId].rootTxid = rootTxid;
-    namespaces[nsId].rootAddress = rootAddress;
-    if (!namespaces[nsId].displayName) {
-      // This namespace may be transferred from different wallet.
-      const nsInfo = await getNamespaceInfoFromShortCode(ecl, shortCode);
-      if (nsInfo) {
-        namespaces[nsId].displayName = nsInfo.displayName;
-      }
-    }
+    namespaces[nsId].displayName = displayName;
+    namespaces[nsId].bio = bio;
   }
   return namespaces;
 }
@@ -1215,38 +1167,18 @@ export async function findOtherNamespace(ecl, nsidOrShortCode) {
     txid = await getTxIdFromShortCode(ecl, nsidOrShortCode);
   }
 
-  const transactions = [];
-  const { shortCode, rootTxid } = await findNamespaceShortCode(ecl, transactions, txid);
-
-  if (!shortCode) {
+  const { shortCode, namespaceId, displayName, bio } = await getNamespaceInfoFromTx(ecl, txid);
+  if (!shortCode || !namespaceId) {
     return null;
   }
 
-  let namespaces = {};
-  let nsId;
-  const tx = await ecl.blockchainTransaction_get(rootTxid, true);
-  // From transactions, tx.outputs
-  // From server: tx.vout
-  for (let v of tx.vout) {
-    let result = parseKeva(v.scriptPubKey.asm);
-    if (!result) {
-        continue;
-    }
-    const keva = kevaToJson(result);
-    nsId = keva.namespaceId;
-    namespaces[nsId] = namespaces[nsId] || {
-      id: nsId,
-      txId: tx.txid,
-    }
-    if (keva.displayName) {
-      namespaces[nsId].displayName = keva.displayName;
-    }
-  }
-
-  if (nsId) {
-    namespaces[nsId].shortCode = shortCode;
-    namespaces[nsId].rootTxid = rootTxid;
-  }
+  let namespaces = {}
+  namespaces[namespaceId] = {
+    id: namespaceId,
+    shortCode,
+    displayName,
+    bio
+  };
   return namespaces;
 }
 
@@ -1399,7 +1331,7 @@ export function parseSpecialKey(key) {
 // replyRootAddress: the root namespace of the post.
 // replyTxid: the txid of the post
 //
-export async function shareKeyValue(ecl, wallet, requestedSatPerByte, namespaceId, shortCode, origShortCode, value, shareRootAddress, shareTxid, height) {
+export async function shareKeyValue(wallet, requestedSatPerByte, namespaceId, value, shareRootAddress, shareTxid) {
   await wallet.fetchBalance();
   await wallet.fetchTransactions();
   let nsUtxo = await getNamespaceUtxo(wallet, namespaceId);
@@ -1515,12 +1447,7 @@ export async function getKeyValueFromTxid(ecl, txid) {
 
 export async function getNamespaceInfoFromShortCode(ecl, shortCode) {
   const nsRootId = await getTxIdFromShortCode(ecl, shortCode);
-  let nsData = await getNamespaceDataFromTx(ecl, [], nsRootId);
-  if (!nsData) {
-    return;
-  }
-  const nsInfo = kevaToJson(nsData.result);
-  return nsInfo;
+  return await getNamespaceDataFromNSTx(ecl, nsRootId);
 }
 
 export async function getNamespaceInfo(ecl, namespaceId, needShortcode = true) {
@@ -1531,8 +1458,7 @@ export async function getNamespaceInfo(ecl, namespaceId, needShortcode = true) {
   // Get the latest one, i.e. last one.
   const rootTx = history[history.length - 1];
   const txid = rootTx.tx_hash;
-  let nsData = await getNamespaceDataFromTx(ecl, [], txid);
-  let result = kevaToJson(nsData.result);
+  let result = await getNamespaceDataFromNSTx(ecl, txid);
   if (needShortcode) {
     let merkle = await ecl.blockchainTransaction_getMerkle(txid, rootTx.height, false);
     if (merkle) {

@@ -915,6 +915,7 @@ class Namespaces extends React.Component {
             }
           </View>
 
+          {/*
           <Text style={titleStyle}>{'Tx ID'}</Text>
           <View style={container}>
             <Text style={contentStyle}>{nsData.txId}</Text>
@@ -922,6 +923,7 @@ class Namespaces extends React.Component {
               {COPY_ICON}
             </TouchableOpacity>
           </View>
+          */}
         </View>
       </Modal>
     )

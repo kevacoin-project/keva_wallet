@@ -22,7 +22,7 @@ const KevaColors = require('../../common/KevaColors');
 import { THIN_BORDER, timeConverter, toastError, getInitials, stringToColor } from "../../util";
 import {
   getRepliesAndShares, parseSpecialKey, getKeyValueFromTxid,
-  getHeightFromShortCode, findNamespaceShortCode, getSpecialKeyText
+  getNamespaceInfoFromTx, getSpecialKeyText
 } from '../../class/keva-ops';
 import { setKeyValueList, setMediaInfo } from '../../actions'
 import {
@@ -191,7 +191,7 @@ class ShowKeyValue extends React.Component {
 
     try {
       const kevaResult = await getKeyValueFromTxid(BlueElectrum, partialTxId);
-      let nsData = await findNamespaceShortCode(BlueElectrum, [], partialTxId);
+      let nsData = await getNamespaceInfoFromTx(BlueElectrum, partialTxId);
       this.setState({
         shareKey: kevaResult.key,
         shareValue: kevaResult.value,
@@ -559,16 +559,16 @@ class ShowKeyValue extends React.Component {
     }
 
     // This is a share post, share the shared post instead.
+    // TODO: this is not right!
+    throw new Error('Not implemented yet');
     const {txIdShortCode, origShortCode} = shareInfo;
     let {shareValue} = this.state;
-    const height = getHeightFromShortCode(txIdShortCode);
     navigation.navigate('ShareKeyValue', {
       rootAddress: null, // Must get it from origShortCode.
       shareTxid: null, // Must get it from the txIdShortCode
       txIdShortCode,
       origValue: shareValue,
       origShortCode: origShortCode,
-      height,
     });
   }
 
