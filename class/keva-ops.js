@@ -1331,7 +1331,7 @@ export function parseSpecialKey(key) {
 // replyRootAddress: the root namespace of the post.
 // replyTxid: the txid of the post
 //
-export async function shareKeyValue(wallet, requestedSatPerByte, namespaceId, value, shareRootAddress, shareTxid) {
+export async function shareKeyValue(wallet, requestedSatPerByte, namespaceId, value, shareTxid) {
   await wallet.fetchBalance();
   await wallet.fetchTransactions();
   let nsUtxo = await getNamespaceUtxo(wallet, namespaceId);
@@ -1349,8 +1349,6 @@ export async function shareKeyValue(wallet, requestedSatPerByte, namespaceId, va
   let targets = [{
     address: namespaceAddress, value: namespaceValue,
     script: nsScript
-  }, {
-    address: shareRootAddress, value: SHARE_COST,
   }];
 
   const transactions = wallet.getTransactions();

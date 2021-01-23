@@ -544,31 +544,23 @@ class ShowKeyValue extends React.Component {
     }
 
     const shareInfo = parseSpecialKey(key);
-    if (!shareInfo) {
+    if (shareInfo.keyType != 'share') {
       // This is not a share post.
-      const {rootAddress, shortCode, shareTxid, height} = navigation.state.params;
+      const {shareTxid} = navigation.state.params;
       navigation.navigate('ShareKeyValue', {
-        rootAddress,
         shareTxid,
         origKey: key,
         origValue: value,
-        origShortCode: shortCode,
-        height,
       });
       return;
     }
 
     // This is a share post, share the shared post instead.
-    // TODO: this is not right!
-    throw new Error('Not implemented yet');
-    const {txIdShortCode, origShortCode} = shareInfo;
+    const txidToShare = shareInfo.partialTxId;
     let {shareValue} = this.state;
     navigation.navigate('ShareKeyValue', {
-      rootAddress: null, // Must get it from origShortCode.
-      shareTxid: null, // Must get it from the txIdShortCode
-      txIdShortCode,
+      shareTxid: txidToShare,
       origValue: shareValue,
-      origShortCode: origShortCode,
     });
   }
 

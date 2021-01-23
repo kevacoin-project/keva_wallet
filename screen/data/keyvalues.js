@@ -601,23 +601,18 @@ class KeyValues extends React.Component {
     })
   }
 
-  onShare = (shareTxid, key, value, blockHeight) => {
+  onShare = (shareTxid, key, value) => {
     const {navigation, namespaceList} = this.props;
-    const rootAddress = navigation.getParam('rootAddress');
     // Must have a namespace.
     if (Object.keys(namespaceList).length == 0) {
       toastError(loc.namespaces.create_namespace_first);
       return;
     }
 
-    const shortCode = navigation.getParam('shortCode');
     navigation.navigate('ShareKeyValue', {
-      rootAddress,
       shareTxid,
       origKey: key,
-      origValue: value,
-      origShortCode: shortCode,
-      height: blockHeight,
+      origValue: value
     })
   }
 
