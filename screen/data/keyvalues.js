@@ -645,8 +645,10 @@ class KeyValues extends React.Component {
 
   render() {
     let {navigation, dispatch, keyValueList, mediaInfoList} = this.props;
-    let {isOther, namespaceId, displayName} = navigation.state.params;
+    let {isOther, namespaceId, displayName, shortCode} = navigation.state.params;
+    let isNew = false;
     if (!namespaceId) {
+      isNew = true;
       namespaceId = this.namespaceId;
     }
     if (!displayName) {
@@ -663,6 +665,31 @@ class KeyValues extends React.Component {
       });
     } else {
       mergeList = mergeListAll;
+    }
+
+    let listHeader = null;
+    if (isNew && mergeList && mergeList.length > 0) {
+      listHeader = (
+        <View style={styles.container}>
+          <View style={styles.keyContainer}>
+            <View style={{paddingRight: 10}}>
+              <Avatar rounded size="medium" title={getInitials(displayName)} containerStyle={{backgroundColor: stringToColor(displayName)}}/>
+            </View>
+            <View style={{paddingRight: 10, flexShrink: 1}}>
+              <View style={{flexDirection: 'row'}}>
+                <Text style={styles.sender} numberOfLines={1} ellipsizeMode="tail">
+                  {displayName + ' '}
+                </Text>
+                <TouchableOpacity>
+                  <Text style={styles.shortCode}>
+                    {`@${shortCode}`}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </View>
+      );
     }
 
     return (
@@ -687,6 +714,7 @@ class KeyValues extends React.Component {
           <FlatList
             style={styles.listStyle}
             contentContainerStyle={{paddingBottom: 400}}
+            ListHeaderComponent={listHeader}
             data={mergeList}
             onRefresh={() => this.refreshKeyValues()}
             refreshing={this.state.isRefreshing}
@@ -857,5 +885,34 @@ var styles = StyleSheet.create({
     bottom: 0,
     justifyContent: 'center',
     alignItems: 'center'
+  },
+  keyContainer: {
+    marginBottom: 10,
+    borderWidth: THIN_BORDER,
+    borderColor: KevaColors.cellBorder,
+    backgroundColor: '#fff',
+    padding: 10,
+    flexDirection: 'row',
+  },
+  key: {
+    fontSize: 16,
+    color: KevaColors.darkText,
+    flex: 1,
+    flexWrap: 'wrap',
+  },
+  sender: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: KevaColors.darkText,
+    lineHeight: 25,
+    paddingBottom: 5,
+    maxWidth: 220,
+  },
+  shortCode: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: KevaColors.actionText,
+    lineHeight: 25,
+    paddingBottom: 5,
   },
 });
