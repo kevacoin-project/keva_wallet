@@ -597,35 +597,13 @@ class OtherNamespaces extends React.Component {
     this.props.dispatch(setOtherNamespaceOrder(order));
   }
 
-  fetchOtherNamespaces = async () => {
-    const { dispatch, otherNamespaceList } = this.props;
-    try {
-      await BlueElectrum.ping();
-      const order = otherNamespaceList.order;
-      const namespaces = otherNamespaceList.namespaces;
-      for (let ns of Object.keys(namespaces)) {
-        const namespace = await findOtherNamespace(BlueElectrum, namespaces[ns].shortCode);
-        dispatch(setOtherNamespaceList(namespace, order));
-      }
-    } catch (err) {
-      toastError('Cannot find namespace');
-      console.log(err);
-    }
-  }
-
   async componentDidMount() {
-    try {
-      //await this.fetchOtherNamespaces();
-    } catch (err) {
-      toastError('Cannot fetch namespaces');
-      console.error(err);
-    }
   }
 
   refreshNamespaces = async () => {
     this.setState({isRefreshing: true});
     try {
-      //this.fetchOtherNamespaces();
+      // Do nothing.
     } catch (err) {
       console.error(err);
       this.setState({isRefreshing: false});

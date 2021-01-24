@@ -62,6 +62,8 @@ module.exports = {
     submit: 'Submit',
     title: 'Title',
     content: 'Content',
+    follow: 'Follow',
+    following: 'Following',
   },
   wallets: {
     select_wallet: 'Select Wallet',

@@ -7,6 +7,7 @@ import {
   FlatList,
   InteractionManager,
 } from 'react-native';
+import { Button } from 'react-native-elements';
 const StyleSheet = require('../../PlatformStyleSheet');
 const KevaButton = require('../../common/KevaButton');
 const KevaColors = require('../../common/KevaColors');
@@ -26,7 +27,10 @@ import MIcon from 'react-native-vector-icons/MaterialIcons';
 import ActionSheet from 'react-native-actionsheet';
 import { connect } from 'react-redux'
 import { createThumbnail } from "react-native-create-thumbnail";
-import { setKeyValueList, setMediaInfo, CURRENT_KEYVALUE_LIST_VERSION } from '../../actions'
+import { setKeyValueList, setMediaInfo,
+         CURRENT_KEYVALUE_LIST_VERSION, setOtherNamespaceList,
+         deleteOtherNamespace
+       } from '../../actions'
 import {
         fetchKeyValueList, getNamespaceScriptHash, parseSpecialKey,
         deleteKeyValue, mergeKeyValueList, getRepliesAndShares, getSpecialKeyText,
@@ -643,8 +647,22 @@ class KeyValues extends React.Component {
     })
   }
 
+  onUnfollow = (namespaceId) => {
+    const {dispatch} = this.props;
+    dispatch(deleteOtherNamespace(namespaceId));
+  }
+
+  onFollow = (namespaceId, namespaceInfo) => {
+    const {otherNamespaceList, dispatch} = this.props;
+    let order = [...otherNamespaceList.order];
+    if (!order.find(nsid => nsid == namespaceId)) {
+      order.unshift(namespaceId);
+    }
+    dispatch(setOtherNamespaceList(namespaceInfo, order));
+  }
+
   render() {
-    let {navigation, dispatch, keyValueList, mediaInfoList} = this.props;
+    let {navigation, dispatch, keyValueList, mediaInfoList, otherNamespaceList} = this.props;
     let {isOther, namespaceId, displayName, shortCode} = navigation.state.params;
     let isNew = false;
     if (!namespaceId) {
@@ -669,14 +687,21 @@ class KeyValues extends React.Component {
 
     let listHeader = null;
     if (isNew && mergeList && mergeList.length > 0) {
+      const isFollowing = !!otherNamespaceList.namespaces[namespaceId];
+      const namespaceInfo = {}
+      namespaceInfo[namespaceId] = {
+        id: namespaceId,
+        displayName,
+        shortCode,
+      }
       listHeader = (
         <View style={styles.container}>
           <View style={styles.keyContainer}>
-            <View style={{paddingRight: 10}}>
+            <View style={{paddingRight: 20, alignSelf: 'center'}}>
               <Avatar rounded size="medium" title={getInitials(displayName)} containerStyle={{backgroundColor: stringToColor(displayName)}}/>
             </View>
             <View style={{paddingRight: 10, flexShrink: 1}}>
-              <View style={{flexDirection: 'row'}}>
+              <View style={{flexDirection: 'row', marginBottom: 5}}>
                 <Text style={styles.sender} numberOfLines={1} ellipsizeMode="tail">
                   {displayName + ' '}
                 </Text>
@@ -686,6 +711,24 @@ class KeyValues extends React.Component {
                   </Text>
                 </TouchableOpacity>
               </View>
+              {
+                isFollowing ?
+                <Button
+                  type='solid'
+                  buttonStyle={{borderRadius: 30, height: 28, width: 120, borderColor: KevaColors.actionText, backgroundColor: KevaColors.actionText}}
+                  title={loc.namespaces.following}
+                  titleStyle={{fontSize: 14, color: '#fff'}}
+                  onPress={()=>{this.onUnfollow(namespaceId)}}
+                />
+                :
+                <Button
+                  type='outline'
+                  buttonStyle={{borderRadius: 30, height: 28, width: 120, borderColor: KevaColors.actionText}}
+                  title={loc.namespaces.follow}
+                  titleStyle={{fontSize: 14, color: KevaColors.actionText}}
+                  onPress={()=>{this.onFollow(namespaceId, namespaceInfo)}}
+                />
+              }
             </View>
           </View>
         </View>
@@ -742,6 +785,7 @@ function mapStateToProps(state) {
   return {
     keyValueList: state.keyValueList,
     namespaceList: state.namespaceList,
+    otherNamespaceList: state.otherNamespaceList,
     mediaInfoList: state.mediaInfoList,
   }
 }

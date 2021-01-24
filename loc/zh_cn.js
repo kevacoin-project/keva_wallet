@@ -62,6 +62,8 @@ module.exports = {
     submit: '提交',
     title: '标题',
     content: '内容',
+    follow: '关注',
+    following: '已关注',
   },
   wallets: {
     select_wallet: '选择钱包',
