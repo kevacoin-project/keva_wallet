@@ -124,7 +124,7 @@ class RewardKeyValue extends React.Component {
 
   getRewardKeyValueModal = () => {
     const { namespaceList } = this.props;
-    const { rewardTxid, rootAddress, onGoBack } = this.props.navigation.state.params;
+    const { rewardTxid, onGoBack } = this.props.navigation.state.params;
     if (!this.state.showKeyValueModal) {
       return null;
     }

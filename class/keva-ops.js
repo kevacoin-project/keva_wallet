@@ -1013,8 +1013,11 @@ export async function getTxIdFromShortCode(ecl, shortCode) {
   let prefix = parseInt(shortCode.substring(0, 1));
   let height = shortCode.substring(1, 1 + prefix);
   let pos = shortCode.substring(1 + prefix, 2 + prefix);
-  let txHash = await ecl.blockchainTransaction_idFromPos(height, pos);
-  return txHash;
+  if (height >= 0 && pos >= 0) {
+    let txHash = await ecl.blockchainTransaction_idFromPos(height, pos);
+    return txHash;
+  }
+  return null;
 }
 
 const VERBOSE = true;
@@ -1165,6 +1168,9 @@ export async function findOtherNamespace(ecl, nsidOrShortCode) {
     txid = history[0].tx_hash;
   } else {
     txid = await getTxIdFromShortCode(ecl, nsidOrShortCode);
+    if (!txid) {
+      return null;
+    }
   }
 
   const { shortCode, namespaceId, displayName, bio } = await getNamespaceInfoFromTx(ecl, txid);
@@ -1445,7 +1451,10 @@ export async function getKeyValueFromTxid(ecl, txid) {
 
 export async function getNamespaceInfoFromShortCode(ecl, shortCode) {
   const nsRootId = await getTxIdFromShortCode(ecl, shortCode);
-  return await getNamespaceDataFromNSTx(ecl, nsRootId);
+  if (nsRootId) {
+    return await getNamespaceInfoFromTx(ecl, nsRootId);
+  }
+  return null;
 }
 
 export async function getNamespaceInfo(ecl, namespaceId, needShortcode = true) {

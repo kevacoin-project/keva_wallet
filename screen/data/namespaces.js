@@ -117,7 +117,7 @@ class Namespace extends React.Component {
   onKey = () => {
     let namespace = this.props.data;
     let isOther = this.props.isOther;
-    this.props.navigation.navigate('KeyValues', {
+    this.props.navigation.push('KeyValues', {
       namespaceId: namespace.id,
       shortCode: namespace.shortCode,
       displayName: namespace.displayName,

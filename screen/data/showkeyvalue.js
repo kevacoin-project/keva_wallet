@@ -45,11 +45,12 @@ class Reply extends React.Component {
     this.state = { };
   }
 
-  copyString = (str) => {
-    Clipboard.setString(str);
-    Toast.show(loc.general.copiedToClipboard, {
-      position: Toast.positions.TOP,
-      backgroundColor: "#53DD6C",
+  gotoShortCode = (shortCode) => {
+    this.props.navigation.push('KeyValues', {
+      namespaceId: null,
+      shortCode,
+      displayName: null,
+      isOther: true,
     });
   }
 
@@ -63,7 +64,7 @@ class Reply extends React.Component {
             <Text style={styles.sender} numberOfLines={1} ellipsizeMode="tail">
               {item.sender.displayName + ' '}
             </Text>
-            <TouchableOpacity onPress={() => this.copyString(item.sender.shortCode)}>
+            <TouchableOpacity onPress={() => this.gotoShortCode(item.sender.shortCode)}>
               <Text style={styles.shortCode}>
                 {`@${item.sender.shortCode}`}
               </Text>
@@ -483,11 +484,12 @@ class ShowKeyValue extends React.Component {
     }
   }
 
-  copyString = (str) => {
-    Clipboard.setString(str);
-    Toast.show(loc.general.copiedToClipboard, {
-      position: Toast.positions.TOP,
-      backgroundColor: "#53DD6C",
+  gotoShortCode = (shortCode) => {
+    this.props.navigation.push('KeyValues', {
+      namespaceId: null,
+      shortCode,
+      displayName: null,
+      isOther: true,
     });
   }
 
@@ -512,7 +514,7 @@ class ShowKeyValue extends React.Component {
               <Text style={styles.sender} numberOfLines={1} ellipsizeMode="tail">
                 {origName + ' '}
               </Text>
-              <TouchableOpacity onPress={() => this.copyString(origShortCode)}>
+              <TouchableOpacity onPress={() => this.gotoShortCode(origShortCode)}>
                 <Text style={styles.shortCode}>
                   {`@${origShortCode}`}
                 </Text>
@@ -591,7 +593,7 @@ class ShowKeyValue extends React.Component {
               <Text style={styles.sender} numberOfLines={1} ellipsizeMode="tail">
                 {displayName + ' '}
               </Text>
-              <TouchableOpacity onPress={() => this.copyString(shortCode)}>
+              <TouchableOpacity onPress={() => this.gotoShortCode(shortCode)}>
                 <Text style={styles.shortCode}>
                   {`@${shortCode}`}
                 </Text>
@@ -649,7 +651,7 @@ class ShowKeyValue extends React.Component {
         onRefresh={() => this.fetchReplies()}
         refreshing={this.state.isRefreshing}
         keyExtractor={(item, index) => item.key + index}
-        renderItem={({item, index}) => <Reply item={item} />}
+        renderItem={({item, index}) => <Reply item={item} navigation={this.props.navigation} />}
       />
     )
   }

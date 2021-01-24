@@ -29,7 +29,8 @@ import { createThumbnail } from "react-native-create-thumbnail";
 import { setKeyValueList, setMediaInfo, CURRENT_KEYVALUE_LIST_VERSION } from '../../actions'
 import {
         fetchKeyValueList, getNamespaceScriptHash, parseSpecialKey,
-        deleteKeyValue, mergeKeyValueList, getRepliesAndShares, getSpecialKeyText
+        deleteKeyValue, mergeKeyValueList, getRepliesAndShares, getSpecialKeyText,
+        getNamespaceInfoFromShortCode
         } from '../../class/keva-ops';
 import Toast from 'react-native-root-toast';
 import StepModal from "../../common/StepModalWizard";
@@ -101,9 +102,9 @@ class Item extends React.Component {
   }
 
   render() {
-    let {item, onShow, onReply, onShare, onReward, namespaceId, navigation} = this.props;
+    let {item, onShow, onReply, onShare, onReward, namespaceId, displayName, navigation} = this.props;
     let {thumbnail} = this.state;
-    const {isOther, displayName} = navigation.state.params;
+    const {isOther} = navigation.state.params;
     const {mediaCID, mimeType} = extractMedia(item.value);
     let displayKey = item.key;
     const {keyType} = parseSpecialKey(item.key);
@@ -114,7 +115,7 @@ class Item extends React.Component {
 
     return (
       <View style={styles.card}>
-        <TouchableOpacity onPress={() => onShow(item.key, item.value, item.tx, item.replies, item.shares, item.rewards, item.height, item.favorite)}>
+        <TouchableOpacity onPress={() => onShow(namespaceId, displayName, item.key, item.value, item.tx, item.replies, item.shares, item.rewards, item.height, item.favorite)}>
           <View style={{flex:1,paddingHorizontal:10,paddingTop:2}}>
             <View style={{flexDirection:'row',alignItems:'center',justifyContent:'space-between'}}>
               <View style={{paddingRight: 10, paddingTop: 5, paddingBottom: 8}}>
@@ -267,7 +268,7 @@ class KeyValues extends React.Component {
     this.setState({totalToFetch, fetched});
   }
 
-  fastFetchKeyValues = async (dispatch, namespaceId, history, rootAddress, kvList, cb) => {
+  fastFetchKeyValues = async (dispatch, namespaceId, history, kvList, cb) => {
     const {namespaceList} = this.props;
     const myNamespaces = namespaceList.namespaces;
 
@@ -311,7 +312,19 @@ class KeyValues extends React.Component {
   fetchKeyValues = async () => {
     const {navigation, dispatch, keyValueList, namespaceList} = this.props;
     const myNamespaces = namespaceList.namespaces;
-    const {namespaceId, rootAddress} = navigation.state.params;
+    let {namespaceId, shortCode} = navigation.state.params;
+
+    if (!namespaceId && shortCode) {
+      // We are here because user clicks on the short code.
+      // There is no namespaceId yet.
+      let nsData = await getNamespaceInfoFromShortCode(BlueElectrum, shortCode);
+      if (!nsData) {
+        return;
+      }
+      namespaceId = nsData.namespaceId;
+      this.namespaceId = namespaceId;
+      this.displayName = nsData.displayName;
+    }
 
     let kvList = keyValueList.keyValues[namespaceId];
     let cb;
@@ -320,7 +333,7 @@ class KeyValues extends React.Component {
     if (!kvList || kvList.length == 0) {
       cb = this.progressCallback;
       // Show some results ASAP.
-      await this.fastFetchKeyValues(dispatch, namespaceId, history, rootAddress, kvList, cb);
+      await this.fastFetchKeyValues(dispatch, namespaceId, history, kvList, cb);
     }
 
     let keyValues = await fetchKeyValueList(BlueElectrum, history, kvList, false, cb);
@@ -560,20 +573,16 @@ class KeyValues extends React.Component {
     );
   }
 
-  onShow = (key, value, tx, replies, shares, rewards, height, favorite) => {
+  onShow = (namespaceId, displayName, key, value, tx, replies, shares, rewards, height, favorite) => {
     const {navigation} = this.props;
-    const rootAddress = navigation.getParam('rootAddress');
     const isOther = navigation.getParam('isOther');
-    const namespaceId = navigation.getParam('namespaceId');
     const shortCode = navigation.getParam('shortCode');
-    const displayName = navigation.getParam('displayName');
     navigation.push('ShowKeyValue', {
       namespaceId,
       shortCode,
       displayName,
       key,
       value,
-      rootAddress,
       replyTxid: tx,
       shareTxid: tx,
       rewardTxid: tx,
@@ -618,7 +627,6 @@ class KeyValues extends React.Component {
 
   onReward = (rewardTxid, key, value, height) => {
     const {navigation, namespaceList} = this.props;
-    const rootAddress = navigation.getParam('rootAddress');
     // Must have a namespace.
     if (Object.keys(namespaceList).length == 0) {
       toastError(loc.namespaces.create_namespace_first);
@@ -627,7 +635,6 @@ class KeyValues extends React.Component {
 
     const shortCode = navigation.getParam('shortCode');
     navigation.navigate('RewardKeyValue', {
-      rootAddress,
       rewardTxid,
       origKey: key,
       origValue: value,
@@ -638,8 +645,14 @@ class KeyValues extends React.Component {
 
   render() {
     let {navigation, dispatch, keyValueList, mediaInfoList} = this.props;
-    //const namespaceId = navigation.getParam('namespaceId');
-    const {isOther, namespaceId} = navigation.state.params;
+    let {isOther, namespaceId, displayName} = navigation.state.params;
+    if (!namespaceId) {
+      namespaceId = this.namespaceId;
+    }
+    if (!displayName) {
+      displayName = this.displayName;
+    }
+
     const list = keyValueList.keyValues[namespaceId] || [];
     const mergeListAll = mergeKeyValueList(list);
     let mergeList;
@@ -681,6 +694,7 @@ class KeyValues extends React.Component {
             renderItem={({item, index}) =>
               <Item item={item} key={index} dispatch={dispatch} onDelete={this.onDelete}
                 onShow={this.onShow} namespaceId={namespaceId}
+                displayName={displayName}
                 onReply={this.onReply}
                 onShare={this.onShare}
                 onReward={this.onReward}
