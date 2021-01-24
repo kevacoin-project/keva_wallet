@@ -645,7 +645,17 @@ class KeyValues extends React.Component {
       origValue: value,
       origShortCode: shortCode,
       height,
-    })
+    });
+  }
+
+  onEditProfile = (namespaceId, namespaceInfo) => {
+    const {navigation} = this.props;
+    const {walletId} = navigation.state.params;
+    navigation.navigate('EditProfile', {
+      walletId,
+      namespaceId,
+      namespaceInfo,
+    });
   }
 
   onUnfollow = (namespaceId) => {
@@ -693,7 +703,7 @@ class KeyValues extends React.Component {
     }
 
     let listHeader = null;
-    if (isOther && mergeList && mergeList.length > 0) {
+    if (mergeList && mergeList.length > 0) {
       const isFollowing = !!otherNamespaceList.namespaces[namespaceId];
       const namespaceInfo = {}
       namespaceInfo[namespaceId] = {
@@ -719,23 +729,35 @@ class KeyValues extends React.Component {
                 </TouchableOpacity>
               </View>
               {
-                isFollowing ?
-                <Button
-                  type='solid'
-                  buttonStyle={{borderRadius: 30, height: 28, width: 120, borderColor: KevaColors.actionText, backgroundColor: KevaColors.actionText}}
-                  title={loc.namespaces.following}
-                  titleStyle={{fontSize: 14, color: '#fff'}}
-                  onPress={()=>{this.onUnfollow(namespaceId)}}
-                />
-                :
+                isOther ?
+                (isFollowing ?
+                  <Button
+                    type='solid'
+                    buttonStyle={{borderRadius: 30, height: 28, width: 120, borderColor: KevaColors.actionText, backgroundColor: KevaColors.actionText}}
+                    title={loc.namespaces.following}
+                    titleStyle={{fontSize: 14, color: '#fff'}}
+                    onPress={()=>{this.onUnfollow(namespaceId)}}
+                  />
+                  :
+                  <Button
+                    type='outline'
+                    buttonStyle={{borderRadius: 30, height: 28, width: 120, borderColor: KevaColors.actionText}}
+                    title={loc.namespaces.follow}
+                    titleStyle={{fontSize: 14, color: KevaColors.actionText}}
+                    onPress={()=>{this.onFollow(namespaceId, namespaceInfo)}}
+                  />
+              )
+              :
+              (
                 <Button
                   type='outline'
-                  buttonStyle={{borderRadius: 30, height: 28, width: 120, borderColor: KevaColors.actionText}}
-                  title={loc.namespaces.follow}
+                  buttonStyle={{borderRadius: 30, height: 28, width: 100, borderColor: KevaColors.actionText}}
+                  title={'Edit'}
                   titleStyle={{fontSize: 14, color: KevaColors.actionText}}
-                  onPress={()=>{this.onFollow(namespaceId, namespaceInfo)}}
+                  onPress={()=>{this.onEditProfile(namespaceId, namespaceInfo[namespaceId])}}
                 />
-              }
+              )
+            }
             </View>
           </View>
         </View>

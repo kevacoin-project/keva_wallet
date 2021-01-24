@@ -49,6 +49,7 @@ import Broadcast from './screen/send/broadcast';
 import Namespaces from './screen/data/namespaces';
 import KeyValues from './screen/data/keyvalues';
 import AddKeyValue from './screen/data/addkeyvalue';
+import EditProfile from './screen/data/editprofile';
 import ReplyKeyValue from './screen/data/replykeyvalue';
 import ShareKeyValue from './screen/data/sharekeyvalue';
 import ShowKeyValue from './screen/data/showkeyvalue';
@@ -324,6 +325,9 @@ const HomeStackNavigator = createStackNavigator({
   },
   AddKeyValue: {
     screen: AddKeyValue,
+  },
+  EditProfile: {
+    screen: EditProfile,
   },
   ReplyKeyValue: {
     screen: ReplyKeyValue,
