@@ -140,6 +140,14 @@ class EditProfile extends React.Component {
   }
 
   KeyValueCreationFinish = () => {
+    // We don't need to wait for confirmation, just
+    // update the namespace info.
+    const {namespaceList, dispatch} = this.props;
+    const {namespaceId} = this.props.navigation.state.params;
+    let order = [...namespaceList.order];
+    let namespaceInfo = {};
+    namespaceInfo[namespaceId] = this.state.namespaceInfo;
+    dispatch(setNamespaceList(namespaceInfo, order));
     return this.setState({showKeyValueModal: false});
   }
 
@@ -204,6 +212,7 @@ class EditProfile extends React.Component {
                   return;
                 }
               }
+
               let result = await BlueElectrum.broadcast(this.namespaceTx);
               if (result.code) {
                 // Error.

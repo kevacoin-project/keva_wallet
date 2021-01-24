@@ -286,7 +286,7 @@ export async function getNamespaceDataFromNSTx(ecl, txid) {
       return kevaToJson(result);
     } else if (op === KEVA_OP_PUT) {
       // Check the key format.
-      const key = result[1];
+      const key = result[2];
       if (key.startsWith(KEY_PUT_NAMESPACE)) {
         let info = kevaToJson(result);
         const {displayName, bio} = parseProfile(info.value);
@@ -1463,11 +1463,13 @@ export async function getNamespaceInfo(ecl, namespaceId, needShortcode = true) {
     return {}
   }
   // Get the latest one, i.e. last one.
-  const rootTx = history[history.length - 1];
-  const txid = rootTx.tx_hash;
+  const latestTx = history[history.length - 1];
+  const txid = latestTx.tx_hash;
   let result = await getNamespaceDataFromNSTx(ecl, txid);
   if (needShortcode) {
-    let merkle = await ecl.blockchainTransaction_getMerkle(txid, rootTx.height, false);
+    // Short code must use the first transaction when the namesapce is created.
+    const rootTx = history[0];
+    let merkle = await ecl.blockchainTransaction_getMerkle(rootTx.tx_hash, rootTx.height, false);
     if (merkle) {
       // The first digit is the length of the block height.
       let strHeight = merkle.block_height.toString();
