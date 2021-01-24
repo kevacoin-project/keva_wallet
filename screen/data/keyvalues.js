@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   FlatList,
   InteractionManager,
+  Clipboard,
 } from 'react-native';
 import { Button } from 'react-native-elements';
 const StyleSheet = require('../../PlatformStyleSheet');
@@ -661,12 +662,18 @@ class KeyValues extends React.Component {
     dispatch(setOtherNamespaceList(namespaceInfo, order));
   }
 
+  copyString = str => {
+    Clipboard.setString(str);
+    Toast.show(loc.general.copiedToClipboard, {
+      position: Toast.positions.TOP,
+      backgroundColor: "#53DD6C",
+    });
+  }
+
   render() {
     let {navigation, dispatch, keyValueList, mediaInfoList, otherNamespaceList} = this.props;
     let {isOther, namespaceId, displayName, shortCode} = navigation.state.params;
-    let isNew = false;
     if (!namespaceId) {
-      isNew = true;
       namespaceId = this.namespaceId;
     }
     if (!displayName) {
@@ -686,7 +693,7 @@ class KeyValues extends React.Component {
     }
 
     let listHeader = null;
-    if (isNew && mergeList && mergeList.length > 0) {
+    if (isOther && mergeList && mergeList.length > 0) {
       const isFollowing = !!otherNamespaceList.namespaces[namespaceId];
       const namespaceInfo = {}
       namespaceInfo[namespaceId] = {
@@ -705,7 +712,7 @@ class KeyValues extends React.Component {
                 <Text style={styles.sender} numberOfLines={1} ellipsizeMode="tail">
                   {displayName + ' '}
                 </Text>
-                <TouchableOpacity>
+                <TouchableOpacity onPress={() => this.copyString(shortCode)}>
                   <Text style={styles.shortCode}>
                     {`@${shortCode}`}
                   </Text>

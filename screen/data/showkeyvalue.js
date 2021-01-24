@@ -6,7 +6,6 @@ import {
   Dimensions,
   TouchableOpacity,
   FlatList,
-  Clipboard,
   Modal,
   StatusBar,
   InteractionManager,
