@@ -682,21 +682,17 @@ class KeyValues extends React.Component {
 
   render() {
     let {navigation, dispatch, keyValueList, mediaInfoList, namespaceList, otherNamespaceList} = this.props;
-    let {isOther, namespaceId, shortCode} = navigation.state.params;
+    let {isOther, namespaceId, displayName, shortCode} = navigation.state.params;
     if (!namespaceId) {
       namespaceId = this.namespaceId;
     }
 
-    let displayName;
     let namespace;
-    if (isOther) {
-      namespace = otherNamespaceList.namespaces[namespaceId];
-    } else {
+    if (!isOther) {
       namespace = namespaceList.namespaces[namespaceId];
-    }
-
-    if (namespace) {
-      displayName = namespace.displayName;
+      if (namespace) {
+        displayName = namespace.displayName;
+      }
     }
 
     if (!displayName) {
