@@ -1108,7 +1108,8 @@ export function mergeKeyValueList(origkeyValues) {
     } else if (kv.op === 'KEVA_OP_DELETE') {
       keyValues = keyValues.filter(e => e.key != kv.key);
     } else if (kv.op === 'KEVA_OP_NAMESPACE') {
-      keyValues.push({key: kv.displayName, value: '', ...kv});
+      // Special treatment for namespace creation.
+      keyValues.push({key: kv.displayName, value: loc.namespaces.created, ...kv});
     }
   }
   return keyValues.reverse();

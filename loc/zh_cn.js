@@ -68,6 +68,7 @@ module.exports = {
     share_post: '分享帖子',
     reward_post: '赏赐帖子',
     update_profile: '更新简介',
+    created: '命名空间创建',
   },
   wallets: {
     select_wallet: '选择钱包',

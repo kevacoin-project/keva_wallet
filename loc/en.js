@@ -68,6 +68,7 @@ module.exports = {
     share_post: 'Shared a Post',
     reward_post: 'Rewarded a Post',
     update_profile: 'Updated Profile',
+    created: 'Namespace Created',
   },
   wallets: {
     select_wallet: 'Select Wallet',
