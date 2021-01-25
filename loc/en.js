@@ -64,6 +64,10 @@ module.exports = {
     content: 'Content',
     follow: 'Follow',
     following: 'Following',
+    comment_post: 'Commented on a Post',
+    share_post: 'Shared a Post',
+    reward_post: 'Rewarded a Post',
+    update_profile: 'Updated Profile',
   },
   wallets: {
     select_wallet: 'Select Wallet',

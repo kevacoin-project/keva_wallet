@@ -27,11 +27,13 @@ const DUMMY_TXID = 'c70483b4613b18e750d0b1087ada28d713ad1e406ebc87d36f94063512c5
 export function getSpecialKeyText(keyType) {
   let displayKey = "";
   if (keyType === 'comment') {
-    displayKey = 'Commented on a Post';
+    displayKey = loc.namespaces.comment_post;
   } else if (keyType === 'share') {
-    displayKey = 'Shared a Post';
+    displayKey = loc.namespaces.share_post;
   } else if (keyType === 'reward') {
-    displayKey = 'Rewarded a Post';
+    displayKey = loc.namespaces.reward_post;
+  } else if (keyType === 'profile') {
+    displayKey = loc.namespaces.update_profile;
   }
   return displayKey;
 }
@@ -1313,6 +1315,11 @@ export function parseSpecialKey(key) {
   } else {
     // Buffer object.
     keyHex = key.toString('hex');
+  }
+
+  // Check if it is profile type.
+  if (keyHex === KEY_PUT_NAMESPACE) {
+    return {keyType: 'profile'};
   }
 
   // 2 bytes prefix, plus 32 bytes txId, is the minimal length.

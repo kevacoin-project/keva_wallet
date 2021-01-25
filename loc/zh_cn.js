@@ -64,6 +64,10 @@ module.exports = {
     content: '内容',
     follow: '关注',
     following: '已关注',
+    comment_post: '发表评论',
+    share_post: '分享帖子',
+    reward_post: '赏赐帖子',
+    update_profile: '更新简介',
   },
   wallets: {
     select_wallet: '选择钱包',
