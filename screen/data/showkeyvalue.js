@@ -55,25 +55,33 @@ class Reply extends React.Component {
 
   render() {
     let {item} = this.props;
+    const displayName = item.sender.displayName;
     return (
       <View style={styles.reply}>
         <View style={styles.senderBar} />
         <View>
           <View style={{flexDirection: 'row'}}>
-            <Text style={styles.sender} numberOfLines={1} ellipsizeMode="tail">
-              {item.sender.displayName + ' '}
+            <Avatar rounded size="small"
+              title={getInitials(displayName)}
+              containerStyle={{backgroundColor: stringToColor(displayName), marginRight: 5}}
+              onPress={() => this.gotoShortCode(item.sender.shortCode)}
+            />
+            <Text style={styles.sender} numberOfLines={1} ellipsizeMode="tail" onPress={() => this.gotoShortCode(item.sender.shortCode)}>
+              {displayName + ' '}
             </Text>
+            {/*
             <TouchableOpacity onPress={() => this.gotoShortCode(item.sender.shortCode)}>
               <Text style={styles.shortCode}>
                 {`@${item.sender.shortCode}`}
               </Text>
             </TouchableOpacity>
+            */}
           </View>
           <Text style={styles.replyValue} selectable={true}>{item.value}</Text>
           {(item.height > 0) ?
-            <Text style={styles.timestamp}>{timeConverter(item.time) + ' ' + item.height}</Text>
+            <Text style={styles.timestampReply}>{timeConverter(item.time) + ' ' + item.height}</Text>
             :
-            <Text style={styles.timestamp}>{loc.general.unconfirmed}</Text>
+            <Text style={styles.timestampReply}>{loc.general.unconfirmed}</Text>
           }
         </View>
       </View>
@@ -510,14 +518,23 @@ class ShowKeyValue extends React.Component {
         <View style={styles.shareContainer}>
           <View>
             <View style={{flexDirection: 'row'}}>
-              <Text style={styles.sender} numberOfLines={1} ellipsizeMode="tail">
-                {origName + ' '}
-              </Text>
-              <TouchableOpacity onPress={() => this.gotoShortCode(origShortCode)}>
-                <Text style={styles.shortCode}>
-                  {`@${origShortCode}`}
+              <Avatar rounded size="small"
+                title={getInitials(origName)}
+                containerStyle={{backgroundColor: stringToColor(origName), marginRight: 5}}
+                onPress={() => this.gotoShortCode(origShortCode)}
+              />
+              <View style={{flexDirection: 'row'}}>
+                <Text style={styles.sender} numberOfLines={1} ellipsizeMode="tail" onPress={() => this.gotoShortCode(origShortCode)}>
+                  {origName + ' '}
                 </Text>
-              </TouchableOpacity>
+                {/*
+                <TouchableOpacity onPress={() => this.gotoShortCode(origShortCode)}>
+                  <Text style={styles.shortCode}>
+                    {`@${origShortCode}`}
+                  </Text>
+                </TouchableOpacity>
+                */}
+              </View>
               {(shareTime > 0) ?
                 <Text style={styles.timestamp}>{'  ' + timeConverter(shareTime)}</Text>
                 :
@@ -748,16 +765,19 @@ var styles = StyleSheet.create({
   },
   timestamp: {
     color: KevaColors.extraLightText,
-    paddingTop: 5,
+    alignSelf: 'center',
     fontSize: 13,
-    alignSelf: 'flex-start'
+  },
+  timestampReply: {
+    color: KevaColors.extraLightText,
+    alignSelf: 'flex-start',
+    fontSize: 13,
   },
   sender: {
     fontSize: 16,
     fontWeight: '700',
     color: KevaColors.darkText,
-    lineHeight: 25,
-    paddingBottom: 5,
+    alignSelf: 'center',
     maxWidth: 220,
   },
   shortCode: {
