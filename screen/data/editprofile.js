@@ -19,6 +19,7 @@ const loc = require('../../loc');
 let BlueApp = require('../../BlueApp');
 let BlueElectrum = require('../../BlueElectrum');
 import { FALLBACK_DATA_PER_BYTE_FEE } from '../../models/networkTransactionFees';
+import { setNamespaceList } from '../../actions'
 
 import { connect } from 'react-redux'
 import { updateKeyValue } from '../../class/keva-ops';
@@ -140,14 +141,6 @@ class EditProfile extends React.Component {
   }
 
   KeyValueCreationFinish = () => {
-    // We don't need to wait for confirmation, just
-    // update the namespace info.
-    const {namespaceList, dispatch} = this.props;
-    const {namespaceId} = this.props.navigation.state.params;
-    let order = [...namespaceList.order];
-    let namespaceInfo = {};
-    namespaceInfo[namespaceId] = this.state.namespaceInfo;
-    dispatch(setNamespaceList(namespaceInfo, order));
     return this.setState({showKeyValueModal: false});
   }
 
@@ -159,6 +152,21 @@ class EditProfile extends React.Component {
     return this.setState({
       currentPage: this.state.currentPage + 1
     });
+  }
+
+  updateCurrentProfile = () => {
+    // We don't need to wait for confirmation, just
+    // update the namespace info.
+    const {namespaceList, dispatch} = this.props;
+    const {namespaceId} = this.props.navigation.state.params;
+    let order = [...namespaceList.order];
+    // Need to duplicate everything as this is assumed by
+    // setNamespaceList later.
+    let namespaceInfo = {...namespaceList.namespaces};
+
+    // TODO: for now just displayName, more in the future.
+    namespaceInfo[namespaceId].displayName = this.state.namespaceInfo.displayName;
+    dispatch(setNamespaceList(namespaceInfo, order));
   }
 
   getKeyValueModal = () => {
@@ -227,6 +235,9 @@ class EditProfile extends React.Component {
                 console.log('tx to publish: ' + result)
                 await publishMedia(result);
               }
+
+              // Update the profile right away before confirmation.
+              this.updateCurrentProfile();
               this.setState({isBroadcasting: false, showSkip: false});
             } catch (err) {
               this.setState({isBroadcasting: false, broadcastErr: err.message});
@@ -390,6 +401,7 @@ class EditProfile extends React.Component {
 function mapStateToProps(state) {
   return {
     keyValueList: state.keyValueList,
+    namespaceList: state.namespaceList,
   }
 }
 
