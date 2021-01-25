@@ -602,11 +602,14 @@ class ShowKeyValue extends React.Component {
       <View style={styles.container}>
         <View style={styles.keyContainer}>
           <View style={{paddingRight: 10}}>
-            <Avatar rounded size="medium" title={getInitials(displayName)} containerStyle={{backgroundColor: stringToColor(displayName)}}/>
+            <Avatar rounded size="medium" title={getInitials(displayName)}
+              containerStyle={{backgroundColor: stringToColor(displayName)}}
+              onPress={() => this.gotoShortCode(shortCode)}
+            />
           </View>
           <View style={{paddingRight: 10, flexShrink: 1}}>
             <View style={{flexDirection: 'row'}}>
-              <Text style={styles.sender} numberOfLines={1} ellipsizeMode="tail">
+              <Text style={styles.sender} numberOfLines={1} ellipsizeMode="tail" onPress={() => this.gotoShortCode(shortCode)}>
                 {displayName + ' '}
               </Text>
               <TouchableOpacity onPress={() => this.gotoShortCode(shortCode)}>
