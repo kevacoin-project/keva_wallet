@@ -192,6 +192,10 @@ class ElectrumClient extends Client {
   blockchainAddress_subscribe(address) {
     return this.request('blockchain.address.subscribe', [address]);
   }
+  // Keva specific APIs
+  blockchainKeva_getHashtag(scripthash, min_tx_num) {
+    return this.request('blockchain.keva.get_hashtag', [scripthash, min_tx_num]);
+  }
 }
 
 module.exports = ElectrumClient;

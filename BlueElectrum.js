@@ -687,4 +687,8 @@ module.exports.blockchainTransaction_idFromPos = async function(height, pos) {
   return txid;
 }
 
+module.exports.blockchainKeva_getHashtag = async function(scripthash, min_tx_num=-1) {
+  return await mainClient.blockchainKeva_getHashtag(scripthash, min_tx_num);
+}
+
 module.exports.getCurrentPeer = getCurrentPeer;

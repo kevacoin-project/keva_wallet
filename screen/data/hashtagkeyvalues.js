@@ -25,7 +25,7 @@ import { Avatar } from 'react-native-elements';
 import { setMediaInfo, } from '../../actions'
 import {
         fetchKeyValueList, getHashtagScriptHash, parseSpecialKey,
-        getNamespaceInfo, getRepliesAndShares, getSpecialKeyText
+        getNamespaceInfo, getRepliesAndShares, getSpecialKeyText,
         } from '../../class/keva-ops';
 import Toast from 'react-native-root-toast';
 import { timeConverter, stringToColor, getInitials, SCREEN_WIDTH, } from "../../util";
@@ -143,11 +143,11 @@ class Item extends React.Component {
         <View style={{flexDirection: 'row'}}>
           <TouchableOpacity onPress={() => onReply(item.tx)} style={{flexDirection: 'row'}}>
             <MIcon name="chat-bubble-outline" size={22} style={styles.talkIcon} />
-            {(item.replies && item.replies.length > 0) && <Text style={styles.count}>{item.replies.length}</Text>}
+            {(item.replies > 0) && <Text style={styles.count}>{item.replies}</Text>}
           </TouchableOpacity>
           <TouchableOpacity onPress={() => onShare(item.tx, item.key, item.value, item.height)} style={{flexDirection: 'row'}}>
             <MIcon name="cached" size={22} style={styles.shareIcon} />
-            {(item.shares && item.shares.length > 0) && <Text style={styles.count}>{item.shares.length}</Text>}
+            {(item.shares > 0) && <Text style={styles.count}>{item.shares}</Text>}
           </TouchableOpacity>
           <TouchableOpacity onPress={() => onReward(item.tx, item.key, item.value, item.height)} style={{flexDirection: 'row'}}>
             {
@@ -156,7 +156,7 @@ class Item extends React.Component {
               :
                 <MIcon name="favorite-border" size={22} style={styles.shareIcon} />
             }
-            {(item.rewards && item.rewards.length > 0) && <Text style={styles.count}>{item.rewards.length}</Text> }
+            {(item.rewards > 0) && <Text style={styles.count}>{item.rewards}</Text> }
           </TouchableOpacity>
         </View>
       </View>
@@ -241,6 +241,51 @@ class HashtagKeyValues extends React.Component {
     this.setState({hashtagkeyValueList: keyValues});
   }
 
+  fetchHashtag = async () => {
+    const {navigation, namespaceList} = this.props;
+    const myNamespaces = namespaceList.namespaces;
+    const {hashtag} = navigation.state.params;
+
+    /*
+      Data returned by ElectrumX API
+      {
+        hashtags: [{
+          'tx_hash': hash_to_hex_str(tx_hash),
+          'displayName': display_name,
+          'height': height, 'shortCode': shortCode,
+          'time': timestamp,
+          'replies': replies, 'shares': shares, 'likes': likes,
+          'namespace': namespaceId,
+          'key': key,
+          'value': value,
+          'type': REG|PUT|DEL|UNK
+        }],
+        min_tx_num: 123
+      }
+    */
+    let history = await BlueElectrum.blockchainKeva_getHashtag(getHashtagScriptHash(hashtag));
+    if (history.hashtags.length == 0) {
+        return [];
+    }
+    const keyValues = history.hashtags.map(h => {
+      return {
+        displayName: h.displayName,
+        shortCode: h.shortCode,
+        tx: h.tx_hash,
+        replies: h.replies,
+        shares: h.shares,
+        rewards: h.likes,
+        height: h.height,
+        time: h.time,
+        namespaceId: h.namespace,
+        key: Buffer.from(h.key, 'base64').toString(),
+        value: h.value ? Buffer.from(h.value, 'base64').toString() : '',
+        favorite: true //TODO: fix this.
+      }
+    });
+    this.setState({hashtagkeyValueList: keyValues});
+  }
+
   fetchKeyValues = async () => {
     const {navigation, namespaceList} = this.props;
     const myNamespaces = namespaceList.namespaces;
@@ -306,7 +351,8 @@ class HashtagKeyValues extends React.Component {
     try {
       this.setState({isRefreshing: true});
       await BlueElectrum.ping();
-      await this.fetchKeyValues();
+      //await this.fetchKeyValues();
+      await this.fetchHashtag();
       this.setState({isRefreshing: false});
     } catch (err) {
       this.setState({isRefreshing: false});
@@ -339,7 +385,8 @@ class HashtagKeyValues extends React.Component {
         try {
           this.setState({isRefreshing: true});
           toast = showStatusAlways(loc.namespaces.refreshing);
-          await this.fetchKeyValues();
+          //await this.fetchKeyValues();
+          await this.fetchHashtag();
           this.setState({isRefreshing: false});
           hideStatus(toast);
         } catch (err) {
@@ -371,9 +418,9 @@ class HashtagKeyValues extends React.Component {
       replyTxid: tx,
       shareTxid: tx,
       rewardTxid: tx,
-      replies,
-      shares,
-      rewards,
+      replies: [], //replies,
+      shares: [], //shares,
+      rewards: [], //rewards,
       favorite,
       height,
     });
