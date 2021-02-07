@@ -191,56 +191,6 @@ class HashtagKeyValues extends React.Component {
     this.setState({totalToFetch, fetched});
   }
 
-  fastFetchKeyValues = async (history, kvList) => {
-    const {namespaceList} = this.props;
-    const myNamespaces = namespaceList.namespaces;
-
-    let keyValues = await fetchKeyValueList(BlueElectrum, history, kvList, true);
-    if (!keyValues) {
-      return;
-    }
-
-    // Get namespace info.
-    for (let kv of keyValues) {
-      if (!kv.shortCode || !kv.displayName) {
-        let {displayName, shortCode} = await getNamespaceInfo(BlueElectrum, kv.namespaceId);
-        kv.displayName = displayName;
-        kv.shortCode = shortCode;
-      }
-    }
-
-    this.setState({hashtagkeyValueList: keyValues});
-
-    // Fetch replies.
-    const {replies, shares, rewards} = await getRepliesAndShares(BlueElectrum, history);
-
-    // Add the replies.
-    for (let kv of keyValues) {
-      const txReplies = replies.filter(r => kv.tx.startsWith(r.partialTxId));
-      if (txReplies && txReplies.length > 0) {
-        kv.replies = txReplies;
-      }
-    }
-
-    // Add the rewards
-    for (let kv of keyValues) {
-      const txRewards = rewards.filter(r => kv.tx == r.partialTxId);
-      if (txRewards && txRewards.length > 0) {
-        kv.rewards = txRewards;
-        kv.favorite = txRewards.find(r => Object.keys(myNamespaces).find(n => myNamespaces[n].id == r.rewarder.namespaceId));
-      }
-    }
-
-    // Add the shares
-    for (let kv of keyValues) {
-      const txShares = shares.filter(r => kv.tx == r.sharedTxId);
-      if (txShares && txShares.length > 0) {
-        kv.shares = txShares;
-      }
-    }
-    this.setState({hashtagkeyValueList: keyValues});
-  }
-
   fetchHashtag = async () => {
     const {navigation, namespaceList} = this.props;
     const myNamespaces = namespaceList.namespaces;
@@ -280,70 +230,9 @@ class HashtagKeyValues extends React.Component {
         namespaceId: h.namespace,
         key: Buffer.from(h.key, 'base64').toString(),
         value: h.value ? Buffer.from(h.value, 'base64').toString() : '',
-        favorite: true //TODO: fix this.
+        favorite: false //TODO: fix this.
       }
     });
-    this.setState({hashtagkeyValueList: keyValues});
-  }
-
-  fetchKeyValues = async () => {
-    const {navigation, namespaceList} = this.props;
-    const myNamespaces = namespaceList.namespaces;
-    const {hashtag} = navigation.state.params;
-
-    let kvList = [];
-    let history = await BlueElectrum.blockchainScripthash_getHistory(getHashtagScriptHash(hashtag));
-    if (history.length == 0) {
-        return [];
-    }
-    history.reverse();
-
-    if (!kvList || kvList.length == 0) {
-      // Show some results ASAP.
-      await this.fastFetchKeyValues(history, kvList);
-    }
-
-    let keyValues = await fetchKeyValueList(BlueElectrum, history, kvList, false);
-    if (!keyValues) {
-      return;
-    }
-
-    // Get namespace info.
-    for (let kv of keyValues) {
-      if (!kv.shortCode || !kv.displayName) {
-        let {displayName, shortCode} = await getNamespaceInfo(BlueElectrum, kv.namespaceId);
-        kv.displayName = displayName;
-        kv.shortCode = shortCode;
-      }
-    }
-
-    // Fetch replies.
-    const {replies, shares, rewards} = await getRepliesAndShares(BlueElectrum, history);
-
-    // Add the replies.
-    for (let kv of keyValues) {
-      const txReplies = replies.filter(r => kv.tx.startsWith(r.partialTxId));
-      if (txReplies && txReplies.length > 0) {
-        kv.replies = txReplies;
-      }
-    }
-
-    // Add the rewards
-    for (let kv of keyValues) {
-      const txRewards = rewards.filter(r => kv.tx.startsWith(r.partialTxId));
-      if (txRewards && txRewards.length > 0) {
-        kv.rewards = txRewards;
-        kv.favorite = txRewards.find(r => Object.keys(myNamespaces).find(n => myNamespaces[n].id == r.rewarder.namespaceId));
-      }
-    }
-
-    // Add the shares
-    for (let kv of keyValues) {
-      const txShares = shares.filter(r => kv.tx == r.sharedTxId);
-      if (txShares && txShares.length > 0) {
-        kv.shares = txShares;
-      }
-    }
     this.setState({hashtagkeyValueList: keyValues});
   }
 
@@ -351,7 +240,6 @@ class HashtagKeyValues extends React.Component {
     try {
       this.setState({isRefreshing: true});
       await BlueElectrum.ping();
-      //await this.fetchKeyValues();
       await this.fetchHashtag();
       this.setState({isRefreshing: false});
     } catch (err) {
@@ -385,7 +273,6 @@ class HashtagKeyValues extends React.Component {
         try {
           this.setState({isRefreshing: true});
           toast = showStatusAlways(loc.namespaces.refreshing);
-          //await this.fetchKeyValues();
           await this.fetchHashtag();
           this.setState({isRefreshing: false});
           hideStatus(toast);
