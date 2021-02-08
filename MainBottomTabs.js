@@ -47,6 +47,7 @@ import PsbtWithHardwareWallet from './screen/send/psbtWithHardwareWallet';
 import Success from './screen/send/success';
 import Broadcast from './screen/send/broadcast';
 import Namespaces from './screen/data/namespaces';
+import Explore from './screen/data/hashtagkeyvalues';
 import KeyValues from './screen/data/keyvalues';
 import AddKeyValue from './screen/data/addkeyvalue';
 import EditProfile from './screen/data/editprofile';
@@ -130,6 +131,18 @@ const KevaTabNavigator = createBottomTabNavigator({
         headerTintColor: '#0c2550',
       },
     },
+    Explore: {
+      screen: Explore,
+      path: 'Explore',
+      navigationOptions: {
+        headerStyle: {
+          backgroundColor: '#FFFFFF',
+          borderBottomWidth: 0,
+          elevation: 0,
+        },
+        headerTintColor: '#0c2550',
+      },
+    },
     Settings: {
       screen: Settings,
       path: 'Settings',
@@ -169,6 +182,8 @@ const KevaTabNavigator = createBottomTabNavigator({
           iconName = 'md-settings';
         } else if (routeName === 'Namespaces') {
           iconName = 'md-filing';
+        } else if (routeName === 'Explore') {
+          iconName = 'md-search';
         }
         return <Ionicons name={iconName} size={22} color={tintColor}/>;
       },
@@ -181,6 +196,8 @@ const KevaTabNavigator = createBottomTabNavigator({
           label = loc.general.label_settings;
         } else if (routeName === 'Namespaces') {
           label = loc.general.label_data;
+        } else if (routeName === 'Explore') {
+          label = loc.general.label_explore;
         }
         return <Text style={{fontSize: 12, alignSelf: 'center', color: tintColor, position: 'relative', top: -2}}>{label}</Text>;
       },
