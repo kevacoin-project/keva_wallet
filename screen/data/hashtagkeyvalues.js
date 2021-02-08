@@ -175,9 +175,12 @@ class HashtagKeyValues extends React.Component {
       currentPage: 0,
       showDeleteModal: false,
       isRefreshing: false,
+      isLoadingMore: false,
+      min_tx_num: -1,
       totalToFetch: 0,
       fetched: 0,
     };
+    this.onEndReachedCalledDuringMomentum = true;
   }
 
   static navigationOptions = ({ navigation }) => ({
@@ -191,9 +194,8 @@ class HashtagKeyValues extends React.Component {
     this.setState({totalToFetch, fetched});
   }
 
-  fetchHashtag = async () => {
-    const {navigation, namespaceList} = this.props;
-    const myNamespaces = namespaceList.namespaces;
+  fetchHashtag = async (min_tx_num) => {
+    const {navigation} = this.props;
     const {hashtag} = navigation.state.params;
 
     /*
@@ -213,10 +215,11 @@ class HashtagKeyValues extends React.Component {
         min_tx_num: 123
       }
     */
-    let history = await BlueElectrum.blockchainKeva_getHashtag(getHashtagScriptHash(hashtag));
+    let history = await BlueElectrum.blockchainKeva_getHashtag(getHashtagScriptHash(hashtag), min_tx_num);
     if (history.hashtags.length == 0) {
-        return [];
+        return;
     }
+
     const keyValues = history.hashtags.map(h => {
       return {
         displayName: h.displayName,
@@ -230,20 +233,49 @@ class HashtagKeyValues extends React.Component {
         namespaceId: h.namespace,
         key: Buffer.from(h.key, 'base64').toString(),
         value: h.value ? Buffer.from(h.value, 'base64').toString() : '',
-        favorite: false //TODO: fix this.
+        favorite: false, //TODO: fix this.
       }
     });
-    this.setState({hashtagkeyValueList: keyValues});
+
+    if (history.min_tx_num < this.state.min_tx_num) {
+      this.setState({
+        hashtagkeyValueList: [...this.state.hashtagkeyValueList, ...keyValues],
+        min_tx_num: history.min_tx_num,
+      });
+    } else {
+      this.setState({
+        hashtagkeyValueList: keyValues,
+        min_tx_num: history.min_tx_num,
+      });
+    }
   }
 
   refreshKeyValues = async () => {
     try {
       this.setState({isRefreshing: true});
       await BlueElectrum.ping();
-      await this.fetchHashtag();
+      await this.fetchHashtag(-1);
       this.setState({isRefreshing: false});
     } catch (err) {
       this.setState({isRefreshing: false});
+      console.warn(err);
+      Toast.show('Failed to fetch key values');
+    }
+  }
+
+  loadMoreKeyValues = async () => {
+    if(this.onEndReachedCalledDuringMomentum) {
+      return;
+    }
+    try {
+      this.setState({isLoadingMore: true});
+      await BlueElectrum.ping();
+      await this.fetchHashtag(this.state.min_tx_num);
+      this.setState({isLoadingMore: false});
+      this.onEndReachedCalledDuringMomentum = true;
+    } catch (err) {
+      this.onEndReachedCalledDuringMomentum = true;
+      this.setState({isLoadingMore: false});
       console.warn(err);
       Toast.show('Failed to fetch key values');
     }
@@ -373,8 +405,10 @@ class HashtagKeyValues extends React.Component {
     const mergeList = this.state.hashtagkeyValueList;
 
     if (this.state.isRefreshing && (!mergeList || mergeList.length == 0)) {
-      return <BlueLoading />;
+      return <BlueLoading />
     }
+
+    const footerLoader = this.state.isLoadingMore ? <BlueLoading style={{paddingTop: 30, paddingBottom: 400}} /> : null;
 
     return (
       <View style={styles.container}>
@@ -382,11 +416,15 @@ class HashtagKeyValues extends React.Component {
           (mergeList && mergeList.length > 0 ) ?
           <FlatList
             style={styles.listStyle}
-            contentContainerStyle={{paddingBottom: 400}}
+            contentContainerStyle={{paddingBottom: 400, backgroundColor: '#fff'}}
             data={mergeList}
             onRefresh={() => this.refreshKeyValues()}
+            onEndReached={() => {this.loadMoreKeyValues()}}
+            onEndReachedThreshold={0.1}
+            onMomentumScrollBegin={() => { this.onEndReachedCalledDuringMomentum = false; }}
             refreshing={this.state.isRefreshing}
             keyExtractor={(item, index) => item.key + index}
+            ListFooterComponent={footerLoader}
             renderItem={({item, index}) =>
               <Item item={item} key={index} dispatch={dispatch} onDelete={this.onDelete}
                 onShow={this.onShow}
