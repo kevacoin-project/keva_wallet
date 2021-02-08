@@ -1,7 +1,6 @@
 import React from 'react';
 import {
   Text,
-  Image,
   View,
   TouchableOpacity,
   FlatList,
@@ -19,13 +18,13 @@ let BlueApp = require('../../BlueApp');
 let BlueElectrum = require('../../BlueElectrum');
 
 import MIcon from 'react-native-vector-icons/MaterialIcons';
+import Icon from 'react-native-vector-icons/Ionicons';
 import { connect } from 'react-redux'
 import { createThumbnail } from "react-native-create-thumbnail";
-import { Avatar } from 'react-native-elements';
+import { Avatar, Image } from 'react-native-elements';
 import { setMediaInfo, } from '../../actions'
 import {
-        fetchKeyValueList, getHashtagScriptHash, parseSpecialKey,
-        getNamespaceInfo, getRepliesAndShares, getSpecialKeyText,
+        getHashtagScriptHash, parseSpecialKey, getSpecialKeyText,
         } from '../../class/keva-ops';
 import Toast from 'react-native-root-toast';
 import { timeConverter, stringToColor, getInitials, SCREEN_WIDTH, } from "../../util";
@@ -33,6 +32,7 @@ import Biometric from '../../class/biometrics';
 import { extractMedia, getImageGatewayURL, removeMedia } from './mediaManager';
 
 const PLAY_ICON  = <MIcon name="play-arrow" size={50} color="#fff"/>;
+const IMAGE_ICON = <Icon name="ios-image" size={50} color="#fff"/>;
 
 class Item extends React.Component {
 
@@ -135,7 +135,11 @@ class Item extends React.Component {
                   </View>
                 </View>
                 :
-                <Image style={styles.previewImage} source={{uri: getImageGatewayURL(mediaCID)}} />
+                <Image style={styles.previewImage}
+                  source={{uri: getImageGatewayURL(mediaCID)}}
+                  PlaceholderContent={IMAGE_ICON}
+                  placeholderStyle={{backgroundColor: '#ddd'}}
+                />
               )
             }
           </View>

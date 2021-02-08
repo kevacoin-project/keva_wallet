@@ -2,7 +2,7 @@ import React from 'react';
 import {
   Text,
   View,
-  Image,
+  Image as RNImage,
   Dimensions,
   TouchableOpacity,
   FlatList,
@@ -16,6 +16,7 @@ import { createThumbnail } from "react-native-create-thumbnail";
 const BlueElectrum = require('../../BlueElectrum');
 import Toast from 'react-native-root-toast';
 import MIcon from 'react-native-vector-icons/MaterialIcons';
+import Icon from 'react-native-vector-icons/Ionicons';
 const StyleSheet = require('../../PlatformStyleSheet');
 const KevaColors = require('../../common/KevaColors');
 import { THIN_BORDER, timeConverter, toastError, getInitials, stringToColor } from "../../util";
@@ -30,11 +31,12 @@ import {
 } from '../../BlueComponents';
 import VideoPlayer from 'react-native-video-player';
 import ImageViewer from 'react-native-image-zoom-viewer';
-import { Avatar } from 'react-native-elements';
+import { Avatar, Image } from 'react-native-elements';
 const loc = require('../../loc');
 import { connect } from 'react-redux';
 import { extractMedia, getImageGatewayURL, removeMedia, replaceMedia } from './mediaManager';
 
+const LARGE_IMAGE_ICON = <Icon name="ios-image" size={90} color="#fff"/>;
 const MAX_TIME = 3147483647;
 
 class Reply extends React.Component {
@@ -143,7 +145,7 @@ class ShowKeyValue extends React.Component {
       } else {
         InteractionManager.runAfterInteractions(async () => {
           if (mimeType.startsWith('image')) {
-            Image.getSize(getImageGatewayURL(mediaCID), (width, height) => {
+            RNImage.getSize(getImageGatewayURL(mediaCID), (width, height) => {
               this.setState({CIDHeight: height, CIDWidth: width});
             });
           } else if (mimeType.startsWith('video')) {
@@ -211,7 +213,7 @@ class ShowKeyValue extends React.Component {
       const {mediaCID, mimeType} = extractMedia(kevaResult.value);
       if (mediaCID) {
         if (mimeType.startsWith('image')) {
-          Image.getSize(getImageGatewayURL(mediaCID), (width, height) => {
+          RNImage.getSize(getImageGatewayURL(mediaCID), (width, height) => {
             this.setState({CIDHeight: height, CIDWidth: width});
           });
         } else if (mimeType.startsWith('video')) {
@@ -316,7 +318,12 @@ class ShowKeyValue extends React.Component {
             <ImageViewer key={index} imageUrls={images} onCancel={this.closeModal} enableSwipeDown={true} swipeDownThreshold={100}/>
           </Modal>
           <TouchableOpacity onPress={this.showModal}>
-            <Image style={{ width, height, alignSelf: 'center'}} source={{ uri: a.src }} resizeMode="contain"/>
+            <Image style={{ width, height, alignSelf: 'center'}}
+              source={{ uri: a.src }}
+              resizeMode="contain"
+              PlaceholderContent={LARGE_IMAGE_ICON}
+              placeholderStyle={{backgroundColor: '#ddd', borderRadius: 10}}
+            />
           </TouchableOpacity>
         </View>
       );
