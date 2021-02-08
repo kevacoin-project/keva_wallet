@@ -331,7 +331,6 @@ class HashtagKeyValues extends React.Component {
 
   onReply = (replyTxid) => {
     const {navigation, namespaceList} = this.props;
-    const {rootAddress, namespaceId} = navigation.state.params;
     // Must have a namespace.
     if (Object.keys(namespaceList).length == 0) {
       toastError(loc.namespaces.create_namespace_first);
@@ -339,14 +338,12 @@ class HashtagKeyValues extends React.Component {
     }
 
     navigation.navigate('ReplyKeyValue', {
-      rootAddress,
       replyTxid
     })
   }
 
   onShare = (shareTxid, key, value, blockHeight) => {
     const {navigation, namespaceList} = this.props;
-    const rootAddress = navigation.getParam('rootAddress');
     // Must have a namespace.
     if (Object.keys(namespaceList).length == 0) {
       toastError(loc.namespaces.create_namespace_first);
@@ -355,7 +352,6 @@ class HashtagKeyValues extends React.Component {
 
     const shortCode = navigation.getParam('shortCode');
     navigation.navigate('ShareKeyValue', {
-      rootAddress,
       shareTxid,
       origKey: key,
       origValue: value,
@@ -366,7 +362,6 @@ class HashtagKeyValues extends React.Component {
 
   onReward = (rewardTxid, key, value, height) => {
     const {navigation, namespaceList} = this.props;
-    const rootAddress = navigation.getParam('rootAddress');
     // Must have a namespace.
     if (Object.keys(namespaceList).length == 0) {
       toastError(loc.namespaces.create_namespace_first);
@@ -375,7 +370,6 @@ class HashtagKeyValues extends React.Component {
 
     const shortCode = navigation.getParam('shortCode');
     navigation.navigate('RewardKeyValue', {
-      rootAddress,
       rewardTxid,
       origKey: key,
       origValue: value,
