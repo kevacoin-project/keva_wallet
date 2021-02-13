@@ -128,6 +128,13 @@ class Namespace extends React.Component {
     });
   }
 
+  onTransfer = (namespace) => {
+    this.props.navigation.push('TransferNamespace', {
+      namespaceId: namespace.id,
+      walletId: namespace.walletId,
+    });
+  }
+
   UNSAFE_componentWillReceiveProps(nextProps) {
     if (this.props.active !== nextProps.active) {
       Animated.timing(this._active, {
@@ -151,6 +158,8 @@ class Namespace extends React.Component {
     const namespace = this.props.data;
     const {canDelete, onDelete} = this.props;
     const {titleAvatar, colorAvatar} = this.getAvatar(namespace.displayName);
+    const canTransfer = !canDelete;
+
     return (
       <Animated.View style={this._style}>
         <View style={styles.cardTitle} >
@@ -174,6 +183,11 @@ class Namespace extends React.Component {
               { canDelete &&
               <TouchableOpacity onPress={() => onDelete(namespace.id)}>
                 <Icon name="ios-remove-circle-outline" size={20} style={styles.actionIcon} />
+              </TouchableOpacity>
+              }
+              { canTransfer &&
+              <TouchableOpacity onPress={() => this.onTransfer(namespace)}>
+                <Icon name="ios-log-out" size={20} style={styles.actionIcon} />
               </TouchableOpacity>
               }
             </View>

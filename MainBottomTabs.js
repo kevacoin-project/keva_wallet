@@ -56,6 +56,7 @@ import ShareKeyValue from './screen/data/sharekeyvalue';
 import ShowKeyValue from './screen/data/showkeyvalue';
 import RewardKeyValue from './screen/data/rewardkeyvalue';
 import HashtagKeyValues from './screen/data/hashtagkeyvalues';
+import TransferNamespace from './screen/data/transfernamespace';
 
 import Ionicons from 'react-native-vector-icons/Ionicons';
 let loc = require('./loc');
@@ -360,6 +361,9 @@ const HomeStackNavigator = createStackNavigator({
   },
   HashtagKeyValues: {
     screen: HashtagKeyValues,
+  },
+  TransferNamespace: {
+    screen: TransferNamespace,
   },
   // Settings
   SelectWallet: {
