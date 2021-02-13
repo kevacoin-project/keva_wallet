@@ -73,6 +73,8 @@ module.exports = {
     update_profile: 'Updated Profile',
     created: 'Namespace Created',
     namespace_not_found: 'Cannot find namespace',
+    ns_transfer_explain: 'Transfer to the Other Wallet',
+    ns_transfer_notes: 'Notes',
   },
   wallets: {
     select_wallet: 'Select Wallet',

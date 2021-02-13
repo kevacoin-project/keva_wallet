@@ -116,6 +116,9 @@ class Item extends React.Component {
     if (keyType) {
       displayKey = getSpecialKeyText(keyType);
     }
+    if (displayKey == '__WALLET_TRANSFER__') {
+      displayKey = loc.namespaces.ns_transfer_explain;
+    }
     const canEdit = !isOther && item.op !== 'KEVA_OP_NAMESPACE';
 
     return (

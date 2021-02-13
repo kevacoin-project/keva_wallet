@@ -564,7 +564,7 @@ export async function getNamespaceUtxo(wallet, namespaceId) {
   return null;
 }
 
-export async function updateKeyValue(wallet, requestedSatPerByte, namespaceId, key, value, serverIPFS) {
+export async function updateKeyValue(wallet, requestedSatPerByte, namespaceId, key, value, serverIPFS, newAddress) {
   await wallet.fetchBalance();
   await wallet.fetchTransactions();
   let nsUtxo = await getNamespaceUtxo(wallet, namespaceId);
@@ -575,7 +575,7 @@ export async function updateKeyValue(wallet, requestedSatPerByte, namespaceId, k
   // IMPORTANT: we will use the same namespace address. Ideally, for
   // security/privacy reason, it is better to use a new address. But that
   // would create many addresses and slow down the update.
-  const namespaceAddress = nsUtxo.address;
+  const namespaceAddress = newAddress ? newAddress: nsUtxo.address;
   const nsScript = getKeyValueUpdateScript(namespaceId, namespaceAddress, key, value);
 
   // Namespace needs at least 0.01 KVA.

@@ -97,7 +97,8 @@ class TransferNamespace extends React.Component {
       setTimeout(async () => {
         try {
           await BlueElectrum.ping();
-          const { tx, fee } = await updateKeyValue(this.wallet, FALLBACK_DATA_PER_BYTE_FEE, namespaceId, key, value);
+          const newAddress = this.state.addresses[0] ? this.state.addresses[0].address : null;
+          const { tx, fee } = await updateKeyValue(this.wallet, FALLBACK_DATA_PER_BYTE_FEE, namespaceId, key, value, null, newAddress);
           let feeKVA = fee / 100000000;
           this.setState({ showKeyValueModal: true, currentPage: 1, fee: feeKVA });
           this.namespaceTx = tx;
@@ -370,7 +371,7 @@ class TransferNamespace extends React.Component {
     return (
       <View style={styles.container}>
         {this.getKeyValueModal()}
-        <Text style={styles.explain}>{'Transfer to a Different Wallet'}</Text>
+        <Text style={styles.explain}>{loc.namespaces.ns_transfer_explain}</Text>
         <View style={{ minWidth: width, maxWidth: width, width: width }}>
           <BlueAddressInput
             onChangeText={async text => {
@@ -415,9 +416,9 @@ class TransferNamespace extends React.Component {
             value={this.state.value}
             underlineColorAndroid='rgba(0,0,0,0)'
             style={{ flex: 1, marginHorizontal: 8, minHeight: 33 }}
-            placeholder={'Notes'}
+            placeholder={loc.namespaces.ns_transfer_notes}
             clearButtonMode="while-editing"
-            onChangeTextValue={value => {this.setState({value})}}
+            onChangeText={value => {this.setState({value})}}
           />
         </View>
       </View>
