@@ -47,7 +47,7 @@ import PsbtWithHardwareWallet from './screen/send/psbtWithHardwareWallet';
 import Success from './screen/send/success';
 import Broadcast from './screen/send/broadcast';
 import Namespaces from './screen/data/namespaces';
-import Explore from './screen/data/hashtagkeyvalues';
+import Explore from './screen/data/hashtagexplore';
 import KeyValues from './screen/data/keyvalues';
 import AddKeyValue from './screen/data/addkeyvalue';
 import EditProfile from './screen/data/editprofile';

@@ -5,6 +5,11 @@ import {
   TouchableOpacity,
   FlatList,
   InteractionManager,
+  SafeAreaView,
+  TextInput,
+  LayoutAnimation,
+  Keyboard,
+  Image as RNImage,
 } from 'react-native';
 const StyleSheet = require('../../PlatformStyleSheet');
 const KevaColors = require('../../common/KevaColors');
@@ -168,7 +173,7 @@ class Item extends React.Component {
   }
 }
 
-class HashtagKeyValues extends React.Component {
+class HashtagExplore extends React.Component {
 
   constructor() {
     super();
@@ -183,25 +188,29 @@ class HashtagKeyValues extends React.Component {
       min_tx_num: -1,
       totalToFetch: 0,
       fetched: 0,
+      inputMode: false,
+      hashtag: '',
+      searched: false,
     };
     this.onEndReachedCalledDuringMomentum = true;
   }
 
   static navigationOptions = ({ navigation }) => ({
     ...BlueNavigationStyle(),
-    title: '',
-    tabBarVisible: false,
-    headerStyle: { backgroundColor: '#fff', elevation:0, shadowColor: 'transparent', borderBottomWidth: THIN_BORDER, borderColor: KevaColors.cellBorder },
+    headerShown: false,
   });
 
   progressCallback = (totalToFetch, fetched) => {
     this.setState({totalToFetch, fetched});
   }
 
-  fetchHashtag = async (min_tx_num) => {
-    const {navigation} = this.props;
-    const {hashtag} = navigation.state.params;
+  onSearchHashtag = async () => {
+    Keyboard.dismiss();
+    this.setState({hashtagkeyValueList: [], min_tx_num: -1});
+    await this.fetchHashtag(-1);
+  }
 
+  fetchHashtag = async (min_tx_num) => {
     /*
       Data returned by ElectrumX API
       {
@@ -219,9 +228,11 @@ class HashtagKeyValues extends React.Component {
         min_tx_num: 123
       }
     */
+    const hashtag = this.state.hashtag;
     let history = await BlueElectrum.blockchainKeva_getHashtag(getHashtagScriptHash(hashtag), min_tx_num);
     if (history.hashtags.length == 0) {
-        return;
+      this.setState({searched: true});
+      return;
     }
 
     const keyValues = history.hashtags.map(h => {
@@ -293,38 +304,7 @@ class HashtagKeyValues extends React.Component {
   }
 
   async componentDidMount() {
-    try {
-      await this.refreshKeyValues();
-    } catch (err) {
-      Toast.show("Cannot fetch key-values");
-    }
     this.isBiometricUseCapableAndEnabled = await Biometric.isBiometricUseCapableAndEnabled();
-    this.subs = [
-      this.props.navigation.addListener('willFocus', async (payload) => {
-        const routeName = payload.lastState.routeName;
-        if (routeName == "ShowKeyValue") {
-          return;
-        }
-        let toast;
-        try {
-          this.setState({isRefreshing: true});
-          toast = showStatusAlways(loc.namespaces.refreshing);
-          await this.fetchHashtag();
-          this.setState({isRefreshing: false});
-          hideStatus(toast);
-        } catch (err) {
-          hideStatus(toast);
-          console.warn(err)
-          this.setState({isRefreshing: false});
-        }
-      }),
-    ];
-  }
-
-  componentWillUnmount () {
-    if (this.subs) {
-      this.subs.forEach(sub => sub.remove());
-    }
   }
 
   onShow = (key, value, tx, replies, shares, rewards, height, favorite, shortCode, displayName) => {
@@ -351,7 +331,6 @@ class HashtagKeyValues extends React.Component {
 
   onReply = (replyTxid) => {
     const {navigation, namespaceList} = this.props;
-    const {rootAddress, namespaceId} = navigation.state.params;
     // Must have a namespace.
     if (Object.keys(namespaceList).length == 0) {
       toastError(loc.namespaces.create_namespace_first);
@@ -359,14 +338,12 @@ class HashtagKeyValues extends React.Component {
     }
 
     navigation.navigate('ReplyKeyValue', {
-      rootAddress,
       replyTxid
     })
   }
 
   onShare = (shareTxid, key, value, blockHeight) => {
     const {navigation, namespaceList} = this.props;
-    const rootAddress = navigation.getParam('rootAddress');
     // Must have a namespace.
     if (Object.keys(namespaceList).length == 0) {
       toastError(loc.namespaces.create_namespace_first);
@@ -375,7 +352,6 @@ class HashtagKeyValues extends React.Component {
 
     const shortCode = navigation.getParam('shortCode');
     navigation.navigate('ShareKeyValue', {
-      rootAddress,
       shareTxid,
       origKey: key,
       origValue: value,
@@ -386,7 +362,6 @@ class HashtagKeyValues extends React.Component {
 
   onReward = (rewardTxid, key, value, height) => {
     const {navigation, namespaceList} = this.props;
-    const rootAddress = navigation.getParam('rootAddress');
     // Must have a namespace.
     if (Object.keys(namespaceList).length == 0) {
       toastError(loc.namespaces.create_namespace_first);
@@ -395,7 +370,6 @@ class HashtagKeyValues extends React.Component {
 
     const shortCode = navigation.getParam('shortCode');
     navigation.navigate('RewardKeyValue', {
-      rootAddress,
       rewardTxid,
       origKey: key,
       origValue: value,
@@ -404,18 +378,68 @@ class HashtagKeyValues extends React.Component {
     })
   }
 
+  openItemAni = () => {
+    LayoutAnimation.configureNext({
+      duration: 100,
+      update: {type: LayoutAnimation.Types.easeInEaseOut}
+    });
+    this.setState({inputMode: true});
+  }
+
+  closeItemAni = () => {
+    LayoutAnimation.configureNext({
+      duration: 100,
+      update: {type: LayoutAnimation.Types.easeInEaseOut}
+    });
+    this.setState({inputMode: false, hashtag: '', searched: false});
+    this._inputRef && this._inputRef.blur();
+    this._inputRef && this._inputRef.clear();
+  }
+
   render() {
     let {navigation, dispatch, mediaInfoList} = this.props;
     const mergeList = this.state.hashtagkeyValueList;
+    const canSearch = this.state.hashtag && this.state.hashtag.length > 0;
+    const {inputMode, hashtag, saving, searched} = this.state;
 
     if (this.state.isRefreshing && (!mergeList || mergeList.length == 0)) {
       return <BlueLoading />
     }
-
     const footerLoader = this.state.isLoadingMore ? <BlueLoading style={{paddingTop: 30, paddingBottom: 400}} /> : null;
 
     return (
-      <View style={styles.container}>
+      <SafeAreaView style={styles.topContainer}>
+        <View style={styles.inputContainer}>
+          <TouchableOpacity onPress={this.closeItemAni}>
+            <Text style={[{color: KevaColors.actionText, fontSize: 16, textAlign: 'left'}, inputMode && {paddingRight: 5}]}>
+              {inputMode ? loc.general.cancel : ''}
+            </Text>
+          </TouchableOpacity>
+          <TextInput
+            onFocus={this.openItemAni}
+            ref={ref => this._inputRef = ref}
+            onChangeText={hashtag => this.setState({ hashtag: hashtag, searched: false })}
+            value={hashtag}
+            placeholder={loc.namespaces.search_hashtag}
+            multiline={false}
+            underlineColorAndroid='rgba(0,0,0,0)'
+            returnKeyType='search'
+            clearButtonMode='while-editing'
+            onSubmitEditing={this.onSearchHashtag}
+            style={styles.textInput}
+            returnKeyType={ 'done' }
+            clearButtonMode='while-editing'
+          />
+          {saving ?
+            <ActivityIndicator size="small" color={KevaColors.actionText} style={{ width: 42, height: 42 }} />
+            :
+            <TouchableOpacity onPress={this.onSearchHashtag} disabled={!canSearch}>
+              <Icon name={'md-search'}
+                    style={[styles.searchIcon, !canSearch && {color: KevaColors.inactiveText}]}
+                    size={25} />
+            </TouchableOpacity>
+          }
+        </View>
         {
           (mergeList && mergeList.length > 0 ) ?
           <FlatList
@@ -442,13 +466,13 @@ class HashtagKeyValues extends React.Component {
           />
           :
           <View style={{justifyContent: 'center', alignItems: 'center'}}>
-            <Image source={require('../../img/other_no_data.png')} style={{ width: SCREEN_WIDTH*0.33, height: SCREEN_WIDTH*0.33, marginVertical: 50 }} />
-            <Text style={{padding: 20, fontSize: 24, textAlign: 'center', color: KevaColors.lightText}}>
-              {loc.namespaces.no_hashtag}
+            <RNImage source={require('../../img/other_no_data.png')} style={{ width: SCREEN_WIDTH*0.33, height: SCREEN_WIDTH*0.33, marginVertical: 50 }} />
+            <Text style={{padding: 10, fontSize: 24, textAlign: 'center', color: KevaColors.darkText}}>
+              {(searched && hashtag.length > 0) ? (loc.namespaces.no_hashtag + hashtag) : loc.namespaces.hashtag_help}
             </Text>
           </View>
         }
-      </View>
+      </SafeAreaView>
     );
   }
 
@@ -461,9 +485,13 @@ function mapStateToProps(state) {
   }
 }
 
-export default HashtagKeyValuesScreen = connect(mapStateToProps)(HashtagKeyValues);
+export default HashtagExploreScreen = connect(mapStateToProps)(HashtagExplore);
 
 var styles = StyleSheet.create({
+  topContainer: {
+    flex: 1,
+    backgroundColor: '#fff',
+  },
   container: {
     flex:1,
   },
@@ -600,5 +628,45 @@ var styles = StyleSheet.create({
     bottom: 0,
     justifyContent: 'center',
     alignItems: 'center'
+  },
+  inputContainer: {
+    paddingVertical: 3,
+    paddingLeft: 8,
+    backgroundColor: '#fff',
+    borderBottomWidth: THIN_BORDER,
+    borderColor: KevaColors.cellBorder,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  textInput:
+  {
+    flex: 1,
+    borderRadius: 10,
+    backgroundColor: '#f1f3f4',
+    android: {
+      paddingTop: 3,
+      paddingBottom: 3,
+    },
+    ios: {
+      paddingTop: 8,
+      paddingBottom: 8,
+    },
+    paddingLeft: 7,
+    paddingRight: 36,
+    fontSize: 15,
+  },
+  searchIcon: {
+    width: 42,
+    height: 42,
+    color: KevaColors.actionText,
+    paddingVertical: 5,
+    paddingHorizontal: 9,
+    android: {
+      top: 4,
+    },
+    ios: {
+      top: 3,
+    }
   },
 });
