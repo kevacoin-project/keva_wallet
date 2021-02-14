@@ -164,8 +164,8 @@ class EditProfile extends React.Component {
     // setNamespaceList later.
     let namespaceInfo = {...namespaceList.namespaces};
 
-    // TODO: for now just displayName, more in the future.
     namespaceInfo[namespaceId].displayName = this.state.namespaceInfo.displayName;
+    namespaceInfo[namespaceId].bio = this.state.namespaceInfo.bio;
     dispatch(setNamespaceList(namespaceInfo, order));
   }
 
@@ -377,7 +377,6 @@ class EditProfile extends React.Component {
             </TouchableOpacity>
           */}
         </View>
-        {/*
         <View style={styles.inputValue}>
           <FloatTextInput
             multiline={true}
@@ -391,7 +390,6 @@ class EditProfile extends React.Component {
             onChangeTextValue={bio => {this.setState({namespaceInfo: {...namespaceInfo, bio}})}}
           />
         </View>
-        */}
       </View>
     );
   }
