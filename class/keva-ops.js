@@ -575,7 +575,8 @@ export async function updateKeyValue(wallet, requestedSatPerByte, namespaceId, k
   // IMPORTANT: we will use the same namespace address. Ideally, for
   // security/privacy reason, it is better to use a new address. But that
   // would create many addresses and slow down the update.
-  const namespaceAddress = newAddress ? newAddress: nsUtxo.address;
+  const currentAddress = nsUtxo.address;
+  const namespaceAddress = newAddress ? newAddress: currentAddress;
   const nsScript = getKeyValueUpdateScript(namespaceId, namespaceAddress, key, value);
 
   // Namespace needs at least 0.01 KVA.
@@ -637,7 +638,7 @@ export async function updateKeyValue(wallet, requestedSatPerByte, namespaceId, k
       // Change address.
       // IMPORTANT: we will use the same namespace address. See the
       // previous IMPORANT comment.
-      output.address = namespaceAddress;
+      output.address = currentAddress;
     }
 
     if (i == 0) {

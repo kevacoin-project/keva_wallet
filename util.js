@@ -138,3 +138,7 @@ export function getInitials(name) {
   }
   return initials;
 }
+
+export async function sleepAync(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}

@@ -6,7 +6,6 @@ import {
   Dimensions,
   TextInput,
 } from 'react-native';
-import Toast from 'react-native-root-toast';
 const StyleSheet = require('../../PlatformStyleSheet');
 const KevaButton = require('../../common/KevaButton');
 const KevaColors = require('../../common/KevaColors');
@@ -25,7 +24,7 @@ let BlueElectrum = require('../../BlueElectrum');
 import { FALLBACK_DATA_PER_BYTE_FEE } from '../../models/networkTransactionFees';
 
 import { connect } from 'react-redux'
-import { updateKeyValue } from '../../class/keva-ops';
+import { updateKeyValue, findMyNamespaces } from '../../class/keva-ops';
 import StepModal from "../../common/StepModalWizard";
 import Biometric from '../../class/biometrics';
 
@@ -33,6 +32,8 @@ import BitcoinBIP70TransactionDecode from '../../bip70/bip70';
 import { BitcoinUnit } from '../../models/bitcoinUnits';
 import { BitcoinTransaction } from '../../models/bitcoinTransactionInfo';
 import DeeplinkSchemaMatch from '../../class/deeplink-schema-match';
+
+import { setNamespaceList } from '../../actions'
 
 const btcAddressRx = /^[a-zA-Z0-9]{26,35}$/;
 
@@ -44,7 +45,7 @@ class TransferNamespace extends React.Component {
       loaded: false,
       changes: false,
       saving: false,
-      key: '__WALLET_TRANSFER__',
+      key: '__WALLET_TRANSFER__' + Date.now(),
       value: '',
       showKeyValueModal: false,
       valueOnly: false,
@@ -78,6 +79,26 @@ class TransferNamespace extends React.Component {
       onPress: this.onSave
     });
     this.isBiometricUseCapableAndEnabled = await Biometric.isBiometricUseCapableAndEnabled();
+  }
+
+  fetchNamespaces = async () => {
+    const { dispatch } = this.props;
+    const wallets = BlueApp.getWallets();
+    let namespaces = {};
+    for (let w of wallets) {
+      const ns = await findMyNamespaces(w, BlueElectrum);
+      namespaces = {...namespaces, ...ns};
+    }
+
+    const order = this.props.namespaceList.order;
+    // Remove the order that are not in the namespace list.
+    let newOrder = order.filter(nsid => namespaces[nsid]);
+    for (let id of Object.keys(namespaces)) {
+      if (!newOrder.find(nsid => nsid == id)) {
+        newOrder.unshift(id);
+      }
+    }
+    dispatch(setNamespaceList(namespaces, newOrder));
   }
 
   onSave = async () => {
@@ -184,11 +205,10 @@ class TransferNamespace extends React.Component {
                 });
               }
               await BlueApp.saveToDisk();
-              // Pin the media to IPFS.
-              if (this.state.serverIPFS) {
-                console.log('tx to publish: ' + result)
-                await publishMedia(result);
-              }
+              // Refresh the namespaces. If the address is from a wallet not owned
+              // by us, the namespace will disappear.
+              await utils.sleepAync(3000);
+              await this.fetchNamespaces();
               this.setState({isBroadcasting: false, showSkip: false});
             } catch (err) {
               this.setState({isBroadcasting: false, broadcastErr: err.message});
@@ -429,6 +449,7 @@ class TransferNamespace extends React.Component {
 
 function mapStateToProps(state) {
   return {
+    namespaceList: state.namespaceList,
     keyValueList: state.keyValueList,
   }
 }

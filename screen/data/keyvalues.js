@@ -8,7 +8,7 @@ import {
   InteractionManager,
   Clipboard,
 } from 'react-native';
-import { Button } from 'react-native-elements';
+import { Button, Image as ImagePlaceholder  } from 'react-native-elements';
 const StyleSheet = require('../../PlatformStyleSheet');
 const KevaButton = require('../../common/KevaButton');
 const KevaColors = require('../../common/KevaColors');
@@ -116,7 +116,7 @@ class Item extends React.Component {
     if (keyType) {
       displayKey = getSpecialKeyText(keyType);
     }
-    if (displayKey == '__WALLET_TRANSFER__') {
+    if (displayKey.startsWith('__WALLET_TRANSFER__')) {
       displayKey = loc.namespaces.ns_transfer_explain;
     }
     const canEdit = !isOther && item.op !== 'KEVA_OP_NAMESPACE';
@@ -166,7 +166,7 @@ class Item extends React.Component {
                   </View>
                 </View>
                 :
-                <Image style={styles.previewImage} source={{uri: getImageGatewayURL(mediaCID)}} />
+                <ImagePlaceholder style={styles.previewImage} source={{uri: getImageGatewayURL(mediaCID)}} />
               )
             }
           </View>
