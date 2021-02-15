@@ -14,14 +14,13 @@ import {
 import HTMLView from 'react-native-htmlview';
 import { createThumbnail } from "react-native-create-thumbnail";
 const BlueElectrum = require('../../BlueElectrum');
-import Toast from 'react-native-root-toast';
 import MIcon from 'react-native-vector-icons/MaterialIcons';
 import Icon from 'react-native-vector-icons/Ionicons';
 const StyleSheet = require('../../PlatformStyleSheet');
 const KevaColors = require('../../common/KevaColors');
 import { THIN_BORDER, timeConverter, toastError, getInitials, stringToColor } from "../../util";
 import {
-  getRepliesAndShares, parseSpecialKey, getKeyValueFromTxid,
+  parseSpecialKey, getKeyValueFromTxid,
   getNamespaceInfoFromTx, getSpecialKeyText
 } from '../../class/keva-ops';
 import { setKeyValueList, setMediaInfo } from '../../actions'

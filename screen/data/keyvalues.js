@@ -662,7 +662,13 @@ class KeyValues extends React.Component {
       if (kv.type === 'REG') {
         return kv;
       }
-      kv.key = Buffer.from(kv.key, 'base64').toString('utf-8');
+      const keyBuf = Buffer.from(kv.key, 'base64');
+      if (keyBuf[0] < 10) {
+        // Special protocol, not a valid utf-8 string.
+        kv.key = keyBuf;
+      } else {
+        kv.key = keyBuf.toString('utf-8');
+      }
       kv.value = Buffer.from(kv.value, 'base64').toString('utf-8');
       return kv;
     });
