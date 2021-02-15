@@ -198,17 +198,18 @@ class ShowKeyValue extends React.Component {
     }
 
     try {
-      const kevaResult = await getKeyValueFromTxid(BlueElectrum, partialTxId);
-      let nsData = await getNamespaceInfoFromTx(BlueElectrum, partialTxId);
+      const {result} = await BlueElectrum.blockchainKeva_getKeyValueReactions(partialTxId);
+      //TODO: how to get the timestamp of the tx?
+      const value = Buffer.from(result.value, 'base64').toString('utf-8');
       this.setState({
-        shareKey: kevaResult.key,
-        shareValue: kevaResult.value,
-        shareTime: kevaResult.time,
-        origShortCode: nsData.shortCode,
-        origName: nsData.displayName,
+        shareKey: result.value,
+        shareValue: Buffer.from(result.value, 'base64').toString('utf-8'),
+        shareTime: 0, //TODO.
+        origShortCode: result.shortCode,
+        origName: result.displayName,
       });
 
-      const {mediaCID, mimeType} = extractMedia(kevaResult.value);
+      const {mediaCID, mimeType} = extractMedia(value);
       if (mediaCID) {
         if (mimeType.startsWith('image')) {
           RNImage.getSize(getImageGatewayURL(mediaCID), (width, height) => {
@@ -444,6 +445,9 @@ class ShowKeyValue extends React.Component {
         reactions format:
         {
           "key": "<key>",
+          "value": "<value>",
+          "displayName": <>,
+          "shortCode": <>,
           "likes": <likes>,
           "replies": [{
             "height": <>,
