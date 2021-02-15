@@ -300,6 +300,10 @@ class ShowKeyValue extends React.Component {
     if (isNewline) {
       return <Text key={index} selectable></Text>;
     }
+    const isLink = node.parent && node.parent.name == 'a';
+    if (isLink) {
+      return;
+    }
 
     if (node.type == 'text') {
       return <Text key={index} selectable>{this.renderText(unescape(node.data), index)}</Text>;
@@ -534,13 +538,6 @@ class ShowKeyValue extends React.Component {
                 <Text style={styles.sender} numberOfLines={1} ellipsizeMode="tail" onPress={() => this.gotoShortCode(origShortCode)}>
                   {origName + ' '}
                 </Text>
-                {/*
-                <TouchableOpacity onPress={() => this.gotoShortCode(origShortCode)}>
-                  <Text style={styles.shortCode}>
-                    {`@${origShortCode}`}
-                  </Text>
-                </TouchableOpacity>
-                */}
               </View>
               {(shareTime > 0) ?
                 <Text style={styles.timestamp}>{'  ' + timeConverter(shareTime)}</Text>
@@ -855,6 +852,13 @@ export const htmlStyles = StyleSheet.create({
   p: {
     fontSize: 16,
     color: KevaColors.darkText,
+    lineHeight: 25,
+    padding: 0,
+    margin: 0,
+  },
+  a: {
+    fontSize: 16,
+    color: '#0000ee',
     lineHeight: 25,
     padding: 0,
     margin: 0,
