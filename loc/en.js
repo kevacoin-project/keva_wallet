@@ -61,7 +61,7 @@ module.exports = {
     pending_confirmation: 'Pending confirmation. This will take a few minutes. You can start adding content to your namespace.',
     confirmed: 'Namespace Confirmed',
     no_hashtag: 'No results for ',
-    hashtag_help: 'Enter a hashtag, e.g. kevacoin and click search icon',
+    hashtag_help: 'Find what is trending by searching hashtags, try kevacoin',
     submit: 'Submit',
     title: 'Title',
     content: 'Content',

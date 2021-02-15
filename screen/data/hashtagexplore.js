@@ -10,6 +10,7 @@ import {
   LayoutAnimation,
   Keyboard,
   Image as RNImage,
+  ActivityIndicator,
 } from 'react-native';
 const StyleSheet = require('../../PlatformStyleSheet');
 const KevaColors = require('../../common/KevaColors');
@@ -184,6 +185,7 @@ class HashtagExplore extends React.Component {
       currentPage: 0,
       showDeleteModal: false,
       isRefreshing: false,
+      loading: false,
       isLoadingMore: false,
       min_tx_num: -1,
       totalToFetch: 0,
@@ -206,8 +208,9 @@ class HashtagExplore extends React.Component {
 
   onSearchHashtag = async () => {
     Keyboard.dismiss();
-    this.setState({hashtagkeyValueList: [], min_tx_num: -1});
+    this.setState({hashtagkeyValueList: [], min_tx_num: -1, loading: true});
     await this.fetchHashtag(-1);
+    this.setState({loading: false});
   }
 
   fetchHashtag = async (min_tx_num) => {
@@ -400,7 +403,7 @@ class HashtagExplore extends React.Component {
     let {navigation, dispatch, mediaInfoList} = this.props;
     const mergeList = this.state.hashtagkeyValueList;
     const canSearch = this.state.hashtag && this.state.hashtag.length > 0;
-    const {inputMode, hashtag, saving, searched} = this.state;
+    const {inputMode, hashtag, loading, searched} = this.state;
 
     if (this.state.isRefreshing && (!mergeList || mergeList.length == 0)) {
       return <BlueLoading />
@@ -430,7 +433,7 @@ class HashtagExplore extends React.Component {
             returnKeyType={ 'done' }
             clearButtonMode='while-editing'
           />
-          {saving ?
+          {loading ?
             <ActivityIndicator size="small" color={KevaColors.actionText} style={{ width: 42, height: 42 }} />
             :
             <TouchableOpacity onPress={this.onSearchHashtag} disabled={!canSearch}>
@@ -467,7 +470,7 @@ class HashtagExplore extends React.Component {
           :
           <View style={{justifyContent: 'center', alignItems: 'center'}}>
             <RNImage source={require('../../img/other_no_data.png')} style={{ width: SCREEN_WIDTH*0.33, height: SCREEN_WIDTH*0.33, marginVertical: 50 }} />
-            <Text style={{padding: 10, fontSize: 24, textAlign: 'center', color: KevaColors.darkText}}>
+            <Text style={{padding: 10, fontSize: 20, textAlign: 'center', color: KevaColors.darkText}}>
               {(searched && hashtag.length > 0) ? (loc.namespaces.no_hashtag + hashtag) : loc.namespaces.hashtag_help}
             </Text>
           </View>
@@ -630,7 +633,7 @@ var styles = StyleSheet.create({
     alignItems: 'center'
   },
   inputContainer: {
-    paddingVertical: 3,
+    paddingVertical: 5,
     paddingLeft: 8,
     backgroundColor: '#fff',
     borderBottomWidth: THIN_BORDER,
