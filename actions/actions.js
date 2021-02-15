@@ -7,7 +7,7 @@ export const DELETE_OTHER_NAMESPACE = 'DELETE_OTHER_NAMESPACE';
 export const SET_KEYVALUE_LIST = 'SET_KEYVALUE_LIST';
 export const SET_MEDIA_INFO = 'SET_MEDIA_INFO';
 
-export const CURRENT_KEYVALUE_LIST_VERSION = 2;
+export const CURRENT_KEYVALUE_LIST_VERSION = 3;
 
 export function setNamespaceList(list, order) {
   return { type: SET_NAMESPACES, namespaceList: list, order }

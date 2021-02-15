@@ -208,6 +208,8 @@ class KeyValues extends React.Component {
       totalToFetch: 0,
       fetched: 0,
     };
+    this.onEndReachedCalledDuringMomentum = true;
+    this.min_tx_num = -1;
   }
 
   static navigationOptions = ({ navigation }) => ({
@@ -276,7 +278,7 @@ class KeyValues extends React.Component {
     this.setState({totalToFetch, fetched});
   }
 
-  fetchKeyValues = async () => {
+  fetchKeyValues = async (min_tx_num) => {
     const {navigation, dispatch, keyValueList, namespaceList} = this.props;
     const myNamespaces = namespaceList.namespaces;
     let {namespaceId, shortCode} = navigation.state.params;
@@ -293,7 +295,10 @@ class KeyValues extends React.Component {
       this.displayName = nsData.displayName;
     }
 
-    const history = await BlueElectrum.blockchainKeva_getKeyValues(getNamespaceScriptHash(namespaceId));
+    const history = await BlueElectrum.blockchainKeva_getKeyValues(getNamespaceScriptHash(namespaceId), min_tx_num);
+    if (history.keyvalues.length == 0) {
+      return;
+    }
     const keyValues = this.processKeyValueList(history.keyvalues);
 
     // Add the rewards
@@ -306,18 +311,41 @@ class KeyValues extends React.Component {
       }
     }
     */
-
-    dispatch(setKeyValueList(namespaceId, keyValues));
+    if (history.min_tx_num < this.min_tx_num) {
+      const combined = [...keyValueList.keyValues[namespaceId], ...keyValues];
+      dispatch(setKeyValueList(namespaceId, combined));
+    } else {
+      dispatch(setKeyValueList(namespaceId, keyValues));
+    }
+    this.min_tx_num = history.min_tx_num;
   }
 
-  refreshKeyValues = async () => {
+  refreshKeyValues = async (min_tx_num) => {
     try {
       this.setState({isRefreshing: true});
       await BlueElectrum.ping();
-      await this.fetchKeyValues();
+      await this.fetchKeyValues(min_tx_num);
       this.setState({isRefreshing: false});
     } catch (err) {
       this.setState({isRefreshing: false});
+      console.warn(err);
+      Toast.show('Failed to fetch key values');
+    }
+  }
+
+  loadMoreKeyValues = async () => {
+    if(this.onEndReachedCalledDuringMomentum) {
+      return;
+    }
+    try {
+      this.setState({isLoadingMore: true});
+      await BlueElectrum.ping();
+      await this.fetchKeyValues(this.min_tx_num);
+      this.setState({isLoadingMore: false});
+      this.onEndReachedCalledDuringMomentum = true;
+    } catch (err) {
+      this.onEndReachedCalledDuringMomentum = true;
+      this.setState({isLoadingMore: false});
       console.warn(err);
       Toast.show('Failed to fetch key values');
     }
@@ -340,7 +368,7 @@ class KeyValues extends React.Component {
     }
 
     try {
-      await this.refreshKeyValues();
+      await this.refreshKeyValues(-1);
     } catch (err) {
       Toast.show("Cannot fetch key-values");
     }
@@ -492,7 +520,7 @@ class KeyValues extends React.Component {
               this.setState({
                 showDeleteModal: false,
               });
-              await this.refreshKeyValues();
+              await this.refreshKeyValues(-1);
             }}
           />
         </View>
@@ -735,6 +763,7 @@ class KeyValues extends React.Component {
       );
     }
 
+    const footerLoader = this.state.isLoadingMore ? <BlueLoading style={{paddingTop: 30, paddingBottom: 400}} /> : null;
     return (
       <View style={styles.container}>
         <ActionSheet
@@ -759,9 +788,13 @@ class KeyValues extends React.Component {
             contentContainerStyle={{paddingBottom: 400}}
             ListHeaderComponent={listHeader}
             data={mergeList}
-            onRefresh={() => this.refreshKeyValues()}
+            onEndReached={() => {this.loadMoreKeyValues()}}
+            onEndReachedThreshold={0.5}
+            onMomentumScrollBegin={() => { this.onEndReachedCalledDuringMomentum = false; }}
+            onRefresh={() => this.refreshKeyValues(-1)}
             refreshing={this.state.isRefreshing}
             keyExtractor={(item, index) => item.key + index}
+            ListFooterComponent={footerLoader}
             renderItem={({item, index}) =>
               <Item item={item} key={index} dispatch={dispatch} onDelete={this.onDelete}
                 onShow={this.onShow} namespaceId={namespaceId}
@@ -800,6 +833,7 @@ var styles = StyleSheet.create({
     flex: 1,
     borderBottomWidth: 1,
     borderColor: KevaColors.cellBorder,
+    backgroundColor: '#fff',
   },
   card: {
     backgroundColor:'#fff',
