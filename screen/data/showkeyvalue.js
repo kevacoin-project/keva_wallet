@@ -71,13 +71,11 @@ class Reply extends React.Component {
             <Text style={styles.sender} numberOfLines={1} ellipsizeMode="tail" onPress={() => this.gotoShortCode(item.sender.shortCode)}>
               {displayName + ' '}
             </Text>
-            {/*
-            <TouchableOpacity onPress={() => this.gotoShortCode(item.sender.shortCode)}>
-              <Text style={styles.shortCode}>
+            <TouchableOpacity onPress={() => this.gotoShortCode(item.sender.shortCode)} style={{alignSelf: 'center'}}>
+              <Text style={styles.shortCodeReply}>
                 {`@${item.sender.shortCode}`}
               </Text>
             </TouchableOpacity>
-            */}
           </View>
           <Text style={styles.replyValue} selectable={true}>{item.value}</Text>
           {(item.height > 0) ?
@@ -175,6 +173,7 @@ class ShowKeyValue extends React.Component {
       shortCode,
       displayName
     });
+    await this.fetchReplies();
 
     this.subs = [
       this.props.navigation.addListener('willFocus', async (payload) => {
@@ -437,63 +436,47 @@ class ShowKeyValue extends React.Component {
   fetchReplies = async () => {
     const {dispatch, navigation, keyValueList, namespaceList} = this.props;
     const {replyTxid, namespaceId} = navigation.state.params;
-    const myNamespaces = namespaceList.namespaces;
 
     try {
-      // Fetch replies.
       this.setState({isRefreshing: true});
-      const {replies, shares, rewards} = await getRepliesAndShares(BlueElectrum, [{tx_hash: replyTxid}], true);
-
-      if (!namespaceId) {
-        const favorite = !!rewards.find(r => Object.keys(myNamespaces).find(n => myNamespaces[n].id == r.rewarder.namespaceId));
-        this.setState({
-          isRefreshing: false,
-          replies: this.sortReplies(replies),
-          shares: shares,
-          rewards: rewards,
-          favorite: favorite,
-        });
-        return;
-      }
-
+      const results = await BlueElectrum.blockchainKeva_getKeyValueReactions(replyTxid);
+      const reactions = results.result;
+      /*
+        reactions format:
+        {
+          "key": "<key>",
+          "likes": <likes>,
+          "replies": [{
+            "height": <>,
+            "key": <>,
+            "value": <>,
+            "time": <>,
+            "sender": {
+              shortCode: <>,
+              displayName: <>
+            }
+          }],
+          "shares": <shares>
+          ...
+        }
+      */
       const keyValues = keyValueList.keyValues[namespaceId];
-
-      // Add the replies.
-      for (let kv of keyValues) {
-        const txReplies = replies.filter(r => kv.tx.startsWith(r.partialTxId));
-        if (txReplies && txReplies.length > 0) {
-          kv.replies = txReplies;
-        }
-      }
-
-      // Add the rewards
-      for (let kv of keyValues) {
-        const txRewards = rewards.filter(r => kv.tx == r.partialTxId);
-        if (txRewards && txRewards.length > 0) {
-          kv.rewards = txRewards;
-          kv.favorite = !!txRewards.find(r => Object.keys(myNamespaces).find(n => myNamespaces[n].id == r.rewarder.namespaceId));
-        }
-      }
-
-      // Add the shares
-      for (let kv of keyValues) {
-        const txShares = shares.filter(r => kv.tx == r.sharedTxId);
-        if (txShares && txShares.length > 0) {
-          kv.shares = txShares;
-        }
-      }
-
-      dispatch(setKeyValueList(namespaceId, keyValues));
-
       // Update the replies and shares for this.
-      const thisKV = keyValues.find(kv => kv.tx == replyTxid);
+      const thisKV = keyValues.find(kv => kv.tx_hash == replyTxid);
+      // Decode replies base64
+      const replies = reactions.replies.map(r => {
+        r.value = Buffer.from(r.value, 'base64').toString('utf-8');
+        return r;
+      });
       this.setState({
         isRefreshing: false,
-        replies: this.sortReplies(thisKV.replies),
+        replies: replies,
         shares: thisKV.shares,
-        rewards: thisKV.rewards,
+        rewards: thisKV.likes,
         favorite: thisKV.favorite,
       });
+
+      dispatch(setKeyValueList(namespaceId, keyValues));
 
     } catch(err) {
       console.warn(err);
@@ -791,8 +774,11 @@ var styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '700',
     color: KevaColors.actionText,
-    lineHeight: 25,
-    paddingBottom: 5,
+  },
+  shortCodeReply: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: KevaColors.actionText,
   },
   senderBar: {
     borderLeftWidth: 4,

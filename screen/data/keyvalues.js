@@ -123,7 +123,7 @@ class Item extends React.PureComponent {
 
     return (
       <View style={styles.card}>
-        <TouchableOpacity onPress={() => onShow(namespaceId, displayName, item.key, item.value, item.tx, item.shares, item.likes, item.height, item.favorite)}>
+        <TouchableOpacity onPress={() => onShow(namespaceId, displayName, item.key, item.value, item.tx_hash, item.shares, item.likes, item.height, item.favorite)}>
           <View style={{flex:1,paddingHorizontal:10,paddingTop:2}}>
             <View style={{flexDirection:'row',alignItems:'center',justifyContent:'space-between'}}>
               <View style={{paddingRight: 10, paddingTop: 5, paddingBottom: 8}}>
