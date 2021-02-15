@@ -46,7 +46,7 @@ import { extractMedia, getImageGatewayURL, removeMedia } from './mediaManager';
 
 const PLAY_ICON  = <MIcon name="play-arrow" size={50} color="#fff"/>;
 
-class Item extends React.Component {
+class Item extends React.PureComponent {
 
   constructor(props) {
     super(props);
@@ -312,7 +312,7 @@ class KeyValues extends React.Component {
     }
     */
     if (history.min_tx_num < this.min_tx_num) {
-      const combined = [...keyValueList.keyValues[namespaceId], ...keyValues];
+      const combined = keyValueList.keyValues[namespaceId].concat(keyValues);
       dispatch(setKeyValueList(namespaceId, combined));
     } else {
       dispatch(setKeyValueList(namespaceId, keyValues));
