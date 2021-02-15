@@ -196,6 +196,12 @@ class ElectrumClient extends Client {
   blockchainKeva_getHashtag(scripthash, min_tx_num) {
     return this.request('blockchain.keva.get_hashtag', [scripthash, min_tx_num]);
   }
+  blockchainKeva_getKeyValues(scripthash, min_tx_num) {
+    return this.request('blockchain.keva.get_keyvalues', [scripthash, min_tx_num]);
+  }
+  blockchainKeva_getKeyValueReactions(tx_hash, min_tx_num) {
+    return this.request('blockchain.keva.get_keyvalue_reactions', [tx_hash, min_tx_num]);
+  }
 }
 
 module.exports = ElectrumClient;

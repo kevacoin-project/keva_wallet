@@ -33,8 +33,8 @@ import { setKeyValueList, setMediaInfo,
          deleteOtherNamespace
        } from '../../actions'
 import {
-        fetchKeyValueList, getNamespaceScriptHash, parseSpecialKey,
-        deleteKeyValue, mergeKeyValueList, getRepliesAndShares, getSpecialKeyText,
+        getNamespaceScriptHash, parseSpecialKey,
+        deleteKeyValue, getSpecialKeyText,
         getNamespaceInfoFromShortCode
         } from '../../class/keva-ops';
 import Toast from 'react-native-root-toast';
@@ -172,22 +172,22 @@ class Item extends React.Component {
           </View>
         </TouchableOpacity>
         <View style={{flexDirection: 'row'}}>
-          <TouchableOpacity onPress={() => onReply(item.tx)} style={{flexDirection: 'row'}}>
+          <TouchableOpacity onPress={() => onReply(item.tx_hash)} style={{flexDirection: 'row'}}>
             <MIcon name="chat-bubble-outline" size={22} style={styles.talkIcon} />
-            {(item.replies && item.replies.length > 0) && <Text style={styles.count}>{item.replies.length}</Text>}
+            {(item.replies > 0) && <Text style={styles.count}>{item.replies}</Text>}
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => onShare(item.tx, item.key, item.value, item.height)} style={{flexDirection: 'row'}}>
+          <TouchableOpacity onPress={() => onShare(item.tx_hash, item.key, item.value, item.height)} style={{flexDirection: 'row'}}>
             <MIcon name="cached" size={22} style={styles.shareIcon} />
-            {(item.shares && item.shares.length > 0) && <Text style={styles.count}>{item.shares.length}</Text>}
+            {(item.shares > 0) && <Text style={styles.count}>{item.shares}</Text>}
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => onReward(item.tx, item.key, item.value, item.height)} style={{flexDirection: 'row'}}>
+          <TouchableOpacity onPress={() => onReward(item.tx_hash, item.key, item.value, item.height)} style={{flexDirection: 'row'}}>
             {
               item.favorite ?
                 <MIcon name="favorite" size={22} style={[styles.shareIcon, {color: KevaColors.favorite}]} />
               :
                 <MIcon name="favorite-border" size={22} style={styles.shareIcon} />
             }
-            {(item.rewards && item.rewards.length > 0) && <Text style={styles.count}>{item.rewards.length}</Text> }
+            {(item.likes > 0) && <Text style={styles.count}>{item.likes}</Text> }
           </TouchableOpacity>
         </View>
       </View>
@@ -276,47 +276,6 @@ class KeyValues extends React.Component {
     this.setState({totalToFetch, fetched});
   }
 
-  fastFetchKeyValues = async (dispatch, namespaceId, history, kvList, cb) => {
-    const {namespaceList} = this.props;
-    const myNamespaces = namespaceList.namespaces;
-
-    let keyValues = await fetchKeyValueList(BlueElectrum, history, kvList, true, cb);
-    if (!keyValues) {
-      return;
-    }
-    dispatch(setKeyValueList(namespaceId, keyValues));
-
-    // Fetch replies.
-    const {replies, shares, rewards} = await getRepliesAndShares(BlueElectrum, history);
-
-    // Add the replies.
-    for (let kv of keyValues) {
-      const txReplies = replies.filter(r => kv.tx.startsWith(r.partialTxId));
-      if (txReplies && txReplies.length > 0) {
-        kv.replies = txReplies;
-      }
-    }
-
-    // Add the rewards
-    for (let kv of keyValues) {
-      const txRewards = rewards.filter(r => kv.tx == r.partialTxId);
-      if (txRewards && txRewards.length > 0) {
-        kv.rewards = txRewards;
-        kv.favorite = txRewards.find(r => Object.keys(myNamespaces).find(n => myNamespaces[n].id == r.rewarder.namespaceId));
-      }
-    }
-
-    // Add the shares
-    for (let kv of keyValues) {
-      const txShares = shares.filter(r => kv.tx == r.sharedTxId);
-      if (txShares && txShares.length > 0) {
-        kv.shares = txShares;
-      }
-    }
-
-    dispatch(setKeyValueList(namespaceId, keyValues));
-  }
-
   fetchKeyValues = async () => {
     const {navigation, dispatch, keyValueList, namespaceList} = this.props;
     const myNamespaces = namespaceList.namespaces;
@@ -334,32 +293,11 @@ class KeyValues extends React.Component {
       this.displayName = nsData.displayName;
     }
 
-    let kvList = keyValueList.keyValues[namespaceId];
-    let cb;
-
-    const history = await BlueElectrum.blockchainScripthash_getHistory(getNamespaceScriptHash(namespaceId));
-    if (!kvList || kvList.length == 0) {
-      cb = this.progressCallback;
-      // Show some results ASAP.
-      await this.fastFetchKeyValues(dispatch, namespaceId, history, kvList, cb);
-    }
-
-    let keyValues = await fetchKeyValueList(BlueElectrum, history, kvList, false, cb);
-    if (!keyValues) {
-      return;
-    }
-
-    // Fetch replies.
-    const {replies, shares, rewards} = await getRepliesAndShares(BlueElectrum, history);
-    // Add the replies.
-    for (let kv of keyValues) {
-      const txReplies = replies.filter(r => kv.tx.startsWith(r.partialTxId));
-      if (txReplies && txReplies.length > 0) {
-        kv.replies = txReplies;
-      }
-    }
+    const history = await BlueElectrum.blockchainKeva_getKeyValues(getNamespaceScriptHash(namespaceId));
+    const keyValues = this.processKeyValueList(history.keyvalues);
 
     // Add the rewards
+    /*
     for (let kv of keyValues) {
       const txRewards = rewards.filter(r => kv.tx.startsWith(r.partialTxId));
       if (txRewards && txRewards.length > 0) {
@@ -367,14 +305,8 @@ class KeyValues extends React.Component {
         kv.favorite = txRewards.find(r => Object.keys(myNamespaces).find(n => myNamespaces[n].id == r.rewarder.namespaceId));
       }
     }
+    */
 
-    // Add the shares
-    for (let kv of keyValues) {
-      const txShares = shares.filter(r => kv.tx == r.sharedTxId);
-      if (txShares && txShares.length > 0) {
-        kv.shares = txShares;
-      }
-    }
     dispatch(setKeyValueList(namespaceId, keyValues));
   }
 
@@ -683,6 +615,33 @@ class KeyValues extends React.Component {
     });
   }
 
+  processKeyValueList = (origkeyValues) => {
+    // Merge the results.
+    let keyValues = [];
+    for (let kv of origkeyValues) {
+      if (kv.type === 'PUT') {
+        // Remove the existing one.
+        keyValues = keyValues.filter(e => e.key != kv.key);
+        keyValues.push(kv);
+      } else if (kv.type === 'DEL') {
+        keyValues = keyValues.filter(e => e.key != kv.key);
+      } else if (kv.type === 'REG') {
+        // Special treatment for namespace creation.
+        keyValues.push({key: kv.displayName, value: loc.namespaces.created, ...kv});
+      }
+    }
+    // Base64 decode
+    keyValues = keyValues.map(kv => {
+      if (kv.type === 'REG') {
+        return kv;
+      }
+      kv.key = Buffer.from(kv.key, 'base64').toString('utf-8');
+      kv.value = Buffer.from(kv.value, 'base64').toString('utf-8');
+      return kv;
+    });
+    return keyValues;
+  }
+
   render() {
     let {navigation, dispatch, keyValueList, mediaInfoList, namespaceList, otherNamespaceList} = this.props;
     let {isOther, namespaceId, displayName, shortCode} = navigation.state.params;
@@ -703,7 +662,7 @@ class KeyValues extends React.Component {
     }
 
     const list = keyValueList.keyValues[namespaceId] || [];
-    const mergeListAll = mergeKeyValueList(list);
+    const mergeListAll = list;
     let mergeList;
     if (isOther) {
       mergeList = mergeListAll.filter(m => {

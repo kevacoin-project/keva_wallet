@@ -691,4 +691,12 @@ module.exports.blockchainKeva_getHashtag = async function(scripthash, min_tx_num
   return await mainClient.blockchainKeva_getHashtag(scripthash, min_tx_num);
 }
 
+module.exports.blockchainKeva_getKeyValues = async function(scripthash, min_tx_num=-1) {
+  return await mainClient.blockchainKeva_getKeyValues(scripthash, min_tx_num);
+}
+
+module.exports.blockchainKeva_getKeyValueReactions = async function(tx_hash, min_tx_num=-1) {
+  return await mainClient.blockchainKeva_getKeyValueReactions(tx_hash, min_tx_num);
+}
+
 module.exports.getCurrentPeer = getCurrentPeer;
