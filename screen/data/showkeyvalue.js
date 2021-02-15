@@ -105,6 +105,7 @@ class ShowKeyValue extends React.Component {
       showPicModal: false,
       thumbnail: null,
       opacity: 0,
+      replies: [],
     };
   }
 
@@ -130,7 +131,7 @@ class ShowKeyValue extends React.Component {
   }
 
   async componentDidMount() {
-    const {key, value, replies, shares, rewards, favorite, shortCode, displayName} = this.props.navigation.state.params;
+    const {key, value, shares, likes, favorite, shortCode, displayName} = this.props.navigation.state.params;
     const {mediaCID, mimeType} = extractMedia(value);
     const {mediaInfoList, dispatch} = this.props;
 
@@ -168,9 +169,8 @@ class ShowKeyValue extends React.Component {
     this.setState({
       key,
       value,
-      replies: this.sortReplies(replies),
       shares,
-      rewards,
+      likes,
       favorite,
       shortCode,
       displayName
@@ -587,7 +587,7 @@ class ShowKeyValue extends React.Component {
   }
 
   render() {
-    let {isRaw, value, key, replies, shares, rewards, favorite, CIDHeight, CIDWidth, thumbnail, shortCode, displayName} = this.state;
+    let {isRaw, value, key, replies, shares, likes, favorite, CIDHeight, CIDWidth, thumbnail, shortCode, displayName} = this.state;
     const shareInfo = parseSpecialKey(key);
     if (shareInfo) {
       // The shareValue contains the shared media for preview.
@@ -646,7 +646,7 @@ class ShowKeyValue extends React.Component {
             </TouchableOpacity>
             <TouchableOpacity onPress={() => this.onShare(key, value)} style={{flexDirection: 'row'}}>
               <MIcon name="cached" size={22} style={styles.shareIcon} />
-              {(shares && shares.length > 0) && <Text style={styles.count}>{shares.length}</Text>}
+              {(shares > 0) && <Text style={styles.count}>{shares}</Text>}
             </TouchableOpacity>
             <TouchableOpacity onPress={() => this.onReward()} style={{flexDirection: 'row'}}>
               {
@@ -655,7 +655,7 @@ class ShowKeyValue extends React.Component {
                 :
                   <MIcon name="favorite-border" size={22} style={styles.shareIcon} />
               }
-              {(rewards && rewards.length > 0) && <Text style={styles.count}>{rewards.length}</Text>}
+              {(likes > 0) && <Text style={styles.count}>{likes}</Text>}
             </TouchableOpacity>
           </View>
           <TouchableOpacity onPress={() => this.onToggleRaw()}>

@@ -123,7 +123,7 @@ class Item extends React.PureComponent {
 
     return (
       <View style={styles.card}>
-        <TouchableOpacity onPress={() => onShow(namespaceId, displayName, item.key, item.value, item.tx, item.replies, item.shares, item.rewards, item.height, item.favorite)}>
+        <TouchableOpacity onPress={() => onShow(namespaceId, displayName, item.key, item.value, item.tx, item.shares, item.likes, item.height, item.favorite)}>
           <View style={{flex:1,paddingHorizontal:10,paddingTop:2}}>
             <View style={{flexDirection:'row',alignItems:'center',justifyContent:'space-between'}}>
               <View style={{paddingRight: 10, paddingTop: 5, paddingBottom: 8}}>
@@ -541,7 +541,7 @@ class KeyValues extends React.Component {
     );
   }
 
-  onShow = (namespaceId, displayName, key, value, tx, replies, shares, rewards, height, favorite) => {
+  onShow = (namespaceId, displayName, key, value, tx, shares, likes, height, favorite) => {
     const {navigation} = this.props;
     const isOther = navigation.getParam('isOther');
     const shortCode = navigation.getParam('shortCode');
@@ -554,9 +554,8 @@ class KeyValues extends React.Component {
       replyTxid: tx,
       shareTxid: tx,
       rewardTxid: tx,
-      replies,
       shares,
-      rewards,
+      likes,
       favorite,
       isOther,
       height,
