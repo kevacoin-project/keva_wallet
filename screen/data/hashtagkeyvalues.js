@@ -24,7 +24,7 @@ import { createThumbnail } from "react-native-create-thumbnail";
 import { Avatar, Image } from 'react-native-elements';
 import { setMediaInfo, } from '../../actions'
 import {
-        getHashtagScriptHash, parseSpecialKey, getSpecialKeyText,
+        getHashtagScriptHash, parseSpecialKey, getSpecialKeyText, decodeKey,
         } from '../../class/keva-ops';
 import Toast from 'react-native-root-toast';
 import { timeConverter, stringToColor, getInitials, SCREEN_WIDTH, } from "../../util";
@@ -235,7 +235,7 @@ class HashtagKeyValues extends React.Component {
         height: h.height,
         time: h.time,
         namespaceId: h.namespace,
-        key: Buffer.from(h.key, 'base64').toString(),
+        key: decodeKey(h.key),
         value: h.value ? Buffer.from(h.value, 'base64').toString() : '',
         favorite: false, //TODO: fix this.
       }

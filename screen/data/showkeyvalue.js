@@ -193,7 +193,7 @@ class ShowKeyValue extends React.Component {
 
     // Check if it is a shared post.
     const {partialTxId, keyType} = parseSpecialKey(key);
-    if (keyType != 'share') {
+    if (keyType != 'share' && keyType != 'comment') {
       return;
     }
 
@@ -498,7 +498,7 @@ class ShowKeyValue extends React.Component {
 
   getShareContent = (key) => {
     const {keyType} = parseSpecialKey(key);
-    if (keyType != 'share') {
+    if (keyType != 'share' && keyType != 'comment') {
       return null;
     }
 

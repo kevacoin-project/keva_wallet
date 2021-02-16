@@ -1293,7 +1293,14 @@ export async function getRepliesAndShares(ecl, historyTxList, needShortcode = tr
   return {replies, shares, rewards};
 }
 
-const SHARE_COST = 1000000;
+export function decodeKey(key) {
+  const keyBuf = Buffer.from(key, 'base64');
+  if (keyBuf[0] < 10) {
+    // Special protocol, not a valid utf-8 string.
+    return keyBuf;
+  }
+  return keyBuf.toString('utf-8');
+}
 
 // Prefix 0x0002
 function createShareKey(txId) {

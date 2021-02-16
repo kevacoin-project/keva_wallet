@@ -35,7 +35,7 @@ import { setKeyValueList, setMediaInfo,
 import {
         getNamespaceScriptHash, parseSpecialKey,
         deleteKeyValue, getSpecialKeyText,
-        getNamespaceInfoFromShortCode
+        getNamespaceInfoFromShortCode, decodeKey,
         } from '../../class/keva-ops';
 import Toast from 'react-native-root-toast';
 import StepModal from "../../common/StepModalWizard";
@@ -662,13 +662,7 @@ class KeyValues extends React.Component {
       if (kv.type === 'REG') {
         return kv;
       }
-      const keyBuf = Buffer.from(kv.key, 'base64');
-      if (keyBuf[0] < 10) {
-        // Special protocol, not a valid utf-8 string.
-        kv.key = keyBuf;
-      } else {
-        kv.key = keyBuf.toString('utf-8');
-      }
+      kv.key = decodeKey(kv.key);
       kv.value = Buffer.from(kv.value, 'base64').toString('utf-8');
       return kv;
     });
