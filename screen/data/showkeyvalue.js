@@ -199,12 +199,11 @@ class ShowKeyValue extends React.Component {
 
     try {
       const {result} = await BlueElectrum.blockchainKeva_getKeyValueReactions(partialTxId);
-      //TODO: how to get the timestamp of the tx?
       const value = Buffer.from(result.value, 'base64').toString('utf-8');
       this.setState({
         shareKey: result.value,
         shareValue: Buffer.from(result.value, 'base64').toString('utf-8'),
-        shareTime: 0, //TODO.
+        shareTime: result.time,
         origShortCode: result.shortCode,
         origName: result.displayName,
       });
