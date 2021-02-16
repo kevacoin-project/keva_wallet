@@ -464,7 +464,7 @@ class ShowKeyValue extends React.Component {
       */
       const keyValues = keyValueList.keyValues[namespaceId];
       // Update the replies and shares for this.
-      const thisKV = keyValues.find(kv => kv.tx_hash == replyTxid);
+      const thisKV = keyValues ? keyValues.find(kv => kv.tx_hash == replyTxid) : {};
       // Decode replies base64
       const replies = reactions.replies.map(r => {
         r.value = Buffer.from(r.value, 'base64').toString('utf-8');
