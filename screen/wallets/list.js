@@ -8,7 +8,6 @@ import { PlaceholderWallet } from '../../class';
 import WalletImport from '../../class/walletImport';
 import DeeplinkSchemaMatch from '../../class/deeplink-schema-match';
 let EV = require('../../events');
-let A = require('../../analytics');
 /** @type {AppStorage} */
 let BlueApp = require('../../BlueApp');
 let loc = require('../../loc');
@@ -320,38 +319,6 @@ export default class WalletsList extends Component {
         </TouchableOpacity>
       </View>
     );
-  };
-
-  renderLocalTrader = () => {
-    if (BlueApp.getWallets().length > 0 && !BlueApp.getWallets().some(wallet => wallet.type === PlaceholderWallet.type)) {
-      return (
-        <TouchableOpacity
-          onPress={() => {
-            this.props.navigation.navigate('HodlHodl', { fromWallet: this.state.wallet });
-          }}
-          style={{
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            marginHorizontal: 16,
-            marginVertical: 16,
-            backgroundColor: '#eef0f4',
-            padding: 16,
-            borderRadius: 6,
-          }}
-        >
-          <View style={{ flexDirection: 'column' }}>
-            <Text style={{ fontSize: 16, fontWeight: '600', color: '#0C2550' }}>Local Trader</Text>
-            <Text style={{ fontSize: 13, fontWeight: '500', color: '#9AA0AA' }}>A p2p exchange</Text>
-          </View>
-          <View style={{ flexDirection: 'column', backgroundColor: '#007AFF', borderRadius: 16 }}>
-            <Text style={{ paddingHorizontal: 16, paddingVertical: 8, fontSize: 13, color: '#fff', fontWeight: '600' }}>New</Text>
-          </View>
-        </TouchableOpacity>
-      );
-    } else {
-      return null;
-    }
   };
 
   renderWalletsCarousel = () => {

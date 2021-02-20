@@ -195,10 +195,6 @@ export class WatchOnlyWallet extends LegacyWallet {
     return this.getAddress() === address;
   }
 
-  allowHodlHodlTrading() {
-    return this.isHd();
-  }
-
   useWithHardwareWalletEnabled() {
     return !!this.use_with_hardware_wallet;
   }

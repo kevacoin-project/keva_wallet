@@ -18,7 +18,6 @@ import {
 } from 'react-native';
 import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 const EV = require('../events');
-const A = require('../analytics');
 /** @type {AppStorage} */
 const BlueApp = require('../BlueApp');
 const loc = require('../loc');
@@ -53,7 +52,6 @@ export default class WalletImport {
         WalletImport.removePlaceholderWallet();
         BlueApp.wallets.push(w);
         await BlueApp.saveToDisk();
-        A(A.ENUM.CREATED_WALLET);
         Alert.alert(loc.wallets.import.do_import, loc.wallets.import.success, [{text: "OK", onPress: ()=>{}}]);
       }
       EV(EV.enum.WALLETS_COUNT_CHANGED);

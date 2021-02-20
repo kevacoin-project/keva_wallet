@@ -8,19 +8,11 @@ import { BlueTextCentered, BlueButton } from './BlueComponents';
 import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 import { Chain } from './models/bitcoinUnits';
 import QuickActions from 'react-native-quick-actions';
-import * as Sentry from '@sentry/react-native';
 import OnAppLaunch from './class/onAppLaunch';
 import DeeplinkSchemaMatch from './class/deeplink-schema-match';
 import BitcoinBIP70TransactionDecode from './bip70/bip70';
 import { Provider } from 'react-redux';
 import { configureStore } from './reducers';
-const A = require('./analytics');
-
-if (process.env.NODE_ENV !== 'development') {
-  Sentry.init({
-    dsn: 'https://23377936131848ca8003448a893cb622@sentry.io/1295736',
-  });
-}
 
 const bitcoinModalString = 'Kevacoin address';
 const lightningModalString = 'Lightning Invoice';
@@ -115,7 +107,6 @@ export default class App extends React.Component {
   _handleAppStateChange = async nextAppState => {
     if (BlueApp.getWallets().length > 0) {
       if ((this.state.appState.match(/background/) && nextAppState) === 'active' || nextAppState === undefined) {
-        setTimeout(() => A(A.ENUM.APP_UNSUSPENDED), 2000);
         const clipboard = await Clipboard.getString();
         const isAddressFromStoredWallet = BlueApp.getWallets().some(wallet => {
           if (wallet.chain === Chain.ONCHAIN) {

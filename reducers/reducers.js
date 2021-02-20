@@ -8,6 +8,7 @@ import {
   SET_KEYVALUE_LIST,
   SET_MEDIA_INFO,
   CURRENT_KEYVALUE_LIST_VERSION,
+  SET_REACTION,
 } from '../actions'
 
 const initNamespaceList = {namespaces: {}, order: []};
@@ -117,9 +118,33 @@ function mediaInfoList(state = initMediaInfoList, action) {
   }
 }
 
+const initReactions = {}
+
+// Store reactions, e.g. comments, rewards, shares.
+function reactions(state = initReactions, action) {
+  switch (action.type) {
+    case SET_REACTION:
+      if (action.tx_hash) {
+        if (action.info) {
+          return {...state, [action.tx_hash]: action.info}
+        } else {
+          // Delete the reactions of given tx_hash
+          let resultList = {...state};
+          delete resultList[action.tx_hash];
+          return resultList;
+        }
+      }
+      // Remove all the old data
+      return {}
+    default:
+      return state;
+  }
+}
+
 export const appReducer = combineReducers({
   namespaceList,
   otherNamespaceList,
   keyValueList,
   mediaInfoList,
+  reactions,
 });

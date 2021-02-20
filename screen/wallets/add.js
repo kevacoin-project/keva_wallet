@@ -32,7 +32,6 @@ import { AppStorage, HDSegwitBech32Wallet, SegwitP2SHWallet } from '../../class'
 import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 import { Icon } from 'react-native-elements';
 let EV = require('../../events');
-let A = require('../../analytics');
 let BlueApp: AppStorage = require('../../BlueApp');
 let loc = require('../../loc');
 export default class WalletsAdd extends Component {
@@ -306,12 +305,10 @@ export default class WalletsAdd extends Component {
                               return alert(Err);
                               // giving app, not adding anything
                             }
-                            A(A.ENUM.CREATED_LIGHTNING_WALLET);
                             await w.generate();
                             BlueApp.wallets.push(w);
                             await BlueApp.saveToDisk();
                             EV(EV.enum.WALLETS_COUNT_CHANGED);
-                            A(A.ENUM.CREATED_WALLET);
                             ReactNativeHapticFeedback.trigger('notificationSuccess', { ignoreAndroidSystemSettings: false });
                             this.props.navigation.navigate('PleaseBackupLNDHub', {
                               wallet: w,
@@ -338,7 +335,6 @@ export default class WalletsAdd extends Component {
                           BlueApp.wallets.push(w);
                           await BlueApp.saveToDisk();
                           EV(EV.enum.WALLETS_COUNT_CHANGED);
-                          A(A.ENUM.CREATED_WALLET);
                           ReactNativeHapticFeedback.trigger('notificationSuccess', { ignoreAndroidSystemSettings: false });
                           if (w.type === HDSegwitP2SHWallet.type || w.type === HDSegwitBech32Wallet.type) {
                             this.props.navigation.navigate('PleaseBackup', {

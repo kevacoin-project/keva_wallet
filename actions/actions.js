@@ -6,6 +6,7 @@ export const SET_OTHER_NAMESPACES_ORDER = 'SET_OTHER_NAMESPACES_ORDER';
 export const DELETE_OTHER_NAMESPACE = 'DELETE_OTHER_NAMESPACE';
 export const SET_KEYVALUE_LIST = 'SET_KEYVALUE_LIST';
 export const SET_MEDIA_INFO = 'SET_MEDIA_INFO';
+export const SET_REACTION = 'SET_REACTION';
 
 export const CURRENT_KEYVALUE_LIST_VERSION = 3;
 
@@ -35,4 +36,8 @@ export function setKeyValueList(namespaceId, keyValues) {
 
 export function setMediaInfo(CID, info) {
   return { type: SET_MEDIA_INFO, CID, info }
+}
+
+export function setReaction(tx_hash, info) {
+  return { type: SET_REACTION, tx_hash, info }
 }

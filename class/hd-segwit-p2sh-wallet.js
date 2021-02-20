@@ -163,7 +163,4 @@ export class HDSegwitP2SHWallet extends AbstractHDElectrumWallet {
     return address;
   }
 
-  allowHodlHodlTrading() {
-    return true;
-  }
 }
