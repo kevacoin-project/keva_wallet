@@ -14,12 +14,10 @@ let BlueApp = require('../../BlueApp');
 let loc = require('../../loc');
 let BlueElectrum = require('../../BlueElectrum');
 import { showStatus, hideStatus, enableStatus } from '../../util';
-import { populateReactions } from '../../class/keva-ops';
-import { setAllReactions } from '../../actions/actions';
 
 const WalletsListSections = { CAROUSEL: 'CAROUSEL', LOCALTRADER: 'LOCALTRADER', TRANSACTIONS: 'TRANSACTIONS' };
 
-class WalletsList extends Component {
+export default class WalletsList extends Component {
   walletsCarousel = React.createRef();
   viewPagerRef = React.createRef();
 
@@ -43,8 +41,6 @@ class WalletsList extends Component {
   }
 
   componentDidMount() {
-    const {reactions, namespaceList, dispatch} = this.props;
-
     // the idea is that upon wallet launch we will refresh
     // all balances and all transactions here:
     InteractionManager.runAfterInteractions(async () => {
@@ -60,10 +56,6 @@ class WalletsList extends Component {
         await BlueApp.fetchWalletTransactions();
         let end = +new Date();
         console.log('fetch all wallet txs took', (end - start) / 1000, 'sec');
-        if (!reactions.populated) {
-          const allReactions = populateReactions();
-          dispatch(setAllReactions(allReactions));
-        }
       } catch (error) {
         console.log(error);
       }
@@ -490,12 +482,3 @@ WalletsList.propTypes = {
     navigate: PropTypes.func,
   }),
 };
-
-function mapStateToProps(state) {
-  return {
-    reactions: state.reactions,
-    namespaceList: state.namespaceList,
-  }
-}
-
-export default WalletsListScreen = connect(mapStateToProps)(WalletsList)

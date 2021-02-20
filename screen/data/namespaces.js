@@ -17,6 +17,7 @@ import {
   LayoutAnimation,
   Keyboard,
   Image,
+  InteractionManager,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import {
@@ -35,6 +36,7 @@ import {
   setNamespaceList, setOtherNamespaceList,
   setNamespaceOrder, setOtherNamespaceOrder,
   deleteOtherNamespace, setKeyValueList,
+  setAllReactions,
 } from '../../actions'
 import { HDSegwitP2SHWallet,  } from '../../class';
 import { FALLBACK_DATA_PER_BYTE_FEE } from '../../models/networkTransactionFees';
@@ -57,7 +59,7 @@ import StepModal from "../../common/StepModalWizard";
 import {
   createKevaNamespace, findMyNamespaces,
   findOtherNamespace,
-  waitPromise
+  waitPromise, populateReactions,
 } from '../../class/keva-ops';
 
 const COPY_ICON = (<Icon name="ios-copy" size={22} color={KevaColors.extraLightText}
@@ -792,6 +794,13 @@ class Namespaces extends React.Component {
   }
 
   async componentDidMount() {
+    const { dispatch, reactions } = this.props;
+    InteractionManager.runAfterInteractions(async () => {
+      if (!reactions.populated) {
+        const allReactions = populateReactions();
+        dispatch(setAllReactions(allReactions));
+      }
+    });
   }
 
   onNSInfo = (nsData) => {
@@ -1041,6 +1050,7 @@ function mapStateToProps(state) {
   return {
     namespaceList: state.namespaceList,
     otherNamespaceList: state.otherNamespaceList,
+    reactions: state.reactions,
   }
 }
 
