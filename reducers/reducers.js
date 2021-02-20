@@ -9,6 +9,7 @@ import {
   SET_MEDIA_INFO,
   CURRENT_KEYVALUE_LIST_VERSION,
   SET_REACTION,
+  SET_ALL_REACTIONS
 } from '../actions'
 
 const initNamespaceList = {namespaces: {}, order: []};
@@ -118,7 +119,7 @@ function mediaInfoList(state = initMediaInfoList, action) {
   }
 }
 
-const initReactions = {}
+const initReactions = {populated: false}
 
 // Store reactions, e.g. comments, rewards, shares.
 function reactions(state = initReactions, action) {
@@ -134,8 +135,13 @@ function reactions(state = initReactions, action) {
           return resultList;
         }
       }
+      return state;
+    case SET_ALL_REACTIONS:
+      if (action.reactions) {
+        return {populated: true, ...action.reactions};
+      }
       // Remove all the old data
-      return {}
+      return {...initReactions}
     default:
       return state;
   }

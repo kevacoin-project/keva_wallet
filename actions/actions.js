@@ -7,6 +7,7 @@ export const DELETE_OTHER_NAMESPACE = 'DELETE_OTHER_NAMESPACE';
 export const SET_KEYVALUE_LIST = 'SET_KEYVALUE_LIST';
 export const SET_MEDIA_INFO = 'SET_MEDIA_INFO';
 export const SET_REACTION = 'SET_REACTION';
+export const SET_ALL_REACTIONS = 'SET_ALL_REACTIONS';
 
 export const CURRENT_KEYVALUE_LIST_VERSION = 3;
 
@@ -40,4 +41,8 @@ export function setMediaInfo(CID, info) {
 
 export function setReaction(tx_hash, info) {
   return { type: SET_REACTION, tx_hash, info }
+}
+
+export function setAllReactions(reactions) {
+  return { type: SET_ALL_REACTIONS, reactions }
 }

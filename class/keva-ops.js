@@ -2,10 +2,15 @@ const bitcoin = require('bitcoinjs-lib');
 const base58check = require('bs58check')
 const coinSelectAccumulative = require('coinselect/accumulative');
 let loc = require('../loc');
+const BlueApp = require('../BlueApp');
 
 export const KEVA_OP_NAMESPACE = 0xd0;
 export const KEVA_OP_PUT = 0xd1;
 export const KEVA_OP_DELETE = 0xd2;
+
+export const REACTION_REPLY   = 0x01;
+export const REACTION_REWARD  = 0x02;
+export const REACTION_SHARE   = 0x03;
 
 const convert = (from, to) => str => Buffer.from(str, from).toString(to)
 const utf8ToHex = convert('utf8', 'hex')
@@ -1513,4 +1518,48 @@ export async function getNamespaceShortcode(ecl, namespaceId) {
     return shortCode;
   }
   return -1;
+}
+
+export function getTxReaction(tx) {
+  for (let vout of tx.outputs) {
+    const keva = parseKeva(vout.scriptPubKey.asm);
+    if (!keva) {
+      continue;
+    }
+    const kevaJson = kevaToJson(keva);
+    if (kevaJson.op != 'KEVA_OP_PUT') {
+      continue;
+    }
+
+    const {keyType, partialTxId} = parseSpecialKey(kevaJson.key);
+    if (keyType == 'share') {
+      return {keyType: REACTION_SHARE, tx_hash: partialTxId}
+    } else if (keyType == 'comment') {
+
+      return {keyType: REACTION_REPLY, tx_hash: partialTxId}
+    } else if (keyType == 'reward') {
+      return {keyType: REACTION_REWARD, tx_hash: partialTxId}
+    }
+  }
+  return {};
+}
+
+export function populateReactions() {
+  const wallets = BlueApp.getWallets();
+  if (wallets.length == 0) {
+    return;
+  }
+
+  let reactions = {};
+  for (const wallet of wallets) {
+    const transactions = wallet.getTransactions();
+    for (const tx of transactions) {
+      const {keyType, tx_hash} = getTxReaction(tx);
+      if (!keyType) {
+        continue;
+      }
+      reactions[tx_hash] = {keyType, tx_hash: tx.hash}
+    }
+  }
+  return reactions;
 }

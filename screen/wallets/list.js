@@ -4,6 +4,7 @@ import { SafeBlueArea, WalletsCarousel, BlueHeaderDefaultMain, BlueTransactionLi
 import { NavigationEvents } from 'react-navigation';
 import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 import PropTypes from 'prop-types';
+import { connect } from 'react-redux'
 import { PlaceholderWallet } from '../../class';
 import WalletImport from '../../class/walletImport';
 import DeeplinkSchemaMatch from '../../class/deeplink-schema-match';
@@ -13,10 +14,12 @@ let BlueApp = require('../../BlueApp');
 let loc = require('../../loc');
 let BlueElectrum = require('../../BlueElectrum');
 import { showStatus, hideStatus, enableStatus } from '../../util';
+import { populateReactions } from '../../class/keva-ops';
+import { setAllReactions } from '../../actions/actions';
 
 const WalletsListSections = { CAROUSEL: 'CAROUSEL', LOCALTRADER: 'LOCALTRADER', TRANSACTIONS: 'TRANSACTIONS' };
 
-export default class WalletsList extends Component {
+class WalletsList extends Component {
   walletsCarousel = React.createRef();
   viewPagerRef = React.createRef();
 
@@ -40,6 +43,8 @@ export default class WalletsList extends Component {
   }
 
   componentDidMount() {
+    const {reactions, namespaceList, dispatch} = this.props;
+
     // the idea is that upon wallet launch we will refresh
     // all balances and all transactions here:
     InteractionManager.runAfterInteractions(async () => {
@@ -55,6 +60,10 @@ export default class WalletsList extends Component {
         await BlueApp.fetchWalletTransactions();
         let end = +new Date();
         console.log('fetch all wallet txs took', (end - start) / 1000, 'sec');
+        if (!reactions.populated) {
+          const allReactions = populateReactions();
+          dispatch(setAllReactions(allReactions));
+        }
       } catch (error) {
         console.log(error);
       }
@@ -481,3 +490,12 @@ WalletsList.propTypes = {
     navigate: PropTypes.func,
   }),
 };
+
+function mapStateToProps(state) {
+  return {
+    reactions: state.reactions,
+    namespaceList: state.namespaceList,
+  }
+}
+
+export default WalletsListScreen = connect(mapStateToProps)(WalletsList)
