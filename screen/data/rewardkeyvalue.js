@@ -27,6 +27,7 @@ import { connect } from 'react-redux'
 import { rewardKeyValue } from '../../class/keva-ops';
 import StepModal from "../../common/StepModalWizard";
 import Biometric from '../../class/biometrics';
+import { setReaction } from '../../actions'
 
 class RewardKeyValue extends React.Component {
 
@@ -123,7 +124,7 @@ class RewardKeyValue extends React.Component {
   }
 
   getRewardKeyValueModal = () => {
-    const { namespaceList } = this.props;
+    const { namespaceList, reactions, dispatch } = this.props;
     const { rewardTxid, onGoBack } = this.props.navigation.state.params;
     if (!this.state.showKeyValueModal) {
       return null;
@@ -245,6 +246,9 @@ class RewardKeyValue extends React.Component {
                   broadcastErr: result.message,
                 });
               }
+              const reaction = reactions[rewardTxid] || {};
+              reaction["reward"] = this.namespaceTx;
+              dispatch(setReaction(rewardTxid, reaction));
               await BlueApp.saveToDisk();
               this.setState({ isBroadcasting: false, showSkip: false });
             } catch (err) {
@@ -383,6 +387,7 @@ function mapStateToProps(state) {
   return {
     keyValueList: state.keyValueList,
     namespaceList: state.namespaceList,
+    reactions: state.reactions,
   }
 }
 

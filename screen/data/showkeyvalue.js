@@ -20,10 +20,10 @@ const StyleSheet = require('../../PlatformStyleSheet');
 const KevaColors = require('../../common/KevaColors');
 import { THIN_BORDER, timeConverter, toastError, getInitials, stringToColor } from "../../util";
 import {
-  parseSpecialKey, getKeyValueFromTxid,
-  getNamespaceInfoFromTx, getSpecialKeyText
+  parseSpecialKey,
+  getSpecialKeyText
 } from '../../class/keva-ops';
-import { setKeyValueList, setMediaInfo } from '../../actions'
+import { setReplies, setMediaInfo } from '../../actions'
 import {
   BlueNavigationStyle,
   BlueLoading,
@@ -102,6 +102,7 @@ class ShowKeyValue extends React.Component {
       showPicModal: false,
       thumbnail: null,
       opacity: 0,
+      replyCount: 0,
       replies: [],
     };
   }
@@ -128,7 +129,12 @@ class ShowKeyValue extends React.Component {
   }
 
   async componentDidMount() {
-    const {key, value, shares, likes, favorite, shortCode, displayName} = this.props.navigation.state.params;
+    const {keyValueList} = this.props;
+    const {namespaceId, index, type, shortCode, displayName} = this.props.navigation.state.params;
+
+    const keyValues = keyValueList.keyValues[namespaceId]
+    const key = keyValues[index].key;
+    const value = keyValues[index].value;
     const {mediaCID, mimeType} = extractMedia(value);
     const {mediaInfoList, dispatch} = this.props;
 
@@ -163,17 +169,20 @@ class ShowKeyValue extends React.Component {
       }
     }
 
+    /*
     this.setState({
       key,
       value,
+      replyCount: replies, // The replies from the navigator is the count, not list.
       shares,
       likes,
       favorite,
       shortCode,
       displayName
     });
-    await this.fetchReplies();
+    */
 
+    await this.fetchReplies();
     this.subs = [
       this.props.navigation.addListener('willFocus', async (payload) => {
         try {
@@ -377,32 +386,9 @@ class ShowKeyValue extends React.Component {
     }
   }
 
-  // Go back from the reply screen.
-  onGoBack = (reply) => {
-    // Perform an instant update. We will still fetch
-    // from the server.
-    let replies = this.state.replies || [];
-    replies.push(reply);
-    this.setState({
-      replies: this.sortReplies(replies),
-    });
-  }
-
-  // Go back from the reward screen.
-  onRewardGoBack = (reward) => {
-    // Perform an instant update. We will still fetch
-    // from the server.
-    let rewards = this.state.rewards || [];
-    rewards.push(reward);
-    this.setState({
-      rewards,
-      favorite: true,
-    });
-  }
-
   onReply = () => {
     const {navigation, namespaceList} = this.props;
-    const {rootAddress, replyTxid} = navigation.state.params;
+    const {replyTxid} = navigation.state.params;
     // Must have a namespace.
     if (Object.keys(namespaceList).length == 0) {
       toastError('Create a namespace first');
@@ -410,7 +396,6 @@ class ShowKeyValue extends React.Component {
     }
 
     navigation.navigate('ReplyKeyValue', {
-      rootAddress,
       replyTxid,
       onGoBack: this.onGoBack,
     })
@@ -418,7 +403,7 @@ class ShowKeyValue extends React.Component {
 
   onReward = () => {
     const {navigation, namespaceList} = this.props;
-    const {rootAddress, rewardTxid} = navigation.state.params;
+    const {rewardTxid} = navigation.state.params;
     // Must have a namespace.
     if (Object.keys(namespaceList).length == 0) {
       toastError('Create a namespace first');
@@ -426,22 +411,21 @@ class ShowKeyValue extends React.Component {
     }
 
     navigation.navigate('RewardKeyValue', {
-      rootAddress,
       rewardTxid,
       onGoBack: this.onRewardGoBack,
     })
   }
 
   fetchReplies = async () => {
-    const {dispatch, navigation, keyValueList, namespaceList} = this.props;
+    const {dispatch, navigation, index, type, hashtag, keyValueList, reactions} = this.props;
     const {replyTxid, namespaceId} = navigation.state.params;
 
     try {
       this.setState({isRefreshing: true});
       const results = await BlueElectrum.blockchainKeva_getKeyValueReactions(replyTxid);
-      const reactions = results.result;
+      const totalReactions = results.result;
       /*
-        reactions format:
+        totalReactions format:
         {
           "key": "<key>",
           "value": "<value>",
@@ -462,24 +446,33 @@ class ShowKeyValue extends React.Component {
           ...
         }
       */
-      const keyValues = keyValueList.keyValues[namespaceId];
-      // Update the replies and shares for this.
-      const thisKV = keyValues ? keyValues.find(kv => kv.tx_hash == replyTxid) : {};
       // Decode replies base64
-      const replies = reactions.replies.map(r => {
+      const replies = totalReactions.replies.map(r => {
         r.value = Buffer.from(r.value, 'base64').toString('utf-8');
         return r;
       });
+      dispatch(setReplies(replies));
+
+      // Check if it is a favorite.
+      const reaction = reactions[replyTxid];
+      const favorite = reaction && !!reaction['reward'];
+
+      // Update the replies, shares and favorite.
+      if (type == 'keyvalue') {
+        const keyValues = keyValueList.keyValues[namespaceId];
+        let keyValue = keyValues[index];
+        keyValue.favorite = favorite;
+        keyValue.likes = totalReactions.likes;
+        keyValue.shares = totalReactions.shares;
+        keyValue.replies = totalReactions.replies.length;
+        dispatch(setKeyValue(namespaceId, index, keyValue));
+      } else if (type == 'hashtag') {
+
+      }
+
       this.setState({
-        isRefreshing: false,
-        replies: replies,
-        shares: thisKV.shares,
-        rewards: thisKV.likes,
-        favorite: thisKV.favorite,
+        isRefreshing: false
       });
-
-      dispatch(setKeyValueList(namespaceId, keyValues));
-
     } catch(err) {
       console.warn(err);
       this.setState({isRefreshing: false});
@@ -572,7 +565,17 @@ class ShowKeyValue extends React.Component {
   }
 
   render() {
-    let {isRaw, value, key, replies, shares, likes, favorite, CIDHeight, CIDWidth, thumbnail, shortCode, displayName} = this.state;
+    const {replies, keyValueList} = this.props;
+    let {isRaw, CIDHeight, CIDWidth, thumbnail} = this.state;
+    const {shortCode, displayName, namespaceId, index} = this.props.navigation.state.params;
+    const keyValue = (keyValueList.keyValues[namespaceId])[index];
+    const key = keyValue.key;
+    let value = keyValue.value;
+    const favorite = keyValue.favorite;
+    const replyCount = keyValue.replies;
+    const shareCount = keyValue.shares;
+    const likeCount = keyValue.likes;
+
     const shareInfo = parseSpecialKey(key);
     if (shareInfo) {
       // The shareValue contains the shared media for preview.
@@ -627,11 +630,11 @@ class ShowKeyValue extends React.Component {
           <View style={{flexDirection: 'row'}}>
             <TouchableOpacity onPress={() => this.onReply()} style={{flexDirection: 'row'}}>
               <MIcon name="chat-bubble-outline" size={22} style={styles.talkIcon} />
-              {(replies && replies.length > 0) && <Text style={styles.count}>{replies.length}</Text>}
+              {(replyCount > 0) && <Text style={styles.count}>{replyCount}</Text>}
             </TouchableOpacity>
             <TouchableOpacity onPress={() => this.onShare(key, value)} style={{flexDirection: 'row'}}>
               <MIcon name="cached" size={22} style={styles.shareIcon} />
-              {(shares > 0) && <Text style={styles.count}>{shares}</Text>}
+              {(shareCount > 0) && <Text style={styles.count}>{shareCount}</Text>}
             </TouchableOpacity>
             <TouchableOpacity onPress={() => this.onReward()} style={{flexDirection: 'row'}}>
               {
@@ -640,7 +643,7 @@ class ShowKeyValue extends React.Component {
                 :
                   <MIcon name="favorite-border" size={22} style={styles.shareIcon} />
               }
-              {(likes > 0) && <Text style={styles.count}>{likes}</Text>}
+              {(likeCount > 0) && <Text style={styles.count}>{likeCount}</Text>}
             </TouchableOpacity>
           </View>
           <TouchableOpacity onPress={() => this.onToggleRaw()}>
@@ -671,6 +674,9 @@ function mapStateToProps(state) {
     keyValueList: state.keyValueList,
     namespaceList: state.namespaceList,
     mediaInfoList: state.mediaInfoList,
+    reactions: state.reactions,
+    replies: state.replies,
+    hashtags: state.hashtags,
   }
 }
 

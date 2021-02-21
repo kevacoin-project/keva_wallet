@@ -46,7 +46,7 @@ import { extractMedia, getImageGatewayURL, removeMedia } from './mediaManager';
 
 const PLAY_ICON  = <MIcon name="play-arrow" size={50} color="#fff"/>;
 
-class Item extends React.PureComponent {
+class Item extends React.Component {
 
   constructor(props) {
     super(props);
@@ -107,7 +107,7 @@ class Item extends React.PureComponent {
   }
 
   render() {
-    let {item, onShow, onReply, onShare, onReward, namespaceId, displayName, navigation} = this.props;
+    let {item, index, onShow, onReply, onShare, onReward, namespaceId, displayName, navigation} = this.props;
     let {thumbnail} = this.state;
     const {isOther} = navigation.state.params;
     const {mediaCID, mimeType} = extractMedia(item.value);
@@ -123,7 +123,7 @@ class Item extends React.PureComponent {
 
     return (
       <View style={styles.card}>
-        <TouchableOpacity onPress={() => onShow(namespaceId, displayName, item.key, item.value, item.tx_hash, item.shares, item.likes, item.height, item.favorite)}>
+        <TouchableOpacity onPress={() => onShow(namespaceId, index, displayName, item.key, item.value, item.tx_hash, item.shares, item.likes, item.height, item.favorite)}>
           <View style={{flex:1,paddingHorizontal:10,paddingTop:2}}>
             <View style={{flexDirection:'row',alignItems:'center',justifyContent:'space-between'}}>
               <View style={{paddingRight: 10, paddingTop: 5, paddingBottom: 8}}>
@@ -279,8 +279,7 @@ class KeyValues extends React.Component {
   }
 
   fetchKeyValues = async (min_tx_num) => {
-    const {navigation, dispatch, keyValueList, namespaceList} = this.props;
-    const myNamespaces = namespaceList.namespaces;
+    const {navigation, dispatch, keyValueList, namespaceList, reactions} = this.props;
     let {namespaceId, shortCode} = navigation.state.params;
 
     if (!namespaceId && shortCode) {
@@ -301,16 +300,12 @@ class KeyValues extends React.Component {
     }
     const keyValues = this.processKeyValueList(history.keyvalues);
 
-    // Add the rewards
-    /*
+    // Check if it is a favorite.
     for (let kv of keyValues) {
-      const txRewards = rewards.filter(r => kv.tx.startsWith(r.partialTxId));
-      if (txRewards && txRewards.length > 0) {
-        kv.rewards = txRewards;
-        kv.favorite = txRewards.find(r => Object.keys(myNamespaces).find(n => myNamespaces[n].id == r.rewarder.namespaceId));
-      }
+      const reaction = reactions[kv.tx_hash];
+      kv.favorite = reaction && !!reaction['reward'];
     }
-    */
+
     if (history.min_tx_num < this.min_tx_num) {
       const combined = keyValueList.keyValues[namespaceId].concat(keyValues);
       dispatch(setKeyValueList(namespaceId, combined));
@@ -541,22 +536,19 @@ class KeyValues extends React.Component {
     );
   }
 
-  onShow = (namespaceId, displayName, key, value, tx, shares, likes, height, favorite) => {
+  onShow = (namespaceId, index, displayName, key, value, tx, shares, likes, height, favorite) => {
     const {navigation} = this.props;
     const isOther = navigation.getParam('isOther');
     const shortCode = navigation.getParam('shortCode');
     navigation.push('ShowKeyValue', {
       namespaceId,
+      index,
+      type: 'keyvalue',
       shortCode,
       displayName,
-      key,
-      value,
       replyTxid: tx,
       shareTxid: tx,
       rewardTxid: tx,
-      shares,
-      likes,
-      favorite,
       isOther,
       height,
     });
@@ -795,7 +787,7 @@ class KeyValues extends React.Component {
             keyExtractor={(item, index) => item.key + index}
             ListFooterComponent={footerLoader}
             renderItem={({item, index}) =>
-              <Item item={item} key={index} dispatch={dispatch} onDelete={this.onDelete}
+              <Item item={item} index={index} key={index} dispatch={dispatch} onDelete={this.onDelete}
                 onShow={this.onShow} namespaceId={namespaceId}
                 displayName={displayName}
                 onReply={this.onReply}
@@ -819,6 +811,7 @@ function mapStateToProps(state) {
     namespaceList: state.namespaceList,
     otherNamespaceList: state.otherNamespaceList,
     mediaInfoList: state.mediaInfoList,
+    reactions: state.reactions,
   }
 }
 

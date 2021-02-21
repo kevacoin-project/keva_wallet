@@ -6,10 +6,15 @@ import {
   DELETE_OTHER_NAMESPACE,
   SET_OTHER_NAMESPACES_ORDER,
   SET_KEYVALUE_LIST,
+  SET_KEYVALUE,
   SET_MEDIA_INFO,
   CURRENT_KEYVALUE_LIST_VERSION,
   SET_REACTION,
-  SET_ALL_REACTIONS
+  SET_ALL_REACTIONS,
+  SET_HASHTAGS,
+  SET_HASHTAG_ENTRY,
+  SET_REPLIES,
+  ADD_REPLY_ENTRY,
 } from '../actions'
 
 const initNamespaceList = {namespaces: {}, order: []};
@@ -93,6 +98,16 @@ function keyValueList(state = initKeyValueList, action) {
       }
       // Remove all the old data.
       return {...initKeyValueList};
+    case SET_KEYVALUE:
+      if (action.namespaceId && action.index && action.keyValue) {
+        let newKeyValues = [...state.keyValues[action.namespaceId]];
+        newKeyValues[action.index] = {...newKeyValues[action.index], ...action.keyValue}
+        return {
+          keyValues: {...state.keyValues, [action.namespaceId]: newKeyValues},
+          version: CURRENT_KEYVALUE_LIST_VERSION
+        }
+      }
+      return state;
     default:
       return state;
   }
@@ -121,7 +136,7 @@ function mediaInfoList(state = initMediaInfoList, action) {
 
 const initReactions = {populated: false}
 
-// Store reactions, e.g. comments, rewards, shares.
+// Store our own reactions, e.g. comments, rewards, shares.
 function reactions(state = initReactions, action) {
   switch (action.type) {
     case SET_REACTION:
@@ -147,10 +162,70 @@ function reactions(state = initReactions, action) {
   }
 }
 
+const initHashtags = [];
+/*
+  Data returned by ElectrumX API
+  {
+    hashtags: [{
+      'tx_hash': hash_to_hex_str(tx_hash),
+      'displayName': display_name,
+      'height': height, 'shortCode': shortCode,
+      'time': timestamp,
+      'replies': replies, 'shares': shares, 'likes': likes,
+      'namespace': namespaceId,
+      'key': key,
+      'value': value,
+      'type': REG|PUT|DEL|UNK
+    }],
+    min_tx_num: 123
+  }
+*/
+function hashtags(state = initHashtags, action) {
+  switch (action.type) {
+    case SET_HASHTAGS:
+      if (action.hashtags) {
+        return [...action.hashtags];
+      }
+      // Clear everything.
+      return initHashtags;
+    case SET_HASHTAG_ENTRY:
+      if (action.index && action.entry) {
+        let newState = [...state];
+        newState[action.index] = {...state[action.index], ...action.entry};
+        return newState;
+      }
+      return state;
+    default:
+      return state;
+  }
+}
+
+const initReplies = [];
+function replies(state=initReplies, action) {
+  switch (action.type) {
+    case SET_REPLIES:
+      if (action.replies) {
+        return [...action.replies];
+      }
+      // Clear everything.
+      return initReplies;
+    case ADD_REPLY_ENTRY:
+      if (action.reply) {
+        let newState = [action.reply, ...state];
+        return newState;
+      }
+      return state;
+    default:
+      return state;
+  }
+}
+
 export const appReducer = combineReducers({
   namespaceList,
   otherNamespaceList,
   keyValueList,
   mediaInfoList,
   reactions,
+  replies,
+  hashtags,
 });

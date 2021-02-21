@@ -112,7 +112,7 @@ class Item extends React.Component {
 
     return (
       <View style={styles.card}>
-        <TouchableOpacity onPress={() => onShow(item.key, item.value, item.tx, item.replies, item.shares, item.rewards, item.height, item.favorite, item.shortCode, item.displayName)}>
+        <TouchableOpacity onPress={() => onShow(item.key, item.value, item.tx, item.replies, item.shares, item.likes, item.height, item.favorite, item.shortCode, item.displayName)}>
           <View style={{flex:1,paddingHorizontal:10,paddingTop:2}}>
             <View style={{flexDirection:'row',alignItems:'center',justifyContent:'space-between'}}>
               <View style={{paddingRight: 10}}>
@@ -166,7 +166,7 @@ class Item extends React.Component {
               :
                 <MIcon name="favorite-border" size={22} style={styles.shareIcon} />
             }
-            {(item.rewards > 0) && <Text style={styles.count}>{item.rewards}</Text> }
+            {(item.likes > 0) && <Text style={styles.count}>{item.likes}</Text> }
           </TouchableOpacity>
         </View>
       </View>
@@ -214,6 +214,7 @@ class HashtagExplore extends React.Component {
   }
 
   fetchHashtag = async (min_tx_num) => {
+    const {reactions} = this.props;
     /*
       Data returned by ElectrumX API
       {
@@ -239,19 +240,21 @@ class HashtagExplore extends React.Component {
     }
 
     const keyValues = history.hashtags.map(h => {
+      const reaction = reactions[h.tx_hash];
+      const favorite = reaction && !!reaction['reward'];
       return {
         displayName: h.displayName,
         shortCode: h.shortCode,
         tx: h.tx_hash,
         replies: h.replies,
         shares: h.shares,
-        rewards: h.likes,
+        likes: h.likes,
         height: h.height,
         time: h.time,
         namespaceId: h.namespace,
         key: decodeKey(h.key),
         value: h.value ? Buffer.from(h.value, 'base64').toString() : '',
-        favorite: false, //TODO: fix this.
+        favorite,
       }
     });
 
@@ -310,7 +313,7 @@ class HashtagExplore extends React.Component {
     this.isBiometricUseCapableAndEnabled = await Biometric.isBiometricUseCapableAndEnabled();
   }
 
-  onShow = (key, value, tx, replies, shares, rewards, height, favorite, shortCode, displayName) => {
+  onShow = (key, value, tx, replies, shares, likes, height, favorite, shortCode, displayName) => {
     const {navigation} = this.props;
     const rootAddress = navigation.getParam('rootAddress');
     const namespaceId = navigation.getParam('namespaceId');
@@ -324,9 +327,9 @@ class HashtagExplore extends React.Component {
       replyTxid: tx,
       shareTxid: tx,
       rewardTxid: tx,
-      replies: [], //replies,
-      shares: [], //shares,
-      rewards: [], //rewards,
+      replies: replies,
+      shares: shares,
+      likes: likes,
       favorite,
       height,
     });
@@ -485,6 +488,7 @@ function mapStateToProps(state) {
   return {
     namespaceList: state.namespaceList,
     mediaInfoList: state.mediaInfoList,
+    reactions: state.reactions,
   }
 }
 

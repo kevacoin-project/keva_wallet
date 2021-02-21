@@ -5,9 +5,14 @@ export const SET_OTHER_NAMESPACES = 'SET_OTHER_NAMESPACES';
 export const SET_OTHER_NAMESPACES_ORDER = 'SET_OTHER_NAMESPACES_ORDER';
 export const DELETE_OTHER_NAMESPACE = 'DELETE_OTHER_NAMESPACE';
 export const SET_KEYVALUE_LIST = 'SET_KEYVALUE_LIST';
+export const SET_KEYVALUE = 'SET_KEYVALUE';
 export const SET_MEDIA_INFO = 'SET_MEDIA_INFO';
 export const SET_REACTION = 'SET_REACTION';
 export const SET_ALL_REACTIONS = 'SET_ALL_REACTIONS';
+export const SET_HASHTAGS = 'SET_HASHTAGS';
+export const SET_HASHTAG_ENTRY = 'SET_HASHTAG_ENTRY';
+export const SET_REPLIES = 'SET_REPLIES';
+export const ADD_REPLY_ENTRY = 'ADD_REPLY_ENTRY';
 
 export const CURRENT_KEYVALUE_LIST_VERSION = 3;
 
@@ -35,6 +40,10 @@ export function setKeyValueList(namespaceId, keyValues) {
   return { type: SET_KEYVALUE_LIST, namespaceId, keyValues }
 }
 
+export function setKeyValue(namespaceId, index, keyValue) {
+  return { type: SET_KEYVALUE, namespaceId, index, keyValue }
+}
+
 export function setMediaInfo(CID, info) {
   return { type: SET_MEDIA_INFO, CID, info }
 }
@@ -45,4 +54,20 @@ export function setReaction(tx_hash, info) {
 
 export function setAllReactions(reactions) {
   return { type: SET_ALL_REACTIONS, reactions }
+}
+
+export function setHashtags(hashtags) {
+  return { type: SET_HASHTAGS, hashtags }
+}
+
+export function updateHashtag(index, entry) {
+  return { type: SET_HASHTAG_ENTRY, index, entry }
+}
+
+export function setReplies(replies) {
+  return { type: SET_REPLIES, replies }
+}
+
+export function addReply(reply) {
+  return { type: ADD_REPLY_ENTRY, reply }
 }

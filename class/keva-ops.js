@@ -8,10 +8,6 @@ export const KEVA_OP_NAMESPACE = 0xd0;
 export const KEVA_OP_PUT = 0xd1;
 export const KEVA_OP_DELETE = 0xd2;
 
-export const REACTION_REPLY   = 0x01;
-export const REACTION_REWARD  = 0x02;
-export const REACTION_SHARE   = 0x03;
-
 const convert = (from, to) => str => Buffer.from(str, from).toString(to)
 const utf8ToHex = convert('utf8', 'hex')
 const hexToUtf8 = convert('hex', 'utf8')
@@ -1532,13 +1528,8 @@ export function getTxReaction(tx) {
     }
 
     const {keyType, partialTxId} = parseSpecialKey(kevaJson.key);
-    if (keyType == 'share') {
-      return {keyType: REACTION_SHARE, tx_hash: partialTxId}
-    } else if (keyType == 'comment') {
-
-      return {keyType: REACTION_REPLY, tx_hash: partialTxId}
-    } else if (keyType == 'reward') {
-      return {keyType: REACTION_REWARD, tx_hash: partialTxId}
+    if (keyType == 'share' || keyType == 'comment' || keyType == 'reward') {
+      return {keyType: keyType, tx_hash: partialTxId}
     }
   }
   return {};
@@ -1558,7 +1549,8 @@ export function populateReactions() {
       if (!keyType) {
         continue;
       }
-      reactions[tx_hash] = {keyType, tx_hash: tx.hash}
+      const reaction = reactions[tx_hash] || {};
+      reactions[tx_hash] = {[keyType]:  tx.hash, ...reaction};
     }
   }
   return reactions;
