@@ -23,7 +23,7 @@ import {
   parseSpecialKey,
   getSpecialKeyText, findTxIndex,
 } from '../../class/keva-ops';
-import { setReplies, setMediaInfo, setKeyValue, updateHashtag } from '../../actions'
+import { setReplies, setMediaInfo, setKeyValue, updateHashtag, setHashtags } from '../../actions'
 import {
   BlueNavigationStyle,
   BlueLoading,
@@ -262,7 +262,8 @@ class ShowKeyValue extends React.Component {
   }
 
   onHashtag = hashtag => {
-    const {navigation} = this.props;
+    const {navigation, dispatch} = this.props;
+    dispatch(setHashtags());
     navigation.push('HashtagKeyValues', {hashtag});
   }
 
