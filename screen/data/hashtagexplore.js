@@ -155,11 +155,11 @@ class Item extends React.Component {
             <MIcon name="chat-bubble-outline" size={22} style={styles.talkIcon} />
             {(item.replies > 0) && <Text style={styles.count}>{item.replies}</Text>}
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => onShare(item.tx, item.key, item.value, item.height)} style={{flexDirection: 'row'}}>
+          <TouchableOpacity onPress={() => onShare(index, item.tx, item.key, item.value, item.height)} style={{flexDirection: 'row'}}>
             <MIcon name="cached" size={22} style={styles.shareIcon} />
             {(item.shares > 0) && <Text style={styles.count}>{item.shares}</Text>}
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => onReward(item.tx, item.key, item.value, item.height)} style={{flexDirection: 'row'}}>
+          <TouchableOpacity onPress={() => onReward(index, item.tx, item.key, item.value, item.height)} style={{flexDirection: 'row'}}>
             {
               item.favorite ?
                 <MIcon name="favorite" size={22} style={[styles.shareIcon, {color: KevaColors.favorite}]} />
@@ -344,7 +344,7 @@ class HashtagExplore extends React.Component {
     })
   }
 
-  onShare = (shareTxid, key, value, blockHeight) => {
+  onShare = (index, shareTxid, key, value, blockHeight) => {
     const {navigation, namespaceList} = this.props;
     // Must have a namespace.
     if (Object.keys(namespaceList).length == 0) {
@@ -354,6 +354,8 @@ class HashtagExplore extends React.Component {
 
     const shortCode = navigation.getParam('shortCode');
     navigation.navigate('ShareKeyValue', {
+      index,
+      type: 'hashtag',
       shareTxid,
       origKey: key,
       origValue: value,
@@ -362,7 +364,7 @@ class HashtagExplore extends React.Component {
     })
   }
 
-  onReward = (rewardTxid, key, value, height) => {
+  onReward = (index, rewardTxid, key, value, height) => {
     const {navigation, namespaceList} = this.props;
     // Must have a namespace.
     if (Object.keys(namespaceList).length == 0) {
@@ -372,6 +374,8 @@ class HashtagExplore extends React.Component {
 
     const shortCode = navigation.getParam('shortCode');
     navigation.navigate('RewardKeyValue', {
+      index,
+      type: 'hashtag',
       rewardTxid,
       origKey: key,
       origValue: value,

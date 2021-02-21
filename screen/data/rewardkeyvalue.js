@@ -124,7 +124,7 @@ class RewardKeyValue extends React.Component {
   }
 
   getRewardKeyValueModal = () => {
-    const { namespaceList, keyValueList, reactions, dispatch } = this.props;
+    const { namespaceList, keyValueList, reactions, hashtags, dispatch } = this.props;
     const { rewardTxid, namespaceId: origNamespaceId, index, type } = this.props.navigation.state.params;
     if (!this.state.showKeyValueModal) {
       return null;
@@ -246,6 +246,7 @@ class RewardKeyValue extends React.Component {
                   broadcastErr: result.message,
                 });
               }
+
               const reaction = reactions[rewardTxid] || {};
               reaction['like'] = this.namespaceTx;
               dispatch(setReaction(rewardTxid, reaction));
