@@ -30,7 +30,7 @@ import { connect } from 'react-redux'
 import { createThumbnail } from "react-native-create-thumbnail";
 import { setKeyValueList, setMediaInfo,
          CURRENT_KEYVALUE_LIST_VERSION, setOtherNamespaceList,
-         deleteOtherNamespace
+         deleteOtherNamespace, setReplies,
        } from '../../actions'
 import {
         getNamespaceScriptHash, parseSpecialKey,
@@ -537,9 +537,10 @@ class KeyValues extends React.Component {
   }
 
   onShow = (namespaceId, index, displayName, key, value, tx, shares, likes, height, favorite) => {
-    const {navigation} = this.props;
+    const {dispatch, navigation} = this.props;
     const isOther = navigation.getParam('isOther');
     const shortCode = navigation.getParam('shortCode');
+    dispatch(setReplies());
     navigation.push('ShowKeyValue', {
       namespaceId,
       index,
