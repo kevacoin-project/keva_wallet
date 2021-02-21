@@ -172,7 +172,7 @@ class Item extends React.Component {
           </View>
         </TouchableOpacity>
         <View style={{flexDirection: 'row'}}>
-          <TouchableOpacity onPress={() => onReply(item.tx_hash)} style={{flexDirection: 'row'}}>
+          <TouchableOpacity onPress={() => onReply(index, item.tx_hash)} style={{flexDirection: 'row'}}>
             <MIcon name="chat-bubble-outline" size={22} style={styles.talkIcon} />
             {(item.replies > 0) && <Text style={styles.count}>{item.replies}</Text>}
           </TouchableOpacity>
@@ -368,26 +368,6 @@ class KeyValues extends React.Component {
       Toast.show("Cannot fetch key-values");
     }
     this.isBiometricUseCapableAndEnabled = await Biometric.isBiometricUseCapableAndEnabled();
-    this.subs = [
-      this.props.navigation.addListener('willFocus', async (payload) => {
-        const routeName = payload.lastState.routeName;
-        if (routeName == "ShowKeyValue") {
-          return;
-        }
-        let toast;
-        try {
-          this.setState({isRefreshing: true});
-          toast = showStatusAlways(loc.namespaces.refreshing);
-          await this.fetchKeyValues();
-          this.setState({isRefreshing: false});
-          hideStatus(toast);
-        } catch (err) {
-          hideStatus(toast);
-          console.warn(err)
-          this.setState({isRefreshing: false});
-        }
-      }),
-    ];
   }
 
   componentWillUnmount () {
@@ -555,9 +535,9 @@ class KeyValues extends React.Component {
     });
   }
 
-  onReply = (replyTxid) => {
+  onReply = (index, replyTxid) => {
     const {navigation, namespaceList} = this.props;
-    const {rootAddress, namespaceId} = navigation.state.params;
+    const {namespaceId} = navigation.state.params;
     // Must have a namespace.
     if (Object.keys(namespaceList).length == 0) {
       toastError(loc.namespaces.create_namespace_first);
@@ -565,8 +545,10 @@ class KeyValues extends React.Component {
     }
 
     navigation.navigate('ReplyKeyValue', {
-      rootAddress,
-      replyTxid
+      namespaceId,
+      index,
+      type: 'keyvalue',
+      replyTxid,
     })
   }
 

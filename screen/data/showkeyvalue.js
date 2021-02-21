@@ -23,7 +23,7 @@ import {
   parseSpecialKey,
   getSpecialKeyText
 } from '../../class/keva-ops';
-import { setReplies, setMediaInfo } from '../../actions'
+import { setReplies, setMediaInfo, setKeyValue } from '../../actions'
 import {
   BlueNavigationStyle,
   BlueLoading,
@@ -388,7 +388,7 @@ class ShowKeyValue extends React.Component {
 
   onReply = () => {
     const {navigation, namespaceList} = this.props;
-    const {replyTxid} = navigation.state.params;
+    const {replyTxid, namespaceId, index, type} = navigation.state.params;
     // Must have a namespace.
     if (Object.keys(namespaceList).length == 0) {
       toastError('Create a namespace first');
@@ -397,7 +397,9 @@ class ShowKeyValue extends React.Component {
 
     navigation.navigate('ReplyKeyValue', {
       replyTxid,
-      onGoBack: this.onGoBack,
+      namespaceId,
+      index,
+      type,
     })
   }
 
@@ -417,8 +419,8 @@ class ShowKeyValue extends React.Component {
   }
 
   fetchReplies = async () => {
-    const {dispatch, navigation, index, type, hashtag, keyValueList, reactions} = this.props;
-    const {replyTxid, namespaceId} = navigation.state.params;
+    const {dispatch, navigation, hashtag, keyValueList, reactions} = this.props;
+    const {replyTxid, namespaceId, index, type} = navigation.state.params;
 
     try {
       this.setState({isRefreshing: true});

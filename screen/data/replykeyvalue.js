@@ -28,6 +28,7 @@ import { connect } from 'react-redux'
 import { replyKeyValue } from '../../class/keva-ops';
 import StepModal from "../../common/StepModalWizard";
 import Biometric from '../../class/biometrics';
+import { setKeyValue, addReply } from '../../actions';
 
 class ReplyKeyValue extends React.Component {
 
@@ -124,8 +125,8 @@ class ReplyKeyValue extends React.Component {
   }
 
   getReplyKeyValueModal = () => {
-    const { namespaceList } = this.props;
-    const { replyTxid, rootAddress, onGoBack } = this.props.navigation.state.params;
+    const { namespaceList, keyValueList, dispatch } = this.props;
+    const { replyTxid, rootAddress, namespaceId: origNamespaceId, index, type } = this.props.navigation.state.params;
     if (!this.state.showKeyValueModal) {
       return null;
     }
@@ -291,10 +292,9 @@ class ReplyKeyValue extends React.Component {
               });
 
               // Update the previous screen.
-              if (onGoBack) {
-                // Insert the tx into the replies of the target namespace.
-                const {namespaceId, key, value} = this.state;
-                const {shortCode, displayName} = namespaceList.namespaces[namespaceId];
+              const {key, value, namespaceId} = this.state;
+              const {shortCode, displayName} = namespaceList.namespaces[namespaceId];
+              if (type == 'keyvalue') {
                 let reply = {
                   key,
                   value,
@@ -304,7 +304,12 @@ class ReplyKeyValue extends React.Component {
                     displayName,
                   }
                 }
-                onGoBack(reply);
+                let keyValue = (keyValueList.keyValues[origNamespaceId])[index];
+                keyValue.replies = keyValue.replies + 1;
+                dispatch(setKeyValue(origNamespaceId, index, keyValue));
+                dispatch(addReply(reply));
+              } else if (type == 'hashtag') {
+
               }
               this.props.navigation.goBack();
             }}

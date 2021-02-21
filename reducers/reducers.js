@@ -99,7 +99,7 @@ function keyValueList(state = initKeyValueList, action) {
       // Remove all the old data.
       return {...initKeyValueList};
     case SET_KEYVALUE:
-      if (action.namespaceId && action.index && action.keyValue) {
+      if (action.namespaceId && action.index >= 0 && action.keyValue) {
         let newKeyValues = [...state.keyValues[action.namespaceId]];
         newKeyValues[action.index] = {...newKeyValues[action.index], ...action.keyValue}
         return {
