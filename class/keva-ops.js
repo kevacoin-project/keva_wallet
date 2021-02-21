@@ -1560,5 +1560,15 @@ export function findTxIndex(keyValues, txid) {
   if (!keyValues || !txid) {
     return -1;
   }
-  return keyValues.findIndex(kv => kv.tx_hash == txid);
+
+  if (!keyValues[0]) {
+    return -1;
+  }
+
+  if (keyValues[0].tx_hash) {
+    return keyValues.findIndex(kv => kv.tx_hash == txid);
+  } else {
+    return keyValues.findIndex(kv => kv.tx == txid);
+  }
+  return -1;
 }

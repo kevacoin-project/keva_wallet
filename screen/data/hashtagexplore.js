@@ -30,8 +30,9 @@ import { createThumbnail } from "react-native-create-thumbnail";
 import { Avatar, Image } from 'react-native-elements';
 import { setHashtags, setMediaInfo, } from '../../actions'
 import {
-        getHashtagScriptHash, parseSpecialKey, getSpecialKeyText, decodeKey
-        } from '../../class/keva-ops';
+  getHashtagScriptHash, parseSpecialKey, getSpecialKeyText, decodeKey,
+  findTxIndex,
+} from '../../class/keva-ops';
 import Toast from 'react-native-root-toast';
 import { timeConverter, stringToColor, getInitials, SCREEN_WIDTH, } from "../../util";
 import Biometric from '../../class/biometrics';
@@ -101,7 +102,7 @@ class Item extends React.Component {
   }
 
   render() {
-    let {item, index, onShow, onReply, onShare, onReward} = this.props;
+    let {item, onShow, onReply, onShare, onReward} = this.props;
     let {thumbnail} = this.state;
     const {mediaCID, mimeType} = extractMedia(item.value);
     let displayKey = item.key;
@@ -112,7 +113,7 @@ class Item extends React.Component {
 
     return (
       <View style={styles.card}>
-        <TouchableOpacity onPress={() => onShow(index, item.key, item.value, item.tx, item.replies, item.shares, item.likes, item.height, item.favorite, item.shortCode, item.displayName)}>
+        <TouchableOpacity onPress={() => onShow(item.key, item.value, item.tx, item.replies, item.shares, item.likes, item.height, item.favorite, item.shortCode, item.displayName)}>
           <View style={{flex:1,paddingHorizontal:10,paddingTop:2}}>
             <View style={{flexDirection:'row',alignItems:'center',justifyContent:'space-between'}}>
               <View style={{paddingRight: 10}}>
@@ -151,15 +152,15 @@ class Item extends React.Component {
           </View>
         </TouchableOpacity>
         <View style={{flexDirection: 'row'}}>
-          <TouchableOpacity onPress={() => onReply(index, item.tx)} style={{flexDirection: 'row'}}>
+          <TouchableOpacity onPress={() => onReply(item.tx)} style={{flexDirection: 'row'}}>
             <MIcon name="chat-bubble-outline" size={22} style={styles.talkIcon} />
             {(item.replies > 0) && <Text style={styles.count}>{item.replies}</Text>}
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => onShare(index, item.tx, item.key, item.value, item.height)} style={{flexDirection: 'row'}}>
+          <TouchableOpacity onPress={() => onShare(item.tx, item.key, item.value, item.height)} style={{flexDirection: 'row'}}>
             <MIcon name="cached" size={22} style={styles.shareIcon} />
             {(item.shares > 0) && <Text style={styles.count}>{item.shares}</Text>}
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => onReward(index, item.tx, item.key, item.value, item.height)} style={{flexDirection: 'row'}}>
+          <TouchableOpacity onPress={() => onReward(item.tx, item.key, item.value, item.height)} style={{flexDirection: 'row'}}>
             {
               item.favorite ?
                 <MIcon name="favorite" size={22} style={[styles.shareIcon, {color: KevaColors.favorite}]} />
@@ -315,8 +316,12 @@ class HashtagExplore extends React.Component {
     this.isBiometricUseCapableAndEnabled = await Biometric.isBiometricUseCapableAndEnabled();
   }
 
-  onShow = (index, key, value, tx, replies, shares, likes, height, favorite, shortCode, displayName) => {
-    const {navigation} = this.props;
+  onShow = (key, value, tx, replies, shares, likes, height, favorite, shortCode, displayName) => {
+    const {navigation, hashtags} = this.props;
+    const index = findTxIndex(hashtags, tx);
+    if (index < 0) {
+      return;
+    }
     navigation.push('ShowKeyValue', {
       index,
       type: 'hashtag',
@@ -329,11 +334,16 @@ class HashtagExplore extends React.Component {
     });
   }
 
-  onReply = (index, replyTxid) => {
-    const {navigation, namespaceList} = this.props;
+  onReply = (replyTxid) => {
+    const {navigation, namespaceList, hashtags} = this.props;
     // Must have a namespace.
     if (Object.keys(namespaceList).length == 0) {
       toastError(loc.namespaces.create_namespace_first);
+      return;
+    }
+
+    const index = findTxIndex(hashtags, replyTxid);
+    if (index < 0) {
       return;
     }
 
@@ -344,11 +354,16 @@ class HashtagExplore extends React.Component {
     })
   }
 
-  onShare = (index, shareTxid, key, value, blockHeight) => {
-    const {navigation, namespaceList} = this.props;
+  onShare = (shareTxid, key, value, blockHeight) => {
+    const {navigation, namespaceList, hashtags} = this.props;
     // Must have a namespace.
     if (Object.keys(namespaceList).length == 0) {
       toastError(loc.namespaces.create_namespace_first);
+      return;
+    }
+
+    const index = findTxIndex(hashtags, shareTxid);
+    if (index < 0) {
       return;
     }
 
@@ -364,8 +379,8 @@ class HashtagExplore extends React.Component {
     })
   }
 
-  onReward = (index, rewardTxid, key, value, height) => {
-    const {navigation, namespaceList} = this.props;
+  onReward = (rewardTxid, key, value, height) => {
+    const {navigation, namespaceList, hashtags} = this.props;
     // Must have a namespace.
     if (Object.keys(namespaceList).length == 0) {
       toastError(loc.namespaces.create_namespace_first);
@@ -373,6 +388,10 @@ class HashtagExplore extends React.Component {
     }
 
     const shortCode = navigation.getParam('shortCode');
+    const index = findTxIndex(hashtags, rewardTxid);
+    if (index < 0) {
+      return;
+    }
     navigation.navigate('RewardKeyValue', {
       index,
       type: 'hashtag',
@@ -460,7 +479,7 @@ class HashtagExplore extends React.Component {
             keyExtractor={(item, index) => item.key + index}
             ListFooterComponent={footerLoader}
             renderItem={({item, index}) =>
-              <Item item={item} index={index} key={index} dispatch={dispatch} onDelete={this.onDelete}
+              <Item item={item} key={index} dispatch={dispatch} onDelete={this.onDelete}
                 onShow={this.onShow}
                 onReply={this.onReply}
                 onShare={this.onShare}

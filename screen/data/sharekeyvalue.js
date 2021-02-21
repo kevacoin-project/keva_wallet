@@ -294,6 +294,7 @@ class ShareKeyValue extends React.Component {
                   broadcastErr: result.message,
                 });
               }
+
               await BlueApp.saveToDisk();
               this.setState({ isBroadcasting: false, showSkip: false });
             } catch (err) {
@@ -470,6 +471,7 @@ function mapStateToProps(state) {
     mediaInfoList: state.mediaInfoList,
     shares: state.shares,
     keyValueList: state.keyValueList,
+    hashtags: state.hashtags,
   }
 }
 
