@@ -28,7 +28,7 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import { connect } from 'react-redux'
 import { createThumbnail } from "react-native-create-thumbnail";
 import { Avatar, Image } from 'react-native-elements';
-import { setMediaInfo, } from '../../actions'
+import { setHashtags, setMediaInfo, } from '../../actions'
 import {
         getHashtagScriptHash, parseSpecialKey, getSpecialKeyText, decodeKey
         } from '../../class/keva-ops';
@@ -101,7 +101,7 @@ class Item extends React.Component {
   }
 
   render() {
-    let {item, onShow, onReply, onShare, onReward} = this.props;
+    let {item, index, onShow, onReply, onShare, onReward} = this.props;
     let {thumbnail} = this.state;
     const {mediaCID, mimeType} = extractMedia(item.value);
     let displayKey = item.key;
@@ -112,7 +112,7 @@ class Item extends React.Component {
 
     return (
       <View style={styles.card}>
-        <TouchableOpacity onPress={() => onShow(item.key, item.value, item.tx, item.replies, item.shares, item.likes, item.height, item.favorite, item.shortCode, item.displayName)}>
+        <TouchableOpacity onPress={() => onShow(index, item.key, item.value, item.tx, item.replies, item.shares, item.likes, item.height, item.favorite, item.shortCode, item.displayName)}>
           <View style={{flex:1,paddingHorizontal:10,paddingTop:2}}>
             <View style={{flexDirection:'row',alignItems:'center',justifyContent:'space-between'}}>
               <View style={{paddingRight: 10}}>
@@ -151,7 +151,7 @@ class Item extends React.Component {
           </View>
         </TouchableOpacity>
         <View style={{flexDirection: 'row'}}>
-          <TouchableOpacity onPress={() => onReply(item.tx)} style={{flexDirection: 'row'}}>
+          <TouchableOpacity onPress={() => onReply(index, item.tx)} style={{flexDirection: 'row'}}>
             <MIcon name="chat-bubble-outline" size={22} style={styles.talkIcon} />
             {(item.replies > 0) && <Text style={styles.count}>{item.replies}</Text>}
           </TouchableOpacity>
@@ -179,7 +179,6 @@ class HashtagExplore extends React.Component {
   constructor() {
     super();
     this.state = {
-      hashtagkeyValueList: [],
       loaded: false,
       isModalVisible: false,
       currentPage: 0,
@@ -208,13 +207,14 @@ class HashtagExplore extends React.Component {
 
   onSearchHashtag = async () => {
     Keyboard.dismiss();
-    this.setState({hashtagkeyValueList: [], min_tx_num: -1, loading: true});
+    this.props.dispatch(setHashtags());
+    this.setState({min_tx_num: -1, loading: true});
     await this.fetchHashtag(-1);
     this.setState({loading: false});
   }
 
   fetchHashtag = async (min_tx_num) => {
-    const {reactions} = this.props;
+    const {reactions, hashtags, dispatch} = this.props;
     /*
       Data returned by ElectrumX API
       {
@@ -259,13 +259,15 @@ class HashtagExplore extends React.Component {
     });
 
     if (history.min_tx_num < this.state.min_tx_num) {
+      // TODO: optimize this, add appendHashtags to avoid
+      // duplicating twice.
+      dispatch(setHashtags([...hashtags, ...keyValues]));
       this.setState({
-        hashtagkeyValueList: [...this.state.hashtagkeyValueList, ...keyValues],
         min_tx_num: history.min_tx_num,
       });
     } else {
+      dispatch(setHashtags(keyValues));
       this.setState({
-        hashtagkeyValueList: keyValues,
         min_tx_num: history.min_tx_num,
       });
     }
@@ -313,29 +315,21 @@ class HashtagExplore extends React.Component {
     this.isBiometricUseCapableAndEnabled = await Biometric.isBiometricUseCapableAndEnabled();
   }
 
-  onShow = (key, value, tx, replies, shares, likes, height, favorite, shortCode, displayName) => {
+  onShow = (index, key, value, tx, replies, shares, likes, height, favorite, shortCode, displayName) => {
     const {navigation} = this.props;
-    const rootAddress = navigation.getParam('rootAddress');
-    const namespaceId = navigation.getParam('namespaceId');
     navigation.push('ShowKeyValue', {
-      namespaceId,
+      index,
+      type: 'hashtag',
       shortCode,
       displayName,
-      key,
-      value,
-      rootAddress,
       replyTxid: tx,
       shareTxid: tx,
       rewardTxid: tx,
-      replies: replies,
-      shares: shares,
-      likes: likes,
-      favorite,
       height,
     });
   }
 
-  onReply = (replyTxid) => {
+  onReply = (index, replyTxid) => {
     const {navigation, namespaceList} = this.props;
     // Must have a namespace.
     if (Object.keys(namespaceList).length == 0) {
@@ -344,6 +338,8 @@ class HashtagExplore extends React.Component {
     }
 
     navigation.navigate('ReplyKeyValue', {
+      index,
+      type: 'hashtag',
       replyTxid
     })
   }
@@ -403,8 +399,8 @@ class HashtagExplore extends React.Component {
   }
 
   render() {
-    let {navigation, dispatch, mediaInfoList} = this.props;
-    const mergeList = this.state.hashtagkeyValueList;
+    let {navigation, dispatch, mediaInfoList, hashtags} = this.props;
+    const mergeList = hashtags;
     const canSearch = this.state.hashtag && this.state.hashtag.length > 0;
     const {inputMode, hashtag, loading, searched} = this.state;
 
@@ -460,7 +456,7 @@ class HashtagExplore extends React.Component {
             keyExtractor={(item, index) => item.key + index}
             ListFooterComponent={footerLoader}
             renderItem={({item, index}) =>
-              <Item item={item} key={index} dispatch={dispatch} onDelete={this.onDelete}
+              <Item item={item} index={index} key={index} dispatch={dispatch} onDelete={this.onDelete}
                 onShow={this.onShow}
                 onReply={this.onReply}
                 onShare={this.onShare}
@@ -489,6 +485,7 @@ function mapStateToProps(state) {
     namespaceList: state.namespaceList,
     mediaInfoList: state.mediaInfoList,
     reactions: state.reactions,
+    hashtags: state.hashtags,
   }
 }
 

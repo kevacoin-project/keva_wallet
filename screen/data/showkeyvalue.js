@@ -23,7 +23,7 @@ import {
   parseSpecialKey,
   getSpecialKeyText
 } from '../../class/keva-ops';
-import { setReplies, setMediaInfo, setKeyValue } from '../../actions'
+import { setReplies, setMediaInfo, setKeyValue, updateHashtag } from '../../actions'
 import {
   BlueNavigationStyle,
   BlueLoading,
@@ -129,12 +129,22 @@ class ShowKeyValue extends React.Component {
   }
 
   async componentDidMount() {
-    const {keyValueList} = this.props;
-    const {namespaceId, index, type, shortCode, displayName} = this.props.navigation.state.params;
+    const {keyValueList, hashtags} = this.props;
+    const {namespaceId, index, type} = this.props.navigation.state.params;
 
-    const keyValues = keyValueList.keyValues[namespaceId]
-    const key = keyValues[index].key;
-    const value = keyValues[index].value;
+    let key;
+    let value;
+
+    if (type == 'keyvalue') {
+      keyValue = (keyValueList.keyValues[namespaceId])[index];
+      key = keyValue.key;
+      value = keyValue.value;
+    } else if (type == 'hashtag') {
+      const keyValue = hashtags[index];
+      key = keyValue.key;
+      value = keyValue.value;
+    }
+
     const {mediaCID, mimeType} = extractMedia(value);
     const {mediaInfoList, dispatch} = this.props;
 
@@ -419,7 +429,7 @@ class ShowKeyValue extends React.Component {
   }
 
   fetchReplies = async () => {
-    const {dispatch, navigation, hashtag, keyValueList, reactions} = this.props;
+    const {dispatch, navigation, hashtags, keyValueList, reactions} = this.props;
     const {replyTxid, namespaceId, index, type} = navigation.state.params;
 
     try {
@@ -469,7 +479,12 @@ class ShowKeyValue extends React.Component {
         keyValue.replies = totalReactions.replies.length;
         dispatch(setKeyValue(namespaceId, index, keyValue));
       } else if (type == 'hashtag') {
-
+        let keyValue = hashtags[index];
+        keyValue.favorite = favorite;
+        keyValue.likes = totalReactions.likes;
+        keyValue.shares = totalReactions.shares;
+        keyValue.replies = totalReactions.replies.length;
+        dispatch(updateHashtag(index, keyValue));
       }
 
       this.setState({
@@ -567,10 +582,16 @@ class ShowKeyValue extends React.Component {
   }
 
   render() {
-    const {replies, keyValueList} = this.props;
+    const {replies, keyValueList, hashtags} = this.props;
     let {isRaw, CIDHeight, CIDWidth, thumbnail} = this.state;
-    const {shortCode, displayName, namespaceId, index} = this.props.navigation.state.params;
-    const keyValue = (keyValueList.keyValues[namespaceId])[index];
+    const {shortCode, displayName, namespaceId, index, type} = this.props.navigation.state.params;
+    let keyValue;
+    if (type == 'keyvalue') {
+      keyValue = (keyValueList.keyValues[namespaceId])[index];
+    } else if (type == 'hashtag') {
+      keyValue = hashtags[index];
+    }
+
     const key = keyValue.key;
     let value = keyValue.value;
     const favorite = keyValue.favorite;

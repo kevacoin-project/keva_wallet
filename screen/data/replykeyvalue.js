@@ -28,7 +28,7 @@ import { connect } from 'react-redux'
 import { replyKeyValue } from '../../class/keva-ops';
 import StepModal from "../../common/StepModalWizard";
 import Biometric from '../../class/biometrics';
-import { setKeyValue, addReply } from '../../actions';
+import { setKeyValue, addReply, updateHashtag } from '../../actions';
 
 class ReplyKeyValue extends React.Component {
 
@@ -125,7 +125,7 @@ class ReplyKeyValue extends React.Component {
   }
 
   getReplyKeyValueModal = () => {
-    const { namespaceList, keyValueList, dispatch } = this.props;
+    const { namespaceList, keyValueList, hashtags, dispatch } = this.props;
     const { replyTxid, rootAddress, namespaceId: origNamespaceId, index, type } = this.props.navigation.state.params;
     if (!this.state.showKeyValueModal) {
       return null;
@@ -294,22 +294,26 @@ class ReplyKeyValue extends React.Component {
               // Update the previous screen.
               const {key, value, namespaceId} = this.state;
               const {shortCode, displayName} = namespaceList.namespaces[namespaceId];
-              if (type == 'keyvalue') {
-                let reply = {
-                  key,
-                  value,
-                  height: 0,
-                  sender: {
-                    shortCode,
-                    displayName,
-                  }
+              const reply = {
+                key,
+                value,
+                height: 0,
+                sender: {
+                  shortCode,
+                  displayName,
                 }
+              }
+
+              if (type == 'keyvalue') {
                 let keyValue = (keyValueList.keyValues[origNamespaceId])[index];
                 keyValue.replies = keyValue.replies + 1;
                 dispatch(setKeyValue(origNamespaceId, index, keyValue));
                 dispatch(addReply(reply));
               } else if (type == 'hashtag') {
-
+                let keyValue = hashtags[index];
+                keyValue.replies = keyValue.replies + 1;
+                dispatch(updateHashtag(index, keyValue));
+                dispatch(addReply(reply));
               }
               this.props.navigation.goBack();
             }}
@@ -359,6 +363,7 @@ function mapStateToProps(state) {
   return {
     keyValueList: state.keyValueList,
     namespaceList: state.namespaceList,
+    hashtags: state.hashtags,
   }
 }
 

@@ -189,7 +189,7 @@ function hashtags(state = initHashtags, action) {
       // Clear everything.
       return initHashtags;
     case SET_HASHTAG_ENTRY:
-      if (action.index && action.entry) {
+      if (action.index >= 0 && action.entry) {
         let newState = [...state];
         newState[action.index] = {...state[action.index], ...action.entry};
         return newState;
