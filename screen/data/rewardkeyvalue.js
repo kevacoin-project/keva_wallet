@@ -27,7 +27,7 @@ import { connect } from 'react-redux'
 import { rewardKeyValue } from '../../class/keva-ops';
 import StepModal from "../../common/StepModalWizard";
 import Biometric from '../../class/biometrics';
-import { setReaction } from '../../actions'
+import { setReaction, setKeyValue, updateHashtag } from '../../actions'
 
 class RewardKeyValue extends React.Component {
 
@@ -124,8 +124,8 @@ class RewardKeyValue extends React.Component {
   }
 
   getRewardKeyValueModal = () => {
-    const { namespaceList, reactions, dispatch } = this.props;
-    const { rewardTxid, onGoBack } = this.props.navigation.state.params;
+    const { namespaceList, keyValueList, reactions, dispatch } = this.props;
+    const { rewardTxid, namespaceId: origNamespaceId, index, type } = this.props.navigation.state.params;
     if (!this.state.showKeyValueModal) {
       return null;
     }
@@ -247,7 +247,7 @@ class RewardKeyValue extends React.Component {
                 });
               }
               const reaction = reactions[rewardTxid] || {};
-              reaction["reward"] = this.namespaceTx;
+              reaction['like'] = this.namespaceTx;
               dispatch(setReaction(rewardTxid, reaction));
               await BlueApp.saveToDisk();
               this.setState({ isBroadcasting: false, showSkip: false });
@@ -302,20 +302,16 @@ class RewardKeyValue extends React.Component {
               });
 
               // Update the previous screen.
-              if (onGoBack) {
-                // Insert the tx into the replies of the target namespace.
-                const {namespaceId, key, value} = this.state;
-                const {shortCode, displayName} = namespaceList.namespaces[namespaceId];
-                let reward = {
-                  key,
-                  value,
-                  height: 0,
-                  rewarder: {
-                    shortCode,
-                    displayName,
-                  }
-                }
-                onGoBack(reward);
+              if (type == 'keyvalue') {
+                let keyValue = (keyValueList.keyValues[origNamespaceId])[index];
+                keyValue.likes = keyValue.likes + 1;
+                keyValue.favorite = true;
+                dispatch(setKeyValue(origNamespaceId, index, keyValue));
+              } else if (type == 'hashtag') {
+                let keyValue = hashtags[index];
+                keyValue.likes = keyValue.likes + 1;
+                keyValue.favorite = true;
+                dispatch(updateHashtag(index, keyValue));
               }
               this.props.navigation.goBack();
             }}
@@ -388,6 +384,7 @@ function mapStateToProps(state) {
     keyValueList: state.keyValueList,
     namespaceList: state.namespaceList,
     reactions: state.reactions,
+    hashtags: state.hashtags,
   }
 }
 

@@ -227,12 +227,12 @@ class HashtagKeyValues extends React.Component {
     // Check if it is a favorite.
     for (let kv of keyValues) {
       const reaction = reactions[kv.tx_hash];
-      kv.favorite = reaction && !!reaction['reward'];
+      kv.favorite = reaction && !!reaction['like'];
     }
 
     const keyValues = history.hashtags.map(h => {
       const reaction = reactions[h.tx_hash];
-      const favorite = reaction && !!reaction['reward'];
+      const favorite = reaction && !!reaction['like'];
       return {
         displayName: h.displayName,
         shortCode: h.shortCode,

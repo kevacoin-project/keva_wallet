@@ -31,7 +31,7 @@ export function getSpecialKeyText(keyType) {
     displayKey = loc.namespaces.comment_post;
   } else if (keyType === 'share') {
     displayKey = loc.namespaces.share_post;
-  } else if (keyType === 'reward') {
+  } else if (keyType === 'like') {
     displayKey = loc.namespaces.reward_post;
   } else if (keyType === 'profile') {
     displayKey = loc.namespaces.update_profile;
@@ -1275,7 +1275,7 @@ export async function getRepliesAndShares(ecl, historyTxList, needShortcode = tr
           shortCode
         }
         replies.push(resultJson);
-      } else if (keyType == 'reward') {
+      } else if (keyType == 'like') {
         resultJson.time = tx.time;
         const h = history.find(h => h.tx_hash == tx.txid);
         resultJson.height = h.height;
@@ -1344,7 +1344,7 @@ export function parseSpecialKey(key) {
   } else if (keyHex.startsWith('0002')) {
     return {partialTxId: txId, keyType: 'share'};
   } else if (keyHex.startsWith('0003')) {
-    return {partialTxId: txId, keyType: 'reward'};
+    return {partialTxId: txId, keyType: 'like'};
   } else {
     return false;
   }
@@ -1528,7 +1528,7 @@ export function getTxReaction(tx) {
     }
 
     const {keyType, partialTxId} = parseSpecialKey(kevaJson.key);
-    if (keyType == 'share' || keyType == 'comment' || keyType == 'reward') {
+    if (keyType == 'share' || keyType == 'comment' || keyType == 'like') {
       return {keyType: keyType, tx_hash: partialTxId}
     }
   }

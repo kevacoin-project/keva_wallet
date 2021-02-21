@@ -241,7 +241,7 @@ class HashtagExplore extends React.Component {
 
     const keyValues = history.hashtags.map(h => {
       const reaction = reactions[h.tx_hash];
-      const favorite = reaction && !!reaction['reward'];
+      const favorite = reaction && !!reaction['like'];
       return {
         displayName: h.displayName,
         shortCode: h.shortCode,

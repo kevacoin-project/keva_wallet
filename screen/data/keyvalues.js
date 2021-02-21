@@ -176,11 +176,11 @@ class Item extends React.Component {
             <MIcon name="chat-bubble-outline" size={22} style={styles.talkIcon} />
             {(item.replies > 0) && <Text style={styles.count}>{item.replies}</Text>}
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => onShare(item.tx_hash, item.key, item.value, item.height)} style={{flexDirection: 'row'}}>
+          <TouchableOpacity onPress={() => onShare(index, item.tx_hash, item.key, item.value, item.height)} style={{flexDirection: 'row'}}>
             <MIcon name="cached" size={22} style={styles.shareIcon} />
             {(item.shares > 0) && <Text style={styles.count}>{item.shares}</Text>}
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => onReward(item.tx_hash, item.key, item.value, item.height)} style={{flexDirection: 'row'}}>
+          <TouchableOpacity onPress={() => onReward(index, item.tx_hash, item.key, item.value, item.height)} style={{flexDirection: 'row'}}>
             {
               item.favorite ?
                 <MIcon name="favorite" size={22} style={[styles.shareIcon, {color: KevaColors.favorite}]} />
@@ -298,12 +298,14 @@ class KeyValues extends React.Component {
     if (history.keyvalues.length == 0) {
       return;
     }
+
+    //TODO: this will screw up the index!
     const keyValues = this.processKeyValueList(history.keyvalues);
 
     // Check if it is a favorite.
     for (let kv of keyValues) {
       const reaction = reactions[kv.tx_hash];
-      kv.favorite = reaction && !!reaction['reward'];
+      kv.favorite = reaction && !!reaction['like'];
     }
 
     if (history.min_tx_num < this.min_tx_num) {
@@ -552,8 +554,9 @@ class KeyValues extends React.Component {
     })
   }
 
-  onShare = (shareTxid, key, value) => {
+  onShare = (index, shareTxid, key, value) => {
     const {navigation, namespaceList} = this.props;
+    const {namespaceId} = navigation.state.params;
     // Must have a namespace.
     if (Object.keys(namespaceList).length == 0) {
       toastError(loc.namespaces.create_namespace_first);
@@ -561,14 +564,18 @@ class KeyValues extends React.Component {
     }
 
     navigation.navigate('ShareKeyValue', {
+      namespaceId,
+      index,
+      type: 'keyvalue',
       shareTxid,
       origKey: key,
       origValue: value
     })
   }
 
-  onReward = (rewardTxid, key, value, height) => {
+  onReward = (index, rewardTxid, key, value, height) => {
     const {navigation, namespaceList} = this.props;
+    const {namespaceId} = navigation.state.params;
     // Must have a namespace.
     if (Object.keys(namespaceList).length == 0) {
       toastError(loc.namespaces.create_namespace_first);
@@ -577,6 +584,9 @@ class KeyValues extends React.Component {
 
     const shortCode = navigation.getParam('shortCode');
     navigation.navigate('RewardKeyValue', {
+      namespaceId,
+      index,
+      type: 'keyvalue',
       rewardTxid,
       origKey: key,
       origValue: value,
