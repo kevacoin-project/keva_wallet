@@ -21,7 +21,7 @@ const KevaColors = require('../../common/KevaColors');
 import { THIN_BORDER, timeConverter, toastError, getInitials, stringToColor } from "../../util";
 import {
   parseSpecialKey,
-  getSpecialKeyText
+  getSpecialKeyText, findTxIndex,
 } from '../../class/keva-ops';
 import { setReplies, setMediaInfo, setKeyValue, updateHashtag } from '../../actions'
 import {
@@ -136,7 +136,7 @@ class ShowKeyValue extends React.Component {
     let value;
 
     if (type == 'keyvalue') {
-      keyValue = (keyValueList.keyValues[namespaceId])[index];
+      const keyValue = (keyValueList.keyValues[namespaceId])[index];
       key = keyValue.key;
       value = keyValue.value;
     } else if (type == 'hashtag') {

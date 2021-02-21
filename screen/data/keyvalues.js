@@ -36,6 +36,7 @@ import {
         getNamespaceScriptHash, parseSpecialKey,
         deleteKeyValue, getSpecialKeyText,
         getNamespaceInfoFromShortCode, decodeKey,
+        findTxIndex,
         } from '../../class/keva-ops';
 import Toast from 'react-native-root-toast';
 import StepModal from "../../common/StepModalWizard";
@@ -107,7 +108,7 @@ class Item extends React.Component {
   }
 
   render() {
-    let {item, index, onShow, onReply, onShare, onReward, namespaceId, displayName, navigation} = this.props;
+    let {item, onShow, onReply, onShare, onReward, namespaceId, displayName, navigation} = this.props;
     let {thumbnail} = this.state;
     const {isOther} = navigation.state.params;
     const {mediaCID, mimeType} = extractMedia(item.value);
@@ -123,7 +124,7 @@ class Item extends React.Component {
 
     return (
       <View style={styles.card}>
-        <TouchableOpacity onPress={() => onShow(namespaceId, index, displayName, item.key, item.value, item.tx_hash, item.shares, item.likes, item.height, item.favorite)}>
+        <TouchableOpacity onPress={() => onShow(namespaceId, displayName, item.key, item.value, item.tx_hash, item.shares, item.likes, item.height, item.favorite)}>
           <View style={{flex:1,paddingHorizontal:10,paddingTop:2}}>
             <View style={{flexDirection:'row',alignItems:'center',justifyContent:'space-between'}}>
               <View style={{paddingRight: 10, paddingTop: 5, paddingBottom: 8}}>
@@ -172,15 +173,15 @@ class Item extends React.Component {
           </View>
         </TouchableOpacity>
         <View style={{flexDirection: 'row'}}>
-          <TouchableOpacity onPress={() => onReply(index, item.tx_hash)} style={{flexDirection: 'row'}}>
+          <TouchableOpacity onPress={() => onReply(item.tx_hash)} style={{flexDirection: 'row'}}>
             <MIcon name="chat-bubble-outline" size={22} style={styles.talkIcon} />
             {(item.replies > 0) && <Text style={styles.count}>{item.replies}</Text>}
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => onShare(index, item.tx_hash, item.key, item.value, item.height)} style={{flexDirection: 'row'}}>
+          <TouchableOpacity onPress={() => onShare(item.tx_hash, item.key, item.value, item.height)} style={{flexDirection: 'row'}}>
             <MIcon name="cached" size={22} style={styles.shareIcon} />
             {(item.shares > 0) && <Text style={styles.count}>{item.shares}</Text>}
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => onReward(index, item.tx_hash, item.key, item.value, item.height)} style={{flexDirection: 'row'}}>
+          <TouchableOpacity onPress={() => onReward(item.tx_hash, item.key, item.value, item.height)} style={{flexDirection: 'row'}}>
             {
               item.favorite ?
                 <MIcon name="favorite" size={22} style={[styles.shareIcon, {color: KevaColors.favorite}]} />
@@ -518,11 +519,12 @@ class KeyValues extends React.Component {
     );
   }
 
-  onShow = (namespaceId, index, displayName, key, value, tx, shares, likes, height, favorite) => {
-    const {dispatch, navigation} = this.props;
+  onShow = (namespaceId, displayName, key, value, tx, shares, likes, height, favorite) => {
+    const {dispatch, navigation, keyValueList} = this.props;
     const isOther = navigation.getParam('isOther');
     const shortCode = navigation.getParam('shortCode');
     dispatch(setReplies());
+    const index = findTxIndex(keyValueList.keyValues[namespaceId], tx);
     navigation.push('ShowKeyValue', {
       namespaceId,
       index,
@@ -537,12 +539,17 @@ class KeyValues extends React.Component {
     });
   }
 
-  onReply = (index, replyTxid) => {
-    const {navigation, namespaceList} = this.props;
+  onReply = (replyTxid) => {
+    const {navigation, namespaceList, keyValueList} = this.props;
     const {namespaceId} = navigation.state.params;
     // Must have a namespace.
     if (Object.keys(namespaceList).length == 0) {
       toastError(loc.namespaces.create_namespace_first);
+      return;
+    }
+
+    const index = findTxIndex(keyValueList.keyValues[namespaceId], replyTxid);
+    if (index < 0) {
       return;
     }
 
@@ -554,12 +561,17 @@ class KeyValues extends React.Component {
     })
   }
 
-  onShare = (index, shareTxid, key, value) => {
-    const {navigation, namespaceList} = this.props;
+  onShare = (shareTxid, key, value) => {
+    const {navigation, namespaceList, keyValueList} = this.props;
     const {namespaceId} = navigation.state.params;
     // Must have a namespace.
     if (Object.keys(namespaceList).length == 0) {
       toastError(loc.namespaces.create_namespace_first);
+      return;
+    }
+
+    const index = findTxIndex(keyValueList.keyValues[namespaceId], shareTxid);
+    if (index < 0) {
       return;
     }
 
@@ -573,12 +585,17 @@ class KeyValues extends React.Component {
     })
   }
 
-  onReward = (index, rewardTxid, key, value, height) => {
-    const {navigation, namespaceList} = this.props;
+  onReward = (rewardTxid, key, value, height) => {
+    const {navigation, namespaceList, keyValueList} = this.props;
     const {namespaceId} = navigation.state.params;
     // Must have a namespace.
     if (Object.keys(namespaceList).length == 0) {
       toastError(loc.namespaces.create_namespace_first);
+      return;
+    }
+
+    const index = findTxIndex(keyValueList.keyValues[namespaceId], rewardTxid);
+    if (index < 0) {
       return;
     }
 
@@ -780,7 +797,7 @@ class KeyValues extends React.Component {
             keyExtractor={(item, index) => item.key + index}
             ListFooterComponent={footerLoader}
             renderItem={({item, index}) =>
-              <Item item={item} index={index} key={index} dispatch={dispatch} onDelete={this.onDelete}
+              <Item item={item} key={index} dispatch={dispatch} onDelete={this.onDelete}
                 onShow={this.onShow} namespaceId={namespaceId}
                 displayName={displayName}
                 onReply={this.onReply}

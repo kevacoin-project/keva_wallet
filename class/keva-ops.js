@@ -1555,3 +1555,10 @@ export function populateReactions() {
   }
   return reactions;
 }
+
+export function findTxIndex(keyValues, txid) {
+  if (!keyValues || !txid) {
+    return -1;
+  }
+  return keyValues.findIndex(kv => kv.tx_hash == txid);
+}
