@@ -527,7 +527,7 @@ class ShowKeyValue extends React.Component {
 
   onShare = (key, value) => {
     const {navigation, namespaceList} = this.props;
-    const {index, type} = navigation.state.params;
+    const {index, type, namespaceId} = navigation.state.params;
     // Must have a namespace.
     if (Object.keys(namespaceList).length == 0) {
       toastError(loc.namespaces.create_namespace_first);
@@ -539,6 +539,7 @@ class ShowKeyValue extends React.Component {
       // This is not a share post.
       const {shareTxid} = navigation.state.params;
       navigation.navigate('ShareKeyValue', {
+        namespaceId,
         index,
         type,
         shareTxid,
@@ -552,6 +553,7 @@ class ShowKeyValue extends React.Component {
     const txidToShare = shareInfo.partialTxId;
     let {shareValue} = this.state;
     navigation.navigate('ShareKeyValue', {
+      namespaceId,
       index, type,
       shareTxid: txidToShare,
       origValue: shareValue,

@@ -27,7 +27,7 @@ const loc = require('../../loc');
 let BlueApp = require('../../BlueApp');
 let BlueElectrum = require('../../BlueElectrum');
 import { FALLBACK_DATA_PER_BYTE_FEE } from '../../models/networkTransactionFees';
-import { setMediaInfo } from '../../actions'
+import { setMediaInfo, updateHashtag, setKeyValue } from '../../actions'
 import { TransitionPresets } from 'react-navigation-stack';
 import { createThumbnail } from "react-native-create-thumbnail";
 import VideoPlayer from 'react-native-video-player';
@@ -165,8 +165,8 @@ class ShareKeyValue extends React.Component {
   }
 
   getShareKeyValueModal = () => {
-    const { namespaceList } = this.props;
-    const { shareTxid, rootAddress, origShortCode, height, txIdShortCode } = this.props.navigation.state.params;
+    const { namespaceList, keyValueList, hashtags, dispatch } = this.props;
+    const { shareTxid, origShortCode, height, namespaceId: origNamespaceId, index, type } = this.props.navigation.state.params;
     if (!this.state.showKeyValueModal) {
       return null;
     }
@@ -346,6 +346,17 @@ class ShareKeyValue extends React.Component {
                 position: Toast.positions.TOP,
                 backgroundColor: "#53DD6C",
               });
+
+              // Update share count
+              if (type == 'keyvalue') {
+                let keyValue = (keyValueList.keyValues[origNamespaceId])[index];
+                keyValue.shares = keyValue.shares + 1;
+                dispatch(setKeyValue(origNamespaceId, index, keyValue));
+              } else if (type == 'hashtag') {
+                let keyValue = hashtags[index];
+                keyValue.shares = keyValue.shares + 1;
+                dispatch(updateHashtag(index, keyValue));
+              }
               this.props.navigation.goBack();
             }}
           />
@@ -457,6 +468,8 @@ function mapStateToProps(state) {
   return {
     namespaceList: state.namespaceList,
     mediaInfoList: state.mediaInfoList,
+    shares: state.shares,
+    keyValueList: state.keyValueList,
   }
 }
 
