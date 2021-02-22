@@ -1396,7 +1396,7 @@ export async function getNamespaceInfo(ecl, namespaceId, needShortcode = true) {
     } catch (e) {
       // No merkel result, the transaction has not been confirmed and included
       // in a block yet.
-      result.shortCode = 0;
+      result.shortCode = false;
     }
   }
   return result;
