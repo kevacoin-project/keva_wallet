@@ -15,7 +15,7 @@ export function extractMedia(value) {
     return {};
 }
 
-const DefaultIPFSGateway = 'https://ipfs.io/ipfs/';
+export const DefaultIPFSGateway = 'https://ipfs.io/ipfs/';
 let IPFSGateway = null;
 
 export function setImageGatewayURL(url) {

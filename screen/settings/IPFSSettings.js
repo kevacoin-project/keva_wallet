@@ -1,11 +1,11 @@
 /* global alert */
 import React, { Component } from 'react';
-import { View, TextInput, Text, TouchableWithoutFeedback } from 'react-native';
+import { View, TextInput, TouchableWithoutFeedback } from 'react-native';
 const StyleSheet = require('../../PlatformStyleSheet');
 import {
   THIN_BORDER, SCREEN_WIDTH, sleepAync,
 } from '../../util';
-import { setImageGatewayURL } from '../data/mediaManager';
+import { setImageGatewayURL, DefaultIPFSGateway } from '../data/mediaManager';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { AppStorage } from '../../class';
 import AsyncStorage from '@react-native-community/async-storage';
@@ -122,7 +122,7 @@ export default class IPFSSettings extends Component {
             <BlueText style={styles.title}>IPFS Gateway</BlueText>
             <RNPickerSelect
               disabled={useCustom}
-              value={url || items[0].value}
+              value={url || DefaultIPFSGateway}
               useNativeAndroidPickerStyle={false}
               style={{
                 inputAndroid: [styles.inputAndroid, useCustom && {color: KevaColors.extraLightText}],
