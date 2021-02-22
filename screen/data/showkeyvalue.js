@@ -35,16 +35,6 @@ const loc = require('../../loc');
 import { connect } from 'react-redux';
 import { extractMedia, getImageGatewayURL, removeMedia, replaceMedia } from './mediaManager';
 
-const LARGE_IMAGE_ICON = (
-  <View style={{alignItems: 'center'}}>
-    <Text style={{textAlign: 'center', fontSize: 16, color: '#fff', fontWeight: '700'}}>{loc.settings.ipfs_error_0}</Text>
-    <Text style={{textAlign: 'center', fontSize: 16, color: '#fff', fontWeight: '700'}}>{loc.settings.ipfs_error_1}</Text>
-    <Text style={{textAlign: 'center', fontSize: 16, color: '#fff', marginBottom: 10}}>
-    {loc.settings.ipfs_error_2}
-    </Text>
-    <Icon name="ios-image" size={90} color="#fff"/>
-  </View>
-);
 const MAX_TIME = 3147483647;
 
 class Reply extends React.Component {
@@ -114,6 +104,17 @@ class ShowKeyValue extends React.Component {
       replyCount: 0,
       replies: [],
     };
+
+    this.LARGE_IMAGE_ICON = (
+      <View style={{alignItems: 'center'}}>
+        <Text style={{textAlign: 'center', fontSize: 16, color: '#fff', fontWeight: '700'}}>{loc.settings.ipfs_error_0}</Text>
+        <Text style={{textAlign: 'center', fontSize: 16, color: '#fff', fontWeight: '700'}}>{loc.settings.ipfs_error_1}</Text>
+        <Text style={{textAlign: 'center', fontSize: 16, color: '#fff', marginBottom: 10}}>
+        {loc.settings.ipfs_error_2}
+        </Text>
+        <Icon name="ios-image" size={90} color="#fff"/>
+      </View>
+    );
   }
 
   static navigationOptions = ({ navigation }) => ({
@@ -323,7 +324,7 @@ class ShowKeyValue extends React.Component {
             <Image style={{ width, height, alignSelf: 'center'}}
               source={{ uri: a.src }}
               resizeMode="contain"
-              PlaceholderContent={LARGE_IMAGE_ICON}
+              PlaceholderContent={this.LARGE_IMAGE_ICON}
               placeholderStyle={{backgroundColor: '#ddd', borderRadius: 10}}
             />
           </TouchableOpacity>
