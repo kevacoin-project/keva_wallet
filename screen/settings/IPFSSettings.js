@@ -58,7 +58,7 @@ export default class IPFSSettings extends Component {
     this.setState({
       isLoading: false,
       useCustom,
-      url: url || this.presets[0].url,
+      url: url || DefaultIPFSGateway,
       customUrl: customUrl || '',
     });
 
@@ -122,7 +122,7 @@ export default class IPFSSettings extends Component {
             <BlueText style={styles.title}>IPFS Gateway</BlueText>
             <RNPickerSelect
               disabled={useCustom}
-              value={url || DefaultIPFSGateway}
+              value={url}
               useNativeAndroidPickerStyle={false}
               style={{
                 inputAndroid: [styles.inputAndroid, useCustom && {color: KevaColors.extraLightText}],
