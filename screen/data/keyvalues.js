@@ -282,8 +282,8 @@ class KeyValues extends React.Component {
   decodeKeyValueList = (keyValues) => {
     // Base64 decode
     let decodedKeyValues = keyValues.map(kv => {
-      if (kv.type === 'REG') {
-        return kv;
+      if (kv.displayName) {
+        kv.displayName = decodeKey(kv.displayName);
       }
       if (kv.key) {
         kv.key = decodeKey(kv.key);
