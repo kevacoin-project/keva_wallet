@@ -276,6 +276,9 @@ module.exports = {
     advanced_mode_note: '启用后，您将看到高级选项，例如不同的钱包类型。',
     ipfs_settings: 'IPFS 设定',
     ipfs_settings_explain: '使用自定义IPFS网关',
+    ipfs_error_0: "看不到图片？",
+    ipfs_error_1: '更改IPFS网关',
+    ipfs_error_2: '设置->网络->IPFS设定',
   },
   plausibledeniability: {
     title: '可否认性',

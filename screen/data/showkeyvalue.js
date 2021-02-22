@@ -35,7 +35,16 @@ const loc = require('../../loc');
 import { connect } from 'react-redux';
 import { extractMedia, getImageGatewayURL, removeMedia, replaceMedia } from './mediaManager';
 
-const LARGE_IMAGE_ICON = <Icon name="ios-image" size={90} color="#fff"/>;
+const LARGE_IMAGE_ICON = (
+  <View style={{alignItems: 'center'}}>
+    <Text style={{textAlign: 'center', fontSize: 16, color: '#fff', fontWeight: '700'}}>{loc.settings.ipfs_error_0}</Text>
+    <Text style={{textAlign: 'center', fontSize: 16, color: '#fff', fontWeight: '700'}}>{loc.settings.ipfs_error_1}</Text>
+    <Text style={{textAlign: 'center', fontSize: 16, color: '#fff', marginBottom: 10}}>
+    {loc.settings.ipfs_error_2}
+    </Text>
+    <Icon name="ios-image" size={90} color="#fff"/>
+  </View>
+);
 const MAX_TIME = 3147483647;
 
 class Reply extends React.Component {

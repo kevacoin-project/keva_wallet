@@ -280,6 +280,9 @@ module.exports = {
     advanced_mode_note: 'When enabled, you will be able to view selected wallets, and transactions, using your other Apple iCloud connected devices.',
     ipfs_settings: 'IPFS Settings',
     ipfs_settings_explain: 'Use Custom IPFS Gateway',
+    ipfs_error_0: "Can't See Image?",
+    ipfs_error_1: 'Change IPFS Gateway',
+    ipfs_error_2: 'Settings -> Network -> IPFS Settings',
   },
   plausibledeniability: {
     title: 'Plausible Deniability',
