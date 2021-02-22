@@ -140,7 +140,10 @@ class ShowKeyValue extends React.Component {
 
   async componentDidMount() {
     const {keyValueList, hashtags} = this.props;
-    const {namespaceId, index, type} = this.props.navigation.state.params;
+    const {shortCode, displayName, namespaceId, index, type} = this.props.navigation.state.params;
+    this.setState({
+      shortCode, displayName, namespaceId, index, type
+    });
 
     let key;
     let value;
@@ -273,7 +276,6 @@ class ShowKeyValue extends React.Component {
 
   onHashtag = hashtag => {
     const {navigation, dispatch} = this.props;
-    dispatch(setHashtags());
     navigation.push('HashtagKeyValues', {hashtag});
   }
 
@@ -574,7 +576,11 @@ class ShowKeyValue extends React.Component {
   render() {
     const {replies, keyValueList, hashtags} = this.props;
     let {isRaw, CIDHeight, CIDWidth, thumbnail} = this.state;
-    const {shortCode, displayName, namespaceId, index, type} = this.props.navigation.state.params;
+    const {shortCode, displayName, namespaceId, index, type} = this.state;
+    if (!type) {
+      return null;
+    }
+
     let keyValue;
     if (type == 'keyvalue') {
       keyValue = (keyValueList.keyValues[namespaceId])[index];

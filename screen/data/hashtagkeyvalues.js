@@ -319,6 +319,7 @@ class HashtagKeyValues extends React.Component {
     if (hashtag.startsWith('#')) {
       hashtag = hashtag.substring(1);
     }
+    this.props.dispatch(setHashtags());
     this.setState({hashtag});
     await this.refreshKeyValues();
     this.isBiometricUseCapableAndEnabled = await Biometric.isBiometricUseCapableAndEnabled();
@@ -499,8 +500,8 @@ class HashtagKeyValues extends React.Component {
           />
           :
           <View style={{justifyContent: 'center', alignItems: 'center'}}>
-            <RNImage source={require('../../img/other_no_data.png')} style={{ width: SCREEN_WIDTH*0.33, height: SCREEN_WIDTH*0.33, marginVertical: 50 }} />
-            <Text style={{padding: 10, fontSize: 20, textAlign: 'center', color: KevaColors.darkText}}>
+            <RNImage source={require('../../img/other_no_data.png')} style={{ width: SCREEN_WIDTH*0.33, height: SCREEN_WIDTH*0.33, marginTop: 50, marginBottom: 10 }} />
+            <Text style={{padding: 10, fontSize: 24, textAlign: 'center', color: KevaColors.darkText}}>
               {(searched && hashtag.length > 0) ? (loc.namespaces.no_hashtag + hashtag) : loc.namespaces.hashtag_help}
             </Text>
           </View>
