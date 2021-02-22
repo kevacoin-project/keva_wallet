@@ -1,4 +1,5 @@
-
+import AsyncStorage from '@react-native-community/async-storage';
+import { AppStorage } from '../../class';
 
 const mediaReg = /\{\{([0-9a-zA-Z]+)\|(.+)\}\}/;
 
@@ -14,8 +15,31 @@ export function extractMedia(value) {
     return {};
 }
 
+const DefaultIPFSGateway = 'https://gateway.temporal.cloud/ipfs/';
+let IPFSGateway = null;
+
+export function setImageGatewayURL(url) {
+  if (!url) {
+    return;
+  }
+  IPFSGateway = url.replace(/\/+$/, "");
+}
+
+export async function initializeImageGateway() {
+  if (!IPFSGateway) {
+    const customUrl = await AsyncStorage.getItem(AppStorage.IPFS_CUSTOM_GATEWAY);
+    if (customUrl) {
+      IPFSGateway = customUrl;
+    } else {
+      const url = await AsyncStorage.getItem(AppStorage.IPFS_GATEWAY);
+      IPFSGateway = url || DefaultIPFSGateway;
+    }
+    setImageGatewayURL(IPFSGateway);
+  }
+}
+
 export function getImageGatewayURL(CID) {
-    return `https://gateway.temporal.cloud/ipfs/${CID}`;
+  return `${IPFSGateway}/${CID}`
 }
 
 export function replaceMedia(value, CIDHeight, CIDWidth, poster) {

@@ -15,6 +15,7 @@ import Currency from './screen/settings/currency';
 import EncryptStorage from './screen/settings/encryptStorage';
 import PlausibleDeniability from './screen/plausibledeniability';
 import ElectrumSettings from './screen/settings/electrumSettings';
+import IPFSSettings from './screen/settings/IPFSSettings';
 import GeneralSettings from './screen/settings/GeneralSettings';
 import NetworkSettings from './screen/settings/NetworkSettings';
 import DefaultView from './screen/settings/defaultView';
@@ -407,6 +408,10 @@ const HomeStackNavigator = createStackNavigator({
   ElectrumSettings: {
     screen: ElectrumSettings,
     path: 'ElectrumSettings',
+  },
+  IPFSSettings: {
+    screen: IPFSSettings,
+    path: 'IPFSSettings',
   },
   Broadcast: {
     screen: Broadcast

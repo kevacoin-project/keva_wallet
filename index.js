@@ -3,7 +3,7 @@ import 'intl/locale-data/jsonp/en';
 import React from 'react';
 import './shim.js';
 import { AppRegistry, StyleSheet, View, Text } from 'react-native';
-import WalletMigrate from './screen/wallets/walletMigrate';
+import { initializeImageGateway } from './screen/data/mediaManager';
 import { name as appName } from './app.json';
 import App from './App';
 import LottieView from 'lottie-react-native';
@@ -20,9 +20,8 @@ class BlueAppComponent extends React.Component {
     this.state = { isMigratingData: false, onAnimationFinished: false, successfullyAuthenticated: false };
   }
 
-  componentDidMount() {
-    //const walletMigrate = new WalletMigrate(this.setIsMigratingData);
-    //walletMigrate.start();
+  async componentDidMount() {
+    await initializeImageGateway();
   }
 
   setIsMigratingData = async () => {

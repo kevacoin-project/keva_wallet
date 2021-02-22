@@ -274,6 +274,8 @@ module.exports = {
     advanced_options: '高级选项',
     enable_advanced_mode: '启用高级模式',
     advanced_mode_note: '启用后，您将看到高级选项，例如不同的钱包类型。',
+    ipfs_settings: 'IPFS 设定',
+    ipfs_settings_explain: '使用自定义IPFS网关',
   },
   plausibledeniability: {
     title: '可否认性',

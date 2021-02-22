@@ -18,6 +18,7 @@ const NetworkSettings = () => {
     <SafeBlueArea forceInset={{ horizontal: 'always' }} style={{ flex: 1 }}>
       <ScrollView>
         <BlueListItem title={loc.settings.electrum_settings} component={TouchableOpacity} onPress={() => navigate('ElectrumSettings')} />
+        <BlueListItem title={loc.settings.ipfs_settings} component={TouchableOpacity} onPress={() => navigate('IPFSSettings')} />
         {/* <BlueListItem title={loc.settings.lightning_settings} component={TouchableOpacity} onPress={() => navigate('LightningSettings')} /> */}
         <BlueListItem title="Broadcast transaction" component={TouchableOpacity} onPress={() => navigate('Broadcast')} />
       </ScrollView>

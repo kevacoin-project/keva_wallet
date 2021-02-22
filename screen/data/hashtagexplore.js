@@ -314,6 +314,7 @@ class HashtagExplore extends React.Component {
 
   async componentDidMount() {
     this.isBiometricUseCapableAndEnabled = await Biometric.isBiometricUseCapableAndEnabled();
+    this.props.dispatch(setHashtags());
   }
 
   onShow = (key, value, tx, replies, shares, likes, height, favorite, shortCode, displayName) => {

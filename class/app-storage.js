@@ -30,6 +30,8 @@ export class AppStorage {
   static ADVANCED_MODE_ENABLED = 'advancedmodeenabled';
   static DELETE_WALLET_AFTER_UNINSTALL = 'deleteWalletAfterUninstall';
   static STATUS_ENABLED = 'statusenabled';
+  static IPFS_GATEWAY = 'ipfs_gateway';
+  static IPFS_CUSTOM_GATEWAY = 'ipfs_custom_gateway';
 
   constructor() {
     /** {Array.<AbstractWallet>} */
