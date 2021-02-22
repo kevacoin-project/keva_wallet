@@ -1193,107 +1193,6 @@ export async function findOtherNamespace(ecl, nsidOrShortCode) {
   return namespaces;
 }
 
-// Address is the root address, i.e. the address that is involved in
-// namespace creation.
-export async function getRepliesAndShares(ecl, historyTxList, needShortcode = true) {
-  let replies = [];
-  let shares = [];
-  let rewards = []
-
-  // Replies list.
-  let txScriptHashes = historyTxList.map(t => {
-    return getKeyScriptHash(createReplyKey(t.tx_hash));
-  });
-
-  // Shared list.
-  txScriptHashes = txScriptHashes.concat(historyTxList.map(t => {
-    return getKeyScriptHash(createShareKey(t.tx_hash));
-  }));
-
-  // Reward list.
-  txScriptHashes = txScriptHashes.concat(historyTxList.map(t => {
-    return getKeyScriptHash(createRewardKey(t.tx_hash));
-  }));
-
-  // The history is raw output, something like:
-  // [{"id": 188, "jsonrpc": "2.0", "param": "89fc4149e6e3ce6fce7af87865b3655699b44afb0e986350281494d8334c3285", "result": []}, ...]
-  const historyRaw = await ecl.blockchainScripthash_getHistoryBatch(txScriptHashes);
-  let history = [];
-  historyRaw.forEach(h => {
-    history = history.concat(h.result);
-  });
-
-  let txsToFetch = [];
-  history.forEach(h => {
-    txsToFetch = txsToFetch.concat(h.result);
-  });
-  txsToFetch = history.map(t => t.tx_hash);
-
-  const txsMap = await ecl.multiGetTransactionByTxid(txsToFetch, 20, VERBOSE);
-  let txs = [];
-  for (let t of txsToFetch) {
-    txs.push(txsMap[t]);
-  }
-
-  for (let i = 0; i < txs.length; i++) {
-    let tx = txs[i].result || txs[i];
-    // From transactions, tx.outputs
-    // From server: tx.vout
-    const vout = tx.outputs || tx.vout;
-    for (let v of vout) {
-      let result = parseKeva(v.scriptPubKey.asm);
-      if (!result || result[0] == KEVA_OP_NAMESPACE) {
-        continue;
-      }
-      let resultJson = kevaToJson(result);
-
-      // Check if it is a share
-      const {partialTxId, keyType} = parseSpecialKey(resultJson.key);
-      if (keyType == 'share') {
-        resultJson.time = tx.time;
-        const h = history.find(h => h.tx_hash == tx.txid);
-        resultJson.height = h.height;
-        resultJson.sharedTxId = partialTxId;
-
-        let {namespaceId, displayName, shortCode} = await getNamespaceInfo(ecl, resultJson.namespaceId, needShortcode);
-        resultJson.sharer = {
-          namespaceId,
-          displayName,
-          shortCode
-        }
-        shares.push(resultJson);
-      } else if (keyType == 'comment') {
-        resultJson.time = tx.time;
-        const h = history.find(h => h.tx_hash == tx.txid);
-        resultJson.height = h.height;
-        resultJson.partialTxId = partialTxId;
-
-        let {namespaceId, displayName, shortCode} = await getNamespaceInfo(ecl, resultJson.namespaceId, needShortcode);
-        resultJson.sender = {
-          namespaceId,
-          displayName,
-          shortCode
-        }
-        replies.push(resultJson);
-      } else if (keyType == 'like') {
-        resultJson.time = tx.time;
-        const h = history.find(h => h.tx_hash == tx.txid);
-        resultJson.height = h.height;
-
-        let {namespaceId, displayName, shortCode} = await getNamespaceInfo(ecl, resultJson.namespaceId, needShortcode);
-        resultJson.partialTxId = partialTxId;
-        resultJson.rewarder = {
-          namespaceId,
-          displayName,
-          shortCode
-        }
-        rewards.push(resultJson);
-      }
-    }
-  }
-  return {replies, shares, rewards};
-}
-
 export function decodeKey(key) {
   const keyBuf = Buffer.from(key, 'base64');
   if (keyBuf[0] < 10) {
@@ -1486,34 +1385,21 @@ export async function getNamespaceInfo(ecl, namespaceId, needShortcode = true) {
   if (needShortcode) {
     // Short code must use the first transaction when the namesapce is created.
     const rootTx = history[0];
-    let merkle = await ecl.blockchainTransaction_getMerkle(rootTx.tx_hash, rootTx.height, false);
-    if (merkle) {
-      // The first digit is the length of the block height.
-      let strHeight = merkle.block_height.toString();
-      const prefix = strHeight.length;
-      result.shortCode = prefix + strHeight + merkle.pos.toString();
+    try {
+      let merkle = await ecl.blockchainTransaction_getMerkle(rootTx.tx_hash, rootTx.height, false);
+      if (merkle) {
+        // The first digit is the length of the block height.
+        let strHeight = merkle.block_height.toString();
+        const prefix = strHeight.length;
+        result.shortCode = prefix + strHeight + merkle.pos.toString();
+      }
+    } catch (e) {
+      // No merkel result, the transaction has not been confirmed and included
+      // in a block yet.
+      result.shortCode = 0;
     }
   }
   return result;
-}
-
-export async function getNamespaceShortcode(ecl, namespaceId) {
-  let history = await ecl.blockchainScripthash_getHistory(getRootNamespaceScriptHash(namespaceId));
-  if (history.length == 0) {
-    return -1;
-  }
-  // Get the root one, i.e. first one.
-  const rootTx = history[0];
-  const txid = rootTx.tx_hash;
-  let merkle = await ecl.blockchainTransaction_getMerkle(txid, rootTx.height, false);
-  if (merkle) {
-    // The first digit is the length of the block height.
-    let strHeight = merkle.block_height.toString();
-    let prefix = strHeight.length;
-    let shortCode = prefix + strHeight + merkle.pos.toString();
-    return shortCode;
-  }
-  return -1;
 }
 
 export function getTxReaction(tx) {
@@ -1570,5 +1456,4 @@ export function findTxIndex(keyValues, txid) {
   } else {
     return keyValues.findIndex(kv => kv.tx == txid);
   }
-  return -1;
 }
