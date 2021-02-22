@@ -279,6 +279,23 @@ class KeyValues extends React.Component {
     this.setState({totalToFetch, fetched});
   }
 
+  decodeKeyValueList = (keyValues) => {
+    // Base64 decode
+    let decodedKeyValues = keyValues.map(kv => {
+      if (kv.type === 'REG') {
+        return kv;
+      }
+      if (kv.key) {
+        kv.key = decodeKey(kv.key);
+      }
+      if (kv.value) {
+        kv.value = Buffer.from(kv.value, 'base64').toString('utf-8');
+      }
+      return kv;
+    });
+    return decodedKeyValues;
+  }
+
   fetchKeyValues = async (min_tx_num) => {
     const {navigation, dispatch, keyValueList, namespaceList, reactions} = this.props;
     let {namespaceId, shortCode} = navigation.state.params;
@@ -300,9 +317,7 @@ class KeyValues extends React.Component {
       return;
     }
 
-    //TODO: this will screw up the index!
-    const keyValues = this.processKeyValueList(history.keyvalues);
-
+    const keyValues = this.decodeKeyValueList(history.keyvalues);
     // Check if it is a favorite.
     for (let kv of keyValues) {
       const reaction = reactions[kv.tx_hash];
@@ -649,9 +664,10 @@ class KeyValues extends React.Component {
     let keyValues = [];
     for (let kv of origkeyValues) {
       if (kv.type === 'PUT') {
-        // Remove the existing one.
-        keyValues = keyValues.filter(e => e.key != kv.key);
-        keyValues.push(kv);
+        // Add it only if there is not existing one (overriden).
+        if (keyValues.findIndex(e => e.key == kv.key) < 0) {
+          keyValues.push(kv);
+        }
       } else if (kv.type === 'DEL') {
         keyValues = keyValues.filter(e => e.key != kv.key);
       } else if (kv.type === 'REG') {
@@ -659,15 +675,6 @@ class KeyValues extends React.Component {
         keyValues.push({key: kv.displayName, value: loc.namespaces.created, ...kv});
       }
     }
-    // Base64 decode
-    keyValues = keyValues.map(kv => {
-      if (kv.type === 'REG') {
-        return kv;
-      }
-      kv.key = decodeKey(kv.key);
-      kv.value = Buffer.from(kv.value, 'base64').toString('utf-8');
-      return kv;
-    });
     return keyValues;
   }
 
@@ -691,7 +698,7 @@ class KeyValues extends React.Component {
     }
 
     const list = keyValueList.keyValues[namespaceId] || [];
-    const mergeListAll = list;
+    const mergeListAll = this.processKeyValueList(list);
     let mergeList;
     if (isOther) {
       mergeList = mergeListAll.filter(m => {
