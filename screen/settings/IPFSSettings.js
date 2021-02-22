@@ -142,7 +142,7 @@ export default class IPFSSettings extends Component {
             />
             <View style={styles.input}>
               <TextInput
-                placeholder={'e.g. https://gateway.temporal.cloud/ipfs'}
+                placeholder={'e.g. https://ipfs.io/ipfs/'}
                 value={customUrl}
                 onChangeText={text => this.setState({ customUrl: text })}
                 numberOfLines={1}
