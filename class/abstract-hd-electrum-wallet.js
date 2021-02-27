@@ -11,6 +11,7 @@ const coinSelectAccumulative = require('coinselect/accumulative');
 const coinSelectSplit = require('coinselect/split');
 const reverse = require('buffer-reverse');
 let BlueApp = require('../BlueApp');
+import { parseKeva } from './keva-ops';
 
 const ABSURD_FEE = 10000000;
 
@@ -216,10 +217,37 @@ export class AbstractHDElectrumWallet extends AbstractHDWallet {
     return this._xpub;
   }
 
+  trimTx(tx) {
+    delete tx.hex;
+    delete tx.hash;
+    delete tx.blockhash;
+    for (let input of tx.inputs) {
+      if (input.txinwitness) {
+        delete input.txinwitness;
+      }
+      if (input.scriptSig) {
+        delete input.scriptSig;
+      }
+    }
+    for (let output of tx.outputs) {
+      if (!parseKeva(output.scriptPubKey.asm)) {
+        // Keep the asm with Keva, we need it later.
+        delete output.scriptPubKey.asm;
+      }
+      delete output.scriptPubKey.hex;
+      if (output.txinwitness) {
+        delete output.txinwitness;
+      }
+    }
+  }
+
   /**
    * @inheritDoc
    */
   async fetchTransactions() {
+    if (this.cachedTransactions) {
+      this.cachedTransactions = null;
+    }
     // if txs are absent for some internal address in hierarchy - this is a sign
     // we should fetch txs for that address
     // OR if some address has unconfirmed balance - should fetch it's txs
@@ -271,6 +299,11 @@ export class AbstractHDElectrumWallet extends AbstractHDWallet {
     // then we combine all this data (we need inputs to see source addresses and amounts)
     let vinTxids = [];
     for (let txdata of Object.values(txdatas)) {
+      // Some tx has huge number of inputs. To reduce the bloat,
+      // we only consider those who have fewer than 5 inputs.
+      if (txdata.vin.length > 5) {
+        continue;
+      }
       for (let vin of txdata.vin) {
         vinTxids.push(vin.txid);
       }
@@ -289,6 +322,10 @@ export class AbstractHDElectrumWallet extends AbstractHDWallet {
           // extracting amount & addresses from previous output and adding it to _our_ input:
           txdatas[txid].vin[inpNum].addresses = vintxdatas[inpTxid].vout[inpVout].scriptPubKey.addresses;
           txdatas[txid].vin[inpNum].value = vintxdatas[inpTxid].vout[inpVout].value;
+        } else if (txdatas[inpTxid] && txdatas[inpTxid].vout[inpVout]) {
+          // It is our tx.
+          txdatas[txid].vin[inpNum].addresses = txdatas[inpTxid].vout[inpVout].scriptPubKey.addresses;
+          txdatas[txid].vin[inpNum].value = txdatas[inpTxid].vout[inpVout].value;
         }
       }
     }
@@ -315,6 +352,7 @@ export class AbstractHDElectrumWallet extends AbstractHDWallet {
             clonedTx.outputs = tx.vout.slice(0);
             delete clonedTx.vin;
             delete clonedTx.vout;
+            this.trimTx(clonedTx);
 
             // trying to replace tx if it exists already (because it has lower confirmations, for example)
             let replaced = false;
@@ -336,6 +374,7 @@ export class AbstractHDElectrumWallet extends AbstractHDWallet {
             clonedTx.outputs = tx.vout.slice(0);
             delete clonedTx.vin;
             delete clonedTx.vout;
+            this.trimTx(clonedTx);
 
             // trying to replace tx if it exists already (because it has lower confirmations, for example)
             let replaced = false;
@@ -362,6 +401,7 @@ export class AbstractHDElectrumWallet extends AbstractHDWallet {
             clonedTx.outputs = tx.vout.slice(0);
             delete clonedTx.vin;
             delete clonedTx.vout;
+            this.trimTx(clonedTx);
 
             // trying to replace tx if it exists already (because it has lower confirmations, for example)
             let replaced = false;
@@ -383,6 +423,7 @@ export class AbstractHDElectrumWallet extends AbstractHDWallet {
             clonedTx.outputs = tx.vout.slice(0);
             delete clonedTx.vin;
             delete clonedTx.vout;
+            this.trimTx(clonedTx);
 
             // trying to replace tx if it exists already (because it has lower confirmations, for example)
             let replaced = false;
@@ -402,6 +443,10 @@ export class AbstractHDElectrumWallet extends AbstractHDWallet {
   }
 
   getTransactions() {
+    if (this.cachedTransactions) {
+      return this.cachedTransactions;
+    }
+
     let txs = [];
 
     for (let addressTxs of Object.values(this._txs_by_external_index)) {
@@ -443,9 +488,10 @@ export class AbstractHDElectrumWallet extends AbstractHDWallet {
       usedTxIds[tx.txid] = 1;
     }
 
-    return ret2.sort(function(a, b) {
+    this.cachedTransactions = ret2.sort(function(a, b) {
       return b.received - a.received;
     });
+    return this.cachedTransactions;
   }
 
   async _binarySearchIterationForInternalAddress(index) {

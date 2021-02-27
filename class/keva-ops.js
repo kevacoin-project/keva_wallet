@@ -166,6 +166,9 @@ export function parseKevaNamespace(asm) {
 }
 
 export function parseKeva(asm) {
+  if (!asm) {
+    return null;
+  }
   if (asm.startsWith("OP_KEVA_PUT")) {
     return parseKevaPut(asm);
   } else if (asm.startsWith("OP_KEVA_DELETE")) {
