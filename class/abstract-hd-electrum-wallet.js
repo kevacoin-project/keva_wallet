@@ -326,8 +326,12 @@ export class AbstractHDElectrumWallet extends AbstractHDWallet {
           // It is our tx.
           txdatas[txid].vin[inpNum].addresses = txdatas[inpTxid].vout[inpVout].scriptPubKey.addresses;
           txdatas[txid].vin[inpNum].value = txdatas[inpTxid].vout[inpVout].value;
+        } else {
+          // Remove the unused vin - we cannot get meaningful information.
+          txdatas[txid].vin[inpNum] = null;
         }
       }
+      txdatas[txid].vin = txdatas[txid].vin.filter(v => !!v);
     }
 
     // now purge all unconfirmed txs from internal hashmaps, since some may be evicted from mempool because they became invalid
