@@ -299,11 +299,6 @@ export class AbstractHDElectrumWallet extends AbstractHDWallet {
     // then we combine all this data (we need inputs to see source addresses and amounts)
     let vinTxids = [];
     for (let txdata of Object.values(txdatas)) {
-      // Some tx has huge number of inputs. To reduce the bloat,
-      // we only consider those who have fewer than 5 inputs.
-      if (txdata.vin.length > 5) {
-        continue;
-      }
       for (let vin of txdata.vin) {
         vinTxids.push(vin.txid);
       }
@@ -326,12 +321,30 @@ export class AbstractHDElectrumWallet extends AbstractHDWallet {
           // It is our tx.
           txdatas[txid].vin[inpNum].addresses = txdatas[inpTxid].vout[inpVout].scriptPubKey.addresses;
           txdatas[txid].vin[inpNum].value = txdatas[inpTxid].vout[inpVout].value;
-        } else {
-          // Remove the unused vin - we cannot get meaningful information.
-          txdatas[txid].vin[inpNum] = null;
         }
       }
-      txdatas[txid].vin = txdatas[txid].vin.filter(v => !!v);
+      // Some vins have same address but different value, let's merge them.
+      let addressValues = {};
+      for (let v of txdatas[txid].vin) {
+        if (!v.addresses) {
+          continue;
+        }
+        const address = v.addresses[0];
+        if (addressValues[address]) {
+          addressValues[address] += v.value;
+        } else {
+          addressValues[address] = v.value;
+        }
+      }
+
+      let vins = [];
+      for (let address of Object.keys(addressValues)) {
+        vins.push({
+          addresses: [address],
+          value: addressValues[address]
+        });
+      }
+      txdatas[txid].vin = vins;
     }
 
     // now purge all unconfirmed txs from internal hashmaps, since some may be evicted from mempool because they became invalid
