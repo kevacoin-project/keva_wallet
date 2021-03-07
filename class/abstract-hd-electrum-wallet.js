@@ -11,9 +11,9 @@ const coinSelectAccumulative = require('coinselect/accumulative');
 const coinSelectSplit = require('coinselect/split');
 const reverse = require('buffer-reverse');
 let BlueApp = require('../BlueApp');
-import { parseKeva } from './keva-ops';
 
 const ABSURD_FEE = 10000000;
+const CURRENT_STOTAGE_FORMAT = 2;
 
 /**
  * Electrum - means that it utilizes Electrum protocol for blockchain data
@@ -33,6 +33,7 @@ export class AbstractHDElectrumWallet extends AbstractHDWallet {
     this._txs_by_internal_index = {};
 
     this._utxo = [];
+    this.storage_format = 0;
   }
 
   async clearHistory() {
@@ -221,6 +222,12 @@ export class AbstractHDElectrumWallet extends AbstractHDWallet {
    * @inheritDoc
    */
   async fetchTransactions() {
+    if (this.storage_format != CURRENT_STOTAGE_FORMAT) {
+      console.log('Storage format mismatched, clearing history ...')
+      await this.clearHistory();
+      this.storage_format = CURRENT_STOTAGE_FORMAT;
+    }
+
     if (this.cachedTransactions) {
       this.cachedTransactions = null;
     }
@@ -276,6 +283,7 @@ export class AbstractHDElectrumWallet extends AbstractHDWallet {
     Object.keys(txdatas).forEach((txid, i) => {
       const txHeight = txs[txid].height;
       txdatas[txid].confirmations = (txHeight > 0) ? (height - txHeight + 1) : 0;
+      txdatas[txid].txid = txid;
     });
 
     // now purge all unconfirmed txs from internal hashmaps, since some may be evicted from mempool because they became invalid
@@ -396,7 +404,7 @@ export class AbstractHDElectrumWallet extends AbstractHDWallet {
         // if input (spending) goes from our address - we are loosing!
         if (address && this.weOwnAddress(address)) {
           const value = tx.i[index + 1];
-          tx.value -= new BigNumber(value).multipliedBy(100000000).toNumber();
+          tx.value -= value;
         }
       }
 
@@ -405,7 +413,7 @@ export class AbstractHDElectrumWallet extends AbstractHDWallet {
         // when output goes to our address - this means we are gaining!
         if (address && this.weOwnAddress(address)) {
           const value = tx.o[index + 1];
-          tx.value += new BigNumber(value).multipliedBy(100000000).toNumber();
+          tx.value += value;
         }
       }
       ret.push(tx);
