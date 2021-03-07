@@ -10,18 +10,6 @@ export const KEVA_OP_DELETE = 0xd2;
 
 const convert = (from, to) => str => Buffer.from(str, from).toString(to)
 const utf8ToHex = convert('utf8', 'hex')
-const hexToUtf8 = convert('hex', 'utf8')
-
-// Check if a hex string represents a valid utf-8 string.
-// If yes, convert it into utf-8 string. Otherwise, convert
-// it to binary buffer.
-function hexToUtf8OrBuffer(hexStr) {
-  const utf8Str = hexToUtf8(hexStr);
-  if (utf8ToHex(utf8Str).length === hexStr.length) {
-    return utf8Str;
-  }
-  return Buffer.from(hexStr, 'hex');
-}
 
 const DUMMY_TXID = 'c70483b4613b18e750d0b1087ada28d713ad1e406ebc87d36f94063512c5f0dd';
 
@@ -54,18 +42,6 @@ export function reverse(src) {
   return buffer
 }
 
-export function isKevaNamespace(code) {
-  return code === KEVA_OP_NAMESPACE;
-}
-
-export function isKevaPut(code) {
-  return code === KEVA_OP_PUT;
-}
-
-export function isKevaDelete(code) {
-  return code === KEVA_OP_DELETE;
-}
-
 export function hexToNamespace(hexStr) {
   let decoded = Buffer.from(hexStr, "hex")
   return base58check.encode(decoded);
@@ -73,110 +49,6 @@ export function hexToNamespace(hexStr) {
 
 export function namespaceToHex(nsStr) {
   return base58check.decode(nsStr);
-}
-
-function reverseHex(strHex) {
-  if ((strHex.length % 2) != 0) {
-    strHex = '0' + strHex;
-  }
-  const result = [];
-  let len = strHex.length - 2;
-  while (len >= 0) {
-    result.push(strHex.substr(len, 2));
-    len -= 2;
-  }
-  return result.join('');
-}
-
-function fixInt(num) {
-  let intVal = parseInt(num, 10);
-  if (intVal.toString(10) != num) {
-    return num;
-  }
-  if (intVal > 2147483647) {
-    return num;
-  }
-  if (intVal < 0) {
-    // See set_vch method in script.h in bitcoin code.
-    let scriptNum = (-intVal).toString(16);
-    const numLen = scriptNum.length;
-    if (numLen == 2) {
-      intVal = -intVal + 0x80;
-    } else if (numLen <= 4) {
-      intVal = -intVal + 0x8000;
-    } else if (numLen <= 6) {
-      intVal = -intVal + 0x800000;
-    } else if (numLen <= 8) {
-      intVal = -intVal + 0x80000000;
-    }
-  }
-  return reverseHex(intVal.toString(16));
-}
-
-function kevaToJson(result) {
-  if (result[0] === KEVA_OP_NAMESPACE) {
-      return {
-          op: 'KEVA_OP_NAMESPACE',
-          namespaceId: hexToNamespace(result[1]),
-          displayName: hexToUtf8OrBuffer(fixInt(result[2]))
-      }
-  } else if (result[0] === KEVA_OP_PUT) {
-      return {
-          op: 'KEVA_OP_PUT',
-          namespaceId: hexToNamespace(result[1]),
-          key: hexToUtf8OrBuffer(fixInt(result[2])),
-          value: hexToUtf8(fixInt(result[3]))
-      }
-  } else if (result[0] === KEVA_OP_DELETE) {
-      return {
-          op: 'KEVA_OP_DELETE',
-          namespaceId: hexToNamespace(result[1]),
-          key: hexToUtf8OrBuffer(fixInt(result[2]))
-      }
-  } else {
-      return null;
-  }
-}
-
-export function parseKevaPut(asm) {
-  let re = /^OP_KEVA_PUT\s([0-9A-Fa-f]+)\s(-?[0-9A-Fa-f]+)\s(-?[0-9A-Fa-f]+)/;
-  let match = asm.match(re);
-  if (!match || match.length !== 4) {
-    return null;
-  }
-  return [KEVA_OP_PUT, ...match.slice(1)];
-}
-
-export function parseKevaDelete(asm) {
-  let re = /^OP_KEVA_DELETE\s([0-9A-Fa-f]+)\s(-?[0-9A-Fa-f]+)/;
-  let match = asm.match(re);
-  if (!match || match.length !== 3) {
-    return null;
-  }
-  return [KEVA_OP_DELETE, ...match.slice(1)];
-}
-
-export function parseKevaNamespace(asm) {
-  let re = /^OP_KEVA_NAMESPACE\s([0-9A-Fa-f]+)\s(-?[0-9A-Fa-f]+)/;
-  let match = asm.match(re);
-  if (!match || match.length !== 3) {
-    return null;
-  }
-  return [KEVA_OP_NAMESPACE, ...match.slice(1)];
-}
-
-export function parseKeva(asm) {
-  if (!asm) {
-    return null;
-  }
-  if (asm.startsWith("OP_KEVA_PUT")) {
-    return parseKevaPut(asm);
-  } else if (asm.startsWith("OP_KEVA_DELETE")) {
-    return parseKevaDelete(asm);
-  } else if (asm.startsWith("OP_KEVA_NAMESPACE")) {
-    return parseKevaNamespace(asm);
-  }
-  return null;
 }
 
 export function toScriptHash(addr) {
@@ -277,51 +149,49 @@ function parseProfile(value) {
 // That is, this transaction is used to set the namespace info.
 // Or, it must be KEVA_OP_NAMESPACE.
 export async function getNamespaceDataFromNSTx(ecl, txid) {
-  const tx = await ecl.blockchainTransaction_get(txid, true);
-  // From transactions, tx.outputs
-  // From server: tx.vout
-  const vout = tx.outputs || tx.vout;
-  for (let v of vout) {
-    let result = parseKeva(v.scriptPubKey.asm);
-    if (!result) {
-      continue;
-    }
-
-    const op = result[0];
-    if (op === KEVA_OP_NAMESPACE) {
-      return kevaToJson(result);
-    } else if (op === KEVA_OP_PUT) {
-      // Check the key format.
-      const key = result[2];
-      if (key.startsWith(KEY_PUT_NAMESPACE)) {
-        let info = kevaToJson(result);
-        const {displayName, bio} = parseProfile(info.value);
-        return {...info, displayName, bio};
-      }
-      return null;
-    } else if (op === KEVA_OP_DELETE) {
-      // TODO: how to handle this?
-      return null;
-    }
+  const result = await ecl.multiGetTransactionInfoByTxid([txid], 1, true);
+  const tx = result[txid];
+  if (!tx.n || !tx.kv) {
+    return;
   }
-  return null;
+
+  const op = tx.kv.op;
+  if (op === KEVA_OP_NAMESPACE) {
+    return {
+      op: 'KEVA_OP_NAMESPACE',
+      namespaceId: tx.n[0],
+      displayName: decodeBase64(tx.kv.key),
+    }
+  } else if (op === KEVA_OP_PUT) {
+    // Check the key format.
+    const key = decodeBase64(tx.kv.key);
+    if ((typeof key) == 'string') {
+      return null;
+    }
+    const keyHex = toHexString(key);
+    if (keyHex.startsWith(KEY_PUT_NAMESPACE)) {
+      let info = {
+        op: 'KEVA_OP_PUT',
+        namespaceId: tx.n[0],
+        value: decodeBase64(tx.kv.value),
+      };
+      const {displayName, bio} = parseProfile(info.value);
+      return {...info, displayName, bio};
+    }
+    return null;
+  } else if (op === KEVA_OP_DELETE) {
+    // TODO: how to handle this?
+    return null;
+  }
 }
 
 export async function getNamespaceIdFromTx(ecl, txid) {
-  const tx = await ecl.blockchainTransaction_get(txid, true);
-
-  // From transactions, tx.outputs
-  // From server: tx.vout
-  const vout = tx.outputs || tx.vout;
-  for (let v of vout) {
-    let result = parseKeva(v.scriptPubKey.asm);
-    if (!result) {
-      continue;
-    }
-
-    return result[1];
+  const result = await ecl.multiGetTransactionInfoByTxid([txid], 1, true);
+  const tx = result[txid];
+  if (!tx || !tx.n) {
+    return null;
   }
-  return null;
+  return tx.n[0];
 }
 
 function getNamespaceCreationScript(nsName, address, txId, n) {
@@ -524,40 +394,24 @@ export async function getNonNamespaceUxtos(wallet, transactions, utxos, tryAgain
   return nonNSutxos;
 }
 
-export async function scanForNamespaces(wallet) {
-  let results = [];
-  const txs = wallet.getTransactions();
-  for (let tx of txs) {
-    for (let vout of tx.outputs) {
-      const keva = parseKeva(vout.scriptPubKey.asm);
-      if (keva) {
-        results.push({
-          tx: tx.txid,
-          n: vout.n,
-          address: vout.scriptPubKey.addresses[0],
-          keva: kevaToJson(keva),
-        });
-      }
-    }
-  }
-  return results;
-}
-
 const TRY_UTXO_COUNT = 2;
+
 export async function getNamespaceUtxo(wallet, namespaceId) {
   for (let i = 0; i < TRY_UTXO_COUNT; i++) {
     await wallet.fetchUtxo();
     const utxos = wallet.getUtxo();
-    const results = await scanForNamespaces(wallet);
-    for (let r of results) {
-      if (r.keva.namespaceId === namespaceId) {
-        for (let t of utxos) {
-          if (r.tx == t.txId && r.n == t.vout) {
-            return t;
-          }
-        }
+    const transactions = wallet.getTransactions();
+
+    for (let u of utxos) {
+      const tx = transactions.find(t => t.txid == u.txId);
+      if (!tx || !tx.n) {
+        continue;
+      }
+      if (tx.n[0] == namespaceId || u.vout == tx.n[1]) {
+        return u;
       }
     }
+
     // No namespace UXTO, try again.
     await waitPromise(2000);
     await wallet.fetchBalance();
@@ -1009,8 +863,10 @@ export async function deleteKeyValue(wallet, requestedSatPerByte, namespaceId, k
 }
 
 // nsTx: any tx that contains namespace operation.
-export async function getNamespaceInfoFromTx(ecl, nsTx) {
-  let nsId = await getNamespaceIdFromTx(ecl, nsTx);
+export async function getNamespaceInfoFromTx(ecl, nsTx, nsId) {
+  if (!nsId) {
+    nsId = await getNamespaceIdFromTx(ecl, nsTx);
+  }
   return await getNamespaceInfo(ecl, nsId);
 }
 
@@ -1023,99 +879,6 @@ export async function getTxIdFromShortCode(ecl, shortCode) {
     return txHash;
   }
   return null;
-}
-
-const VERBOSE = true;
-const FAST_LOAD = 20;
-
-// Address is the root address, i.e. the address that is involved in
-// namespace creation.
-export async function fetchKeyValueList(ecl, completeHistory, currentkeyValueList, isFast) {
-
-  let history;
-  if (isFast && completeHistory.length > FAST_LOAD) {
-    // Only load some of the latest results.
-    history = completeHistory.slice(completeHistory.length - FAST_LOAD);
-  } else {
-    history = completeHistory;
-  }
-
-  // Only need to fetch the txs that are not in the current list, or have different height.
-  let txsToFetch = [];
-  currentkeyValueList = currentkeyValueList || [];
-  history.forEach(h => {
-    const same = currentkeyValueList.find(c => (c.tx == h.tx_hash) && (c.height == h.height));
-    if (same) {
-      // No need to update.
-      return;
-    }
-    txsToFetch.push(h.tx_hash);
-  });
-
-  if (txsToFetch.length == 0) {
-    // No changes, return the original ones.
-    return currentkeyValueList;
-  }
-
-  const txsMap = await ecl.multiGetTransactionByTxid(txsToFetch, 20, VERBOSE);
-  let txs = [];
-  for (let t of txsToFetch) {
-    txs.push(txsMap[t]);
-  }
-  let results = [];
-  for (let i = 0; i < txs.length; i++) {
-    let tx = txs[i].result || txs[i];
-    // From transactions, tx.outputs
-    // From server: tx.vout
-    const vout = tx.outputs || tx.vout;
-    for (let v of vout) {
-      let result = parseKeva(v.scriptPubKey.asm);
-      if (!result) {
-        continue;
-      }
-      let resultJson = kevaToJson(result);
-      resultJson.tx = tx.txid;
-      const h = history.find(h => h.tx_hash == tx.txid);
-      resultJson.height = h.height;
-      resultJson.n = v.n;
-      resultJson.time = tx.time;
-      let address = v.scriptPubKey.addresses[0];
-      resultJson.address = address;
-      results.push(resultJson);
-    }
-  }
-
-  // Merge the results. Update the existing ones, and append the rest
-  // to the end;
-  for (let c of currentkeyValueList) {
-    const foundIndex = results.findIndex(r => (r.tx == c.tx));
-    if (foundIndex >= 0) {
-      // Update height in case it is different.
-      c.height = results[foundIndex].height;
-      c.time = results[foundIndex].time;
-      results.splice(foundIndex, 1);
-    }
-  }
-
-  return [...currentkeyValueList, ...results];
-}
-
-export function mergeKeyValueList(origkeyValues) {
-  // Merge the results.
-  let keyValues = [];
-  for (let kv of origkeyValues) {
-    if (kv.op === 'KEVA_OP_PUT') {
-      // Remove the existing one.
-      keyValues = keyValues.filter(e => e.key != kv.key);
-      keyValues.push(kv);
-    } else if (kv.op === 'KEVA_OP_DELETE') {
-      keyValues = keyValues.filter(e => e.key != kv.key);
-    } else if (kv.op === 'KEVA_OP_NAMESPACE') {
-      // Special treatment for namespace creation.
-      keyValues.push({key: kv.displayName, value: loc.namespaces.created, ...kv});
-    }
-  }
-  return keyValues.reverse();
 }
 
 export async function findMyNamespaces(wallet, ecl) {
@@ -1135,26 +898,25 @@ export async function findMyNamespaces(wallet, ecl) {
       continue;
     }
 
-    let v = tx.outputs[utxo.vout];
+    let v = tx.o[utxo.vout];
     if (!v) {
       // This should not happen.
       continue;
     }
-    let result = parseKeva(v.scriptPubKey.asm);
-    if (!result) {
+    if (!tx.n) {
+      // tx.n contains namespace Id and vout.
       continue;
     }
-    const keva = kevaToJson(result);
-    const nsId = keva.namespaceId;
+    const nsId = tx.n[0];
     namespaces[nsId] = namespaces[nsId] || {
       id: nsId,
       walletId: wallet.getID(),
-      txId: tx.hash,
+      txId: tx.txid,
     }
   }
 
   for (let nsId of Object.keys(namespaces)) {
-    const { shortCode, displayName, bio } = await getNamespaceInfoFromTx(ecl, namespaces[nsId].txId);
+    const { shortCode, displayName, bio } = await getNamespaceInfoFromTx(ecl, namespaces[nsId].txId, nsId);
     namespaces[nsId].shortCode = shortCode;
     namespaces[nsId].displayName = displayName;
     namespaces[nsId].bio = bio;
@@ -1194,7 +956,7 @@ export async function findOtherNamespace(ecl, nsidOrShortCode) {
   return namespaces;
 }
 
-export function decodeKey(key) {
+export function decodeBase64(key) {
   const keyBuf = Buffer.from(key, 'base64');
   if (keyBuf[0] < 10) {
     // Special protocol, not a valid utf-8 string.
@@ -1351,21 +1113,6 @@ export async function shareKeyValue(wallet, requestedSatPerByte, namespaceId, va
   return {tx: hexTx, fee, cost: REPLY_COST};
 }
 
-export async function getKeyValueFromTxid(ecl, txid) {
-  const tx = await ecl.blockchainTransaction_get(txid, true);
-  const vout = tx.vout;
-  for (let v of vout) {
-    let result = parseKeva(v.scriptPubKey.asm);
-    if (result) {
-      let resultJson = kevaToJson(result);
-      resultJson.time = tx.time;
-      return resultJson;
-    }
-  }
-
-  return null;
-}
-
 export async function getNamespaceInfoFromShortCode(ecl, shortCode) {
   const nsRootId = await getTxIdFromShortCode(ecl, shortCode);
   if (nsRootId) {
@@ -1404,17 +1151,16 @@ export async function getNamespaceInfo(ecl, namespaceId, needShortcode = true) {
 }
 
 export function getTxReaction(tx) {
-  for (let vout of tx.outputs) {
-    const keva = parseKeva(vout.scriptPubKey.asm);
-    if (!keva) {
+  for (let index = 0; index < tx.o.length; index = index + 2) {
+    if (!tx.n) {
       continue;
     }
-    const kevaJson = kevaToJson(keva);
-    if (kevaJson.op != 'KEVA_OP_PUT') {
+    if (tx.kv.op != KEVA_OP_PUT) {
       continue;
     }
 
-    const {keyType, partialTxId} = parseSpecialKey(kevaJson.key);
+    const key = decodeBase64(tx.kv.key);
+    const {keyType, partialTxId} = parseSpecialKey(key);
     if (keyType == 'share' || keyType == 'comment' || keyType == 'like') {
       return {keyType: keyType, tx_hash: partialTxId}
     }

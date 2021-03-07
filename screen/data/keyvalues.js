@@ -35,7 +35,7 @@ import { setKeyValueList, setMediaInfo,
 import {
         getNamespaceScriptHash, parseSpecialKey,
         deleteKeyValue, getSpecialKeyText,
-        getNamespaceInfoFromShortCode, decodeKey,
+        getNamespaceInfoFromShortCode, decodeBase64,
         findTxIndex,
         } from '../../class/keva-ops';
 import Toast from 'react-native-root-toast';
@@ -283,10 +283,10 @@ class KeyValues extends React.Component {
     // Base64 decode
     let decodedKeyValues = keyValues.map(kv => {
       if (kv.displayName) {
-        kv.displayName = decodeKey(kv.displayName);
+        kv.displayName = decodeBase64(kv.displayName);
       }
       if (kv.key) {
-        kv.key = decodeKey(kv.key);
+        kv.key = decodeBase64(kv.key);
       }
       if (kv.value) {
         kv.value = Buffer.from(kv.value, 'base64').toString('utf-8');
