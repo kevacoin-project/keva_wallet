@@ -42,12 +42,11 @@ export default class TransactionsStatus extends Component {
     for (let tx of BlueApp.getTransactions()) {
       if (tx.hash === hash) {
         foundTx = tx;
-        for (let input of foundTx.inputs) {
-          from = from.concat(input.addresses);
+        for (let index = 0; index < tx.i.length; index = index + 2) {
+          from = from.concat(tx.i[index]);
         }
-        for (let output of foundTx.outputs) {
-          if (output.addresses) to = to.concat(output.addresses);
-          if (output.scriptPubKey && output.scriptPubKey.addresses) to = to.concat(output.scriptPubKey.addresses);
+        for (let index = 0; index < tx.o.length; index = index + 2) {
+          to = to.concat(tx.o[index]);
         }
       }
     }
