@@ -217,30 +217,6 @@ export class AbstractHDElectrumWallet extends AbstractHDWallet {
     return this._xpub;
   }
 
-  trimTx(tx) {
-    delete tx.hex;
-    delete tx.hash;
-    delete tx.blockhash;
-    for (let input of tx.inputs) {
-      if (input.txinwitness) {
-        delete input.txinwitness;
-      }
-      if (input.scriptSig) {
-        delete input.scriptSig;
-      }
-    }
-    for (let output of tx.outputs) {
-      if (!parseKeva(output.scriptPubKey.asm)) {
-        // Keep the asm with Keva, we need it later.
-        delete output.scriptPubKey.asm;
-      }
-      delete output.scriptPubKey.hex;
-      if (output.txinwitness) {
-        delete output.txinwitness;
-      }
-    }
-  }
-
   /**
    * @inheritDoc
    */
@@ -297,10 +273,9 @@ export class AbstractHDElectrumWallet extends AbstractHDWallet {
     let txdatas = await BlueElectrum.multiGetTransactionInfoByTxid(txList, 50, true);
     let height = await BlueElectrum.blockchainBlock_count();
     // Add the confirmation info
-    txdatas.forEach((tx, i) => {
-      tx.txid = txList[i];
-      const txHeight = txs[tx.txid].height;
-      tx.confirmations = (txHeight > 0) ? (height - txHeight + 1) : -1;
+    Object.keys(txdatas).forEach((txid, i) => {
+      const txHeight = txs[txid].height;
+      txdatas[txid].confirmations = (txHeight > 0) ? (height - txHeight + 1) : 0;
     });
 
     // now purge all unconfirmed txs from internal hashmaps, since some may be evicted from mempool because they became invalid
@@ -410,23 +385,27 @@ export class AbstractHDElectrumWallet extends AbstractHDWallet {
 
     let ret = [];
     for (let tx of txs) {
-      tx.received = tx.blocktime * 1000;
-      if (!tx.blocktime) tx.received = +new Date() - 30 * 1000; // unconfirmed
+      tx.received = tx.t * 1000; //tx.t is blocktime
+      if (!tx.t) tx.received = +new Date() - 30 * 1000; // unconfirmed
       tx.confirmations = tx.confirmations || 0; // unconfirmed
       tx.hash = tx.txid;
       tx.value = 0;
 
-      for (let vin of tx.inputs) {
+      for (let index = 0; index < tx.i.length; index = index + 2) {
+        const address = tx.i[index];
         // if input (spending) goes from our address - we are loosing!
-        if ((vin.address && this.weOwnAddress(vin.address)) || (vin.addresses && vin.addresses[0] && this.weOwnAddress(vin.addresses[0]))) {
-          tx.value -= new BigNumber(vin.value).multipliedBy(100000000).toNumber();
+        if (address && this.weOwnAddress(address)) {
+          const value = tx.i[index + 1];
+          tx.value -= new BigNumber(value).multipliedBy(100000000).toNumber();
         }
       }
 
-      for (let vout of tx.outputs) {
+      for (let index = 0; index < tx.o.length; index = index + 2) {
+        const address = tx.o[index];
         // when output goes to our address - this means we are gaining!
-        if (vout.scriptPubKey.addresses && vout.scriptPubKey.addresses[0] && this.weOwnAddress(vout.scriptPubKey.addresses[0])) {
-          tx.value += new BigNumber(vout.value).multipliedBy(100000000).toNumber();
+        if (address && this.weOwnAddress(address)) {
+          const value = tx.o[index + 1];
+          tx.value += new BigNumber(value).multipliedBy(100000000).toNumber();
         }
       }
       ret.push(tx);
@@ -703,24 +682,27 @@ export class AbstractHDElectrumWallet extends AbstractHDWallet {
    * @returns {[]}
    */
   getUtxo() {
+    /*
     if (this._utxo.length === 0) return this.getDerivedUtxoFromOurTransaction(); // oy vey, no stored utxo. lets attempt to derive it from stored transactions
+    */
+    // Must call fetchUtxo before calling this function, otherwise it will be empty.
     return this._utxo;
   }
 
+  // This should not be used. We should always fetch them from the server.
+  /*
   getDerivedUtxoFromOurTransaction() {
     let utxos = [];
     for (let tx of this.getTransactions()) {
-      for (let output of tx.outputs) {
-        let address = false;
-        if (output.scriptPubKey && output.scriptPubKey.addresses && output.scriptPubKey.addresses[0]) {
-          address = output.scriptPubKey.addresses[0];
-        }
+      for (let index = 0; index < tx.o.length; index = index + 1) {
+        let address = tx.o[index];
         if (this.weOwnAddress(address)) {
-          let value = new BigNumber(output.value).multipliedBy(100000000).toNumber();
+          const value = tx.o[index + 1];
+          let value = new BigNumber(value).multipliedBy(100000000).toNumber();
           utxos.push({
             txid: tx.txid,
             txId: tx.txid,
-            vout: output.n,
+            vout: index/2,
             address,
             value,
             amount: value,
@@ -748,6 +730,7 @@ export class AbstractHDElectrumWallet extends AbstractHDWallet {
 
     return ret;
   }
+  */
 
   _getDerivationPathByAddress(address, BIP = 84) {
     const path = `m/${BIP}'/0'/0'`;

@@ -461,7 +461,8 @@ module.exports.multiGetTransactionInfoByTxid = async function(txids, batchsize, 
   // Filter out those already in cache.
   let txidsToFetch;
   let cachedTxs = await BlueApp.getMultiTxFromDisk(txids);
-  txidsToFetch = txids.filter(t => !cachedTxs[t]);
+  // cachedTxs[t].o is the new format.
+  txidsToFetch = txids.filter(t => (!cachedTxs[t] || !cachedTxs[t].o));
 
   let chunks = splitIntoChunks(txidsToFetch, batchsize);
   for (let chunk of chunks) {
@@ -470,10 +471,11 @@ module.exports.multiGetTransactionInfoByTxid = async function(txids, batchsize, 
     let txsToSave = [];
     let index = 0;
     for (let txdata of results) {
-      const tx_hash = chunks[index];
+      const tx_hash = chunk[index];
       ret[tx_hash] = txdata;
       // Tx to save
       txsToSave.push([tx_hash, txdata]);
+      index ++;
     }
 
     // Save the txs to cache.
