@@ -487,9 +487,8 @@ export function getNonNamespaceUxtosSync(transactions, utxos) {
     if (!tx) {
       continue;
     }
-    const v = tx.outputs[u.vout];
-    let result = parseKeva(v.scriptPubKey.asm);
-    let isNSTx = !!result;
+    // tx.n is an array of namespace Id followed by vout.
+    let isNSTx = tx.n && tx.n[1] == u.vout;
     if (!isNSTx) {
       nonNSutxos.push(u);
     }
@@ -504,9 +503,8 @@ export async function getNonNamespaceUxtos(wallet, transactions, utxos, tryAgain
     if (!tx) {
       continue;
     }
-    const v = tx.outputs[u.vout];
-    let result = parseKeva(v.scriptPubKey.asm);
-    let isNSTx = !!result;
+    // tx.n is an array of namespace Id followed by vout.
+    let isNSTx = tx.n && tx.n[1] == u.vout;
     if (!isNSTx) {
       nonNSutxos.push(u);
     }
