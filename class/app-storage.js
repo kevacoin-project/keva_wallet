@@ -475,7 +475,8 @@ export class AppStorage {
     let chunks = this.splitIntoChunks(txids, 50);
     for (ch of chunks) {
       let data = await AsyncStorage.multiGet(ch);
-      if (data) {
+      if (data && data.o) {
+        // data.o an indication that it is a new type of transaction info.
         for (let d of data) {
           result[d[0]] = JSON.parse(d[1]);
         }

@@ -288,64 +288,20 @@ export class AbstractHDElectrumWallet extends AbstractHDWallet {
     let txs = {};
     for (let history of Object.values(histories)) {
       for (let tx of history) {
-        txs[tx.tx_hash] = tx;
+        txs[tx.tx_hash] = tx; //tx content: {tx_hash: <hash>, height: <height>}
       }
     }
 
     // next, batch fetching each txid we got
-    let txdatas = await BlueElectrum.multiGetTransactionByTxid(Object.keys(txs), 20, true);
-
-    // now, tricky part. we collect all transactions from inputs (vin), and batch fetch them too.
-    // then we combine all this data (we need inputs to see source addresses and amounts)
-    let vinTxids = [];
-    for (let txdata of Object.values(txdatas)) {
-      for (let vin of txdata.vin) {
-        vinTxids.push(vin.txid);
-      }
-    }
-    let vintxdatas = await BlueElectrum.multiGetTransactionByTxid(vinTxids, 20, true);
-
-    // fetched all transactions from our inputs. now we need to combine it.
-    // iterating all _our_ transactions:
-    for (let txid of Object.keys(txdatas)) {
-      // iterating all inputs our our single transaction:
-      for (let inpNum = 0; inpNum < txdatas[txid].vin.length; inpNum++) {
-        let inpTxid = txdatas[txid].vin[inpNum].txid;
-        let inpVout = txdatas[txid].vin[inpNum].vout;
-        // got txid and output number of _previous_ transaction we shoud look into
-        if (vintxdatas[inpTxid] && vintxdatas[inpTxid].vout[inpVout]) {
-          // extracting amount & addresses from previous output and adding it to _our_ input:
-          txdatas[txid].vin[inpNum].addresses = vintxdatas[inpTxid].vout[inpVout].scriptPubKey.addresses;
-          txdatas[txid].vin[inpNum].value = vintxdatas[inpTxid].vout[inpVout].value;
-        } else if (txdatas[inpTxid] && txdatas[inpTxid].vout[inpVout]) {
-          // It is our tx.
-          txdatas[txid].vin[inpNum].addresses = txdatas[inpTxid].vout[inpVout].scriptPubKey.addresses;
-          txdatas[txid].vin[inpNum].value = txdatas[inpTxid].vout[inpVout].value;
-        }
-      }
-      // Some vins have same address but different value, let's merge them.
-      let addressValues = {};
-      for (let v of txdatas[txid].vin) {
-        if (!v.addresses) {
-          continue;
-        }
-        const address = v.addresses[0];
-        if (addressValues[address]) {
-          addressValues[address] += v.value;
-        } else {
-          addressValues[address] = v.value;
-        }
-      }
-
-      let vins = [];
-      for (let address of Object.keys(addressValues)) {
-        vins.push({
-          addresses: [address],
-          value: addressValues[address]
-        });
-      }
-      txdatas[txid].vin = vins;
-    }
+    const txList = Object.keys(txs);
+    let txdatas = await BlueElectrum.multiGetTransactionInfoByTxid(txList, 50, true);
+    let height = await BlueElectrum.blockchainBlock_count();
+    // Add the confirmation info
+    txdatas.forEach((tx, i) => {
+      tx.txid = txList[i];
+      const txHeight = txs[tx.txid].height;
+      tx.confirmations = (txHeight > 0) ? (height - txHeight + 1) : -1;
+    });
 
     // now purge all unconfirmed txs from internal hashmaps, since some may be evicted from mempool because they became invalid
     // or replaced. hashmaps are going to be re-populated anyways, since we fetched TXs for addresses with unconfirmed TXs
@@ -357,51 +313,40 @@ export class AbstractHDElectrumWallet extends AbstractHDWallet {
     }
 
     // now, we need to put transactions in all relevant `cells` of internal hashmaps: this._txs_by_internal_index && this._txs_by_external_index
-
     for (let c = 0; c < this.next_free_address_index + this.gap_limit; c++) {
       for (let tx of Object.values(txdatas)) {
-        for (let vin of tx.vin) {
-          if (vin.addresses && vin.addresses.indexOf(this._getExternalAddressByIndex(c)) !== -1) {
+        for (let index = 0; index < tx.i.length; index = index + 2) {
+          const address = tx.i[index];
+          if (address && address == this._getExternalAddressByIndex(c)) {
             // this TX is related to our address
             this._txs_by_external_index[c] = this._txs_by_external_index[c] || [];
-            let clonedTx = Object.assign({}, tx);
-            clonedTx.inputs = tx.vin.slice(0);
-            clonedTx.outputs = tx.vout.slice(0);
-            delete clonedTx.vin;
-            delete clonedTx.vout;
-            this.trimTx(clonedTx);
 
             // trying to replace tx if it exists already (because it has lower confirmations, for example)
             let replaced = false;
             for (let cc = 0; cc < this._txs_by_external_index[c].length; cc++) {
-              if (this._txs_by_external_index[c][cc].txid === clonedTx.txid) {
+              if (this._txs_by_external_index[c][cc].txid === tx.txid) {
                 replaced = true;
-                this._txs_by_external_index[c][cc] = clonedTx;
+                this._txs_by_external_index[c][cc] = tx;
               }
             }
-            if (!replaced) this._txs_by_external_index[c].push(clonedTx);
+            if (!replaced) this._txs_by_external_index[c].push(tx);
           }
         }
-        for (let vout of tx.vout) {
-          if (vout.scriptPubKey.addresses.indexOf(this._getExternalAddressByIndex(c)) !== -1) {
+        for (let index = 0; index < tx.o.length; index = index + 2) {
+          const address = tx.o[index];
+          if (address == this._getExternalAddressByIndex(c)) {
             // this TX is related to our address
             this._txs_by_external_index[c] = this._txs_by_external_index[c] || [];
-            let clonedTx = Object.assign({}, tx);
-            clonedTx.inputs = tx.vin.slice(0);
-            clonedTx.outputs = tx.vout.slice(0);
-            delete clonedTx.vin;
-            delete clonedTx.vout;
-            this.trimTx(clonedTx);
 
             // trying to replace tx if it exists already (because it has lower confirmations, for example)
             let replaced = false;
             for (let cc = 0; cc < this._txs_by_external_index[c].length; cc++) {
-              if (this._txs_by_external_index[c][cc].txid === clonedTx.txid) {
+              if (this._txs_by_external_index[c][cc].txid === tx.txid) {
                 replaced = true;
-                this._txs_by_external_index[c][cc] = clonedTx;
+                this._txs_by_external_index[c][cc] = tx;
               }
             }
-            if (!replaced) this._txs_by_external_index[c].push(clonedTx);
+            if (!replaced) this._txs_by_external_index[c].push(tx);
           }
         }
       }
@@ -409,48 +354,38 @@ export class AbstractHDElectrumWallet extends AbstractHDWallet {
 
     for (let c = 0; c < this.next_free_change_address_index + this.gap_limit; c++) {
       for (let tx of Object.values(txdatas)) {
-        for (let vin of tx.vin) {
-          if (vin.addresses && vin.addresses.indexOf(this._getInternalAddressByIndex(c)) !== -1) {
+        for (let index = 0; index < tx.i.length; index = index + 2) {
+          const address = tx.i[index];
+          if (address && address == this._getInternalAddressByIndex(c)) {
             // this TX is related to our address
             this._txs_by_internal_index[c] = this._txs_by_internal_index[c] || [];
-            let clonedTx = Object.assign({}, tx);
-            clonedTx.inputs = tx.vin.slice(0);
-            clonedTx.outputs = tx.vout.slice(0);
-            delete clonedTx.vin;
-            delete clonedTx.vout;
-            this.trimTx(clonedTx);
 
             // trying to replace tx if it exists already (because it has lower confirmations, for example)
             let replaced = false;
             for (let cc = 0; cc < this._txs_by_internal_index[c].length; cc++) {
-              if (this._txs_by_internal_index[c][cc].txid === clonedTx.txid) {
+              if (this._txs_by_internal_index[c][cc].txid === tx.txid) {
                 replaced = true;
-                this._txs_by_internal_index[c][cc] = clonedTx;
+                this._txs_by_internal_index[c][cc] = tx;
               }
             }
-            if (!replaced) this._txs_by_internal_index[c].push(clonedTx);
+            if (!replaced) this._txs_by_internal_index[c].push(tx);
           }
         }
-        for (let vout of tx.vout) {
-          if (vout.scriptPubKey.addresses.indexOf(this._getInternalAddressByIndex(c)) !== -1) {
+        for (let index = 0; index < tx.o.length; index = index + 2) {
+          const address = tx.o[index];
+          if (address == this._getInternalAddressByIndex(c)) {
             // this TX is related to our address
             this._txs_by_internal_index[c] = this._txs_by_internal_index[c] || [];
-            let clonedTx = Object.assign({}, tx);
-            clonedTx.inputs = tx.vin.slice(0);
-            clonedTx.outputs = tx.vout.slice(0);
-            delete clonedTx.vin;
-            delete clonedTx.vout;
-            this.trimTx(clonedTx);
 
             // trying to replace tx if it exists already (because it has lower confirmations, for example)
             let replaced = false;
             for (let cc = 0; cc < this._txs_by_internal_index[c].length; cc++) {
-              if (this._txs_by_internal_index[c][cc].txid === clonedTx.txid) {
+              if (this._txs_by_internal_index[c][cc].txid === tx.txid) {
                 replaced = true;
-                this._txs_by_internal_index[c][cc] = clonedTx;
+                this._txs_by_internal_index[c][cc] = tx;
               }
             }
-            if (!replaced) this._txs_by_internal_index[c].push(clonedTx);
+            if (!replaced) this._txs_by_internal_index[c].push(tx);
           }
         }
       }

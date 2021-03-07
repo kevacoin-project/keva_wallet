@@ -450,6 +450,46 @@ module.exports.multiGetTransactionByTxid = async function(txids, batchsize, verb
   return ret;
 };
 
+// Kevacoin specific API, with input, output addresses and values.
+module.exports.multiGetTransactionInfoByTxid = async function(txids, batchsize, namespace_info) {
+  batchsize = batchsize || 50;
+  namespace_info = namespace_info !== false;
+  if (!mainClient) throw new Error('Electrum client is not connected');
+  let ret = {};
+  txids = [...new Set(txids)]; // deduplicate just for any case
+
+  // Filter out those already in cache.
+  let txidsToFetch;
+  let cachedTxs = await BlueApp.getMultiTxFromDisk(txids);
+  txidsToFetch = txids.filter(t => !cachedTxs[t]);
+
+  let chunks = splitIntoChunks(txidsToFetch, batchsize);
+  for (let chunk of chunks) {
+    let results = [];
+    results = await mainClient.blockchainKeva_getTransactionsInfo(chunk, namespace_info);
+    let txsToSave = [];
+    let index = 0;
+    for (let txdata of results) {
+      const tx_hash = chunks[index];
+      ret[tx_hash] = txdata;
+      // Tx to save
+      txsToSave.push([tx_hash, txdata]);
+    }
+
+    // Save the txs to cache.
+    await BlueApp.saveMultiTxToDisk(txsToSave);
+  }
+
+  // Fill in those in the cache.
+  for (let t of txids) {
+    if (!ret[t]) {
+      ret[t] = cachedTxs[t];
+    }
+  }
+
+  return ret;
+};
+
 /**
  * Simple waiter till `mainConnected` becomes true (which means
  * it Electrum was connected in other function), or timeout 30 sec.
@@ -697,6 +737,14 @@ module.exports.blockchainKeva_getKeyValues = async function(scripthash, min_tx_n
 
 module.exports.blockchainKeva_getKeyValueReactions = async function(tx_hash, min_tx_num=-1) {
   return await mainClient.blockchainKeva_getKeyValueReactions(tx_hash, min_tx_num);
+}
+
+module.exports.blockchainKeva_getTransactionsInfo = async function(tx_hashes, namespace_info=false) {
+  return await mainClient.blockchainKeva_getTransactionsInfo(tx_hashes, namespace_info);
+}
+
+module.exports.blockchainBlock_count = async function() {
+  return await mainClient.blockchainBlock_count();
 }
 
 module.exports.getCurrentPeer = getCurrentPeer;

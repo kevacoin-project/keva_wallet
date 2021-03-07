@@ -135,6 +135,9 @@ class ElectrumClient extends Client {
   blockchainBlock_headers(start_height, count) {
     return this.request('blockchain.block.headeres', [start_height, count]);
   }
+  blockchainBlock_count() {
+    return this.request('blockchain.block.count', []);
+  }
   blockchainEstimatefee(number) {
     return this.request('blockchain.estimatefee', [number]);
   }
@@ -201,6 +204,9 @@ class ElectrumClient extends Client {
   }
   blockchainKeva_getKeyValueReactions(tx_hash, min_tx_num) {
     return this.request('blockchain.keva.get_keyvalue_reactions', [tx_hash, min_tx_num]);
+  }
+  blockchainKeva_getTransactionsInfo(tx_hashes, namespace_info) {
+    return this.request('blockchain.keva.get_transactions_info', [tx_hashes, namespace_info || false]);
   }
 }
 
