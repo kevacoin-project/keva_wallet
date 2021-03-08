@@ -161,62 +161,34 @@ export class LegacyWallet extends AbstractWallet {
     }
 
     // next, batch fetching each txid we got
-    let txdatas = await BlueElectrum.multiGetTransactionByTxid(Object.keys(txs), 20, true);
+    let txdatas = await BlueElectrum.multiGetTransactionInfoByTxid(Object.keys(txs), 50, true);
+    let height = await BlueElectrum.blockchainBlock_count();
 
-    // now, tricky part. we collect all transactions from inputs (vin), and batch fetch them too.
-    // then we combine all this data (we need inputs to see source addresses and amounts)
-    let vinTxids = [];
-    for (let txdata of Object.values(txdatas)) {
-      for (let vin of txdata.vin) {
-        vinTxids.push(vin.txid);
-      }
-    }
-
-    let vintxdatas = await BlueElectrum.multiGetTransactionByTxid(vinTxids, 20, true);
-
-    // fetched all transactions from our inputs. now we need to combine it.
-    // iterating all _our_ transactions:
-    for (let txid of Object.keys(txdatas)) {
-      // iterating all inputs our our single transaction:
-      for (let inpNum = 0; inpNum < txdatas[txid].vin.length; inpNum++) {
-        let inpTxid = txdatas[txid].vin[inpNum].txid;
-        let inpVout = txdatas[txid].vin[inpNum].vout;
-        // got txid and output number of _previous_ transaction we shoud look into
-        if (vintxdatas[inpTxid] && vintxdatas[inpTxid].vout[inpVout]) {
-          // extracting amount & addresses from previous output and adding it to _our_ input:
-          txdatas[txid].vin[inpNum].addresses = vintxdatas[inpTxid].vout[inpVout].scriptPubKey.addresses;
-          txdatas[txid].vin[inpNum].value = vintxdatas[inpTxid].vout[inpVout].value;
-        }
-      }
-    }
+    // Add the confirmation info
+    Object.keys(txdatas).forEach((txid, i) => {
+      const txHeight = txs[txid].height;
+      txdatas[txid].confirmations = (txHeight > 0) ? (height - txHeight + 1) : 0;
+      txdatas[txid].txid = txid;
+    });
 
     // now, we need to put transactions in all relevant `cells` of internal hashmaps: this.transactions_by_internal_index && this.transactions_by_external_index
-
     for (let tx of Object.values(txdatas)) {
-      for (let vin of tx.vin) {
-        if (vin.addresses && vin.addresses.indexOf(this.getAddress()) !== -1) {
+      for (let index = 0; index < tx.i.length; index = index + 2) {
+        const address = tx.i[index];
+        if (address == this.getAddress()) {
           // this TX is related to our address
-          let clonedTx = Object.assign({}, tx);
-          clonedTx.inputs = tx.vin.slice(0);
-          clonedTx.outputs = tx.vout.slice(0);
-          delete clonedTx.vin;
-          delete clonedTx.vout;
           // Replace the existing tx if it is there, e.g. lower confirmations.
-          this._txs_by_external_ = this._txs_by_external_.filter(e => !(e.txid == clonedTx.txid));
-          this._txs_by_external_.push(clonedTx);
+          this._txs_by_external_ = this._txs_by_external_.filter(e => !(e.txid == tx.txid));
+          this._txs_by_external_.push(tx);
         }
       }
-      for (let vout of tx.vout) {
-        if (vout.scriptPubKey.addresses.indexOf(this.getAddress()) !== -1) {
+      for (let index = 0; index < tx.o.length; index = index + 2) {
+        const address = tx.o[index];
+        if (address == this.getAddress()) {
           // this TX is related to our address
-          let clonedTx = Object.assign({}, tx);
-          clonedTx.inputs = tx.vin.slice(0);
-          clonedTx.outputs = tx.vout.slice(0);
-          delete clonedTx.vin;
-          delete clonedTx.vout;
           // Replace the existing tx if it is there, e.g. lower confirmations.
-          this._txs_by_external_ = this._txs_by_external_.filter(e => !(e.txid == clonedTx.txid));
-          this._txs_by_external_.push(clonedTx);
+          this._txs_by_external_ = this._txs_by_external_.filter(e => !(e.txid == tx.txid));
+          this._txs_by_external_.push(tx);
         }
       }
     }
@@ -236,23 +208,27 @@ export class LegacyWallet extends AbstractWallet {
 
     let ret = [];
     for (let tx of txs) {
-      tx.received = tx.blocktime * 1000;
-      if (!tx.blocktime) tx.received = +new Date() - 30 * 1000; // unconfirmed
+      tx.received = tx.t * 1000;
+      if (tx.t < 0) tx.received = +new Date() - 30 * 1000; // unconfirmed
       tx.confirmations = tx.confirmations || 0; // unconfirmed
       tx.hash = tx.txid;
       tx.value = 0;
 
-      for (let vin of tx.inputs) {
+      for (let index = 0; index < tx.i.length; index = index + 2) {
+        const address = tx.i[index];
         // if input (spending) goes from our address - we are loosing!
-        if ((vin.address && this.weOwnAddress(vin.address)) || (vin.addresses && vin.addresses[0] && this.weOwnAddress(vin.addresses[0]))) {
-          tx.value -= new BigNumber(vin.value).multipliedBy(100000000).toNumber();
+        if (address && this.weOwnAddress(address)) {
+          const value = tx.i[index + 1];
+          tx.value -= value;
         }
       }
 
-      for (let vout of tx.outputs) {
+      for (let index = 0; index < tx.o.length; index = index + 2) {
+        const address = tx.o[index];
         // when output goes to our address - this means we are gaining!
-        if (vout.scriptPubKey.addresses && vout.scriptPubKey.addresses[0] && this.weOwnAddress(vout.scriptPubKey.addresses[0])) {
-          tx.value += new BigNumber(vout.value).multipliedBy(100000000).toNumber();
+        if (address && this.weOwnAddress(address)) {
+          const value = tx.o[index + 1];
+          tx.value += value;
         }
       }
       ret.push(tx);
