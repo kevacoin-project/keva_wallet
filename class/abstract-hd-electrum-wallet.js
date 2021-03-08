@@ -48,6 +48,12 @@ export class AbstractHDElectrumWallet extends AbstractHDWallet {
     await BlueApp.saveToDisk();
   }
 
+  prepareForSerialization() {
+    super.prepareForSerialization();
+    // deleting structures that cant be serialized
+    delete this.cachedTransactions;
+  }
+
   /**
    * @inheritDoc
    */
@@ -690,55 +696,9 @@ export class AbstractHDElectrumWallet extends AbstractHDWallet {
    * @returns {[]}
    */
   getUtxo() {
-    /*
-    if (this._utxo.length === 0) return this.getDerivedUtxoFromOurTransaction(); // oy vey, no stored utxo. lets attempt to derive it from stored transactions
-    */
     // Must call fetchUtxo before calling this function, otherwise it will be empty.
     return this._utxo;
   }
-
-  // This should not be used. We should always fetch them from the server.
-  /*
-  getDerivedUtxoFromOurTransaction() {
-    let utxos = [];
-    for (let tx of this.getTransactions()) {
-      for (let index = 0; index < tx.o.length; index = index + 1) {
-        let address = tx.o[index];
-        if (this.weOwnAddress(address)) {
-          const value = tx.o[index + 1];
-          let value = new BigNumber(value).multipliedBy(100000000).toNumber();
-          utxos.push({
-            txid: tx.txid,
-            txId: tx.txid,
-            vout: index/2,
-            address,
-            value,
-            amount: value,
-            confirmations: tx.confirmations,
-            wif: this._getWifForAddress(address),
-            height: BlueElectrum.estimateCurrentBlockheight() - tx.confirmations,
-          });
-        }
-      }
-    }
-
-    // got all utxos we ever had. lets filter out the ones that are spent:
-    let ret = [];
-    for (let utxo of utxos) {
-      let spent = false;
-      for (let tx of this.getTransactions()) {
-        for (let input of tx.inputs) {
-          if (input.txid === utxo.txid && input.vout === utxo.vout) spent = true;
-          // utxo we got previously was actually spent right here ^^
-        }
-      }
-
-      if (!spent) ret.push(utxo);
-    }
-
-    return ret;
-  }
-  */
 
   _getDerivationPathByAddress(address, BIP = 84) {
     const path = `m/${BIP}'/0'/0'`;
