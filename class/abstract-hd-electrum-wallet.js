@@ -48,10 +48,14 @@ export class AbstractHDElectrumWallet extends AbstractHDWallet {
     await BlueApp.saveToDisk();
   }
 
-  prepareForSerialization() {
-    super.prepareForSerialization();
-    // deleting structures that cant be serialized
-    delete this.cachedTransactions;
+  skipSerialization(k, v) {
+    if (k == 'cachedTransactions') {
+      return [];
+    }
+    if (k == '_txs_by_external_index' || k == '_txs_by_internal_index') {
+      return {}
+    }
+    return v;
   }
 
   /**

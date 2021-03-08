@@ -389,7 +389,12 @@ export class AppStorage {
     for (let key of this.wallets) {
       if (typeof key === 'boolean' || key.type === PlaceholderWallet.type) continue;
       if (key.prepareForSerialization) key.prepareForSerialization();
-      walletsToSave.push(JSON.stringify({ ...key, type: key.type }));
+      walletsToSave.push(JSON.stringify({ ...key, type: key.type }, (k, v) => {
+        if (key.skipSerialization) {
+          return key.skipSerialization(k, v);
+        }
+        return v;
+      }));
     }
     let data = {
       wallets: walletsToSave,
