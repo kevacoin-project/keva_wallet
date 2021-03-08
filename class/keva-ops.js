@@ -407,7 +407,7 @@ export async function getNamespaceUtxo(wallet, namespaceId) {
       if (!tx || !tx.n) {
         continue;
       }
-      if (tx.n[0] == namespaceId || u.vout == tx.n[1]) {
+      if (tx.n[0] == namespaceId && u.vout == tx.n[1]) {
         return u;
       }
     }
