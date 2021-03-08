@@ -394,7 +394,7 @@ export class AbstractHDElectrumWallet extends AbstractHDWallet {
     let ret = [];
     for (let tx of txs) {
       tx.received = tx.t * 1000; //tx.t is blocktime
-      if (!tx.t) tx.received = +new Date() - 30 * 1000; // unconfirmed
+      if (tx.t < 0) tx.received = +new Date() - 30 * 1000; // unconfirmed
       tx.confirmations = tx.confirmations || 0; // unconfirmed
       tx.hash = tx.txid;
       tx.value = 0;
