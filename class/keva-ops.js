@@ -563,18 +563,15 @@ export async function rewardKeyValue(ecl, wallet, requestedSatPerByte, namespace
   const nsScript = getKeyValueUpdateScript(namespaceId, namespaceAddress, key, value);
 
   // rewardRootAddress from replyTxid
-  const tx = await ecl.blockchainTransaction_get(replyTxid, true);
-  const vout = tx.outputs || tx.vout;
+  const result = await ecl.multiGetTransactionInfoByTxid([replyTxid], 1, true);
+  const tx = result[replyTxid];
   let rewardAddress;
-  for (let v of vout) {
-    let result = parseKeva(v.scriptPubKey.asm);
-    if (!result) {
+  for (let index = 0; index < tx.o.length; index = index + 2) {
+    if (!tx.n) {
       continue;
     }
-
-    if (result[0] === KEVA_OP_PUT) {
-      rewardAddress = v.scriptPubKey.addresses[0];
-    }
+    const vout = tx.n[1];
+    rewardAddress = tx.o[vout * 2];
   }
 
   if (!rewardAddress) {
