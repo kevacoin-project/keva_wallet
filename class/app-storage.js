@@ -328,6 +328,9 @@ export class AppStorage {
           if (!this.wallets.some(wallet => wallet.getSecret() === unserializedWallet.secret)) {
             this.wallets.push(unserializedWallet);
             this.tx_metadata = data.tx_metadata;
+            if (unserializedWallet.loadNonsecuredData) {
+              await unserializedWallet.loadNonsecuredData();
+            }
           }
         }
         WatchConnectivity.shared.wallets = this.wallets;
@@ -390,6 +393,9 @@ export class AppStorage {
     for (let key of this.wallets) {
       if (typeof key === 'boolean' || key.type === PlaceholderWallet.type) continue;
       if (key.prepareForSerialization) key.prepareForSerialization();
+      if (key.saveNonsecuredData) {
+        await key.saveNonsecuredData();
+      }
       walletsToSave.push(JSON.stringify({ ...key, type: key.type }, (k, v) => {
         if (key.skipSerialization) {
           return key.skipSerialization(k, v);
