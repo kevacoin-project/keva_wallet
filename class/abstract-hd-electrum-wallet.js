@@ -1,5 +1,4 @@
 import bip39 from 'bip39';
-import RNFS from 'react-native-fs';
 import b58 from 'bs58check';
 import { randomBytes } from './rng';
 import { AbstractHDWallet } from './abstract-hd-wallet';
@@ -57,37 +56,34 @@ export class AbstractHDElectrumWallet extends AbstractHDWallet {
     return v;
   }
 
-  async saveNonsecuredData() {
+  async saveNonsecuredData(MMKV) {
     const walletId = this.getID();
     try {
-      const externalIndexFile = RNFS.DocumentDirectoryPath + '/_txs_by_external_index' + walletId;
-      await RNFS.writeFile(externalIndexFile, JSON.stringify(this._txs_by_external_index), 'utf8');
+      const externalIndexFile = '/_txs_by_external_index' + walletId;
+      await await MMKV.setStringAsync(externalIndexFile, JSON.stringify(this._txs_by_external_index));
 
-      const internalIndexFile = RNFS.DocumentDirectoryPath + '/_txs_by_internal_index' + walletId;
-      const data = JSON.stringify(this._txs_by_internal_index);
-      await RNFS.writeFile(internalIndexFile, JSON.stringify(this._txs_by_internal_index), 'utf8');
+      const internalIndexFile = '/_txs_by_internal_index' + walletId;
+      await await MMKV.setStringAsync(internalIndexFile, JSON.stringify(this._txs_by_internal_index));
 
     } catch (e) {
       console.warn(e);
     }
   }
 
-  async loadNonsecuredData() {
+  async loadNonsecuredData(MMKV) {
     const walletId = this.getID();
     this._txs_by_external_index = {};
     this._txs_by_internal_index = {};
     try {
-      const externalIndexFile = RNFS.DocumentDirectoryPath + '/_txs_by_external_index' + walletId;
-      const hasExternal = await RNFS.exists(externalIndexFile);
-      if (hasExternal) {
-        const externalIndex = await RNFS.readFile(externalIndexFile, 'utf8');
+      const externalIndexFile = '/_txs_by_external_index' + walletId;
+      const externalIndex = await MMKV.getStringAsync(externalIndexFile);
+      if (externalIndex) {
         this._txs_by_external_index = JSON.parse(externalIndex);
       }
 
-      const internalIndexFile = RNFS.DocumentDirectoryPath + '/_txs_by_internal_index' + walletId;
-      const hasInternal = await RNFS.exists(internalIndexFile);
-      if (hasInternal) {
-        const internalIndex = await RNFS.readFile(internalIndexFile, 'utf8');
+      const internalIndexFile = '/_txs_by_internal_index' + walletId;
+      const internalIndex = await MMKV.getStringAsync(internalIndexFile);
+      if (internalIndex) {
         this._txs_by_internal_index = JSON.parse(internalIndex);
       }
     } catch (e) {

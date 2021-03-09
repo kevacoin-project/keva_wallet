@@ -14,6 +14,7 @@ import {
   HDLegacyElectrumSeedP2PKHWallet,
   HDSegwitElectrumSeedP2WPKHWallet,
 } from './';
+import MMKVStorage from "react-native-mmkv-storage";
 import WatchConnectivity from '../WatchConnectivity';
 import DeviceQuickActions from './quickActions';
 const encryption = require('../encryption');
@@ -66,6 +67,7 @@ export class AppStorage {
       lnborderColor: '#F7C056',
       lnbackgroundColor: '#FFFAEF',
     };
+    this.MMKV = new MMKVStorage.Loader().initialize();
   }
 
   /**
@@ -108,7 +110,7 @@ export class AppStorage {
    * @returns {Promise<any>|Promise<any> | Promise<void> | * | Promise | void}
    */
   setItemStorage(key, value) {
-    return AsyncStorage.setItem(key, value);
+    return this.MMKV.setStringAsync(key, value);
   }
 
   /**
@@ -118,7 +120,7 @@ export class AppStorage {
    * @returns {Promise<any>|*}
    */
   getItemStorage(key) {
-    return AsyncStorage.getItem(key);
+    return this.MMKV.getStringAsync(key);
   }
 
   async setResetOnAppUninstallTo(value) {
@@ -329,7 +331,7 @@ export class AppStorage {
             this.wallets.push(unserializedWallet);
             this.tx_metadata = data.tx_metadata;
             if (unserializedWallet.loadNonsecuredData) {
-              await unserializedWallet.loadNonsecuredData();
+              await unserializedWallet.loadNonsecuredData(this.MMKV);
             }
           }
         }
@@ -394,7 +396,7 @@ export class AppStorage {
       if (typeof key === 'boolean' || key.type === PlaceholderWallet.type) continue;
       if (key.prepareForSerialization) key.prepareForSerialization();
       if (key.saveNonsecuredData) {
-        await key.saveNonsecuredData();
+        await key.saveNonsecuredData(this.MMKV);
       }
       walletsToSave.push(JSON.stringify({ ...key, type: key.type }, (k, v) => {
         if (key.skipSerialization) {
@@ -517,9 +519,12 @@ export class AppStorage {
 
   async clearTxs() {
     try {
-      const keys = await AsyncStorage.getAllKeys();
-      await AsyncStorage.multiRemove(keys);
+      const keys = await this.MMKV.indexer.getKeys();
+      for (let k of keys) {
+        await this.MMKV.setStringAsync(k, '');
+      }
     } catch (error) {
+        console.log(error)
         console.error('Error clearing app data.');
     }
   }

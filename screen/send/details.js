@@ -417,7 +417,7 @@ export default class SendDetails extends Component {
     this.setState({loadStatus: 'Refreshing Address ...'});
     const changeAddress = await wallet.getChangeAddressAsync();
     const requestedSatPerByte = +this.state.fee.toString().replace(/\D/g, '');
-    console.log({ requestedSatPerByte, utxo: wallet.getUtxo() });
+    console.log({ requestedSatPerByte });
 
     let targets = [];
     for (const transaction of this.state.addresses) {
