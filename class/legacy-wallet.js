@@ -7,8 +7,6 @@ const coinSelectAccumulative = require('coinselect/accumulative');
 const coinSelectSplit = require('coinselect/split');
 let BlueApp = require('../BlueApp');
 
-const CURRENT_STOTAGE_FORMAT = '2';
-
 /**
  *  Has private key and single address like "1ABCD....."
  *  (legacy P2PKH compressed)
@@ -21,7 +19,6 @@ export class LegacyWallet extends AbstractWallet {
     super();
     this._txs_by_external_ = [];
     this._txs_by_internal_ = [];
-    this.storage_version_checked = false;
   }
 
   async clearHistory() {
@@ -31,24 +28,47 @@ export class LegacyWallet extends AbstractWallet {
     await BlueApp.saveToDisk();
   }
 
-  async clearOldStorage() {
-    if (!this.storage_version_checked) {
-      const version = await BlueApp.getStorageVersion();
-      if (version != CURRENT_STOTAGE_FORMAT) {
-        console.log('Storage format mismatched, clearing history ...')
-        this._txs_by_external_ = [];
-        this._txs_by_internal_ = [];
+  skipSerialization(k, v) {
+    if (k == '_txs_by_external_' || k == '_txs_by_internal_') {
+      return []
+    }
+    return v;
+  }
 
-        this._balances_by_external_index = {};
-        this._balances_by_internal_index = {};
+  async saveNonsecuredData(MMKV) {
+    const walletId = this.getID();
+    try {
+      const externalIndexFile = '/_txs_by_external_' + walletId;
+      await await MMKV.setStringAsync(externalIndexFile, JSON.stringify(this._txs_by_external_));
 
-        this._txs_by_external_index = {};
-        this._txs_by_internal_index = {};
+      const internalIndexFile = '/_txs_by_internal_' + walletId;
+      await await MMKV.setStringAsync(internalIndexFile, JSON.stringify(this._txs_by_internal_));
 
-        this._utxo = [];
-        await BlueApp.setStorageVersion(CURRENT_STOTAGE_FORMAT);
+    } catch (e) {
+      console.warn(e);
+    }
+  }
+
+  async loadNonsecuredData(MMKV) {
+    const walletId = this.getID();
+    this._txs_by_external_ = [];
+    this._txs_by_internal_ = [];
+    try {
+      const externalIndexFile = '/_txs_by_external_' + walletId;
+      const externalIndex = await MMKV.getStringAsync(externalIndexFile);
+      if (externalIndex) {
+        this._txs_by_external_ = JSON.parse(externalIndex);
       }
-      this.storage_version_checked = true;
+
+      const internalIndexFile = '/_txs_by_internal_' + walletId;
+      const internalIndex = await MMKV.getStringAsync(internalIndexFile);
+      if (internalIndex) {
+        this._txs_by_internal_ = JSON.parse(internalIndex);
+      }
+    } catch (e) {
+      this._txs_by_external_ = [];
+      this._txs_by_internal_ = [];
+      console.warn(e);
     }
   }
 
@@ -173,7 +193,6 @@ export class LegacyWallet extends AbstractWallet {
    * @return {Promise.<void>}
    */
   async fetchTransactions() {
-    await this.clearOldStorage();
     let addresses2fetch = [this.getAddress()];
 
     // first: batch fetch for all addresses histories
@@ -222,10 +241,6 @@ export class LegacyWallet extends AbstractWallet {
   }
 
   getTransactions() {
-    if (!this.storage_version_checked) {
-      return [];
-    }
-
     let txs = [];
 
     for (let addressTxs of Object.values(this._txs_by_external_)) {

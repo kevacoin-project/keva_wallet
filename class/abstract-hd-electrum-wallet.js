@@ -31,7 +31,6 @@ export class AbstractHDElectrumWallet extends AbstractHDWallet {
     this._txs_by_internal_index = {};
 
     this._utxo = [];
-    this.storage_version_checked = false;
   }
 
   async clearHistory() {
@@ -267,8 +266,6 @@ export class AbstractHDElectrumWallet extends AbstractHDWallet {
    * @inheritDoc
    */
   async fetchTransactions() {
-    await this.clearOldStorage();
-
     if (this.cachedTransactions) {
       this.cachedTransactions = null;
     }
@@ -419,10 +416,6 @@ export class AbstractHDElectrumWallet extends AbstractHDWallet {
   }
 
   getTransactions() {
-    if (!this.storage_version_checked) {
-      return [];
-    }
-
     if (this.cachedTransactions) {
       return this.cachedTransactions;
     }

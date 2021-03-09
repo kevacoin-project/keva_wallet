@@ -52,6 +52,7 @@ export default class TransactionsDetails extends Component {
         for (let index = 0; index < tx.o.length; index = index + 2) {
           to = to.concat(tx.o[index]);
         }
+        break;
       }
     }
 
