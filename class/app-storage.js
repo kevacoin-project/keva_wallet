@@ -32,6 +32,7 @@ export class AppStorage {
   static STATUS_ENABLED = 'statusenabled';
   static IPFS_GATEWAY = 'ipfs_gateway';
   static IPFS_CUSTOM_GATEWAY = 'ipfs_custom_gateway';
+  static STORAGE_VERSION = 'storage_version';
 
   constructor() {
     /** {Array.<AbstractWallet>} */
@@ -438,6 +439,14 @@ export class AppStorage {
     }
 
     return this.setItem('data', JSON.stringify(data));
+  }
+
+  async setStorageVersion(version) {
+    await this.setItemStorage(AppStorage.STORAGE_VERSION, version);
+  }
+
+  async getStorageVersion() {
+    await this.getItemStorage(AppStorage.STORAGE_VERSION);
   }
 
   async saveTxToDisk(txid, tx) {

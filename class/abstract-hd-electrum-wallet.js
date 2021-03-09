@@ -13,7 +13,6 @@ const reverse = require('buffer-reverse');
 let BlueApp = require('../BlueApp');
 
 const ABSURD_FEE = 10000000;
-const CURRENT_STOTAGE_FORMAT = 2;
 
 /**
  * Electrum - means that it utilizes Electrum protocol for blockchain data
@@ -33,7 +32,7 @@ export class AbstractHDElectrumWallet extends AbstractHDWallet {
     this._txs_by_internal_index = {};
 
     this._utxo = [];
-    this.storage_format = 0;
+    this.storage_version_checked = false;
   }
 
   async clearHistory() {
@@ -232,11 +231,7 @@ export class AbstractHDElectrumWallet extends AbstractHDWallet {
    * @inheritDoc
    */
   async fetchTransactions() {
-    if (this.storage_format != CURRENT_STOTAGE_FORMAT) {
-      console.log('Storage format mismatched, clearing history ...')
-      await this.clearHistory();
-      this.storage_format = CURRENT_STOTAGE_FORMAT;
-    }
+    await this.clearOldStorage();
 
     if (this.cachedTransactions) {
       this.cachedTransactions = null;
@@ -388,6 +383,10 @@ export class AbstractHDElectrumWallet extends AbstractHDWallet {
   }
 
   getTransactions() {
+    if (!this.storage_version_checked) {
+      return [];
+    }
+
     if (this.cachedTransactions) {
       return this.cachedTransactions;
     }

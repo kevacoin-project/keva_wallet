@@ -7,6 +7,8 @@ const coinSelectAccumulative = require('coinselect/accumulative');
 const coinSelectSplit = require('coinselect/split');
 let BlueApp = require('../BlueApp');
 
+const CURRENT_STOTAGE_FORMAT = '2';
+
 /**
  *  Has private key and single address like "1ABCD....."
  *  (legacy P2PKH compressed)
@@ -19,6 +21,7 @@ export class LegacyWallet extends AbstractWallet {
     super();
     this._txs_by_external_ = [];
     this._txs_by_internal_ = [];
+    this.storage_version_checked = false;
   }
 
   async clearHistory() {
@@ -26,6 +29,27 @@ export class LegacyWallet extends AbstractWallet {
     this._txs_by_internal_ = [];
     await BlueApp.clearTxs();
     await BlueApp.saveToDisk();
+  }
+
+  async clearOldStorage() {
+    if (!this.storage_version_checked) {
+      const version = await BlueApp.getStorageVersion();
+      if (version != CURRENT_STOTAGE_FORMAT) {
+        console.log('Storage format mismatched, clearing history ...')
+        this._txs_by_external_ = [];
+        this._txs_by_internal_ = [];
+
+        this._balances_by_external_index = {};
+        this._balances_by_internal_index = {};
+
+        this._txs_by_external_index = {};
+        this._txs_by_internal_index = {};
+
+        this._utxo = [];
+        await BlueApp.setStorageVersion(CURRENT_STOTAGE_FORMAT);
+      }
+      this.storage_version_checked = true;
+    }
   }
 
   /**
@@ -149,6 +173,7 @@ export class LegacyWallet extends AbstractWallet {
    * @return {Promise.<void>}
    */
   async fetchTransactions() {
+    await this.clearOldStorage();
     let addresses2fetch = [this.getAddress()];
 
     // first: batch fetch for all addresses histories
@@ -197,6 +222,10 @@ export class LegacyWallet extends AbstractWallet {
   }
 
   getTransactions() {
+    if (!this.storage_version_checked) {
+      return [];
+    }
+
     let txs = [];
 
     for (let addressTxs of Object.values(this._txs_by_external_)) {
