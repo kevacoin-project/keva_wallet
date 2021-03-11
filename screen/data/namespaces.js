@@ -143,6 +143,7 @@ class Namespace extends React.Component {
         duration: 100,
         easing: Easing.bounce,
         toValue: Number(nextProps.active),
+        useNativeDriver: true,
       }).start();
     }
   }

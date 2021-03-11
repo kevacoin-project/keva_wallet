@@ -296,19 +296,6 @@ export class BlueWalletNavigationHeader extends Component {
         >
           {this.state.wallet.getLabel()}
         </Text>
-        {Platform.OS === 'ios' && (
-          <ToolTip
-            ref={tooltip => (this.tooltip = tooltip)}
-            actions={
-              this.state.wallet.hideBalance
-                ? [{ text: this.state.wallet.hideBalance ? 'Show Balance' : 'Hide Balance', onPress: this.handleBalanceVisibility }]
-                : [
-                    { text: this.state.wallet.hideBalance ? 'Show Balance' : 'Hide Balance', onPress: this.handleBalanceVisibility },
-                    { text: loc.transactions.details.copy, onPress: this.handleCopyPress },
-                  ]
-            }
-          />
-        )}
         <TouchableOpacity
           style={styles.balance}
           onPress={() => {}/*this.changeWalletBalanceUnit()*/}

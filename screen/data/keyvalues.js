@@ -740,7 +740,7 @@ class KeyValues extends React.Component {
                 (isFollowing ?
                   <Button
                     type='solid'
-                    buttonStyle={{borderRadius: 30, height: 28, width: 120, borderColor: KevaColors.actionText, backgroundColor: KevaColors.actionText}}
+                    buttonStyle={{borderRadius: 30, height: 28, width: 120, padding: 0, borderColor: KevaColors.actionText, backgroundColor: KevaColors.actionText}}
                     title={loc.namespaces.following}
                     titleStyle={{fontSize: 14, color: '#fff'}}
                     onPress={()=>{this.onUnfollow(namespaceId)}}
@@ -748,7 +748,7 @@ class KeyValues extends React.Component {
                   :
                   <Button
                     type='outline'
-                    buttonStyle={{borderRadius: 30, height: 28, width: 120, borderColor: KevaColors.actionText}}
+                    buttonStyle={{borderRadius: 30, height: 28, width: 120, padding: 0, borderColor: KevaColors.actionText}}
                     title={loc.namespaces.follow}
                     titleStyle={{fontSize: 14, color: KevaColors.actionText}}
                     onPress={()=>{this.onFollow(namespaceId, namespaceInfo)}}
