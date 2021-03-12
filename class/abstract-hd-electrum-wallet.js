@@ -12,6 +12,7 @@ const reverse = require('buffer-reverse');
 let BlueApp = require('../BlueApp');
 
 const ABSURD_FEE = 10000000;
+const MAX_FEE_RATE = 3500; // Satoshi Per-Byte
 
 /**
  * Electrum - means that it utilizes Electrum protocol for blockchain data
@@ -781,7 +782,13 @@ export class AbstractHDElectrumWallet extends AbstractHDWallet {
    * @param masterFingerprint {number} Decimal number of wallet's master fingerprint
    * @returns {{outputs: Array, tx: Transaction, inputs: Array, fee: Number, psbt: Psbt}}
    */
-  createTransaction(utxos, targets, feeRate, changeAddress, sequence, skipSigning = false, masterFingerprint) {
+  createTransaction(utxos, targets, feeRateSatPerByte, changeAddress, sequence, skipSigning = false, masterFingerprint) {
+    let feeRate = feeRateSatPerByte;
+    // Limit the feeRate
+    if (feeRate >= MAX_FEE_RATE) {
+      feeRate = MAX_FEE_RATE;
+    }
+
     if (!changeAddress) throw new Error('No change address provided');
     sequence = sequence || AbstractHDElectrumWallet.defaultRBFSequence;
 
