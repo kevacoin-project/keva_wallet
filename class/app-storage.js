@@ -94,11 +94,7 @@ export class AppStorage {
    * @returns {Promise<any>|*}
    */
   getItem(key) {
-    if (typeof navigator !== 'undefined' && navigator.product === 'ReactNative') {
-      return RNSecureKeyStore.get(key);
-    } else {
-      return AsyncStorage.getItem(key);
-    }
+    return RNSecureKeyStore.get(key);
   }
 
     /**
