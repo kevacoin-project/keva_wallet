@@ -758,7 +758,7 @@ class KeyValues extends React.Component {
               (
                 <Button
                   type='outline'
-                  buttonStyle={{borderRadius: 30, height: 28, width: 100, borderColor: KevaColors.actionText}}
+                  buttonStyle={{borderRadius: 30, height: 28, width: 100, padding: 0, borderColor: KevaColors.actionText}}
                   title={'Edit'}
                   titleStyle={{fontSize: 14, color: KevaColors.actionText}}
                   onPress={()=>{this.onEditProfile(namespaceId, namespaceInfo[namespaceId])}}

@@ -92,7 +92,7 @@ class Namespace extends React.Component {
           transform: [{
             rotate: this._active.interpolate({
               inputRange: [0, 1],
-              outputRange: [0, -0.04],
+              outputRange: ['0deg', '-5deg'],
             }),
           }],
           elevation: this._active.interpolate({
