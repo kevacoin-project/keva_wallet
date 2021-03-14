@@ -906,7 +906,8 @@ export class AbstractHDElectrumWallet extends AbstractHDWallet {
 
     let tx;
     if (!skipSigning) {
-      tx = psbt.finalizeAllInputs().extractTransaction();
+      // FIXME: use a coinselect algorithm that supports SegWit.
+      tx = psbt.finalizeAllInputs().extractTransaction(true);
     }
     return { tx, inputs, outputs, fee, psbt };
   }
