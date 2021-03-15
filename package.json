@@ -151,7 +151,7 @@
     "react-native-secure-key-store": "git+https://github.com/kevacoin-project/react-native-secure-key-store.git",
     "react-native-share": "2.0.0",
     "react-native-snap-carousel": "3.9.0",
-    "react-native-sortable-list": "0.0.23",
+    "react-native-sortable-list": "git+https://github.com/kevacoin-project/react-native-sortable-list",
     "react-native-svg": "9.13.6",
     "react-native-switch-pro": "^1.0.5",
     "react-native-tab-view": "^2.15.1",
