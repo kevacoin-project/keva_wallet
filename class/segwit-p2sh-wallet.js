@@ -5,6 +5,8 @@ const coinSelectAccumulative = require('coinselect/accumulative');
 const coinSelectSplit = require('coinselect/split');
 const loc = require('../loc');
 
+const ABSURD_FEE = 10000000;
+
 /**
  * Creates Segwit P2SH Kevacoin address
  * @param pubkey
@@ -93,6 +95,19 @@ export class SegwitP2SHWallet extends LegacyWallet {
     let nonNamespaceUtxos = getNonNamespaceUxtosSync(transactions, utxos);
     let { inputs, outputs, fee } = algo(nonNamespaceUtxos, targets, feeRate);
 
+    if (fee >= ABSURD_FEE) {
+      // The network rule doesn't allow fee more than ABSURD_FEE. We
+      // have to reduce the feeRate.
+      feeRate = Math.floor((ABSURD_FEE / fee) * feeRate);
+      ({ inputs, outputs, fee } = algo(nonNamespaceUtxos, targets, feeRate))
+    }
+
+    while (fee >= ABSURD_FEE) {
+      // Still too big - brute force it.
+      feeRate = feeRate - 20;
+      ({ inputs, outputs, fee } = algo(nonNamespaceUtxos, targets, feeRate))
+    }
+
     // .inputs and .outputs will be undefined if no solution was found
     if (!inputs || !outputs) {
       throw new Error('Not enough balance. Try sending smaller amount');
@@ -151,7 +166,8 @@ export class SegwitP2SHWallet extends LegacyWallet {
 
     let tx;
     if (!skipSigning) {
-      tx = psbt.finalizeAllInputs().extractTransaction();
+      // FIXME: use a coinselect algorithm that supports SegWit.
+      tx = psbt.finalizeAllInputs().extractTransaction(true);
     }
     return { tx, inputs, outputs, fee, psbt };
   }
