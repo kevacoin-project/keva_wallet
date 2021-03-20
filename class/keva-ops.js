@@ -870,7 +870,7 @@ export async function getNamespaceInfoFromTx(ecl, nsTx, nsId) {
 export async function getTxIdFromShortCode(ecl, shortCode) {
   let prefix = parseInt(shortCode.substring(0, 1));
   let height = shortCode.substring(1, 1 + prefix);
-  let pos = shortCode.substring(1 + prefix, 2 + prefix);
+  let pos = shortCode.substring(1 + prefix);
   if (height >= 0 && pos >= 0) {
     let txHash = await ecl.blockchainTransaction_idFromPos(height, pos);
     return txHash;
