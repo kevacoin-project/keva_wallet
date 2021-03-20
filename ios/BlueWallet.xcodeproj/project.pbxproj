@@ -757,7 +757,7 @@
 				CODE_SIGN_ENTITLEMENTS = BlueWallet/BlueWallet.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 282;
+				CURRENT_PROJECT_VERSION = 283;
 				DEAD_CODE_STRIPPING = NO;
 				DEVELOPMENT_TEAM = 9BUGTCKF7L;
 				HEADER_SEARCH_PATHS = "$(inherited)";
@@ -768,7 +768,7 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)",
 				);
-				MARKETING_VERSION = 6.6.8;
+				MARKETING_VERSION = 6.6.9;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
@@ -795,7 +795,7 @@
 				CODE_SIGN_ENTITLEMENTS = BlueWallet/BlueWalletRelease.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 282;
+				CURRENT_PROJECT_VERSION = 283;
 				DEVELOPMENT_TEAM = 9BUGTCKF7L;
 				HEADER_SEARCH_PATHS = "$(inherited)";
 				INFOPLIST_FILE = BlueWallet/Info.plist;
@@ -805,7 +805,7 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)",
 				);
-				MARKETING_VERSION = 6.6.8;
+				MARKETING_VERSION = 6.6.9;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
