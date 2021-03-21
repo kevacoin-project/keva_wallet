@@ -42,7 +42,7 @@ module.exports = {
     no_data: "No Data",
     click_add_btn: "Enter profile name and click the '+' button to create your first namespace",
     click_search_btn: "Enter shortcode (e.g. 5570511) and click the 'search' button",
-    explain: "A namespace is a data container where you can add key-value pairs",
+    explain: "Not see your namespaces? Pull down to refresh",
     namespace_creation_err: 'Cannot create namespace. Please wait a few minutes until your last change is confirmed in the blockchain.',
     update_key_err: 'Cannot update or add key-value. Please wait a few minutes until your last change is confirmed in the blockchain.',
     delete_key_err: 'Cannot dete key. Please wait a few minutes until your last change is confirmed in the blockchain.',
