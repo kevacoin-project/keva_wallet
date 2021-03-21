@@ -662,20 +662,35 @@ class KeyValues extends React.Component {
   processKeyValueList = (origkeyValues) => {
     // Merge the results.
     let keyValues = [];
-    for (let kv of origkeyValues) {
+    const reverseKV = origkeyValues.slice().reverse();
+    for (let kv of reverseKV) {
       if (kv.type === 'PUT') {
-        // Add it only if there is not existing one (overriden).
-        if (keyValues.findIndex(e => e.key == kv.key) < 0) {
+        // Override the existing one.
+        const i = keyValues.findIndex(e => e.key == kv.key);
+        if (i >= 0) {
+          keyValues[i] = kv;
+        } else {
           keyValues.push(kv);
         }
       } else if (kv.type === 'DEL') {
-        keyValues = keyValues.filter(e => e.key != kv.key);
+        keyValues = keyValues.filter(e => {
+          if ((typeof e.key) != (typeof kv.key)) {
+            return true;
+          }
+          if ((typeof e.key) == 'string') {
+            return e.key != kv.key;
+          } else if ((typeof e.key) == 'object') {
+            return JSON.stringify(e.key.data) != JSON.stringify(kv.key.data);
+          }
+          return false;
+        });
       } else if (kv.type === 'REG') {
         // Special treatment for namespace creation.
         keyValues.push({key: kv.displayName, value: loc.namespaces.created, ...kv});
       }
     }
-    return keyValues;
+
+    return keyValues.reverse();
   }
 
   render() {
