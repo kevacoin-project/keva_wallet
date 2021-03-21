@@ -20,6 +20,7 @@ import {
   InteractionManager,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
+import MCIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 import {
   BlueNavigationStyle,
   BlueLoading,
@@ -285,6 +286,7 @@ class MyNamespaces extends React.Component {
                 return alert(loc.namespaces.multiaddress_wallet);
               }
               this.setState({ showNSCreationModal: true, currentPage: 1 });
+              await BlueElectrum.ping();
               const { tx, namespaceId, fee } = await createKevaNamespace(wallet, FALLBACK_DATA_PER_BYTE_FEE, this.state.nsName);
               let feeKVA = fee / 100000000;
               this.setState({ showNSCreationModal: true, currentPage: 2, fee: feeKVA });
@@ -580,11 +582,14 @@ class MyNamespaces extends React.Component {
               <RefreshControl onRefresh={() => this.refreshNamespaces()} refreshing={this.state.isRefreshing} />
             }
           >
-            <Image source={require('../../img/my_no_data.png')} style={{ width: SCREEN_WIDTH*0.33, height: SCREEN_WIDTH*0.33, marginBottom: 20 }} />
-            <Text style={[styles.emptyMessage, { marginBottom: 7 }]}>
+            <Text style={[styles.emptyMessage, { marginBottom: 7, marginTop: 30 }]}>
               {loc.namespaces.click_add_btn}
             </Text>
-
+            <MCIcon type='material-community'
+              name='chevron-double-down'
+              color={KevaColors.inactiveText}
+              size={80}
+            />
             <Text style={[styles.emptyMessage, styles.help, {marginTop: 10}]}>
               {loc.namespaces.explain}
             </Text>
@@ -1265,7 +1270,7 @@ var styles = StyleSheet.create({
   },
   emptyMessage: {
     fontSize: 18,
-    color: KevaColors.darkText,
+    color: KevaColors.inactiveText,
     textAlign: 'center',
     lineHeight: 30,
   },
@@ -1274,7 +1279,8 @@ var styles = StyleSheet.create({
     alignSelf: 'center',
     textAlign: 'center',
     lineHeight: 24,
-    paddingHorizontal: 20
+    paddingHorizontal: 20,
+    fontWeight: '700',
   },
   inputAndroid: {
     width: SCREEN_WIDTH*0.8,
