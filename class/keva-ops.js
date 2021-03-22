@@ -148,11 +148,24 @@ function parseProfile(value) {
 // \x01_KEVA_NS_
 // That is, this transaction is used to set the namespace info.
 // Or, it must be KEVA_OP_NAMESPACE.
-export async function getNamespaceDataFromNSTx(ecl, txid) {
-  const result = await ecl.multiGetTransactionInfoByTxid([txid], 1, true);
-  const tx = result[txid];
+export async function getNamespaceDataFromNSTx(ecl, history) {
+  const txids = history.map(h => h.tx_hash);
+  const results = await ecl.multiGetTransactionInfoByTxid(txids, 1, true);
+  // Find the latest one that is not KEVA_OP_DELETE.
+  // Some early version allowed the "deletion" of namespace, which didn't really work.
+  const latestHistory = history.slice().reverse().find(h => {
+    const tx = results[h.tx_hash];
+    if (!tx.n || !tx.kv) {
+      return false;
+    }
+    if (tx.kv.op != KEVA_OP_DELETE) {
+      return true;
+    }
+  });
+
+  const tx = results[latestHistory.tx_hash];
   if (!tx.n || !tx.kv) {
-    return;
+    return null;
   }
 
   const op = tx.kv.op;
@@ -1123,10 +1136,7 @@ export async function getNamespaceInfo(ecl, namespaceId, needShortcode = true) {
   if (history.length == 0) {
     return {}
   }
-  // Get the latest one, i.e. last one.
-  const latestTx = history[history.length - 1];
-  const txid = latestTx.tx_hash;
-  let result = await getNamespaceDataFromNSTx(ecl, txid);
+  let result = await getNamespaceDataFromNSTx(ecl, history);
   if (needShortcode) {
     // Short code must use the first transaction when the namesapce is created.
     const rootTx = history[0];
