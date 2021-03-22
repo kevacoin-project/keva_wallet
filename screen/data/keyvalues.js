@@ -120,7 +120,7 @@ class Item extends React.Component {
     if (displayKey.startsWith('__WALLET_TRANSFER__')) {
       displayKey = loc.namespaces.ns_transfer_explain;
     }
-    const canEdit = !isOther && item.op !== 'KEVA_OP_NAMESPACE';
+    const canEdit = !isOther && item.type !== 'REG';
 
     return (
       <View style={styles.card}>
