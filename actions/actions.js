@@ -59,7 +59,3 @@ export function setAllReactions(reactions) {
 export function setHashtags(hashtags) {
   return { type: SET_HASHTAGS, hashtags }
 }
-
-export function updateHashtag(index, entry) {
-  return { type: SET_HASHTAG_ENTRY, index, entry }
-}

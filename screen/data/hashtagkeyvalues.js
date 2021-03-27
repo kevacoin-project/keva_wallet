@@ -14,7 +14,7 @@ import {
 } from 'react-native';
 const StyleSheet = require('../../PlatformStyleSheet');
 const KevaColors = require('../../common/KevaColors');
-import { THIN_BORDER, showStatusAlways, hideStatus, toastError } from '../../util';
+import { THIN_BORDER, toastError } from '../../util';
 import {
   BlueNavigationStyle,
   BlueLoading,
@@ -28,7 +28,7 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import { connect } from 'react-redux'
 import { createThumbnail } from "react-native-create-thumbnail";
 import { Avatar, Image } from 'react-native-elements';
-import { setHashtags, setMediaInfo, } from '../../actions'
+import { setMediaInfo, } from '../../actions'
 import {
   getHashtagScriptHash, parseSpecialKey, getSpecialKeyText, decodeBase64,
   findTxIndex,
@@ -113,7 +113,7 @@ class Item extends React.Component {
 
     return (
       <View style={styles.card}>
-        <TouchableOpacity onPress={() => onShow(item.key, item.value, item.tx, item.replies, item.shares, item.likes, item.height, item.favorite, item.shortCode, item.displayName)}>
+        <TouchableOpacity onPress={() => onShow(item.tx, item.height, item.shortCode, item.displayName)}>
           <View style={{flex:1,paddingHorizontal:10,paddingTop:2}}>
             <View style={{flexDirection:'row',alignItems:'center',justifyContent:'space-between'}}>
               <View style={{paddingRight: 10}}>
@@ -193,6 +193,7 @@ class HashtagKeyValues extends React.Component {
       inputMode: false,
       hashtag: '',
       searched: false,
+      hashtags: [],
     };
     this.onEndReachedCalledDuringMomentum = true;
   }
@@ -210,14 +211,14 @@ class HashtagKeyValues extends React.Component {
 
   onSearchHashtag = async () => {
     Keyboard.dismiss();
-    this.props.dispatch(setHashtags());
+    this.setState({hashtags: []});
     this.setState({min_tx_num: -1, loading: true});
     await this.fetchHashtag(-1);
     this.setState({loading: false});
   }
 
   fetchHashtag = async (min_tx_num) => {
-    const {reactions, hashtags, dispatch} = this.props;
+    const {reactions} = this.props;
     /*
       Data returned by ElectrumX API
       {
@@ -235,7 +236,7 @@ class HashtagKeyValues extends React.Component {
         min_tx_num: 123
       }
     */
-    const hashtag = this.state.hashtag;
+    const {hashtag, hashtags} = this.state;
     let history = await BlueElectrum.blockchainKeva_getHashtag(getHashtagScriptHash(hashtag), min_tx_num);
     if (history.hashtags.length == 0) {
       this.setState({searched: true});
@@ -264,13 +265,13 @@ class HashtagKeyValues extends React.Component {
     if (history.min_tx_num < this.state.min_tx_num) {
       // TODO: optimize this, add appendHashtags to avoid
       // duplicating twice.
-      dispatch(setHashtags([...hashtags, ...keyValues]));
       this.setState({
+        hashtags: [...hashtags, ...keyValues],
         min_tx_num: history.min_tx_num,
       });
     } else {
-      dispatch(setHashtags(keyValues));
       this.setState({
+        hashtags: [...keyValues],
         min_tx_num: history.min_tx_num,
       });
     }
@@ -319,14 +320,14 @@ class HashtagKeyValues extends React.Component {
     if (hashtag.startsWith('#')) {
       hashtag = hashtag.substring(1);
     }
-    this.props.dispatch(setHashtags());
-    this.setState({hashtag});
+    this.setState({hashtag, hashtags: []});
     await this.refreshKeyValues();
     this.isBiometricUseCapableAndEnabled = await Biometric.isBiometricUseCapableAndEnabled();
   }
 
-  onShow = (key, value, tx, replies, shares, likes, height, favorite, shortCode, displayName) => {
-    const {navigation, hashtags} = this.props;
+  onShow = (tx, height, shortCode, displayName) => {
+    const {navigation} = this.props;
+    const {hashtags} = this.state;
     const index = findTxIndex(hashtags, tx);
     if (index < 0) {
       return;
@@ -340,11 +341,23 @@ class HashtagKeyValues extends React.Component {
       shareTxid: tx,
       rewardTxid: tx,
       height,
+      hashtags,
+      updateHashtag: this.updateHashtag,
     });
   }
 
+  updateHashtag = (index, keyValue) => {
+    const {hashtags} = this.state;
+    const newHashtags = [...hashtags];
+    newHashtags[index] = keyValue;
+    this.setState({
+      hashtags: newHashtags
+    })
+  }
+
   onReply = (replyTxid) => {
-    const {navigation, namespaceList, hashtags} = this.props;
+    const {navigation, namespaceList} = this.props;
+    const {hashtags} = this.state;
     // Must have a namespace.
     if (Object.keys(namespaceList).length == 0) {
       toastError(loc.namespaces.create_namespace_first);
@@ -359,12 +372,15 @@ class HashtagKeyValues extends React.Component {
     navigation.navigate('ReplyKeyValue', {
       index,
       type: 'hashtag',
-      replyTxid
+      replyTxid,
+      hashtags,
+      updateHashtag: this.updateHashtag,
     })
   }
 
   onShare = (shareTxid, key, value, blockHeight) => {
-    const {navigation, namespaceList, hashtags} = this.props;
+    const {navigation, namespaceList} = this.props;
+    const {hashtags} = this.state;
     // Must have a namespace.
     if (Object.keys(namespaceList).length == 0) {
       toastError(loc.namespaces.create_namespace_first);
@@ -385,11 +401,14 @@ class HashtagKeyValues extends React.Component {
       origValue: value,
       origShortCode: shortCode,
       height: blockHeight,
+      hashtags,
+      updateHashtag: this.updateHashtag,
     })
   }
 
   onReward = (rewardTxid, key, value, height) => {
-    const {navigation, namespaceList, hashtags} = this.props;
+    const {navigation, namespaceList} = this.props;
+    const {hashtags} = this.state;
     // Must have a namespace.
     if (Object.keys(namespaceList).length == 0) {
       toastError(loc.namespaces.create_namespace_first);
@@ -409,6 +428,8 @@ class HashtagKeyValues extends React.Component {
       origValue: value,
       origShortCode: shortCode,
       height,
+      hashtags,
+      updateHashtag: this.updateHashtag,
     })
   }
 
@@ -431,10 +452,10 @@ class HashtagKeyValues extends React.Component {
   }
 
   render() {
-    let {navigation, dispatch, mediaInfoList, hashtags} = this.props;
+    let {navigation, dispatch, mediaInfoList} = this.props;
+    const {inputMode, hashtag, loading, searched, hashtags} = this.state;
     const mergeList = hashtags;
-    const canSearch = this.state.hashtag && this.state.hashtag.length > 0;
-    const {inputMode, hashtag, loading, searched} = this.state;
+    const canSearch = hashtag && hashtag.length > 0;
 
     if (this.state.isRefreshing && (!mergeList || mergeList.length == 0)) {
       return <BlueLoading />
@@ -517,7 +538,6 @@ function mapStateToProps(state) {
     namespaceList: state.namespaceList,
     mediaInfoList: state.mediaInfoList,
     reactions: state.reactions,
-    hashtags: state.hashtags,
   }
 }
 

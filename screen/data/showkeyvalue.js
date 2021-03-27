@@ -23,7 +23,7 @@ import {
   parseSpecialKey,
   getSpecialKeyText,
 } from '../../class/keva-ops';
-import { setMediaInfo, setKeyValue, updateHashtag, } from '../../actions'
+import { setMediaInfo, setKeyValue } from '../../actions'
 import {
   BlueNavigationStyle,
   BlueLoading,
@@ -139,8 +139,8 @@ class ShowKeyValue extends React.Component {
   }
 
   async componentDidMount() {
-    const {keyValueList, hashtags} = this.props;
-    const {shortCode, displayName, namespaceId, index, type} = this.props.navigation.state.params;
+    const {keyValueList} = this.props;
+    const {shortCode, displayName, namespaceId, index, type, hashtags} = this.props.navigation.state.params;
     this.setState({
       shortCode, displayName, namespaceId, index, type
     });
@@ -381,14 +381,21 @@ class ShowKeyValue extends React.Component {
   }
 
   updateReplies = (reply) => {
+    const {index, type, hashtags, updateHashtag} = this.props.navigation.state.params;
     this.setState({
       replies: [reply, ...this.state.replies]
     });
+
+    if (type == 'hashtag' && updateHashtag) {
+      let keyValue = hashtags[index];
+      keyValue.replies = keyValue.replies + 1;
+      updateHashtag(index, keyValue);
+    }
   }
 
   onReply = () => {
     const {navigation, namespaceList} = this.props;
-    const {replyTxid, namespaceId, index, type} = navigation.state.params;
+    const {replyTxid, namespaceId, index, type, hashtags} = navigation.state.params;
     // Must have a namespace.
     if (Object.keys(namespaceList).length == 0) {
       toastError('Create a namespace first');
@@ -401,12 +408,18 @@ class ShowKeyValue extends React.Component {
       index,
       type,
       updateReplies: this.updateReplies,
+      hashtags,
     })
+  }
+
+  onRewardDone = () => {
+    // Force refresh.
+    this.setState({type: this.state.type});
   }
 
   onReward = () => {
     const {navigation, namespaceList} = this.props;
-    const {rewardTxid, namespaceId, index, type} = navigation.state.params;
+    const {rewardTxid, namespaceId, index, type, hashtags, updateHashtag} = navigation.state.params;
     // Must have a namespace.
     if (Object.keys(namespaceList).length == 0) {
       toastError('Create a namespace first');
@@ -418,12 +431,15 @@ class ShowKeyValue extends React.Component {
       rewardTxid,
       index,
       type,
+      updateHashtag,
+      hashtags,
+      onRewardDone: this.onRewardDone,
     })
   }
 
   fetchReplies = async () => {
-    const {dispatch, navigation, hashtags, keyValueList, reactions} = this.props;
-    const {replyTxid, namespaceId, index, type} = navigation.state.params;
+    const {dispatch, navigation, keyValueList, reactions} = this.props;
+    const {replyTxid, namespaceId, index, type, hashtags} = navigation.state.params;
 
     try {
       this.setState({isRefreshing: true});
@@ -477,7 +493,11 @@ class ShowKeyValue extends React.Component {
         keyValue.likes = totalReactions.likes;
         keyValue.shares = totalReactions.shares;
         keyValue.replies = totalReactions.replies.length;
-        dispatch(updateHashtag(index, keyValue));
+        const newHashtags = [...hashtags];
+        newHashtags[index] = keyValue;
+        this.setState({
+          hashtags: newHashtags,
+        });
       }
 
       this.setState({
@@ -545,9 +565,14 @@ class ShowKeyValue extends React.Component {
     );
   }
 
+  onShareDone = () => {
+    // Force refresh.
+    this.setState({type: this.state.type});
+  }
+
   onShare = (key, value) => {
     const {navigation, namespaceList} = this.props;
-    const {index, type, namespaceId} = navigation.state.params;
+    const {index, type, namespaceId, updateHashtag, hashtags} = navigation.state.params;
     // Must have a namespace.
     if (Object.keys(namespaceList).length == 0) {
       toastError(loc.namespaces.create_namespace_first);
@@ -565,6 +590,9 @@ class ShowKeyValue extends React.Component {
         shareTxid,
         origKey: key,
         origValue: value,
+        updateHashtag,
+        hashtags,
+        onShareDone: this.onShareDone,
       });
       return;
     }
@@ -577,11 +605,13 @@ class ShowKeyValue extends React.Component {
       index, type,
       shareTxid: txidToShare,
       origValue: shareValue,
+      updateHashtag,
     });
   }
 
   render() {
-    const {keyValueList, hashtags} = this.props;
+    const {keyValueList} = this.props;
+    const {hashtags} = this.props.navigation.state.params;
     let {replies, isRaw, CIDHeight, CIDWidth, thumbnail} = this.state;
     const {shortCode, displayName, namespaceId, index, type} = this.state;
     if (!type) {
@@ -701,7 +731,6 @@ function mapStateToProps(state) {
     namespaceList: state.namespaceList,
     mediaInfoList: state.mediaInfoList,
     reactions: state.reactions,
-    hashtags: state.hashtags,
   }
 }
 
