@@ -21,9 +21,9 @@ const KevaColors = require('../../common/KevaColors');
 import { THIN_BORDER, timeConverter, toastError, getInitials, stringToColor } from "../../util";
 import {
   parseSpecialKey,
-  getSpecialKeyText, findTxIndex,
+  getSpecialKeyText,
 } from '../../class/keva-ops';
-import { setReplies, setMediaInfo, setKeyValue, updateHashtag, setHashtags } from '../../actions'
+import { setMediaInfo, setKeyValue, updateHashtag, } from '../../actions'
 import {
   BlueNavigationStyle,
   BlueLoading,
@@ -380,6 +380,12 @@ class ShowKeyValue extends React.Component {
     }
   }
 
+  updateReplies = (reply) => {
+    this.setState({
+      replies: [reply, ...this.state.replies]
+    });
+  }
+
   onReply = () => {
     const {navigation, namespaceList} = this.props;
     const {replyTxid, namespaceId, index, type} = navigation.state.params;
@@ -394,6 +400,7 @@ class ShowKeyValue extends React.Component {
       namespaceId,
       index,
       type,
+      updateReplies: this.updateReplies,
     })
   }
 
@@ -449,7 +456,7 @@ class ShowKeyValue extends React.Component {
         r.value = Buffer.from(r.value, 'base64').toString('utf-8');
         return r;
       });
-      dispatch(setReplies(replies));
+      this.setState({replies});
 
       // Check if it is a favorite.
       const reaction = reactions[replyTxid];
@@ -574,8 +581,8 @@ class ShowKeyValue extends React.Component {
   }
 
   render() {
-    const {replies, keyValueList, hashtags} = this.props;
-    let {isRaw, CIDHeight, CIDWidth, thumbnail} = this.state;
+    const {keyValueList, hashtags} = this.props;
+    let {replies, isRaw, CIDHeight, CIDWidth, thumbnail} = this.state;
     const {shortCode, displayName, namespaceId, index, type} = this.state;
     if (!type) {
       return null;
@@ -694,7 +701,6 @@ function mapStateToProps(state) {
     namespaceList: state.namespaceList,
     mediaInfoList: state.mediaInfoList,
     reactions: state.reactions,
-    replies: state.replies,
     hashtags: state.hashtags,
   }
 }
