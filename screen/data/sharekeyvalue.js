@@ -27,7 +27,7 @@ const loc = require('../../loc');
 let BlueApp = require('../../BlueApp');
 let BlueElectrum = require('../../BlueElectrum');
 import { FALLBACK_DATA_PER_BYTE_FEE } from '../../models/networkTransactionFees';
-import { setMediaInfo, updateHashtag, setKeyValue } from '../../actions'
+import { setMediaInfo, setKeyValue } from '../../actions'
 import { TransitionPresets } from 'react-navigation-stack';
 import { createThumbnail } from "react-native-create-thumbnail";
 import VideoPlayer from 'react-native-video-player';
@@ -165,8 +165,8 @@ class ShareKeyValue extends React.Component {
   }
 
   getShareKeyValueModal = () => {
-    const { namespaceList, keyValueList, hashtags, dispatch } = this.props;
-    const { shareTxid, origShortCode, height, namespaceId: origNamespaceId, index, type } = this.props.navigation.state.params;
+    const { namespaceList, keyValueList, dispatch } = this.props;
+    const { shareTxid, origShortCode, height, namespaceId: origNamespaceId, index, type, hashtags, updateHashtag, onShareDone } = this.props.navigation.state.params;
     if (!this.state.showKeyValueModal) {
       return null;
     }
@@ -281,7 +281,7 @@ class ShareKeyValue extends React.Component {
               await BlueElectrum.ping();
               await BlueElectrum.waitTillConnected();
               if (this.isBiometricUseCapableAndEnabled) {
-                if (!(await Biometric.unlockWithBiometrics())) {
+                if (!(await BiometrionShareDonec.unlockWithBiometrics())) {
                   this.setState({ isBroadcasting: false });
                   return;
                 }
@@ -356,7 +356,12 @@ class ShareKeyValue extends React.Component {
               } else if (type == 'hashtag') {
                 let keyValue = hashtags[index];
                 keyValue.shares = keyValue.shares + 1;
-                dispatch(updateHashtag(index, keyValue));
+                if (updateHashtag) {
+                  updateHashtag(index, keyValue);
+                }
+              }
+              if (onShareDone) {
+                onShareDone();
               }
               this.props.navigation.goBack();
             }}
@@ -471,7 +476,6 @@ function mapStateToProps(state) {
     mediaInfoList: state.mediaInfoList,
     shares: state.shares,
     keyValueList: state.keyValueList,
-    hashtags: state.hashtags,
   }
 }
 

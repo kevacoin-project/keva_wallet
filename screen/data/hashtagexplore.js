@@ -14,7 +14,7 @@ import {
 } from 'react-native';
 const StyleSheet = require('../../PlatformStyleSheet');
 const KevaColors = require('../../common/KevaColors');
-import { THIN_BORDER, showStatusAlways, hideStatus, toastError } from '../../util';
+import { THIN_BORDER, toastError } from '../../util';
 import {
   BlueNavigationStyle,
   BlueLoading,

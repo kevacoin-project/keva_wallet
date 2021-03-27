@@ -27,7 +27,7 @@ import { connect } from 'react-redux'
 import { rewardKeyValue } from '../../class/keva-ops';
 import StepModal from "../../common/StepModalWizard";
 import Biometric from '../../class/biometrics';
-import { setReaction, setKeyValue, updateHashtag } from '../../actions'
+import { setReaction, setKeyValue } from '../../actions'
 
 class RewardKeyValue extends React.Component {
 
@@ -124,8 +124,8 @@ class RewardKeyValue extends React.Component {
   }
 
   getRewardKeyValueModal = () => {
-    const { namespaceList, keyValueList, reactions, hashtags, dispatch } = this.props;
-    const { rewardTxid, namespaceId: origNamespaceId, index, type } = this.props.navigation.state.params;
+    const { namespaceList, keyValueList, reactions, dispatch } = this.props;
+    const { rewardTxid, namespaceId: origNamespaceId, index, type, hashtags, updateHashtag, onRewardDone } = this.props.navigation.state.params;
     if (!this.state.showKeyValueModal) {
       return null;
     }
@@ -312,7 +312,12 @@ class RewardKeyValue extends React.Component {
                 let keyValue = hashtags[index];
                 keyValue.likes = keyValue.likes + 1;
                 keyValue.favorite = true;
-                dispatch(updateHashtag(index, keyValue));
+                if (updateHashtag) {
+                  updateHashtag(index, keyValue);
+                }
+              }
+              if (onRewardDone) {
+                onRewardDone();
               }
               this.props.navigation.goBack();
             }}
@@ -385,7 +390,6 @@ function mapStateToProps(state) {
     keyValueList: state.keyValueList,
     namespaceList: state.namespaceList,
     reactions: state.reactions,
-    hashtags: state.hashtags,
   }
 }
 
