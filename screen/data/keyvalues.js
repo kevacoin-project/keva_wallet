@@ -30,7 +30,7 @@ import { connect } from 'react-redux'
 import { createThumbnail } from "react-native-create-thumbnail";
 import { setKeyValueList, setMediaInfo,
          CURRENT_KEYVALUE_LIST_VERSION, setOtherNamespaceList,
-         deleteOtherNamespace, setReplies,
+         deleteOtherNamespace,
        } from '../../actions'
 import {
         getNamespaceScriptHash, parseSpecialKey,
@@ -538,7 +538,6 @@ class KeyValues extends React.Component {
     const {dispatch, navigation, keyValueList} = this.props;
     const isOther = navigation.getParam('isOther');
     const shortCode = navigation.getParam('shortCode');
-    dispatch(setReplies());
     const index = findTxIndex(keyValueList.keyValues[namespaceId], tx);
     navigation.push('ShowKeyValue', {
       namespaceId,

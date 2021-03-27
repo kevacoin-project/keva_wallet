@@ -28,7 +28,7 @@ import { connect } from 'react-redux'
 import { replyKeyValue } from '../../class/keva-ops';
 import StepModal from "../../common/StepModalWizard";
 import Biometric from '../../class/biometrics';
-import { setKeyValue, addReply, updateHashtag } from '../../actions';
+import { setKeyValue, updateHashtag } from '../../actions';
 
 class ReplyKeyValue extends React.Component {
 
@@ -126,7 +126,7 @@ class ReplyKeyValue extends React.Component {
 
   getReplyKeyValueModal = () => {
     const { namespaceList, keyValueList, hashtags, dispatch } = this.props;
-    const { replyTxid, rootAddress, namespaceId: origNamespaceId, index, type } = this.props.navigation.state.params;
+    const { replyTxid, rootAddress, namespaceId: origNamespaceId, index, type, updateReplies } = this.props.navigation.state.params;
     if (!this.state.showKeyValueModal) {
       return null;
     }
@@ -308,12 +308,16 @@ class ReplyKeyValue extends React.Component {
                 let keyValue = (keyValueList.keyValues[origNamespaceId])[index];
                 keyValue.replies = keyValue.replies + 1;
                 dispatch(setKeyValue(origNamespaceId, index, keyValue));
-                dispatch(addReply(reply));
+                if (updateReplies) {
+                  updateReplies(reply);
+                }
               } else if (type == 'hashtag') {
                 let keyValue = hashtags[index];
                 keyValue.replies = keyValue.replies + 1;
                 dispatch(updateHashtag(index, keyValue));
-                dispatch(addReply(reply));
+                if (updateReplies) {
+                  updateReplies(reply);
+                }
               }
               this.props.navigation.goBack();
             }}

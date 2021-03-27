@@ -63,11 +63,3 @@ export function setHashtags(hashtags) {
 export function updateHashtag(index, entry) {
   return { type: SET_HASHTAG_ENTRY, index, entry }
 }
-
-export function setReplies(replies) {
-  return { type: SET_REPLIES, replies }
-}
-
-export function addReply(reply) {
-  return { type: ADD_REPLY_ENTRY, reply }
-}
