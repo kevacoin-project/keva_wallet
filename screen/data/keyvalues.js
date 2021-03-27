@@ -667,13 +667,16 @@ class KeyValues extends React.Component {
       if (kv.type === 'PUT') {
         // Override the existing one.
         const i = keyValues.findIndex(e => e.key == kv.key);
-        if (i >= 0) {
+        if (i >= 0 && keyValues[i].type != 'REG') {
           keyValues[i] = kv;
         } else {
           keyValues.push(kv);
         }
       } else if (kv.type === 'DEL') {
         keyValues = keyValues.filter(e => {
+          if (e.type == 'REG') {
+            return true;
+          }
           if ((typeof e.key) != (typeof kv.key)) {
             return true;
           }
@@ -689,7 +692,6 @@ class KeyValues extends React.Component {
         keyValues.push({key: kv.displayName, value: loc.namespaces.created, ...kv});
       }
     }
-
     return keyValues.reverse();
   }
 
