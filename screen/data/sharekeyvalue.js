@@ -166,7 +166,7 @@ class ShareKeyValue extends React.Component {
 
   getShareKeyValueModal = () => {
     const { namespaceList, keyValueList, dispatch } = this.props;
-    const { shareTxid, origShortCode, height, namespaceId: origNamespaceId, index, type, hashtags, updateHashtag, onShareDone } = this.props.navigation.state.params;
+    const { shareTxid, origShortCode, namespaceId: origNamespaceId, index, type, hashtags, updateHashtag, onShareDone } = this.props.navigation.state.params;
     if (!this.state.showKeyValueModal) {
       return null;
     }
