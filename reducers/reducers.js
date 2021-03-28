@@ -162,63 +162,6 @@ function reactions(state = initReactions, action) {
   }
 }
 
-const initHashtags = [];
-/*
-  Data returned by ElectrumX API
-  {
-    hashtags: [{
-      'tx_hash': hash_to_hex_str(tx_hash),
-      'displayName': display_name,
-      'height': height, 'shortCode': shortCode,
-      'time': timestamp,
-      'replies': replies, 'shares': shares, 'likes': likes,
-      'namespace': namespaceId,
-      'key': key,
-      'value': value,
-      'type': REG|PUT|DEL|UNK
-    }],
-    min_tx_num: 123
-  }
-*/
-function hashtags(state = initHashtags, action) {
-  switch (action.type) {
-    case SET_HASHTAGS:
-      if (action.hashtags) {
-        return [...action.hashtags];
-      }
-      // Clear everything.
-      return initHashtags;
-    case SET_HASHTAG_ENTRY:
-      if (action.index >= 0 && action.entry) {
-        let newState = [...state];
-        newState[action.index] = {...state[action.index], ...action.entry};
-        return newState;
-      }
-      return state;
-    default:
-      return state;
-  }
-}
-
-const initReplies = [];
-function replies(state=initReplies, action) {
-  switch (action.type) {
-    case SET_REPLIES:
-      if (action.replies) {
-        return [...action.replies];
-      }
-      // Clear everything.
-      return initReplies;
-    case ADD_REPLY_ENTRY:
-      if (action.reply) {
-        let newState = [action.reply, ...state];
-        return newState;
-      }
-      return state;
-    default:
-      return state;
-  }
-}
 
 export const appReducer = combineReducers({
   namespaceList,
@@ -226,6 +169,4 @@ export const appReducer = combineReducers({
   keyValueList,
   mediaInfoList,
   reactions,
-  replies,
-  hashtags,
 });
