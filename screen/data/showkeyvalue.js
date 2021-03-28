@@ -382,13 +382,14 @@ class ShowKeyValue extends React.Component {
 
   updateReplies = (reply) => {
     const {index, type, hashtags, updateHashtag} = this.props.navigation.state.params;
+    let currentLength = this.state.replies.length;
     this.setState({
       replies: [reply, ...this.state.replies]
     });
 
     if (type == 'hashtag' && updateHashtag) {
       let keyValue = hashtags[index];
-      keyValue.replies = keyValue.replies + 1;
+      keyValue.replies = currentLength + 1;
       updateHashtag(index, keyValue);
     }
   }
