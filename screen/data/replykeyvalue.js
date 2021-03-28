@@ -125,8 +125,8 @@ class ReplyKeyValue extends React.Component {
   }
 
   getReplyKeyValueModal = () => {
-    const { namespaceList, keyValueList, hashtags, dispatch } = this.props;
-    const { replyTxid, rootAddress, namespaceId: origNamespaceId, index, type, updateReplies, updateHashtag } = this.props.navigation.state.params;
+    const { namespaceList, keyValueList, dispatch } = this.props;
+    const { replyTxid, rootAddress, namespaceId: origNamespaceId, index, type, hashtags, updateReplies, updateHashtag } = this.props.navigation.state.params;
     if (!this.state.showKeyValueModal) {
       return null;
     }
