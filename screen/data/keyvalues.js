@@ -555,7 +555,11 @@ class KeyValues extends React.Component {
 
   onReply = (replyTxid) => {
     const {navigation, namespaceList, keyValueList} = this.props;
-    const {namespaceId} = navigation.state.params;
+    let {namespaceId} = navigation.state.params;
+    if (!namespaceId) {
+      // Try the resolved one.
+      namespaceId = this.namespaceId;
+    }
     // Must have a namespace.
     if (Object.keys(namespaceList).length == 0) {
       toastError(loc.namespaces.create_namespace_first);
@@ -577,7 +581,11 @@ class KeyValues extends React.Component {
 
   onShare = (shareTxid, key, value) => {
     const {navigation, namespaceList, keyValueList} = this.props;
-    const {namespaceId} = navigation.state.params;
+    let {namespaceId} = navigation.state.params;
+    if (!namespaceId) {
+      // Try the resolved one.
+      namespaceId = this.namespaceId;
+    }
     // Must have a namespace.
     if (Object.keys(namespaceList).length == 0) {
       toastError(loc.namespaces.create_namespace_first);
@@ -601,7 +609,11 @@ class KeyValues extends React.Component {
 
   onReward = (rewardTxid, key, value, height) => {
     const {navigation, namespaceList, keyValueList} = this.props;
-    const {namespaceId} = navigation.state.params;
+    let {namespaceId} = navigation.state.params;
+    if (!namespaceId) {
+      // Try the resolved one.
+      namespaceId = this.namespaceId;
+    }
     // Must have a namespace.
     if (Object.keys(namespaceList).length == 0) {
       toastError(loc.namespaces.create_namespace_first);

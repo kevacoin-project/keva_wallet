@@ -211,8 +211,7 @@ class HashtagKeyValues extends React.Component {
 
   onSearchHashtag = async () => {
     Keyboard.dismiss();
-    this.setState({hashtags: []});
-    this.setState({min_tx_num: -1, loading: true});
+    this.setState({min_tx_num: -1, loading: true, hashtags: []});
     await this.fetchHashtag(-1);
     this.setState({loading: false});
   }

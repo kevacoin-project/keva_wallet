@@ -55,7 +55,3 @@ export function setReaction(tx_hash, info) {
 export function setAllReactions(reactions) {
   return { type: SET_ALL_REACTIONS, reactions }
 }
-
-export function setHashtags(hashtags) {
-  return { type: SET_HASHTAGS, hashtags }
-}
