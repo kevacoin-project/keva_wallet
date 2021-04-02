@@ -235,7 +235,8 @@ class HashtagKeyValues extends React.Component {
         min_tx_num: 123
       }
     */
-    const {hashtag, hashtags} = this.state;
+    const {hashtags} = this.state;
+    const hashtag = this.state.hashtag.trim();
     let history = await BlueElectrum.blockchainKeva_getHashtag(getHashtagScriptHash(hashtag), min_tx_num);
     if (history.hashtags.length == 0) {
       this.setState({searched: true});
