@@ -917,6 +917,10 @@ export async function findMyNamespaces(wallet, ecl) {
       // tx.n contains namespace Id and vout.
       continue;
     }
+    if (utxo.vout != tx.n[1]) {
+      continue;
+    }
+
     const nsId = tx.n[0];
     namespaces[nsId] = namespaces[nsId] || {
       id: nsId,
