@@ -138,6 +138,7 @@ class ReplyKeyValue extends React.Component {
         <Text style={[styles.modalText, {textAlign: 'center', marginBottom: 20, color: KevaColors.darkText}]}>{"Choose a namespace"}</Text>
         <RNPickerSelect
           value={this.state.namespaceId}
+          placeholder={{}}
           useNativeAndroidPickerStyle={false}
           style={{
             inputAndroid: styles.inputAndroid,

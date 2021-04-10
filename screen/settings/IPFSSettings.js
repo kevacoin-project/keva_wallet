@@ -123,6 +123,7 @@ export default class IPFSSettings extends Component {
             <RNPickerSelect
               disabled={useCustom}
               value={url}
+              placeholder={{}}
               useNativeAndroidPickerStyle={false}
               style={{
                 inputAndroid: [styles.inputAndroid, useCustom && {color: KevaColors.extraLightText}],

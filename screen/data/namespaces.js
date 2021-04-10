@@ -261,6 +261,7 @@ class MyNamespaces extends React.Component {
         <Text style={[styles.modalText, {textAlign: 'center', marginBottom: 20, color: KevaColors.darkText}]}>{"Choose a Wallet"}</Text>
         <RNPickerSelect
           value={this.state.walletId}
+          placeholder={{}}
           useNativeAndroidPickerStyle={false}
           style={{
             inputAndroid: styles.inputAndroid,
