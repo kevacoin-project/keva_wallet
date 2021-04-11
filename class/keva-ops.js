@@ -327,7 +327,7 @@ function keyToBuffer(key) {
   return key;
 }
 
-function getKeyValueUpdateScript(namespaceId, address, key, value) {
+export function getKeyValueUpdateScript(namespaceId, address, key, value) {
   const keyBuf = keyToBuffer(key);
   const valueBuf = Buffer.from(utf8ToHex(value), 'hex');
 
@@ -550,6 +550,14 @@ function createReplyKey(txId) {
 // prefix 0x0003
 function createRewardKey(txId) {
   return Buffer.concat([Buffer.from('0003', 'hex'), Buffer.from(txId, 'hex')]);
+}
+
+// prefix 0x0004
+export function createBidKey(txId) {
+  // FIXME
+  //return Buffer.concat([Buffer.from('0004', 'hex'), Buffer.from(txId, 'hex')]);
+  // For testing purpose, use it as reply - FIXME!!!!
+  return Buffer.concat([Buffer.from('0001', 'hex'), Buffer.from(txId, 'hex')]);
 }
 
 const MIN_REWARD = 10000000;
