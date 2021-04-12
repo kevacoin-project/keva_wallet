@@ -107,8 +107,9 @@ export async function createNFTBid(wallet, requestedSatPerByte, namespaceId,
         redeem: { output: lockRedeemScript }
     });
     */
-    const witnessHash = bcrypto.hash160(lockRedeemScript)
-    const redeemScript = Buffer.concat([Buffer.from('0014', 'hex'), witnessHash]);
+    const witnessHash = bcrypto.sha256(lockRedeemScript)
+    const redeemScript = Buffer.concat([Buffer.from('0020', 'hex'), witnessHash]);
+
     const payment = bitcoin.payments.p2sh({
       redeem: { output: redeemScript }
     });
