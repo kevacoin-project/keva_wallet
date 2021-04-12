@@ -185,7 +185,7 @@ class ReplyKeyValue extends React.Component {
               let bcrypto = bitcoin.crypto;
               const paymentPubKeyHash160 = bcrypto.hash160(Buffer.from(paymentPubKey, 'hex'))
               const { tx, fee, cost, key } = await createNFTBid(wallet, FALLBACK_DATA_PER_BYTE_FEE, namespaceId,
-                    123000, null, replyTxid, "VQfWnB3aUyzYfTt8ccDDBCmiAA8oEWJY6S", paymentPubKeyHash160, 3, 1);
+                    123000, null, replyTxid, "VQfWnB3aUyzYfTt8ccDDBCmiAA8oEWJY6S", paymentPubKeyHash160, 1, 1);
               console.log('ZZZ After calling createNFTBid, tx is:::::::::')
               console.log(tx)
 

@@ -44,7 +44,7 @@ function getNFTBidScript(myAddressPubKeyHash160, paymentAddressPubKeyHash160, n,
     let bscript = bitcoin.script;
     let timelockRedeemScript = bscript.compile([
         bscript.OPS.OP_IF,
-            bscript.number.encode(lockTime),
+            bscript.number.encode(extracLockTime),
             bscript.OPS.OP_CHECKLOCKTIMEVERIFY,
             bscript.OPS.OP_DROP,
             bscript.OPS.OP_DUP,
@@ -53,7 +53,7 @@ function getNFTBidScript(myAddressPubKeyHash160, paymentAddressPubKeyHash160, n,
             bscript.OPS.OP_EQUALVERIFY,
             bscript.OPS.OP_CHECKSIGVERIFY,
         bscript.OPS.OP_ELSE,
-            bscript.number.encode(extracLockTime),
+            bscript.number.encode(lockTime),
             bscript.OPS.OP_CHECKLOCKTIMEVERIFY,
             bscript.OPS.OP_DROP,
             // Bidder signature
