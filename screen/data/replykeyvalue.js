@@ -30,6 +30,7 @@ import { createNFTBid } from '../../class/nft-ops';
 import StepModal from "../../common/StepModalWizard";
 import Biometric from '../../class/biometrics';
 import { setKeyValue } from '../../actions';
+const bitcoin = require('bitcoinjs-lib');
 
 class ReplyKeyValue extends React.Component {
 
@@ -179,10 +180,13 @@ class ReplyKeyValue extends React.Component {
               export async function createNFTBid(wallet, requestedSatPerByte, namespaceId,
                   amount, nsNFTId, offerTxId, paymentAddress, n, m)
               */
-              console.log('JWU calling createNFTBid ...')
+              console.log('ZZZ Calling createNFTBid ...')
+              const paymentPubKey = '03f79a36abee156f25599bcffc9718dc6a1dc2ea21fd6bcb277a2f4c4c935723ff';
+              let bcrypto = bitcoin.crypto;
+              const paymentPubKeyHash160 = bcrypto.hash160(Buffer.from(paymentPubKey, 'hex'))
               const { tx, fee, cost, key } = await createNFTBid(wallet, FALLBACK_DATA_PER_BYTE_FEE, namespaceId,
-                    123000, null, replyTxid, "VQfWnB3aUyzYfTt8ccDDBCmiAA8oEWJY6S", 100, 10);
-              console.log('JWU after calling createNFTBid, tx is:::::::::')
+                    123000, null, replyTxid, "VQfWnB3aUyzYfTt8ccDDBCmiAA8oEWJY6S", paymentPubKeyHash160, 3, 1);
+              console.log('ZZZ After calling createNFTBid, tx is:::::::::')
               console.log(tx)
 
               let feeKVA = (fee + cost) / 100000000;

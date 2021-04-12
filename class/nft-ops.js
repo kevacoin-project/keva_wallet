@@ -38,19 +38,18 @@ function utcNow() {
 }
 
 // m, n: hours.
-function getNFTBidScript(myAddress, sellerAddress, n, m) {
+function getNFTBidScript(myAddressPubKeyHash160, paymentAddressPubKeyHash160, n, m) {
     const lockTime = bip65.encode({ utc: utcNow() + 3600 * n });
     const extracLockTime = bip65.encode({ utc: utcNow() + 3600 * (m + n) });
     let bscript = bitcoin.script;
-    let baddress = bitcoin.address;
-    let timeLockScript = bscript.compile([
+    let timelockRedeemScript = bscript.compile([
         bscript.OPS.OP_IF,
             bscript.number.encode(lockTime),
             bscript.OPS.OP_CHECKLOCKTIMEVERIFY,
             bscript.OPS.OP_DROP,
             bscript.OPS.OP_DUP,
             bscript.OPS.OP_HASH160,
-            baddress.fromBase58Check(myAddress).hash,
+            myAddressPubKeyHash160,
             bscript.OPS.OP_EQUALVERIFY,
             bscript.OPS.OP_CHECKSIGVERIFY,
         bscript.OPS.OP_ELSE,
@@ -60,19 +59,18 @@ function getNFTBidScript(myAddress, sellerAddress, n, m) {
             // Bidder signature
             bscript.OPS.OP_DUP,
             bscript.OPS.OP_HASH160,
-            baddress.fromBase58Check(myAddress).hash,
+            myAddressPubKeyHash160,
             bscript.OPS.OP_EQUALVERIFY,
             bscript.OPS.OP_CHECKSIGVERIFY,
             // Seller signature
             bscript.OPS.OP_DUP,
             bscript.OPS.OP_HASH160,
-            baddress.fromBase58Check(sellerAddress).hash,
+            paymentAddressPubKeyHash160,
             bscript.OPS.OP_EQUALVERIFY,
             bscript.OPS.OP_CHECKSIGVERIFY,
-            baddress.fromBase58Check(sellerAddress).hash,
         bscript.OPS.OP_ENDIF,
     ]);
-    return timeLockScript;
+    return timelockRedeemScript;
 }
 
 
@@ -81,7 +79,7 @@ function getNFTBidScript(myAddress, sellerAddress, n, m) {
 // n: future hours
 // m: future hours in addition to n.
 export async function createNFTBid(wallet, requestedSatPerByte, namespaceId,
-        amount, nsNFTId, offerTxId, paymentAddress, n, m)
+        amount, nsNFTId, offerTxId, paymentAddress, paymentAddressPubKeyHash160, n, m)
 {
     await wallet.fetchBalance();
     await wallet.fetchTransactions();
@@ -89,14 +87,36 @@ export async function createNFTBid(wallet, requestedSatPerByte, namespaceId,
     if (!nsUtxo) {
       throw new Error(loc.namespaces.update_key_err);
     }
+    console.log('ZZZ nsUXto>>>>>>>>>>>>>>>>>>>')
+    console.log(nsUtxo)
 
     const key = createBidKey(offerTxId);
     // IMPORTANT: re-use the namespace address, security/privacy trade-off.
     const namespaceAddress = nsUtxo.address;
-    const value = "TBD - the partially signed bid tx";
+    const value = "TBD - the partially signed bid tx again";
     const nsScript = getKeyValueUpdateScript(namespaceId, namespaceAddress, key, value);
 
-    const lockScript = getNFTBidScript(namespaceAddress, paymentAddress, n, m);
+    let bcrypto = bitcoin.crypto;
+    const namespaceAddressPubKeyHash160 = bcrypto.hash160(bitcoin.ECPair.fromWIF(nsUtxo.wif).publicKey);
+    const lockRedeemScript = getNFTBidScript(namespaceAddressPubKeyHash160, paymentAddressPubKeyHash160, n, m);
+    console.log('ZZZ lockRedeemScript -----')
+    console.log(lockRedeemScript.toString('hex'))
+
+    /*
+    const payment = bitcoin.payments.p2sh({
+        redeem: { output: lockRedeemScript }
+    });
+    */
+    const witnessHash = bcrypto.hash160(lockRedeemScript)
+    const redeemScript = Buffer.concat([Buffer.from('0014', 'hex'), witnessHash]);
+    const payment = bitcoin.payments.p2sh({
+      redeem: { output: redeemScript }
+    });
+
+    const lockRedeemScriptAddress = payment.address;
+    console.log('ZZZ lockRedeem payment:----- ')
+    console.log(JSON.stringify(payment))
+    console.log('ZZZ lockRedeemScriptAddress: ' + lockRedeemScriptAddress)
 
     // Namespace needs at least 0.01 KVA.
     const namespaceValue = 1000000;
@@ -104,9 +124,7 @@ export async function createNFTBid(wallet, requestedSatPerByte, namespaceId,
       address: namespaceAddress, value: namespaceValue,
       script: nsScript
     }, {
-      address: paymentAddress, value: amount,
-      script: lockScript,
-      isCustom: true,
+      address: lockRedeemScriptAddress, value: amount,
     }];
 
     const transactions = wallet.getTransactions();
@@ -154,14 +172,6 @@ export async function createNFTBid(wallet, requestedSatPerByte, namespaceId,
         // Change address.
         // IMPORANT: re-use namespace address, security/privacy trade-off.
         output.address = namespaceAddress;
-      }
-
-      if (output.isCustom) {
-        psbt.addOutput({
-            script: output.script,
-            value: output.value,
-        });
-        continue;
       }
 
       if (i == 0) {
