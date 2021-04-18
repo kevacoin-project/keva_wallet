@@ -648,6 +648,16 @@ class KeyValues extends React.Component {
     });
   }
 
+  onSellNFT = (namespaceId, namespaceInfo) => {
+    const {navigation} = this.props;
+    const {walletId} = navigation.state.params;
+    navigation.navigate('SellNFT', {
+      walletId,
+      namespaceId,
+      namespaceInfo,
+    });
+  }
+
   onUnfollow = (namespaceId) => {
     const {dispatch} = this.props;
     dispatch(deleteOtherNamespace(namespaceId));
@@ -784,13 +794,22 @@ class KeyValues extends React.Component {
               )
               :
               (
-                <Button
-                  type='outline'
-                  buttonStyle={{borderRadius: 30, height: 28, width: 100, padding: 0, borderColor: KevaColors.actionText}}
-                  title={'Edit'}
-                  titleStyle={{fontSize: 14, color: KevaColors.actionText}}
-                  onPress={()=>{this.onEditProfile(namespaceId, namespaceInfo[namespaceId])}}
-                />
+                <View style={{flexDirection: 'row'}}>
+                  <Button
+                    type='outline'
+                    buttonStyle={{borderRadius: 30, height: 28, width: 100, padding: 0, borderColor: KevaColors.actionText}}
+                    title={'Edit'}
+                    titleStyle={{fontSize: 14, color: KevaColors.actionText}}
+                    onPress={()=>{this.onEditProfile(namespaceId, namespaceInfo[namespaceId])}}
+                  />
+                  <Button
+                    type='solid'
+                    buttonStyle={{marginLeft: 10, borderRadius: 30, height: 28, width: 100, padding: 0, borderColor: KevaColors.actionText, backgroundColor: KevaColors.actionText}}
+                    title={'Sell as NFT'}
+                    titleStyle={{fontSize: 14, color: '#fff'}}
+                    onPress={()=>{this.onSellNFT(namespaceId, namespaceInfo[namespaceId])}}
+                  />
+                </View>
               )
             }
             </View>

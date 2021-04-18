@@ -1,36 +1,33 @@
 import React from 'react';
 import {
   Text,
-  TextInput,
   View,
   TouchableOpacity,
 } from 'react-native';
-import Toast from 'react-native-root-toast';
-import RNPickerSelect from 'react-native-picker-select';
-import Icon from 'react-native-vector-icons/Ionicons';
 const StyleSheet = require('../../PlatformStyleSheet');
 const KevaButton = require('../../common/KevaButton');
 const KevaColors = require('../../common/KevaColors');
 import { THIN_BORDER, SCREEN_WIDTH, toastError } from '../../util';
-import { HDSegwitP2SHWallet,  } from '../../class';
 import {
   BlueNavigationStyle,
   BlueLoading,
   BlueBigCheckmark,
 } from '../../BlueComponents';
+import RNPickerSelect from 'react-native-picker-select';
 const loc = require('../../loc');
 let BlueApp = require('../../BlueApp');
 let BlueElectrum = require('../../BlueElectrum');
 import { FALLBACK_DATA_PER_BYTE_FEE } from '../../models/networkTransactionFees';
-import { TransitionPresets } from 'react-navigation-stack';
+import { HDSegwitP2SHWallet,  } from '../../class';
 
 import { connect } from 'react-redux'
-import { replyKeyValue } from '../../class/keva-ops';
+import { updateKeyValue } from '../../class/keva-ops';
+import FloatTextInput from '../../common/FloatTextInput';
 import StepModal from "../../common/StepModalWizard";
 import Biometric from '../../class/biometrics';
-import { setKeyValue } from '../../actions';
+import IonIcon from 'react-native-vector-icons/Ionicons';
 
-class ReplyKeyValue extends React.Component {
+class SellNFT extends React.Component {
 
   constructor() {
     super();
@@ -38,9 +35,14 @@ class ReplyKeyValue extends React.Component {
       loaded: false,
       changes: false,
       saving: false,
-      value: '',
-      showKeyValueModal: false,
+      namespaceId: '',
+      namespaceInfo: {},
+      showSellNFTModal: false,
+      valueOnly: false,
       createTransactionErr: null,
+      imagePreview: null,
+      price: '',
+      desc: '',
     };
   }
 
@@ -53,27 +55,18 @@ class ReplyKeyValue extends React.Component {
         style={{ marginHorizontal: 16, minWidth: 150, justifyContent: 'center', alignItems: 'flex-end' }}
         onPress={navigation.state.params.onPress}
       >
-        <View style={{ borderRadius: 20, backgroundColor: KevaColors.actionText, paddingVertical: 4, paddingHorizontal: 15 }}>
-          <Text style={{color: '#FFF', fontSize: 16}}>{loc.general.reply}</Text>
-        </View>
+        <Text style={{color: KevaColors.actionText, fontSize: 16}}>{loc.namespaces.submit}</Text>
       </TouchableOpacity>
     ),
-    headerLeft: () => (
-      <TouchableOpacity
-        style={{ marginHorizontal: 16, minWidth: 150, justifyContent: 'center', alignItems: 'flex-start' }}
-        onPress={() => navigation.goBack()}
-      >
-        <Text style={{ color: KevaColors.actionText, fontSize: 16 }}>{loc.general.cancel}</Text>
-      </TouchableOpacity>
-    ),
-    ...TransitionPresets.ModalTransition,
   });
 
   async componentDidMount() {
-    const { replyTxid } = this.props.navigation.state.params;
+    const {namespaceId, namespaceInfo} = this.props.navigation.state.params;
     this.setState({
-      replyTxid,
+        namespaceId,
+        namespaceInfo,
     });
+
     this.props.navigation.setParams({
       onPress: this.onSave
     });
@@ -81,41 +74,41 @@ class ReplyKeyValue extends React.Component {
   }
 
   onSave = async () => {
-    const { value } = this.state;
-    const { namespaceList } = this.props;
-
-    if (value.length == 0) {
-      toastError('Write something to reply');
+    const {namespaceId, walletId} = this.props.navigation.state.params;
+    let {price, desc, namespaceInfo} = this.state;
+    if (!(price > 0)) {
+      toastError('Asking price must be set');
+      return;
+    }
+    //TODO: FIXME
+    if (desc.length <= 1) {
+      toastError('At least 20 characters for description');
       return;
     }
     const wallets = BlueApp.getWallets();
-    if (wallets.length == 0) {
-      Toast.show("You don't have wallet");
+    this.wallet = wallets.find(w => w.getID() == walletId);
+    if (!this.wallet) {
+      toastError('Cannot find wallet');
       return;
     }
 
-    const namespaces = namespaceList.namespaces;
-    const defaultNamespaceId = namespaces[Object.keys(namespaces)[0]].id;
-
     this.setState({
-      showKeyValueModal: true,
+      showSellNFTModal: true,
       currentPage: 0,
       showSkip: true,
       broadcastErr: null,
       isBroadcasting: false,
       fee: 0,
       createTransactionErr: null,
-      currentPage: 0,
-      namespaceId: this.state.namespaceId || defaultNamespaceId,
     });
   }
 
   KeyValueCreationFinish = () => {
-    return this.setState({ showKeyValueModal: false });
+    return this.setState({showSellNFTModal: false});
   }
 
   KeyValueCreationCancel = () => {
-    return this.setState({ showKeyValueModal: false });
+    return this.setState({showSellNFTModal: false});
   }
 
   KeyValueCreationNext = () => {
@@ -124,10 +117,9 @@ class ReplyKeyValue extends React.Component {
     });
   }
 
-  getReplyKeyValueModal = () => {
+  getSellNFTModal = () => {
     const { namespaceList, keyValueList, dispatch } = this.props;
-    const { replyTxid, rootAddress, namespaceId: origNamespaceId, index, type, hashtags, updateReplies, updateHashtag } = this.props.navigation.state.params;
-    if (!this.state.showKeyValueModal) {
+    if (!this.state.showSellNFTModal) {
       return null;
     }
 
@@ -146,9 +138,8 @@ class ReplyKeyValue extends React.Component {
           }}
           onValueChange={(namespaceId) => this.setState({namespaceId})}
           items={items}
-          Icon={() => <Icon name="ios-arrow-down" size={24} color={KevaColors.actionText} style={{ padding: 12 }} />}
+          Icon={() => <IonIcon name="ios-arrow-down" size={24} color={KevaColors.actionText} style={{ padding: 12 }} />}
         />
-        {/* <Text style={[styles.modalFee, {textAlign: 'center', marginTop: 10}]}>{wallet.getBalance()/100000000 + ' KVA'}</Text> */}
         <KevaButton
           type='secondary'
           style={{margin:10, marginTop: 40}}
@@ -173,6 +164,10 @@ class ReplyKeyValue extends React.Component {
               }
               this.setState({ showNSCreationModal: true, currentPage: 1 });
               await BlueElectrum.ping();
+
+              // TODO: create two transactions:
+              // 1. From the selected namesapce, a tx with key: 0004 (sell) + namespaceid to sell
+              // 2. In the namespace to sell, a tx with key key: 0005 (confirm sell) + above txid.
               const { tx, fee, cost, key } = await replyKeyValue(wallet, FALLBACK_DATA_PER_BYTE_FEE, namespaceId, shortCode, value, rootAddress, replyTxid);
               let feeKVA = (fee + cost) / 100000000;
               this.setState({ showNSCreationModal: true, currentPage: 2, fee: feeKVA, key });
@@ -191,22 +186,22 @@ class ReplyKeyValue extends React.Component {
         {
           this.state.createTransactionErr ?
             <>
-              <Text style={[styles.modalText, { color: KevaColors.errColor, fontWeight: 'bold' }]}>{"Error"}</Text>
+              <Text style={[styles.modalText, {color: KevaColors.errColor, fontWeight: 'bold'}]}>{"Error"}</Text>
               <Text style={styles.modalErr}>{this.state.createTransactionErr}</Text>
               <KevaButton
                 type='secondary'
-                style={{ margin: 10, marginTop: 30 }}
+                style={{margin:10, marginTop: 30}}
                 caption={'Cancel'}
                 onPress={async () => {
-                  this.setState({ showKeyValueModal: false, createTransactionErr: null });
+                  this.setState({showSellNFTModal: false, createTransactionErr: null});
                 }}
               />
             </>
-            :
+          :
             <>
-              <Text style={[styles.modalText, { alignSelf: 'center', color: KevaColors.darkText }]}>{loc.namespaces.creating_tx}</Text>
+              <Text style={[styles.modalText, {alignSelf: 'center', color: KevaColors.darkText}]}>{loc.namespaces.creating_tx}</Text>
               <Text style={styles.waitText}>{loc.namespaces.please_wait}</Text>
-              <BlueLoading style={{ paddingTop: 30 }} />
+              <BlueLoading style={{paddingTop: 30}}/>
             </>
         }
       </View>
@@ -219,19 +214,20 @@ class ReplyKeyValue extends React.Component {
         </Text>
         <KevaButton
           type='secondary'
-          style={{ margin: 10, marginTop: 40 }}
+          style={{margin:10, marginTop: 40}}
           caption={'Confirm'}
           onPress={async () => {
-            this.setState({ currentPage: 3, isBroadcasting: true });
+            this.setState({currentPage: 2, isBroadcasting: true});
             try {
               await BlueElectrum.ping();
               await BlueElectrum.waitTillConnected();
               if (this.isBiometricUseCapableAndEnabled) {
                 if (!(await Biometric.unlockWithBiometrics())) {
-                  this.setState({ isBroadcasting: false });
+                  this.setState({isBroadcasting: false});
                   return;
                 }
               }
+
               let result = await BlueElectrum.broadcast(this.namespaceTx);
               if (result.code) {
                 // Error.
@@ -241,9 +237,9 @@ class ReplyKeyValue extends React.Component {
                 });
               }
               await BlueApp.saveToDisk();
-              this.setState({ isBroadcasting: false, showSkip: false });
+              this.setState({isBroadcasting: false, showSkip: false});
             } catch (err) {
-              this.setState({ isBroadcasting: false });
+              this.setState({isBroadcasting: false, broadcastErr: err.message});
               console.warn(err);
             }
           }}
@@ -256,20 +252,20 @@ class ReplyKeyValue extends React.Component {
       broadcastPage = (
         <View style={styles.modalNS}>
           <Text style={styles.modalText}>{"Broadcasting Transaction ..."}</Text>
-          <BlueLoading style={{ paddingTop: 30 }} />
+          <BlueLoading style={{paddingTop: 30}}/>
         </View>
       );
     } else if (this.state.broadcastErr) {
       broadcastPage = (
         <View style={styles.modalNS}>
-          <Text style={[styles.modalText, { color: KevaColors.errColor, fontWeight: 'bold' }]}>{"Error"}</Text>
+          <Text style={[styles.modalText, {color: KevaColors.errColor, fontWeight: 'bold'}]}>{"Error"}</Text>
           <Text style={styles.modalErr}>{this.state.broadcastErr}</Text>
           <KevaButton
             type='secondary'
-            style={{ margin: 10, marginTop: 30 }}
+            style={{margin:10, marginTop: 30}}
             caption={'Cancel'}
             onPress={async () => {
-              this.setState({ showKeyValueModal: false });
+              this.setState({showSellNFTModal: false});
             }}
           />
         </View>
@@ -277,51 +273,16 @@ class ReplyKeyValue extends React.Component {
     } else {
       broadcastPage = (
         <View style={styles.modalNS}>
-          <BlueBigCheckmark style={{ marginHorizontal: 50 }} />
+          <BlueBigCheckmark style={{marginHorizontal: 50}}/>
           <KevaButton
             type='secondary'
-            style={{ margin: 10, marginTop: 30 }}
+            style={{margin:10, marginTop: 30}}
             caption={'Done'}
             onPress={async () => {
               this.setState({
-                showKeyValueModal: false,
+                showSellNFTModal: false,
                 nsName: '',
               });
-              Toast.show(loc.general.reply_sent, {
-                position: Toast.positions.TOP,
-                backgroundColor: "#53DD6C",
-              });
-
-              // Update the previous screen.
-              const {key, value, namespaceId} = this.state;
-              const {shortCode, displayName} = namespaceList.namespaces[namespaceId];
-              const reply = {
-                key,
-                value,
-                height: 0,
-                sender: {
-                  shortCode,
-                  displayName,
-                }
-              }
-
-              if (type == 'keyvalue') {
-                let keyValue = (keyValueList.keyValues[origNamespaceId])[index];
-                keyValue.replies = keyValue.replies + 1;
-                dispatch(setKeyValue(origNamespaceId, index, keyValue));
-                if (updateReplies) {
-                  updateReplies(reply);
-                }
-              } else if (type == 'hashtag') {
-                let keyValue = hashtags[index];
-                keyValue.replies = keyValue.replies + 1;
-                if (updateHashtag) {
-                  updateHashtag(index, keyValue);
-                }
-                if (updateReplies) {
-                  updateReplies(reply);
-                }
-              }
               this.props.navigation.goBack();
             }}
           />
@@ -338,26 +299,46 @@ class ReplyKeyValue extends React.Component {
           stepComponents={[selectNamespacePage, createNSPage, confirmPage, broadcastPage]}
           onFinish={this.KeyValueCreationFinish}
           onNext={this.KeyValueCreationNext}
-          onCancel={this.KeyValueCreationCancel} />
+          onCancel={this.KeyValueCreationCancel}/>
       </View>
     );
   }
 
   render() {
-    let { navigation, dispatch } = this.props;
+    let {navigation, dispatch} = this.props;
+    let {namespaceInfo, desc} = this.state;
     return (
       <View style={styles.container}>
-        {this.getReplyKeyValueModal()}
-        <View style={styles.inputValue}>
-          <TextInput
-            multiline={true}
+        {this.getSellNFTModal()}
+        <View style={styles.inputKey}>
+          <FloatTextInput
             noBorder
-            autoCorrect={true}
-            value={this.state.value}
+            autoCorrect={false}
+            keyboardType='numeric'
+            value={this.state.price}
             underlineColorAndroid='rgba(0,0,0,0)'
-            style={{ fontSize: 15, flex: 1, textAlignVertical: 'top' }}
+            style={{fontSize:15}}
+            placeholder={'Asking Price (KVA)'}
             clearButtonMode="while-editing"
-            onChangeText={value => { this.setState({ value }) }}
+            onChangeTextValue={price => {this.setState({price})}}
+          />
+          {
+            <Text style={styles.iconBtn}>
+              {'KVA'}
+            </Text>
+          }
+        </View>
+        <View style={styles.inputValue}>
+          <FloatTextInput
+            noBorder
+            multiline={true}
+            autoCorrect={false}
+            value={desc}
+            underlineColorAndroid='rgba(0,0,0,0)'
+            style={{fontSize:15}}
+            placeholder={'Description of your NFT'}
+            clearButtonMode="while-editing"
+            onChangeTextValue={desc => {this.setState({desc})}}
           />
         </View>
       </View>
@@ -370,32 +351,34 @@ function mapStateToProps(state) {
   return {
     keyValueList: state.keyValueList,
     namespaceList: state.namespaceList,
-    hashtags: state.hashtags,
   }
 }
 
-export default ReplyKeyValueScreen = connect(mapStateToProps)(ReplyKeyValue);
+export default SellNFTScreen = connect(mapStateToProps)(SellNFT);
 
 var styles = StyleSheet.create({
   container: {
-    flex: 1,
+    flex:1,
     backgroundColor: KevaColors.background,
   },
   inputKey: {
-    height: 45,
+    height:46,
     marginTop: 10,
+    marginBottom: 10,
     borderWidth: THIN_BORDER,
     borderColor: KevaColors.cellBorder,
     backgroundColor: '#fff',
-    paddingHorizontal: 10
+    paddingHorizontal: 10,
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+    alignItems: 'center',
   },
   inputValue: {
-    height: 215,
-    marginTop: 10,
+    height:215,
     borderWidth: THIN_BORDER,
     borderColor: KevaColors.cellBorder,
     backgroundColor: '#fff',
-    paddingHorizontal: 10
+    paddingHorizontal: 10,
   },
   modalNS: {
     height: 300,
@@ -419,6 +402,16 @@ var styles = StyleSheet.create({
   modalErr: {
     fontSize: 16,
     marginTop: 20,
+  },
+  iconBtn: {
+    justifyContent: 'center',
+    marginRight: 15,
+  },
+  closePicture: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    zIndex: 100,
   },
   inputAndroid: {
     width: SCREEN_WIDTH*0.8,

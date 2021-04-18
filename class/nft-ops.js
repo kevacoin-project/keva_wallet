@@ -83,8 +83,10 @@ export function spendLockPaymentPartial(redeemScript, txidLockedFund, voutLocked
   const bscript = bitcoin.script;
   const bcrypto = bitcoin.crypto;
 
+  /*
   const witnessHash = bcrypto.sha256(witnessScript)
   const redeemScript = Buffer.concat([Buffer.from('220020', 'hex'), witnessHash]);
+  */
 
   let txb = new bitcoin.Transaction();
   // Sequence cannot be 0xffffffff because it disables time lock checking.
