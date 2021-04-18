@@ -37,6 +37,7 @@ class SellNFT extends React.Component {
       saving: false,
       namespaceId: '',
       namespaceInfo: {},
+      sellerNamespaceId: '',
       showSellNFTModal: false,
       valueOnly: false,
       createTransactionErr: null,
@@ -129,14 +130,14 @@ class SellNFT extends React.Component {
       <View style={styles.modalNS}>
         <Text style={[styles.modalText, {textAlign: 'center', marginBottom: 20, color: KevaColors.darkText}]}>{"Choose a namespace"}</Text>
         <RNPickerSelect
-          value={this.state.namespaceId}
+          value={this.state.sellerNamespaceId}
           placeholder={{}}
           useNativeAndroidPickerStyle={false}
           style={{
             inputAndroid: styles.inputAndroid,
             inputIOS: styles.inputIOS,
           }}
-          onValueChange={(namespaceId) => this.setState({namespaceId})}
+          onValueChange={(sellerNamespaceId) => this.setState({sellerNamespaceId})}
           items={items}
           Icon={() => <IonIcon name="ios-arrow-down" size={24} color={KevaColors.actionText} style={{ padding: 12 }} />}
         />
@@ -146,32 +147,46 @@ class SellNFT extends React.Component {
           caption={'Next'}
           onPress={async () => {
             try {
-              const {namespaceId, value} = this.state;
-              const shortCode = namespaceList.namespaces[namespaceId].shortCode;
+              const {namespaceId, desc, price, sellerNamespaceId} = this.state;
+              const shortCode = namespaceList.namespaces[sellerNamespaceId].shortCode;
               if (!shortCode) {
                 toastError(loc.namespaces.namespace_unconfirmed);
                 throw new Error('Namespace not confirmed yet');
               }
-              const walletId = namespaceList.namespaces[namespaceId].walletId;
+
+              // Seller wallet
+              const sellerWalletId = namespaceList.namespaces[sellerNamespaceId].walletId;
               const wallets = BlueApp.getWallets();
-              const wallet = wallets.find(w => w.getID() == walletId);
-              if (!wallet) {
+              const sellerWallet = wallets.find(w => w.getID() == sellerWalletId);
+              if (!sellerWallet) {
                 throw new Error('Wallet not found');
               }
               // Make sure it is not single address wallet.
-              if (wallet.type != HDSegwitP2SHWallet.type) {
+              if (sellerWallet.type != HDSegwitP2SHWallet.type) {
                 return alert(loc.namespaces.multiaddress_wallet);
               }
+
+              // NFT wallet
+              const nftWalletId = namespaceList.namespaces[namespaceId].walletId;
+              const nftWallet = wallets.find(w => w.getID() == nftWalletId);
+              if (!nftWallet) {
+                throw new Error('Wallet not found');
+              }
+              // Make sure it is not single address wallet.
+              if (nftWallet.type != HDSegwitP2SHWallet.type) {
+                return alert(loc.namespaces.multiaddress_wallet);
+              }
+
               this.setState({ showNSCreationModal: true, currentPage: 1 });
               await BlueElectrum.ping();
 
               // TODO: create two transactions:
               // 1. From the selected namesapce, a tx with key: 0004 (sell) + namespaceid to sell
               // 2. In the namespace to sell, a tx with key key: 0005 (confirm sell) + above txid.
-              const { tx, fee, cost, key } = await replyKeyValue(wallet, FALLBACK_DATA_PER_BYTE_FEE, namespaceId, shortCode, value, rootAddress, replyTxid);
-              let feeKVA = (fee + cost) / 100000000;
-              this.setState({ showNSCreationModal: true, currentPage: 2, fee: feeKVA, key });
-              this.namespaceTx = tx;
+              const { txSeller, feeSeller} = await createSellNFT(sellerWallet, FALLBACK_DATA_PER_BYTE_FEE, namespaceId, desc, price);
+              const { txConfirm, feeConfirm} = await confirmSellNFT(nftWallet, FALLBACK_DATA_PER_BYTE_FEE, sellerNamespaceId, txSeller);
+              let feeKVA = (feeSeller + feeConfirm) / 100000000;
+              this.setState({ showNSCreationModal: true, currentPage: 2, fee: feeKVA });
             } catch (err) {
               console.warn(err);
               this.setState({createTransactionErr: loc.namespaces.namespace_creation_err + ' [' + err.message + ']'});
