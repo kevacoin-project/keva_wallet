@@ -554,10 +554,7 @@ function createRewardKey(txId) {
 
 // prefix 0x0004
 export function createBidKey(txId) {
-  // FIXME
-  //return Buffer.concat([Buffer.from('0004', 'hex'), Buffer.from(txId, 'hex')]);
-  // For testing purpose, use it as reply - FIXME!!!!
-  return Buffer.concat([Buffer.from('0001', 'hex'), Buffer.from(txId, 'hex')]);
+  return Buffer.concat([Buffer.from('0004', 'hex'), Buffer.from(txId, 'hex')]);
 }
 
 const MIN_REWARD = 10000000;

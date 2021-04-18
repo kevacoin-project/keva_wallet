@@ -37,10 +37,11 @@ function utcNow() {
     return Math.floor(Date.now() / 1000);
 }
 
-// m, n: hours.
-function getNFTBidScript(myAddressPubKeyHash160, paymentAddressPubKeyHash160, n, m) {
-    const lockTime = bip65.encode({ utc: utcNow() + 3600 * n });
-    const extracLockTime = bip65.encode({ utc: utcNow() + 3600 * (m + n) });
+// n: future block height
+// m: additional m blocks.
+function getLockFundScript(myAddressPubKeyHash160, paymentAddressPubKeyHash160, n, m) {
+    const lockTime = bip65.encode({ blocks: n });
+    const extracLockTime = bip65.encode({ blocks: (m + n) });
     let bscript = bitcoin.script;
     let timelockRedeemScript = bscript.compile([
         bscript.OPS.OP_IF,
@@ -51,7 +52,7 @@ function getNFTBidScript(myAddressPubKeyHash160, paymentAddressPubKeyHash160, n,
             bscript.OPS.OP_HASH160,
             myAddressPubKeyHash160,
             bscript.OPS.OP_EQUALVERIFY,
-            bscript.OPS.OP_CHECKSIGVERIFY,
+            bscript.OPS.OP_CHECKSIG,
         bscript.OPS.OP_ELSE,
             bscript.number.encode(lockTime),
             bscript.OPS.OP_CHECKLOCKTIMEVERIFY,
@@ -67,19 +68,64 @@ function getNFTBidScript(myAddressPubKeyHash160, paymentAddressPubKeyHash160, n,
             bscript.OPS.OP_HASH160,
             paymentAddressPubKeyHash160,
             bscript.OPS.OP_EQUALVERIFY,
-            bscript.OPS.OP_CHECKSIGVERIFY,
+            bscript.OPS.OP_CHECKSIG,
         bscript.OPS.OP_ENDIF,
     ]);
     return timelockRedeemScript;
 }
 
+// Only bidder (me) sign it.
+// keyPiar: bidder's key pair
+// myTargetAddress: the address NFT namespace should be transferred to.
+// blockHeight: the tx locktime in block height.
+export function spendLockPaymentPartial(redeemScript, txidLockedFund, voutLockedFund, nsNFT, nsNFTTxId, nsNFTTxIdVout, myTargetAddress, keyPair, paymentAddress, paymentAmount, fee, blockHeight) {
+
+  const bscript = bitcoin.script;
+  const bcrypto = bitcoin.crypto;
+
+  const witnessHash = bcrypto.sha256(witnessScript)
+  const redeemScript = Buffer.concat([Buffer.from('220020', 'hex'), witnessHash]);
+
+  let txb = new bitcoin.Transaction();
+  // Sequence cannot be 0xffffffff because it disables time lock checking.
+  // This input is the locked fund.
+  txb.addInput(Buffer.from(txidLockedFund, "hex").reverse(), voutLockedFund, 0xfffffffe, redeemScript);
+
+  // This input is the NFT namespace. It is standard P2SH-P2WPK, no redeem script.
+  txb.addInput(Buffer.from(nsNFTTxId, "hex").reverse(), nsNFTTxIdVout, 0xfffffffe);
+
+  const lockTime = bip65.encode({ blocks: blockHeight});
+  txb.locktime = lockTime;
+
+  // Output to NFT's payment address.
+  const scriptPubKey = bitcoin.address.toOutputScript(paymentAddress);
+  const value = paymentAmount - fee;
+  txb.addOutput(scriptPubKey, value);
+
+  // Output to my NFT target address (transferring to me).
+  const scriptPubKeyNS = getKeyValueUpdateScript(nsNFT, myTargetAddress, '__NFT_TRADE__', '');
+  txb.addOutput(scriptPubKeyNS, DEFAULT_NS_VALUE);
+
+  const hash = txb.hashForWitnessV0(0, witnessScript, paymentAmount, bitcoin.Transaction.SIGHASH_ALL);
+  // The second input, index 1, has no witness yet. To be done by the nsNFT owner.
+
+  const sig1 = bscript.signature.encode(keyPair.sign(hash), bitcoin.Transaction.SIGHASH_ALL);
+  // IMPORTANT: To be signed by the current NFT owner, i.e. seller.
+  // This order is strange. All items except witness script must be reversed.
+  let witness = [Buffer.from("", "hex"), keyPair.publicKey, sig1, /* sellerPubKey, seller Sig*/].reverse();
+
+  witness.push(witnessScript);
+  txb.ins[0].witness = witness;
+  return txb;
+}
 
 // nsNFTId: namespaceId of the NFT namespace to bid for.
 // paymentAddress: the address to send the payment.
-// n: future hours
-// m: future hours in addition to n.
+// n: future block height
+// m: future block height in addition to n.
+// myTargetAddress: transfer NFT to my target address.
 export async function createNFTBid(wallet, requestedSatPerByte, namespaceId,
-        amount, nsNFTId, offerTxId, paymentAddress, paymentAddressPubKeyHash160, n, m)
+        amount, nsNFTId, offerTxId, paymentAddress, paymentAddressPubKeyHash160, myTargetAddress, n, m)
 {
     await wallet.fetchBalance();
     await wallet.fetchTransactions();
@@ -87,26 +133,18 @@ export async function createNFTBid(wallet, requestedSatPerByte, namespaceId,
     if (!nsUtxo) {
       throw new Error(loc.namespaces.update_key_err);
     }
-    console.log('ZZZ nsUXto>>>>>>>>>>>>>>>>>>>')
-    console.log(nsUtxo)
 
     const key = createBidKey(offerTxId);
     // IMPORTANT: re-use the namespace address, security/privacy trade-off.
     const namespaceAddress = nsUtxo.address;
-    const value = "TBD - the partially signed bid tx again";
-    const nsScript = getKeyValueUpdateScript(namespaceId, namespaceAddress, key, value);
 
     let bcrypto = bitcoin.crypto;
-    const namespaceAddressPubKeyHash160 = bcrypto.hash160(bitcoin.ECPair.fromWIF(nsUtxo.wif).publicKey);
-    const lockRedeemScript = getNFTBidScript(namespaceAddressPubKeyHash160, paymentAddressPubKeyHash160, n, m);
-    console.log('ZZZ lockRedeemScript -----')
-    console.log(lockRedeemScript.toString('hex'))
 
-    /*
-    const payment = bitcoin.payments.p2sh({
-        redeem: { output: lockRedeemScript }
-    });
-    */
+    // Need my namespace key to unlock the locked fund.
+    const myNSKeyPair = bitcoin.ECPair.fromWIF(nsUtxo.wif);
+    const namespaceAddressPubKeyHash160 = bcrypto.hash160(myNSKeyPair.publicKey);
+    const lockRedeemScript = getLockFundScript(namespaceAddressPubKeyHash160, paymentAddressPubKeyHash160, n, m);
+
     const witnessHash = bcrypto.sha256(lockRedeemScript)
     const redeemScript = Buffer.concat([Buffer.from('0020', 'hex'), witnessHash]);
 
@@ -114,11 +152,17 @@ export async function createNFTBid(wallet, requestedSatPerByte, namespaceId,
       redeem: { output: redeemScript }
     });
 
-    const lockRedeemScriptAddress = payment.address;
-    console.log('ZZZ lockRedeem payment:----- ')
-    console.log(JSON.stringify(payment))
-    console.log('ZZZ lockRedeemScriptAddress: ' + lockRedeemScriptAddress)
+    // txid: the lockfund tx id: problem: we don't know it yet!!!
+    const partialTx = spendLockPaymentPartial(lockRedeemScript, txid, vout, nsNFTId, nsNFTTxId, nsNFTTxIdVout, myTargetAddress, myNSKeyPair, paymentAddress, amount, fee, n+1);
+    // Make it work first, optimization later, base64 encode the partial Tx.
+    const txInfo = {
+      v: 0, // version.
+      tx: partialTx.toString('base64'),
+    };
+    const value = JSON.stringify(txInfo);
+    const nsScript = getKeyValueUpdateScript(namespaceId, namespaceAddress, key, value);
 
+    const lockRedeemScriptAddress = payment.address;
     // Namespace needs at least 0.01 KVA.
     const namespaceValue = 1000000;
     let targets = [{
@@ -203,4 +247,41 @@ export async function createNFTBid(wallet, requestedSatPerByte, namespaceId,
     psbt.finalizeAllInputs();
     let hexTx = psbt.extractTransaction(true).toHex();
     return {tx: hexTx, fee, cost: amount, key};
+}
+
+
+export function completePaymentSigning(txb, sellerKeyPair, nsNFTKeyPair) {
+  const bscript = bitcoin.script;
+  const partialTx = bitcoin.Transaction.fromBuffer(txb);
+  const ins = partialTx.ins;
+  if (!ins || ins.length != 2) {
+      throw Error("Incorrect input length");
+  }
+
+  const paymentIn = ins.find((value, index, txin) => txin[index].witness.length > 0);
+  const nsNFTIn = ins.find((value, index, txin) => txin[index].witness.length == 0);
+
+  // Sign the payment.
+  const witnessScript = paymentIn.witness[paymentIn.witness.length - 1];
+  //TODO: where to get the paymentAmount?
+  const hash = partialTx.hashForWitnessV0(0, witnessScript, paymentAmount, bitcoin.Transaction.SIGHASH_ALL);
+
+  const sig2 = bscript.signature.encode(sellerKeyPair.sign(hash), bitcoin.Transaction.SIGHASH_ALL);
+  paymentIn.witness.unshift(sellerKeyPair.publicKey);
+  paymentIn.witness.unshift(sig2);
+
+  // Sign the nsNFT transfer
+  nsNFTIn.witness.unshift(nsNFTKeyPair.publicKey);
+  // nsNFT is the second input.
+  // TODO: is this the right way to the default witnessScript?
+  const p2wpkh = bitcoin.payments.p2wpkh({ pubkey: nsNFTKeyPair.publicKey });
+  const nsWitnessScript = p2wpkh.output;
+
+  // TODO: the amount is not neccessarily DEFAULT_NS_VALUE.
+  const nftHash = partialTx.hashForWitnessV0(1, nsWitnessScript, DEFAULT_NS_VALUE, bitcoin.Transaction.SIGHASH_ALL);
+
+  const sigNFT = bscript.signature.encode(nsNFTKeyPair.sign(nftHash), bitcoin.Transaction.SIGHASH_ALL);
+  nsNFTIn.witness.unshift(sigNFT);
+  // Now it is fully signed.
+  return partialTx;
 }
