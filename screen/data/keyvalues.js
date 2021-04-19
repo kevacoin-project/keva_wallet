@@ -36,7 +36,7 @@ import {
         getNamespaceScriptHash, parseSpecialKey,
         deleteKeyValue, getSpecialKeyText,
         getNamespaceInfoFromShortCode, decodeBase64,
-        findTxIndex,
+        findTxIndex, getNamespaceInfoFromTx
         } from '../../class/keva-ops';
 import Toast from 'react-native-root-toast';
 import StepModal from "../../common/StepModalWizard";
@@ -318,10 +318,29 @@ class KeyValues extends React.Component {
     }
 
     const keyValues = this.decodeKeyValueList(history.keyvalues);
+
     // Check if it is a favorite.
+    //TODO: check for sale info.
     for (let kv of keyValues) {
       const reaction = reactions[kv.tx_hash];
       kv.favorite = reaction && !!reaction['like'];
+      if ((typeof kv.key) !== 'string') {
+        // TODO: if it is the first one, do it at the beginning
+        // change UI.
+        if (kv.key[0] == 0 && kv.key[1] == 5) {
+          // Confirm NFT for sale. The rest must be a tx.
+          const tx = kv.key.slice(2).toString('hex');
+          const nsInfo = await getNamespaceInfoFromTx(BlueElectrum, tx);
+          const txInfo = await BlueElectrum.blockchainKeva_getTransactionsInfo([tx], true);
+          console.log(txInfo[0])
+          const value = JSON.parse(decodeBase64(txInfo[0].kv.value));
+          console.log(value)
+          kv.key = "For Sale";
+          //kv.value = "By " + nsInfo.displayName + '@' + nsInfo.shortCode + " \n";
+          kv.value = value.p + " KVA" + " \n";
+          kv.value += value.d;
+        }
+      }
     }
 
     if (history.min_tx_num < this.min_tx_num) {

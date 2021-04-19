@@ -21,7 +21,7 @@ import { FALLBACK_DATA_PER_BYTE_FEE } from '../../models/networkTransactionFees'
 import { HDSegwitP2SHWallet,  } from '../../class';
 
 import { connect } from 'react-redux'
-import { updateKeyValue } from '../../class/keva-ops';
+import { createSellNFT, confirmSellNFT } from '../../class/nft-ops';
 import FloatTextInput from '../../common/FloatTextInput';
 import StepModal from "../../common/StepModalWizard";
 import Biometric from '../../class/biometrics';
@@ -76,14 +76,16 @@ class SellNFT extends React.Component {
 
   onSave = async () => {
     const {namespaceId, walletId} = this.props.navigation.state.params;
-    let {price, desc, namespaceInfo} = this.state;
+    let {price, desc} = this.state;
+    const { namespaceList } = this.props;
+
     if (!(price > 0)) {
       toastError('Asking price must be set');
       return;
     }
-    //TODO: FIXME
-    if (desc.length <= 1) {
-      toastError('At least 20 characters for description');
+
+    if (desc.length == 0) {
+      toastError('Missing description');
       return;
     }
     const wallets = BlueApp.getWallets();
@@ -93,6 +95,10 @@ class SellNFT extends React.Component {
       return;
     }
 
+    const namespaces = namespaceList.namespaces;
+    const otherNS = Object.keys(namespaces).filter(ns =>  namespaces[ns].id != namespaceId);
+    const defaultSellerNamespaceId = namespaces[otherNS[0]].id;
+
     this.setState({
       showSellNFTModal: true,
       currentPage: 0,
@@ -101,6 +107,7 @@ class SellNFT extends React.Component {
       isBroadcasting: false,
       fee: 0,
       createTransactionErr: null,
+      sellerNamespaceId: this.state.sellerNamespaceId || defaultSellerNamespaceId,
     });
   }
 
@@ -119,13 +126,20 @@ class SellNFT extends React.Component {
   }
 
   getSellNFTModal = () => {
-    const { namespaceList, keyValueList, dispatch } = this.props;
+    const { namespaceList } = this.props;
+    const {namespaceId} = this.state;
     if (!this.state.showSellNFTModal) {
       return null;
     }
 
     const namespaces = namespaceList.namespaces;
-    const items = Object.keys(namespaces).map(ns => ({label: namespaces[ns].displayName, value: namespaces[ns].id}));
+    // The seller namespace must be different from the NFT.
+    const otherNS = Object.keys(namespaces).filter(ns =>  namespaces[ns].id != namespaceId);
+    if (otherNS.length == 0) {
+      return toastError("Create another profile as seller.");
+    }
+
+    const items = otherNS.map(ns => ({label: namespaces[ns].displayName, value: namespaces[ns].id}));
     let selectNamespacePage = (
       <View style={styles.modalNS}>
         <Text style={[styles.modalText, {textAlign: 'center', marginBottom: 20, color: KevaColors.darkText}]}>{"Choose a namespace"}</Text>
@@ -183,9 +197,11 @@ class SellNFT extends React.Component {
               // TODO: create two transactions:
               // 1. From the selected namesapce, a tx with key: 0004 (sell) + namespaceid to sell
               // 2. In the namespace to sell, a tx with key key: 0005 (confirm sell) + above txid.
-              const { txSeller, feeSeller} = await createSellNFT(sellerWallet, FALLBACK_DATA_PER_BYTE_FEE, namespaceId, desc, price);
-              const { txConfirm, feeConfirm} = await confirmSellNFT(nftWallet, FALLBACK_DATA_PER_BYTE_FEE, sellerNamespaceId, txSeller);
+              const {txSeller, txIdSeller, feeSeller} = await createSellNFT(sellerWallet, FALLBACK_DATA_PER_BYTE_FEE, sellerNamespaceId, namespaceId, desc, price);
+              const {txConfirm, feeConfirm} = await confirmSellNFT(nftWallet, FALLBACK_DATA_PER_BYTE_FEE, namespaceId, txIdSeller);
               let feeKVA = (feeSeller + feeConfirm) / 100000000;
+              this.txSeller = txSeller;
+              this.txConfirm = txConfirm;
               this.setState({ showNSCreationModal: true, currentPage: 2, fee: feeKVA });
             } catch (err) {
               console.warn(err);
@@ -232,7 +248,7 @@ class SellNFT extends React.Component {
           style={{margin:10, marginTop: 40}}
           caption={'Confirm'}
           onPress={async () => {
-            this.setState({currentPage: 2, isBroadcasting: true});
+            this.setState({currentPage: 3, isBroadcasting: true});
             try {
               await BlueElectrum.ping();
               await BlueElectrum.waitTillConnected();
@@ -243,7 +259,8 @@ class SellNFT extends React.Component {
                 }
               }
 
-              let result = await BlueElectrum.broadcast(this.namespaceTx);
+              // Broadcast both txSeller and txConfirm
+              let result = await BlueElectrum.broadcast(this.txSeller);
               if (result.code) {
                 // Error.
                 return this.setState({
@@ -251,6 +268,15 @@ class SellNFT extends React.Component {
                   broadcastErr: result.message,
                 });
               }
+              result = await BlueElectrum.broadcast(this.txConfirm);
+              if (result.code) {
+                // Error.
+                return this.setState({
+                  isBroadcasting: false,
+                  broadcastErr: result.message,
+                });
+              }
+
               await BlueApp.saveToDisk();
               this.setState({isBroadcasting: false, showSkip: false});
             } catch (err) {
@@ -364,7 +390,6 @@ class SellNFT extends React.Component {
 
 function mapStateToProps(state) {
   return {
-    keyValueList: state.keyValueList,
     namespaceList: state.namespaceList,
   }
 }

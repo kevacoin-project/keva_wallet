@@ -552,11 +552,6 @@ function createRewardKey(txId) {
   return Buffer.concat([Buffer.from('0003', 'hex'), Buffer.from(txId, 'hex')]);
 }
 
-// prefix 0x0004
-export function createBidKey(txId) {
-  return Buffer.concat([Buffer.from('0004', 'hex'), Buffer.from(txId, 'hex')]);
-}
-
 const MIN_REWARD = 10000000;
 
 // Send a reward to a post(key/value pair).
@@ -1013,9 +1008,7 @@ export function parseSpecialKey(key) {
     return {keyType: 'profile'};
   }
 
-  // 2 bytes prefix, plus 32 bytes txId, is the minimal length.
-  // 4 + 64 = 68.
-  if (!keyHex.startsWith('00') || keyHex.length < 68) {
+  if (!keyHex.startsWith('00')) {
     return false;
   }
 
@@ -1026,6 +1019,10 @@ export function parseSpecialKey(key) {
     return {partialTxId: txId, keyType: 'share'};
   } else if (keyHex.startsWith('0003')) {
     return {partialTxId: txId, keyType: 'like'};
+  } else if (keyHex.startsWith('0004')) {
+    return {partialTxId: txId, keyType: 'sell'};
+  } else if (keyHex.startsWith('0005')) {
+    return {partialTxId: txId, keyType: 'confirm_sell'};
   } else {
     return false;
   }

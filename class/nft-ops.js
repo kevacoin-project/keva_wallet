@@ -287,3 +287,222 @@ export function completePaymentSigning(txb, sellerKeyPair, nsNFTKeyPair) {
   // Now it is fully signed.
   return partialTx;
 }
+
+// prefix 0x0004
+export function createSellKey(namespaceId) {
+  const nsId = base58check.decode(namespaceId);
+  return Buffer.concat([Buffer.from('0004', 'hex'), Buffer.from(nsId, 'hex')]);
+}
+
+// From the selected namesapce, a tx with key: 0004 (sell) + namespaceid to sell
+export async function createSellNFT(sellerWallet, requestedSatPerByte, sellerNamespaceId, namespaceId, desc, price) {
+  await sellerWallet.fetchBalance();
+  await sellerWallet.fetchTransactions();
+  let nsUtxo = await getNamespaceUtxo(sellerWallet, sellerNamespaceId);
+  if (!nsUtxo) {
+    throw new Error(loc.namespaces.update_key_err);
+  }
+
+  // IMPORTANT: we will use the same namespace address. Ideally, for
+  // security/privacy reason, it is better to use a new address. But that
+  // would create many addresses and slow down the update.
+  const currentAddress = nsUtxo.address;
+  const namespaceAddress = currentAddress;
+  const key = createSellKey(namespaceId);
+  const value = JSON.stringify({
+    d: desc,
+    p: price,
+  });
+  const nsScript = getKeyValueUpdateScript(sellerNamespaceId, namespaceAddress, key, value);
+
+  // Namespace needs at least 0.01 KVA.
+  const namespaceValue = 1000000;
+  let targets = [{
+    address: namespaceAddress, value: namespaceValue,
+    script: nsScript
+  }];
+
+  const transactions = sellerWallet.getTransactions();
+  let utxos = sellerWallet.getUtxo();
+  let nonNamespaceUtxos = await getNonNamespaceUxtos(sellerWallet, transactions, utxos);
+  // Move the nsUtxo to the first one, so that it will always be used.
+  nonNamespaceUtxos.unshift(nsUtxo);
+  let { inputs, outputs, fee } = coinSelectAccumulative(nonNamespaceUtxos, targets, requestedSatPerByte);
+
+  // inputs and outputs will be undefined if no solution was found
+  if (!inputs || !outputs) {
+    throw new Error('Not enough balance. Try sending smaller amount');
+  }
+
+  const psbt = new bitcoin.Psbt();
+  psbt.setVersion(0x7100); // Kevacoin transaction.
+  let keypairs = [];
+  for (let i = 0; i < inputs.length; i++) {
+    let input = inputs[i];
+    const pubkey = sellerWallet._getPubkeyByAddress(input.address);
+    if (!pubkey) {
+      throw new Error('Failed to get pubKey');
+    }
+    const p2wpkh = bitcoin.payments.p2wpkh({ pubkey });
+    const p2sh = bitcoin.payments.p2sh({ redeem: p2wpkh });
+
+    psbt.addInput({
+      hash: input.txId,
+      index: input.vout,
+      witnessUtxo: {
+        script: p2sh.output,
+        value: input.value,
+      },
+      redeemScript: p2wpkh.output,
+    });
+
+    let keyPair = bitcoin.ECPair.fromWIF(input.wif);
+    keypairs.push(keyPair);
+  }
+
+  for (let i = 0; i < outputs.length; i++) {
+    let output = outputs[i];
+    if (!output.address) {
+      // Change address.
+      // IMPORTANT: we will use the same namespace address. See the
+      // previous IMPORANT comment.
+      output.address = currentAddress;
+    }
+
+    if (i == 0) {
+      // The namespace creation script.
+      if (output.value != 1000000) {
+        throw new Error('Key update script has incorrect value.');
+      }
+      const nsScript = getKeyValueUpdateScript(sellerNamespaceId, namespaceAddress, key, value);
+      psbt.addOutput({
+        script: nsScript,
+        value: output.value,
+      });
+    } else {
+      psbt.addOutput({
+        address: output.address,
+        value: output.value,
+      });
+    }
+  }
+
+  for (let i = 0; i < keypairs.length; i++) {
+    psbt.signInput(i, keypairs[i]);
+    if (!psbt.validateSignaturesOfInput(i)) {
+      throw new Error('Invalid signature for input #' + i);
+    }
+  }
+
+  psbt.finalizeAllInputs();
+  const hexTx = psbt.extractTransaction(true).toHex();
+  const txId = psbt.extractTransaction(true).getId();
+  return {txSeller: hexTx, txIdSeller: txId, feeSeller: fee};
+}
+
+// prefix 0x0005
+export function createConfirmKey(txId) {
+  return Buffer.concat([Buffer.from('0005', 'hex'), Buffer.from(txId, 'hex')]);
+}
+
+// namespaceId: namespaceId of the NFT.
+export async function confirmSellNFT(nftWallet, requestedSatPerByte, namespaceId, txSeller) {
+  await nftWallet.fetchBalance();
+  await nftWallet.fetchTransactions();
+  let nsUtxo = await getNamespaceUtxo(nftWallet, namespaceId);
+  if (!nsUtxo) {
+    throw new Error(loc.namespaces.update_key_err);
+  }
+
+  // IMPORTANT: we will use the same namespace address. Ideally, for
+  // security/privacy reason, it is better to use a new address. But that
+  // would create many addresses and slow down the update.
+  const currentAddress = nsUtxo.address;
+  const namespaceAddress = currentAddress;
+  const key = createConfirmKey(txSeller);
+  const value = '';
+  const nsScript = getKeyValueUpdateScript(namespaceId, namespaceAddress, key, value);
+
+  // Namespace needs at least 0.01 KVA.
+  const namespaceValue = 1000000;
+  let targets = [{
+    address: namespaceAddress, value: namespaceValue,
+    script: nsScript
+  }];
+
+  const transactions = nftWallet.getTransactions();
+  let utxos = nftWallet.getUtxo();
+  let nonNamespaceUtxos = await getNonNamespaceUxtos(nftWallet, transactions, utxos);
+  // Move the nsUtxo to the first one, so that it will always be used.
+  nonNamespaceUtxos.unshift(nsUtxo);
+  let { inputs, outputs, fee } = coinSelectAccumulative(nonNamespaceUtxos, targets, requestedSatPerByte);
+
+  // inputs and outputs will be undefined if no solution was found
+  if (!inputs || !outputs) {
+    throw new Error('Not enough balance. Try sending smaller amount');
+  }
+
+  const psbt = new bitcoin.Psbt();
+  psbt.setVersion(0x7100); // Kevacoin transaction.
+  let keypairs = [];
+  for (let i = 0; i < inputs.length; i++) {
+    let input = inputs[i];
+    const pubkey = nftWallet._getPubkeyByAddress(input.address);
+    if (!pubkey) {
+      throw new Error('Failed to get pubKey');
+    }
+    const p2wpkh = bitcoin.payments.p2wpkh({ pubkey });
+    const p2sh = bitcoin.payments.p2sh({ redeem: p2wpkh });
+
+    psbt.addInput({
+      hash: input.txId,
+      index: input.vout,
+      witnessUtxo: {
+        script: p2sh.output,
+        value: input.value,
+      },
+      redeemScript: p2wpkh.output,
+    });
+
+    let keyPair = bitcoin.ECPair.fromWIF(input.wif);
+    keypairs.push(keyPair);
+  }
+
+  for (let i = 0; i < outputs.length; i++) {
+    let output = outputs[i];
+    if (!output.address) {
+      // Change address.
+      // IMPORTANT: we will use the same namespace address. See the
+      // previous IMPORANT comment.
+      output.address = currentAddress;
+    }
+
+    if (i == 0) {
+      // The namespace creation script.
+      if (output.value != 1000000) {
+        throw new Error('Key update script has incorrect value.');
+      }
+      const nsScript = getKeyValueUpdateScript(namespaceId, namespaceAddress, key, value);
+      psbt.addOutput({
+        script: nsScript,
+        value: output.value,
+      });
+    } else {
+      psbt.addOutput({
+        address: output.address,
+        value: output.value,
+      });
+    }
+  }
+
+  for (let i = 0; i < keypairs.length; i++) {
+    psbt.signInput(i, keypairs[i]);
+    if (!psbt.validateSignaturesOfInput(i)) {
+      throw new Error('Invalid signature for input #' + i);
+    }
+  }
+
+  psbt.finalizeAllInputs();
+  let hexTx = psbt.extractTransaction(true).toHex();
+  return {txConfirm: hexTx, feeConfirm: fee};
+}
