@@ -120,7 +120,7 @@ class Item extends React.Component {
     if (displayKey.startsWith('__WALLET_TRANSFER__')) {
       displayKey = loc.namespaces.ns_transfer_explain;
     }
-    const canEdit = !isOther && item.type !== 'REG' && keyType != 'profile';
+    const canEdit = !isOther && item.type !== 'REG' && keyType != 'profile' && keyType != 'confirm_sell';
 
     return (
       <View style={styles.card}>
@@ -208,6 +208,7 @@ class KeyValues extends React.Component {
       isRefreshing: false,
       totalToFetch: 0,
       fetched: 0,
+      forSale: false,
     };
     this.onEndReachedCalledDuringMomentum = true;
     this.min_tx_num = -1;
@@ -319,26 +320,23 @@ class KeyValues extends React.Component {
 
     const keyValues = this.decodeKeyValueList(history.keyvalues);
 
-    // Check if it is a favorite.
-    //TODO: check for sale info.
-    for (let kv of keyValues) {
+    // Check if it is a favorite, and if it is on sale.
+    for (let [index, kv] of keyValues.entries()) {
       const reaction = reactions[kv.tx_hash];
       kv.favorite = reaction && !!reaction['like'];
-      if ((typeof kv.key) !== 'string') {
-        // TODO: if it is the first one, do it at the beginning
-        // change UI.
-        if (kv.key[0] == 0 && kv.key[1] == 5) {
-          // Confirm NFT for sale. The rest must be a tx.
-          const tx = kv.key.slice(2).toString('hex');
-          const nsInfo = await getNamespaceInfoFromTx(BlueElectrum, tx);
-          const txInfo = await BlueElectrum.blockchainKeva_getTransactionsInfo([tx], true);
-          console.log(txInfo[0])
-          const value = JSON.parse(decodeBase64(txInfo[0].kv.value));
-          console.log(value)
-          kv.key = "For Sale";
-          //kv.value = "By " + nsInfo.displayName + '@' + nsInfo.shortCode + " \n";
-          kv.value = value.p + " KVA" + " \n";
-          kv.value += value.d;
+      if ((typeof kv.key) == 'string') {
+        continue;
+      }
+
+      if (kv.key[0] == 0 && kv.key[1] == 5) {
+        // Confirm NFT for sale. The rest must be a tx.
+        const tx = kv.key.slice(2).toString('hex');
+        const txInfo = await BlueElectrum.blockchainKeva_getTransactionsInfo([tx], true);
+        const value = JSON.parse(decodeBase64(txInfo[0].kv.value));
+        kv.value = value.p + " KVA" + " \n";
+        kv.value += value.d;
+        if (index == 0) {
+          this.setState({forSale: true});
         }
       }
     }
@@ -393,7 +391,17 @@ class KeyValues extends React.Component {
   async componentDidMount() {
     // Check the version of redux store KeyValue list version.
     // If not matched, nuke it and start over again.
-    let {keyValueList, dispatch} = this.props;
+    let {keyValueList, dispatch, navigation} = this.props;
+    const {namespaceId} = navigation.state.params;
+    const keyValues = keyValueList.keyValues[namespaceId] || [];
+    if (keyValues.length > 0) {
+      const kv = keyValues[0];
+      // 0x0005 is for sale.
+      if (kv.key[0] == 0 && kv.key[1] == 5) {
+        this.setState({forSale: true});
+      }
+    }
+
     if (keyValueList.version != CURRENT_KEYVALUE_LIST_VERSION) {
       // Older version data, remove all of them.
       dispatch(setKeyValueList());
@@ -821,13 +829,24 @@ class KeyValues extends React.Component {
                     titleStyle={{fontSize: 14, color: KevaColors.actionText}}
                     onPress={()=>{this.onEditProfile(namespaceId, namespaceInfo[namespaceId])}}
                   />
-                  <Button
-                    type='solid'
-                    buttonStyle={{marginLeft: 10, borderRadius: 30, height: 28, width: 100, padding: 0, borderColor: KevaColors.actionText, backgroundColor: KevaColors.actionText}}
-                    title={'Sell as NFT'}
-                    titleStyle={{fontSize: 14, color: '#fff'}}
-                    onPress={()=>{this.onSellNFT(namespaceId, namespaceInfo[namespaceId])}}
-                  />
+                  {
+                    this.state.forSale ?
+                    <Button
+                      type='solid'
+                      buttonStyle={{marginLeft: 10, borderRadius: 30, height: 28, width: 100, padding: 0, borderColor: KevaColors.okColor, backgroundColor: KevaColors.okColor}}
+                      title={'For Sale'}
+                      titleStyle={{fontSize: 14, color: '#fff'}}
+                      onPress={()=>{this.onSellNFT(namespaceId, namespaceInfo[namespaceId])}}
+                    />
+                    :
+                    <Button
+                      type='solid'
+                      buttonStyle={{marginLeft: 10, borderRadius: 30, height: 28, width: 100, padding: 0, borderColor: KevaColors.actionText, backgroundColor: KevaColors.actionText}}
+                      title={'Sell as NFT'}
+                      titleStyle={{fontSize: 14, color: '#fff'}}
+                      onPress={()=>{this.onSellNFT(namespaceId, namespaceInfo[namespaceId])}}
+                    />
+                  }
                 </View>
               )
             }

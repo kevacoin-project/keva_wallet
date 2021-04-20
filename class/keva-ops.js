@@ -23,6 +23,10 @@ export function getSpecialKeyText(keyType) {
     displayKey = loc.namespaces.reward_post;
   } else if (keyType === 'profile') {
     displayKey = loc.namespaces.update_profile;
+  } else if (keyType === 'sell') {
+    displayKey = "List for sale";
+  } else if (keyType === 'confirm_sell') {
+    displayKey = "For Sale";
   }
   return displayKey;
 }
