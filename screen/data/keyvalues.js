@@ -399,6 +399,9 @@ class KeyValues extends React.Component {
       // 0x0005 is for sale.
       if (kv.key[0] == 0 && kv.key[1] == 5) {
         this.setState({forSale: true});
+        navigation.setParams({
+          isOther: true,
+        });
       }
     }
 
@@ -785,6 +788,12 @@ class KeyValues extends React.Component {
       }
       listHeader = (
         <View style={styles.container}>
+          { this.state.forSale &&
+            <View style={styles.forSaleContainer}>
+              <Text style={styles.forSaleTitle}>{"For Sale"}</Text>
+              <Icon name="ios-close-circle" size={24} style={styles.cancelSale} />
+            </View>
+          }
           <View style={styles.keyContainer}>
             <View style={{paddingRight: 20, alignSelf: 'center'}}>
               <Avatar rounded size="medium" title={getInitials(displayName)} containerStyle={{backgroundColor: stringToColor(displayName)}}/>
@@ -830,15 +839,7 @@ class KeyValues extends React.Component {
                     onPress={()=>{this.onEditProfile(namespaceId, namespaceInfo[namespaceId])}}
                   />
                   {
-                    this.state.forSale ?
-                    <Button
-                      type='solid'
-                      buttonStyle={{marginLeft: 10, borderRadius: 30, height: 28, width: 100, padding: 0, borderColor: KevaColors.okColor, backgroundColor: KevaColors.okColor}}
-                      title={'For Sale'}
-                      titleStyle={{fontSize: 14, color: '#fff'}}
-                      onPress={()=>{this.onSellNFT(namespaceId, namespaceInfo[namespaceId])}}
-                    />
-                    :
+                    (!this.state.forSale) &&
                     <Button
                       type='solid'
                       buttonStyle={{marginLeft: 10, borderRadius: 30, height: 28, width: 100, padding: 0, borderColor: KevaColors.actionText, backgroundColor: KevaColors.actionText}}
@@ -1065,6 +1066,25 @@ var styles = StyleSheet.create({
     backgroundColor: '#fff',
     padding: 10,
     flexDirection: 'row',
+  },
+  forSaleContainer: {
+    borderColor: KevaColors.cellBorder,
+    backgroundColor: "#1ebdff",
+    padding: 10,
+    flexDirection: 'row',
+    justifyContent: 'center',
+  },
+  forSaleTitle: {
+    color: '#fff',
+    fontWeight: '700',
+    fontSize: 16,
+    textTransform: 'uppercase',
+  },
+  cancelSale: {
+    color: '#fff',
+    position: 'absolute',
+    right: 10,
+    top: 9,
   },
   key: {
     fontSize: 16,
