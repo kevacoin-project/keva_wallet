@@ -53,6 +53,7 @@ import AddKeyValue from './screen/data/addkeyvalue';
 import EditProfile from './screen/data/editprofile';
 import SellNFT from './screen/data/sellnft';
 import BuyNFT from './screen/data/buynft';
+import OfferNFT from './screen/data/offernft';
 import ReplyKeyValue from './screen/data/replykeyvalue';
 import ShareKeyValue from './screen/data/sharekeyvalue';
 import ShowKeyValue from './screen/data/showkeyvalue';
@@ -351,6 +352,9 @@ const HomeStackNavigator = createStackNavigator({
   },
   BuyNFT: {
     screen: BuyNFT,
+  },
+  OfferNFT: {
+    screen: OfferNFT,
   },
   ReplyKeyValue: {
     screen: ReplyKeyValue,

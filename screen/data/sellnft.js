@@ -104,10 +104,12 @@ class SellNFT extends React.Component {
           try {
             // Check if there is an image to upload.
             await BlueElectrum.ping();
+            // Payment address.
+            const addr = await this.wallet.getChangeAddressAsync();
             const key = '\x01_KEVA_NS_';
             const value = {
               displayName: namespaceInfo.displayName,
-              price, desc,
+              price, desc, addr,
             };
             const { tx, fee } = await updateKeyValue(this.wallet, FALLBACK_DATA_PER_BYTE_FEE, namespaceId, key, JSON.stringify(value));
             let feeKVA = fee / 100000000;
@@ -214,12 +216,6 @@ class SellNFT extends React.Component {
                 });
               }
               await BlueApp.saveToDisk();
-              // Pin the media to IPFS.
-              if (this.state.serverIPFS) {
-                console.log('tx to publish: ' + result)
-                await publishMedia(result);
-              }
-
               // Update the profile right away before confirmation.
               this.updateCurrentProfile();
               this.setState({isBroadcasting: false, showSkip: false});

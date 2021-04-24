@@ -315,10 +315,10 @@ class KeyValues extends React.Component {
       this.namespaceId = namespaceId;
       this.displayName = nsData.displayName;
       const value = JSON.parse(nsData.value);
-      const {price, desc} = value;
+      const {price, desc, addr} = value;
       if (price) {
         this.setState({
-          price, desc, saleTx: nsData.tx,
+          price, desc, addr, saleTx: nsData.tx,
         });
       }
     }
@@ -727,7 +727,7 @@ class KeyValues extends React.Component {
     });
   }
 
-  onBuy = (namespaceId, displayName, saleTx, price, desc, height) => {
+  onBuy = (namespaceId, displayName, saleTx, price, desc, addr, height) => {
     const {navigation, keyValueList} = this.props;
     const isOther = navigation.getParam('isOther');
     const shortCode = navigation.getParam('shortCode');
@@ -743,6 +743,7 @@ class KeyValues extends React.Component {
       height,
       price,
       desc,
+      addr,
     });
   }
 
@@ -839,7 +840,7 @@ class KeyValues extends React.Component {
                       buttonStyle={{marginLeft: 10, borderRadius: 30, height: 28, width: 100, padding: 0, borderColor: KevaColors.okColor, backgroundColor: KevaColors.okColor}}
                       title={'Buy It'}
                       titleStyle={{fontSize: 14, color: '#fff'}}
-                      onPress={()=>{this.onBuy(namespaceId, displayName, this.state.saleTx, this.state.price, this.state.desc)}}
+                      onPress={()=>{this.onBuy(namespaceId, displayName, this.state.saleTx, this.state.price, this.state.desc, this.state.addr)}}
                     />
                     :
                     <Button
