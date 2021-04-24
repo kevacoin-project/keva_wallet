@@ -328,7 +328,7 @@ function keyToBuffer(key) {
   return key;
 }
 
-function getKeyValueUpdateScript(namespaceId, address, key, value) {
+export function getKeyValueUpdateScript(namespaceId, address, key, value) {
   const keyBuf = keyToBuffer(key);
   const valueBuf = Buffer.from(utf8ToHex(value), 'hex');
 

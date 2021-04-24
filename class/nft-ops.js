@@ -3,10 +3,9 @@ const bip65 = require('bip65');
 const base58check = require('bs58check')
 const coinSelectAccumulative = require('coinselect/accumulative');
 let loc = require('../loc');
-const BlueApp = require('../BlueApp');
 
 import {
-    createBidKey, getKeyValueUpdateScript, getNamespaceUtxo, getNonNamespaceUxtos
+    getKeyValueUpdateScript, getNamespaceUtxo, getNonNamespaceUxtos,
 } from './keva-ops';
 
 // Reference: https://github.com/bitcoin/bips/blob/master/bip-0141.mediawiki
@@ -126,6 +125,7 @@ export function spendLockPaymentPartial(redeemScript, txidLockedFund, voutLocked
 // n: future block height
 // m: future block height in addition to n.
 // myTargetAddress: transfer NFT to my target address.
+/*
 export async function createNFTBid(wallet, requestedSatPerByte, namespaceId,
         amount, nsNFTId, offerTxId, paymentAddress, paymentAddressPubKeyHash160, myTargetAddress, n, m)
 {
@@ -250,7 +250,7 @@ export async function createNFTBid(wallet, requestedSatPerByte, namespaceId,
     let hexTx = psbt.extractTransaction(true).toHex();
     return {tx: hexTx, fee, cost: amount, key};
 }
-
+*/
 
 export function completePaymentSigning(txb, sellerKeyPair, nsNFTKeyPair) {
   const bscript = bitcoin.script;
@@ -406,7 +406,7 @@ export function createConfirmKey(txId) {
 }
 
 // namespaceId: namespaceId of the NFT.
-export async function confirmSellNFT(nftWallet, requestedSatPerByte, namespaceId, txSeller) {
+export async function confirmSellNFT(nftWallet, requestedSatPerByte, namespaceId, addressSeller) {
   await nftWallet.fetchBalance();
   await nftWallet.fetchTransactions();
   let nsUtxo = await getNamespaceUtxo(nftWallet, namespaceId);
@@ -505,4 +505,96 @@ export async function confirmSellNFT(nftWallet, requestedSatPerByte, namespaceId
   psbt.finalizeAllInputs();
   let hexTx = psbt.extractTransaction(true).toHex();
   return {txConfirm: hexTx, feeConfirm: fee};
+}
+
+// nsNFTId: namespaceId of the NFT namespace to bid for.
+// paymentAddress: the address to send the payment.
+export async function createNFTBid(wallet, requestedSatPerByte, nsNFTId, paymentAddress, price)
+{
+  await wallet.fetchBalance();
+  await wallet.fetchTransactions();
+
+  const nsTargetAddress = await wallet.getAddressAsync();
+  //TODO: fix key/value.
+  const nsScript = getKeyValueUpdateScript(nsNFTId, nsTargetAddress, '_transfer_', '_transfer_value_');
+  // Namespace needs at least 0.01 KVA.
+  const namespaceValue = 1000000;
+  let targets = [{
+    address: nsTargetAddress, value: namespaceValue,
+    script: nsScript
+  }, {
+    address: paymentAddress, value: price,
+  }];
+
+  const transactions = wallet.getTransactions();
+  let utxos = wallet.getUtxo();
+  let nonNamespaceUtxos = await getNonNamespaceUxtos(wallet, transactions, utxos);
+  let { inputs, outputs, fee } = coinSelectAccumulative(nonNamespaceUtxos, targets, requestedSatPerByte);
+
+  // inputs and outputs will be undefined if no solution was found
+  if (!inputs || !outputs) {
+    throw new Error('Not enough balance. Try sending smaller amount');
+  }
+
+  const psbt = new bitcoin.Psbt();
+  psbt.setVersion(0x7100); // Kevacoin transaction.
+  let keypairs = [];
+  for (let i = 0; i < inputs.length; i++) {
+    let input = inputs[i];
+    const pubkey = wallet._getPubkeyByAddress(input.address);
+    if (!pubkey) {
+      throw new Error('Failed to get pubKey');
+    }
+
+    const p2wpkh = bitcoin.payments.p2wpkh({ pubkey });
+    const p2sh = bitcoin.payments.p2sh({ redeem: p2wpkh });
+
+    psbt.addInput({
+      hash: input.txId,
+      index: input.vout,
+      witnessUtxo: {
+        script: p2sh.output,
+        value: input.value,
+      },
+      redeemScript: p2wpkh.output,
+    });
+
+    let keyPair = bitcoin.ECPair.fromWIF(input.wif);
+    keypairs.push(keyPair);
+  }
+
+  for (let i = 0; i < outputs.length; i++) {
+    let output = outputs[i];
+    if (!output.address) {
+      // Change address.
+      output.address = nsTargetAddress;
+    }
+
+    if (output.script) {
+      // The namespace creation script.
+      if (output.value != 1000000) {
+        throw new Error('Key update script has incorrect value.');
+      }
+      psbt.addOutput({
+        script: output.script,
+        value: output.value,
+      });
+    } else {
+      psbt.addOutput({
+        address: output.address,
+        value: output.value,
+      });
+    }
+  }
+
+  for (let i = 0; i < keypairs.length; i++) {
+    psbt.signInput(i, keypairs[i]);
+    if (!psbt.validateSignaturesOfInput(i)) {
+      throw new Error('Invalid signature for input #' + i);
+    }
+  }
+
+  psbt.finalizeAllInputs();
+  let hexTx = psbt.extractTransaction(true).toHex();
+  return {offerTx: hexTx, fee};
 }

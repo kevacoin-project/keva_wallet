@@ -282,20 +282,21 @@ class BuyNFT extends React.Component {
 
   onReply = () => {
     const {navigation, namespaceList} = this.props;
-    const {replyTxid, namespaceId, index, type, hashtags} = navigation.state.params;
+    const {replyTxid, namespaceId, index, type, hashtags, price, desc, addr} = navigation.state.params;
     // Must have a namespace.
     if (Object.keys(namespaceList).length == 0) {
       toastError('Create a namespace first');
       return;
     }
 
-    navigation.navigate('ReplyKeyValue', {
+    navigation.navigate('OfferNFT', {
       replyTxid,
       namespaceId,
       index,
       type,
-      updateReplies: this.updateReplies,
-      hashtags,
+      price, desc, addr, // NFT related.
+      //updateReplies: this.updateReplies,
+      //hashtags,
     })
   }
 
