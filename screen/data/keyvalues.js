@@ -117,9 +117,12 @@ class Item extends React.Component {
     if (keyType) {
       displayKey = getSpecialKeyText(keyType);
     }
-    if (displayKey.startsWith('__WALLET_TRANSFER__')) {
+    if ((typeof displayKey) != 'string') {
+      displayKey = 'Unknown ' + item.height;
+    } else if (displayKey.startsWith('__WALLET_TRANSFER__')) {
       displayKey = loc.namespaces.ns_transfer_explain;
     }
+
     const canEdit = !isOther && item.type !== 'REG' && keyType != 'profile';
 
     return (
@@ -300,7 +303,8 @@ class KeyValues extends React.Component {
     const {navigation, dispatch, keyValueList, namespaceList, reactions} = this.props;
     let {namespaceId, shortCode} = navigation.state.params;
 
-    if (!namespaceId && shortCode) {
+    //if (!namespaceId && shortCode) {
+    if (true) {
       // We are here because user clicks on the short code.
       // There is no namespaceId yet.
       let nsData = await getNamespaceInfoFromShortCode(BlueElectrum, shortCode);
@@ -310,6 +314,13 @@ class KeyValues extends React.Component {
       namespaceId = nsData.namespaceId;
       this.namespaceId = namespaceId;
       this.displayName = nsData.displayName;
+      const value = JSON.parse(nsData.value);
+      const {price, desc} = value;
+      if (price) {
+        this.setState({
+          price, desc, saleTx: nsData.tx,
+        });
+      }
     }
 
     const history = await BlueElectrum.blockchainKeva_getKeyValues(getNamespaceScriptHash(namespaceId), min_tx_num);
@@ -706,6 +717,35 @@ class KeyValues extends React.Component {
     return keyValues.reverse();
   }
 
+  onSellNFT = (namespaceId, namespaceInfo) => {
+    const {navigation} = this.props;
+    const {walletId} = navigation.state.params;
+    navigation.navigate('SellNFT', {
+      walletId,
+      namespaceId,
+      namespaceInfo,
+    });
+  }
+
+  onBuy = (namespaceId, displayName, saleTx, price, desc, height) => {
+    const {navigation, keyValueList} = this.props;
+    const isOther = navigation.getParam('isOther');
+    const shortCode = navigation.getParam('shortCode');
+    const index = findTxIndex(keyValueList.keyValues[namespaceId], saleTx);
+    navigation.push('BuyNFT', {
+      namespaceId,
+      index,
+      type: 'keyvalue',
+      displayName,
+      shortCode,
+      replyTxid: saleTx,
+      isOther,
+      height,
+      price,
+      desc,
+    });
+  }
+
   render() {
     let {navigation, dispatch, keyValueList, mediaInfoList, namespaceList, otherNamespaceList} = this.props;
     let {isOther, namespaceId, displayName, shortCode} = navigation.state.params;
@@ -784,13 +824,33 @@ class KeyValues extends React.Component {
               )
               :
               (
-                <Button
-                  type='outline'
-                  buttonStyle={{borderRadius: 30, height: 28, width: 100, padding: 0, borderColor: KevaColors.actionText}}
-                  title={'Edit'}
-                  titleStyle={{fontSize: 14, color: KevaColors.actionText}}
-                  onPress={()=>{this.onEditProfile(namespaceId, namespaceInfo[namespaceId])}}
-                />
+                <View style={{flexDirection: 'row'}}>
+                  <Button
+                    type='outline'
+                    buttonStyle={{borderRadius: 30, height: 28, width: 100, padding: 0, borderColor: KevaColors.actionText}}
+                    title={'Edit'}
+                    titleStyle={{fontSize: 14, color: KevaColors.actionText}}
+                    onPress={()=>{this.onEditProfile(namespaceId, namespaceInfo[namespaceId])}}
+                  />
+                  {
+                    this.state.price ?
+                    <Button
+                      type='solid'
+                      buttonStyle={{marginLeft: 10, borderRadius: 30, height: 28, width: 100, padding: 0, borderColor: KevaColors.okColor, backgroundColor: KevaColors.okColor}}
+                      title={'Buy It'}
+                      titleStyle={{fontSize: 14, color: '#fff'}}
+                      onPress={()=>{this.onBuy(namespaceId, displayName, this.state.saleTx, this.state.price, this.state.desc)}}
+                    />
+                    :
+                    <Button
+                      type='solid'
+                      buttonStyle={{marginLeft: 10, borderRadius: 30, height: 28, width: 100, padding: 0, borderColor: KevaColors.actionText, backgroundColor: KevaColors.actionText}}
+                      title={'Sell as NFT'}
+                      titleStyle={{fontSize: 14, color: '#fff'}}
+                      onPress={()=>{this.onSellNFT(namespaceId, namespaceInfo[namespaceId])}}
+                    />
+                  }
+                </View>
               )
             }
             </View>

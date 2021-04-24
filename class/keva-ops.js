@@ -187,6 +187,7 @@ export async function getNamespaceDataFromNSTx(ecl, history) {
         op: 'KEVA_OP_PUT',
         namespaceId: tx.n[0],
         value: decodeBase64(tx.kv.value),
+        tx: latestHistory.tx_hash,
       };
       const {displayName, bio} = parseProfile(info.value);
       return {...info, displayName, bio};

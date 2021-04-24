@@ -70,7 +70,7 @@ module.exports = {
     comment_post: 'Commented on a Post',
     share_post: 'Shared a Post',
     reward_post: 'Rewarded a Post',
-    update_profile: 'Updated Profile',
+    update_profile: 'Profile Updated',
     created: 'Namespace Created',
     namespace_not_found: 'Cannot find namespace',
     ns_transfer_explain: 'Transfer to the Other Wallet',
