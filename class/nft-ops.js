@@ -596,12 +596,8 @@ export async function createNFTBid(wallet, requestedSatPerByte, nsNFTId, payment
     }
   }
 
-  /*
-  psbt.finalizeAllInputs();
-  let hexTx = psbt.extractTransaction(true).toHex();
-  */
- let hexTx = psbt.toHex();
-  return {offerTx: hexTx, fee};
+  let offerTx = psbt.toBuffer();
+  return {offerTx, fee};
 }
 
 export async function acceptNFTBid(wallet, partialTransaction, namespaceId) {

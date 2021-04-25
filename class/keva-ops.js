@@ -328,9 +328,13 @@ function keyToBuffer(key) {
   return key;
 }
 
-export function getKeyValueUpdateScript(namespaceId, address, key, value) {
+/**
+ * @param {*} binaryValue the value parameter is a buffer.
+ * @returns
+ */
+export function getKeyValueUpdateScript(namespaceId, address, key, value, binaryValue = false) {
   const keyBuf = keyToBuffer(key);
-  const valueBuf = Buffer.from(utf8ToHex(value), 'hex');
+  const valueBuf = binaryValue ? value : Buffer.from(utf8ToHex(value), 'hex');
 
   let bscript = bitcoin.script;
   let baddress = bitcoin.address;
@@ -681,7 +685,7 @@ export async function rewardKeyValue(ecl, wallet, requestedSatPerByte, namespace
 // replyRootAddress: the root namespace of the post.
 // replyTxid: the txid of the post
 //
-export async function replyKeyValue(wallet, requestedSatPerByte, namespaceId, shortCode, value, replyRootAddress, replyTxid) {
+export async function replyKeyValue(wallet, requestedSatPerByte, namespaceId, value, replyTxid, binaryValue = false) {
   await wallet.fetchBalance();
   await wallet.fetchTransactions();
   let nsUtxo = await getNamespaceUtxo(wallet, namespaceId);
@@ -693,7 +697,7 @@ export async function replyKeyValue(wallet, requestedSatPerByte, namespaceId, sh
   const key = createReplyKey(replyTxid);
   // IMPORANT: reuse address - trade-off between secuity and performance.
   const namespaceAddress = nsUtxo.address;
-  const nsScript = getKeyValueUpdateScript(namespaceId, namespaceAddress, key, value);
+  const nsScript = getKeyValueUpdateScript(namespaceId, namespaceAddress, key, value, binaryValue);
 
   // Namespace needs at least 0.01 KVA.
   const namespaceValue = 1000000;

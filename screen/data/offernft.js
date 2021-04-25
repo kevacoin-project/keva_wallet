@@ -178,13 +178,7 @@ class OfferNFT extends React.Component {
               //TODO: WIP
               const offerPrice = this.state.value * 100000000;
               const {offerTx} = await createNFTBid(wallet, FALLBACK_DATA_PER_BYTE_FEE, origNamespaceId, addr, offerPrice);
-              console.log(offerTx)
-              // TODO: add the offerTx to reply - need to create a reply tx.
-
-              // Testing...
-              await acceptNFTBid(wallet, offerTx, origNamespaceId)
-              return
-              const { tx, fee, cost, key } = await replyKeyValue(wallet, FALLBACK_DATA_PER_BYTE_FEE, namespaceId, shortCode, value, rootAddress, replyTxid);
+              const { tx, fee, cost, key } = await replyKeyValue(wallet, FALLBACK_DATA_PER_BYTE_FEE, namespaceId, offerTx, replyTxid, true);
               let feeKVA = (fee + cost) / 100000000;
               this.setState({ showNSCreationModal: true, currentPage: 2, fee: feeKVA, key });
               this.namespaceTx = tx;
