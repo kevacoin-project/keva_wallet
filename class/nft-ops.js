@@ -538,6 +538,7 @@ export async function createNFTBid(wallet, requestedSatPerByte, nsNFTId, payment
 
   const psbt = new bitcoin.Psbt();
   psbt.setVersion(0x7100); // Kevacoin transaction.
+  const sighashType = bitcoin.Transaction.SIGHASH_ALL | bitcoin.Transaction.SIGHASH_ANYONECANPAY;
   let keypairs = [];
   for (let i = 0; i < inputs.length; i++) {
     let input = inputs[i];
@@ -551,6 +552,7 @@ export async function createNFTBid(wallet, requestedSatPerByte, nsNFTId, payment
 
     psbt.addInput({
       hash: input.txId,
+      sighashType: sighashType,
       index: input.vout,
       witnessUtxo: {
         script: p2sh.output,
@@ -588,22 +590,22 @@ export async function createNFTBid(wallet, requestedSatPerByte, nsNFTId, payment
   }
 
   for (let i = 0; i < keypairs.length; i++) {
-    psbt.signInput(i, keypairs[i]);
+    psbt.signInput(i, keypairs[i], [sighashType]);
     if (!psbt.validateSignaturesOfInput(i)) {
       throw new Error('Invalid signature for input #' + i);
     }
   }
 
+  /*
   psbt.finalizeAllInputs();
   let hexTx = psbt.extractTransaction(true).toHex();
+  */
+ let hexTx = psbt.toHex();
   return {offerTx: hexTx, fee};
 }
 
-export async function acceptNFTBid(wallet, requestedSatPerByte, partialTransaction, namespaceId) {
-  const bscript = bitcoin.script;
-  //const partialTx = bitcoin.Transaction.fromBuffer(partialTransaction);
-  const partialTx = bitcoin.Transaction.fromHex(partialTransaction);
-
+export async function acceptNFTBid(wallet, partialTransaction, namespaceId) {
+  let partialTx = bitcoin.Psbt.fromHex(partialTransaction);
   let nsUtxo = await getNamespaceUtxo(wallet, namespaceId);
   if (!nsUtxo) {
     throw new Error('Cannot find namespace');
@@ -611,19 +613,27 @@ export async function acceptNFTBid(wallet, requestedSatPerByte, partialTransacti
 
   const keyPair = bitcoin.ECPair.fromWIF(nsUtxo.wif);
   const p2wpkh = bitcoin.payments.p2wpkh({ pubkey: keyPair.publicKey });
-  const nsWitnessScript = Buffer.concat([Buffer.from("16", "hex"), p2wpkh.output])
+  const p2sh = bitcoin.payments.p2sh({ redeem: p2wpkh });
+  const sighashType = bitcoin.Transaction.SIGHASH_ALL | bitcoin.Transaction.SIGHASH_ANYONECANPAY;
 
-  partialTx.addInput(Buffer.from(nsUtxo.txid, "hex").reverse(), nsUtxo.vout, 0xffffffff, nsWitnessScript);
+  partialTx.addInput({
+    hash: nsUtxo.txId,
+    sighashType: sighashType,
+    index: nsUtxo.vout,
+    witnessUtxo: {
+      script: p2sh.output,
+      value: nsUtxo.value,
+    },
+    redeemScript: p2wpkh.output,
+  });
 
-  const ins = partialTx.ins;
-  const index = ins.length - 1;
-  const nftHash = partialTx.hashForWitnessV0(index, nsWitnessScript, nsUtxo.amount, bitcoin.Transaction.SIGHASH_ALL);
-  const sigNFT = bscript.signature.encode(keyPair.sign(nftHash), bitcoin.Transaction.SIGHASH_ALL);
-  const witness = [sigNFT, keyPair.publicKey];
+  const index = partialTx.inputCount - 1;
+  partialTx.signInput(index, keyPair, [sighashType]);
+  if (!partialTx.validateSignaturesOfInput(index)) {
+    throw new Error('Invalid signature for input #' + index);
+  }
 
-  partialTx.ins[index].witness = witness;
-  console.log(partialTx.toHex())
-  return
-
-  return partialTx;
+  partialTx.finalizeAllInputs();
+  let hexTx = partialTx.extractTransaction(true).toHex();
+  return hexTx;
 }
