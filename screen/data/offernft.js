@@ -27,7 +27,7 @@ import { TransitionPresets } from 'react-navigation-stack';
 
 import { connect } from 'react-redux'
 import { replyKeyValue } from '../../class/keva-ops';
-import { createNFTBid } from '../../class/nft-ops';
+import { createNFTBid, acceptNFTBid } from '../../class/nft-ops';
 import StepModal from "../../common/StepModalWizard";
 import Biometric from '../../class/biometrics';
 import { setKeyValue } from '../../actions';
@@ -179,6 +179,10 @@ class OfferNFT extends React.Component {
               const offerPrice = this.state.value * 100000000;
               const {offerTx} = await createNFTBid(wallet, FALLBACK_DATA_PER_BYTE_FEE, origNamespaceId, addr, offerPrice);
               console.log(offerTx)
+              // TODO: add the offerTx to reply - need to create a reply tx.
+
+              // Testing...
+              await acceptNFTBid(wallet, FALLBACK_DATA_PER_BYTE_FEE, offerTx, origNamespaceId)
               return
               const { tx, fee, cost, key } = await replyKeyValue(wallet, FALLBACK_DATA_PER_BYTE_FEE, namespaceId, shortCode, value, rootAddress, replyTxid);
               let feeKVA = (fee + cost) / 100000000;

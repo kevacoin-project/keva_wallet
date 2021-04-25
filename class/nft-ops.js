@@ -598,3 +598,32 @@ export async function createNFTBid(wallet, requestedSatPerByte, nsNFTId, payment
   let hexTx = psbt.extractTransaction(true).toHex();
   return {offerTx: hexTx, fee};
 }
+
+export async function acceptNFTBid(wallet, requestedSatPerByte, partialTransaction, namespaceId) {
+  const bscript = bitcoin.script;
+  //const partialTx = bitcoin.Transaction.fromBuffer(partialTransaction);
+  const partialTx = bitcoin.Transaction.fromHex(partialTransaction);
+
+  let nsUtxo = await getNamespaceUtxo(wallet, namespaceId);
+  if (!nsUtxo) {
+    throw new Error('Cannot find namespace');
+  }
+
+  const keyPair = bitcoin.ECPair.fromWIF(nsUtxo.wif);
+  const p2wpkh = bitcoin.payments.p2wpkh({ pubkey: keyPair.publicKey });
+  const nsWitnessScript = Buffer.concat([Buffer.from("16", "hex"), p2wpkh.output])
+
+  partialTx.addInput(Buffer.from(nsUtxo.txid, "hex").reverse(), nsUtxo.vout, 0xffffffff, nsWitnessScript);
+
+  const ins = partialTx.ins;
+  const index = ins.length - 1;
+  const nftHash = partialTx.hashForWitnessV0(index, nsWitnessScript, nsUtxo.amount, bitcoin.Transaction.SIGHASH_ALL);
+  const sigNFT = bscript.signature.encode(keyPair.sign(nftHash), bitcoin.Transaction.SIGHASH_ALL);
+  const witness = [sigNFT, keyPair.publicKey];
+
+  partialTx.ins[index].witness = witness;
+  console.log(partialTx.toHex())
+  return
+
+  return partialTx;
+}
