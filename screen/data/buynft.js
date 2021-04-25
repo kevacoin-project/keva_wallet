@@ -11,7 +11,6 @@ import {
 } from 'react-native';
 import HTMLView from 'react-native-htmlview';
 const BlueElectrum = require('../../BlueElectrum');
-import MIcon from 'react-native-vector-icons/MaterialIcons';
 const StyleSheet = require('../../PlatformStyleSheet');
 const KevaColors = require('../../common/KevaColors');
 import { THIN_BORDER, timeConverter, toastError, getInitials, stringToColor } from "../../util";
@@ -22,14 +21,12 @@ import {
 import { setKeyValue } from '../../actions'
 import {
   BlueNavigationStyle,
-  BlueLoading,
 } from '../../BlueComponents';
 import VideoPlayer from 'react-native-video-player';
 import ImageViewer from 'react-native-image-zoom-viewer';
-import { Avatar, Image } from 'react-native-elements';
+import { Avatar, Button, Image } from 'react-native-elements';
 const loc = require('../../loc');
 import { connect } from 'react-redux';
-import { extractMedia, getImageGatewayURL, removeMedia, replaceMedia } from './mediaManager';
 
 const MAX_TIME = 3147483647;
 
@@ -280,7 +277,7 @@ class BuyNFT extends React.Component {
     }
   }
 
-  onReply = () => {
+  onOffer = () => {
     const {navigation, namespaceList} = this.props;
     const {replyTxid, namespaceId, index, type, hashtags, price, desc, addr} = navigation.state.params;
     // Must have a namespace.
@@ -448,23 +445,13 @@ class BuyNFT extends React.Component {
         </View>
         <View style={styles.actionContainer}>
           <View style={{flexDirection: 'row'}}>
-            <TouchableOpacity onPress={() => this.onReply()} style={{flexDirection: 'row'}}>
-              <MIcon name="chat-bubble-outline" size={22} style={styles.talkIcon} />
-              {(replyCount > 0) && <Text style={styles.count}>{replyCount}</Text>}
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => this.onShare(key, value)} style={{flexDirection: 'row'}}>
-              <MIcon name="cached" size={22} style={styles.shareIcon} />
-              {(shareCount > 0) && <Text style={styles.count}>{shareCount}</Text>}
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => this.onReward()} style={{flexDirection: 'row'}}>
-              {
-                favorite ?
-                  <MIcon name="favorite" size={22} style={[styles.shareIcon, {color: KevaColors.favorite}]} />
-                :
-                  <MIcon name="favorite-border" size={22} style={styles.shareIcon} />
-              }
-              {(likeCount > 0) && <Text style={styles.count}>{likeCount}</Text>}
-            </TouchableOpacity>
+            <Button
+              type='solid'
+              buttonStyle={{borderRadius: 30, height: 28, width: 120, borderColor: KevaColors.actionText, backgroundColor: KevaColors.actionText}}
+              title={"Make an Offer"}
+              titleStyle={{fontSize: 14, color: '#fff'}}
+              onPress={()=>{this.onOffer()}}
+            />
           </View>
         </View>
       </View>
@@ -534,12 +521,6 @@ var styles = StyleSheet.create({
     borderColor: KevaColors.cellBorder,
     backgroundColor: '#fff',
     padding: 10,
-  },
-  talkIcon: {
-    color: KevaColors.arrowIcon,
-    paddingLeft: 15,
-    paddingRight: 2,
-    paddingVertical: 2
   },
   shareIcon: {
     color: KevaColors.arrowIcon,
