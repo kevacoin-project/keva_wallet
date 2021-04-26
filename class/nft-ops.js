@@ -3,6 +3,7 @@ const bip65 = require('bip65');
 const base58check = require('bs58check')
 const coinSelectAccumulative = require('coinselect/accumulative');
 let loc = require('../loc');
+const Txdecoder = require('./txdecoder');
 
 import {
     getKeyValueUpdateScript, getNamespaceUtxo, getNonNamespaceUxtos,
@@ -664,4 +665,12 @@ export function validateOffer(offerTx, paymentAddress, price) {
     console.log(err)
     return 0;
   }
+}
+
+export function decodePSBT(offerTx) {
+  const psbt = bitcoin.Psbt.fromBuffer(offerTx);
+  psbt.finalizeAllInputs();
+  const tx = psbt.extractTransaction(true);
+  const txdecoder = new Txdecoder(tx.toBuffer());
+  return txdecoder.decode();
 }
