@@ -25,7 +25,7 @@ import {
 } from '../../BlueComponents';
 import VideoPlayer from 'react-native-video-player';
 import ImageViewer from 'react-native-image-zoom-viewer';
-import { Avatar, Button, Card, Image } from 'react-native-elements';
+import { Avatar, Button, Icon, Image } from 'react-native-elements';
 const loc = require('../../loc');
 import { connect } from 'react-redux';
 
@@ -47,6 +47,10 @@ class Reply extends React.Component {
     });
   }
 
+  onAccept = (offerTx) => {
+
+  }
+
   render() {
     let {item} = this.props;
     const displayName = item.sender.displayName;
@@ -55,9 +59,27 @@ class Reply extends React.Component {
     return (
       <View style={styles.reply}>
         <View style={styles.senderBar} />
-        <View>
-          <Text style={styles.replyValue} selectable={true}>{offerValue + ' KVA'}</Text>
-          <View style={{flexDirection: 'row'}}>
+        <View style={{flex: 1}}>
+          <View style={{flexDirection: 'row', justifyContent: "space-between"}}>
+            <Text style={styles.replyValue} selectable={true}>{offerValue + ' KVA'}</Text>
+            {(offerValue > 0) &&
+              <Button
+                type='outline'
+                buttonStyle={{margin: 5, borderRadius: 30, height: 28, width: 90, borderColor: KevaColors.actionText}}
+                title={"Accept"}
+                titleStyle={{fontSize: 14, color: KevaColors.actionText, marginLeft: 4}}
+                icon={
+                  <Icon
+                    name="check"
+                    size={18}
+                    color={KevaColors.actionText}
+                  />
+                }
+                onPress={()=>{this.onAccept(item.value)}}
+              />
+            }
+          </View>
+          <View style={{flexDirection: 'row', marginTop: 5}}>
             <Avatar rounded size="small"
               title={getInitials(displayName)}
               containerStyle={{backgroundColor: stringToColor(displayName), marginRight: 5}}
@@ -448,7 +470,7 @@ class BuyNFT extends React.Component {
           <View style={{flexDirection: 'row'}}>
             <Button
               type='solid'
-              buttonStyle={{borderRadius: 30, height: 28, width: 120, borderColor: KevaColors.actionText, backgroundColor: KevaColors.actionText}}
+              buttonStyle={{borderRadius: 30, height: 30, width: 120, marginVertical: 5, borderColor: KevaColors.actionText, backgroundColor: KevaColors.actionText}}
               title={"Make an Offer"}
               titleStyle={{fontSize: 14, color: '#fff'}}
               onPress={()=>{this.onOffer()}}
