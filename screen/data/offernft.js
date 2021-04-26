@@ -128,7 +128,7 @@ class OfferNFT extends React.Component {
 
   getOfferModal = () => {
     const { namespaceList, keyValueList, dispatch } = this.props;
-    const { replyTxid, rootAddress, namespaceId: origNamespaceId, index, type, hashtags, updateReplies, updateHashtag, price, desc, addr } = this.props.navigation.state.params;
+    const { replyTxid, displayName, namespaceId: origNamespaceId, index, type, hashtags, updateReplies, updateHashtag, price, desc, addr, profile } = this.props.navigation.state.params;
     if (!this.state.showKeyValueModal) {
       return null;
     }
@@ -177,7 +177,8 @@ class OfferNFT extends React.Component {
 
               //TODO: WIP
               const offerPrice = this.state.value * 100000000;
-              const {offerTx} = await createNFTBid(wallet, FALLBACK_DATA_PER_BYTE_FEE, origNamespaceId, addr, offerPrice);
+              console.log(profile)
+              const {offerTx} = await createNFTBid(wallet, FALLBACK_DATA_PER_BYTE_FEE, origNamespaceId, addr, offerPrice, profile, displayName);
               const { tx, fee, cost, key } = await replyKeyValue(wallet, FALLBACK_DATA_PER_BYTE_FEE, namespaceId, offerTx, replyTxid, true);
               let feeKVA = (fee + cost) / 100000000;
               this.setState({ showNSCreationModal: true, currentPage: 2, fee: feeKVA, key });

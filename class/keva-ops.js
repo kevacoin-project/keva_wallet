@@ -935,7 +935,7 @@ export async function findMyNamespaces(wallet, ecl) {
   }
 
   for (let nsId of Object.keys(namespaces)) {
-    const { shortCode, displayName, bio, price, desc, addr, tx } = await getNamespaceInfoFromTx(ecl, namespaces[nsId].txId, nsId);
+    const { shortCode, displayName, bio, price, desc, addr, tx, value } = await getNamespaceInfoFromTx(ecl, namespaces[nsId].txId, nsId);
     namespaces[nsId].shortCode = shortCode;
     namespaces[nsId].displayName = displayName;
     namespaces[nsId].bio = bio;
@@ -943,6 +943,7 @@ export async function findMyNamespaces(wallet, ecl) {
     namespaces[nsId].desc = desc;
     namespaces[nsId].addr = addr;
     namespaces[nsId].txId = tx;
+    namespaces[nsId].profile = value;
   }
   return namespaces;
 }
@@ -964,7 +965,7 @@ export async function findOtherNamespace(ecl, nsidOrShortCode) {
     }
   }
 
-  const { shortCode, namespaceId, displayName, bio, price, desc, addr, tx } = await getNamespaceInfoFromTx(ecl, txid);
+  const { shortCode, namespaceId, displayName, bio, price, desc, addr, tx, value } = await getNamespaceInfoFromTx(ecl, txid);
   if (!shortCode || !namespaceId) {
     return null;
   }
@@ -977,6 +978,7 @@ export async function findOtherNamespace(ecl, nsidOrShortCode) {
     displayName,
     bio,
     price, desc, addr,
+    profile: value,
   };
   return namespaces;
 }
