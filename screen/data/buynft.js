@@ -18,7 +18,9 @@ import {
   parseSpecialKey,
   getSpecialKeyText,
 } from '../../class/keva-ops';
-import { setKeyValue } from '../../actions'
+import {
+  validateOffer,
+} from '../../class/nft-ops';
 import {
   BlueNavigationStyle,
 } from '../../BlueComponents';
@@ -49,10 +51,13 @@ class Reply extends React.Component {
   render() {
     let {item} = this.props;
     const displayName = item.sender.displayName;
+    let offerValue = item.offerPrice;
+
     return (
       <View style={styles.reply}>
         <View style={styles.senderBar} />
         <View>
+          <Text style={styles.replyValue} selectable={true}>{offerValue + ' KVA'}</Text>
           <View style={{flexDirection: 'row'}}>
             <Avatar rounded size="small"
               title={getInitials(displayName)}
@@ -68,7 +73,6 @@ class Reply extends React.Component {
               </Text>
             </TouchableOpacity>
           </View>
-          <Text style={styles.replyValue} selectable={true}>{item.value}</Text>
           {(item.height > 0) ?
             <Text style={styles.timestampReply}>{timeConverter(item.time) + ' ' + item.height}</Text>
             :
@@ -122,9 +126,9 @@ class BuyNFT extends React.Component {
 
   async componentDidMount() {
     const {keyValueList} = this.props;
-    const {shortCode, displayName, namespaceId, index, type, hashtags} = this.props.navigation.state.params;
+    const {shortCode, displayName, namespaceId, index, type, hashtags, price, addr, desc} = this.props.navigation.state.params;
     this.setState({
-      shortCode, displayName, namespaceId, index, type
+      shortCode, displayName, namespaceId, index, type, price, addr, desc
     });
     await this.fetchReplies();
   }
@@ -299,7 +303,7 @@ class BuyNFT extends React.Component {
 
   fetchReplies = async () => {
     const {dispatch, navigation, keyValueList, reactions} = this.props;
-    const {replyTxid, namespaceId, index, type, hashtags} = navigation.state.params;
+    const {replyTxid, namespaceId, index, type, hashtags, price, addr} = navigation.state.params;
 
     try {
       this.setState({isRefreshing: true});
@@ -329,11 +333,15 @@ class BuyNFT extends React.Component {
       */
       // Decode replies base64
       const replies = totalReactions.replies.map(r => {
-        r.value = Buffer.from(r.value, 'base64').toString('utf-8');
+        r.value = Buffer.from(r.value, 'base64');
+        r.offerPrice = validateOffer(r.value, addr, price);
         return r;
       });
-      this.setState({replies});
 
+      const sortedReplies = replies.sort((a, b) => (b.offerPrice - a.offerPrice));
+      this.setState({replies: sortedReplies});
+
+      /*
       // Check if it is a favorite.
       const reaction = reactions[replyTxid];
       const favorite = reaction && !!reaction['like'] && totalReactions.likes > 0;
@@ -359,6 +367,7 @@ class BuyNFT extends React.Component {
           hashtags: newHashtags,
         });
       }
+      */
 
       this.setState({
         isRefreshing: false
@@ -382,7 +391,7 @@ class BuyNFT extends React.Component {
   render() {
     const {keyValueList} = this.props;
     const {hashtags} = this.props.navigation.state.params;
-    let {replies, isRaw, CIDHeight, CIDWidth, thumbnail} = this.state;
+    let {replies, isRaw} = this.state;
     const {shortCode, displayName, namespaceId, index, type} = this.state;
     if (!type) {
       return null;
@@ -397,10 +406,6 @@ class BuyNFT extends React.Component {
 
     const key = keyValue.key;
     let value = keyValue.value;
-    const favorite = keyValue.favorite;
-    const replyCount = keyValue.replies;
-    const shareCount = keyValue.shares;
-    const likeCount = keyValue.likes;
 
     let displayKey = key;
     const {keyType} = parseSpecialKey(key);
@@ -552,10 +557,11 @@ var styles = StyleSheet.create({
     borderColor: KevaColors.cellBorder,
   },
   replyValue: {
-    fontSize: 16,
+    fontSize: 18,
     color: KevaColors.darkText,
-    paddingVertical: 5,
+    paddingVertical: 8,
     lineHeight: 25,
+    fontWeight: '700',
   },
   timestamp: {
     color: KevaColors.extraLightText,
@@ -569,7 +575,6 @@ var styles = StyleSheet.create({
   },
   sender: {
     fontSize: 16,
-    fontWeight: '700',
     color: KevaColors.darkText,
     alignSelf: 'center',
     maxWidth: 220,
