@@ -2,12 +2,9 @@ import React from 'react';
 import {
   Text,
   View,
-  Dimensions,
   TouchableOpacity,
   FlatList,
-  Modal,
   StatusBar,
-  ActivityIndicator,
 } from 'react-native';
 const BlueElectrum = require('../../BlueElectrum');
 const StyleSheet = require('../../PlatformStyleSheet');
@@ -23,9 +20,7 @@ import {
 import {
   BlueNavigationStyle,
 } from '../../BlueComponents';
-import VideoPlayer from 'react-native-video-player';
-import ImageViewer from 'react-native-image-zoom-viewer';
-import { Avatar, Button, Icon, Image } from 'react-native-elements';
+import { Avatar, Button, Icon, } from 'react-native-elements';
 const loc = require('../../loc');
 import { connect } from 'react-redux';
 
@@ -59,7 +54,7 @@ class Reply extends React.Component {
   }
 
   render() {
-    let {item} = this.props;
+    let {item, isOther} = this.props;
     const displayName = item.sender.displayName;
     let offerValue = item.offerPrice;
 
@@ -69,7 +64,7 @@ class Reply extends React.Component {
         <View style={{flex: 1}}>
           <View style={{flexDirection: 'row', justifyContent: "space-between"}}>
             <Text style={styles.replyValue} selectable={true}>{offerValue + ' KVA'}</Text>
-            {(offerValue > 0) &&
+            {(offerValue > 0 && !isOther) &&
               <Button
                 type='outline'
                 buttonStyle={{margin: 5, borderRadius: 30, height: 28, width: 90, borderColor: KevaColors.actionText}}
@@ -194,107 +189,6 @@ class BuyNFT extends React.Component {
     navigation.push('HashtagKeyValues', {hashtag});
   }
 
-  renderText = (text) => {
-    const textList = text.split(/(#(?:\[[^\]]+\]|[\p{L}\p{N}\p{Pc}\p{M}]+))/u);
-    return textList.map((t, i) => {
-      if (t.startsWith('#')) {
-        return (
-          <Text selectable key={i} style={styles.htmlLink} onPress={() => this.onHashtag(t.toLowerCase())}>
-            {t}
-          </Text>
-        )
-      }
-
-      return (
-        <Text selectable key={i} style={styles.htmlText}>{t}</Text>
-      )
-    });
-  }
-
-  renderNode = (node, index) => {
-    const isNewline = node.type == 'text' && node.data && node.data.trim().length === 0;
-    if (isNewline) {
-      return <Text key={index} selectable></Text>;
-    }
-    const isLink = node.parent && node.parent.name == 'a';
-    if (isLink) {
-      return;
-    }
-
-    if (node.type == 'text') {
-      return <Text key={index} selectable>{this.renderText(unescape(node.data), index)}</Text>;
-    } else if (node.name == 'img') {
-      const a = node.attribs;
-      const width = Dimensions.get('window').width * 0.9;
-      const height = (a.height && a.width) ? (a.height / a.width) * width : width;
-      const images = [{
-        url: a.src,
-        width: width/0.9,
-        height: height/0.9,
-      }];
-      return (
-        <View key={index}>
-          <Modal visible={this.state.showPicModal} transparent={true} onRequestClose={this.closeModal}>
-            <ImageViewer key={index} imageUrls={images} onCancel={this.closeModal} enableSwipeDown={true} swipeDownThreshold={100}/>
-          </Modal>
-          <TouchableOpacity onPress={this.showModal}>
-            <Image style={{ width, height, alignSelf: 'center'}}
-              source={{ uri: a.src }}
-              resizeMode="contain"
-              PlaceholderContent={this.LARGE_IMAGE_ICON}
-              placeholderStyle={{backgroundColor: '#ddd', borderRadius: 10}}
-            />
-          </TouchableOpacity>
-        </View>
-      );
-    } else if (node.name == 'video') {
-      const { width, height, poster } = node.attribs; // <video width="320" height="240" poster="http://link.com/image.jpg">...</video>
-
-      // Check if node has children
-      if (node.children.length === 0) return;
-
-      // Get all children <source> nodes
-      // <video><source src="movie.mp4" type="video/mp4"><source src="movie.ogg" type="video/ogg"></video>
-      const sourceNodes = node.children.filter((node) => node.type === 'tag' && node.name === 'source')
-      // Get a list of source URLs (<source src="movie.mp4">)
-      const sources = sourceNodes.map((node) => node.attribs.src);
-      let displayWidth = Dimensions.get('window').width;
-      let displayHeight;
-      if (height && width) {
-        displayHeight = (Number(height) / Number(width)) * displayWidth;
-      } else {
-        displayHeight = (225/400)*displayWidth;
-      }
-      return (
-        <View key={index}>
-          <VideoPlayer
-            disableFullscreen={false}
-            fullScreenOnLongPress={true}
-            resizeMode="contain"
-            video={{ uri: sources[0] }} // Select one of the video sources
-            videoWidth={displayWidth}
-            videoHeight={displayHeight}
-            thumbnail={{uri: poster}}
-            onBuffer={this.onBuffer}
-            onLoadStart={this.onLoadStart}
-            onLoad={this.onLoad}
-            customStyles={{
-              video : {backgroundColor: 'black'},
-            }}
-          />
-          <View pointerEvents="none" style={styles.videoContainer}>
-            <ActivityIndicator
-              animating
-              size="large"
-              color="#ddd"
-              style={[styles.activityIndicator, {opacity: this.state.opacity}]}
-            />
-          </View>
-        </View>
-      );
-    }
-  }
-
   updateReplies = (reply) => {
     const {index, type, hashtags, updateHashtag} = this.props.navigation.state.params;
     let currentLength = this.state.replies.length;
@@ -327,6 +221,10 @@ class BuyNFT extends React.Component {
       //updateReplies: this.updateReplies,
       //hashtags,
     })
+  }
+
+  onCancelSale = () => {
+    // Cancel the sale.
   }
 
   fetchReplies = async () => {
@@ -418,8 +316,8 @@ class BuyNFT extends React.Component {
 
   render() {
     const {keyValueList} = this.props;
-    const {hashtags, price, addr, desc} = this.props.navigation.state.params;
-    let {replies, isRaw} = this.state;
+    const {hashtags, price, addr, desc, isOther} = this.props.navigation.state.params;
+    let {replies} = this.state;
     const {shortCode, displayName, namespaceId, index, type} = this.state;
     if (!type) {
       return null;
@@ -433,8 +331,6 @@ class BuyNFT extends React.Component {
     }
 
     const key = keyValue.key;
-    let value = keyValue.value;
-
     let displayKey = key;
     const {keyType} = parseSpecialKey(key);
     if (keyType) {
@@ -475,13 +371,31 @@ class BuyNFT extends React.Component {
         </View>
         <View style={styles.actionContainer}>
           <View style={{flexDirection: 'row'}}>
-            <Button
-              type='solid'
-              buttonStyle={{borderRadius: 30, height: 30, width: 120, marginVertical: 5, borderColor: KevaColors.actionText, backgroundColor: KevaColors.actionText}}
-              title={"Make an Offer"}
-              titleStyle={{fontSize: 14, color: '#fff'}}
-              onPress={()=>{this.onOffer()}}
-            />
+            {
+              isOther ?
+              <Button
+                type='solid'
+                buttonStyle={{borderRadius: 30, height: 30, width: 120, marginVertical: 5, borderColor: KevaColors.actionText, backgroundColor: KevaColors.actionText}}
+                title={"Make an Offer"}
+                titleStyle={{fontSize: 14, color: '#fff'}}
+                onPress={()=>{this.onOffer()}}
+              />
+              :
+              <Button
+                type='outline'
+                buttonStyle={{borderRadius: 30, height: 30, width: 120, marginVertical: 5, borderColor: KevaColors.actionText}}
+                title={"Cancel Sale"}
+                titleStyle={{fontSize: 14, color: KevaColors.actionText, marginLeft: 5}}
+                onPress={()=>{this.onCancelSale()}}
+                icon={
+                  <Icon
+                    name="close"
+                    size={18}
+                    color={KevaColors.actionText}
+                  />
+                }
+              />
+            }
           </View>
         </View>
       </View>
@@ -496,7 +410,7 @@ class BuyNFT extends React.Component {
         onRefresh={() => this.fetchReplies()}
         refreshing={this.state.isRefreshing}
         keyExtractor={(item, index) => item.key + index}
-        renderItem={({item, index}) => <Reply item={item} price={price} addr={addr} shortCode={shortCode} navigation={this.props.navigation} />}
+        renderItem={({item, index}) => <Reply item={item} price={price} addr={addr} shortCode={shortCode} isOther={isOther} navigation={this.props.navigation} />}
       />
     )
   }
