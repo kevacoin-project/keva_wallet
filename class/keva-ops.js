@@ -189,8 +189,8 @@ export async function getNamespaceDataFromNSTx(ecl, history) {
         value: decodeBase64(tx.kv.value),
         tx: latestHistory.tx_hash,
       };
-      const {displayName, bio} = parseProfile(info.value);
-      return {...info, displayName, bio};
+      const {displayName, bio, price, desc, addr} = parseProfile(info.value);
+      return {...info, displayName, bio, price, desc, addr};
     }
     return null;
   } else if (op === KEVA_OP_DELETE) {
@@ -935,10 +935,14 @@ export async function findMyNamespaces(wallet, ecl) {
   }
 
   for (let nsId of Object.keys(namespaces)) {
-    const { shortCode, displayName, bio } = await getNamespaceInfoFromTx(ecl, namespaces[nsId].txId, nsId);
+    const { shortCode, displayName, bio, price, desc, addr, tx } = await getNamespaceInfoFromTx(ecl, namespaces[nsId].txId, nsId);
     namespaces[nsId].shortCode = shortCode;
     namespaces[nsId].displayName = displayName;
     namespaces[nsId].bio = bio;
+    namespaces[nsId].price = price;
+    namespaces[nsId].desc = desc;
+    namespaces[nsId].addr = addr;
+    namespaces[nsId].txId = tx;
   }
   return namespaces;
 }
@@ -960,7 +964,7 @@ export async function findOtherNamespace(ecl, nsidOrShortCode) {
     }
   }
 
-  const { shortCode, namespaceId, displayName, bio } = await getNamespaceInfoFromTx(ecl, txid);
+  const { shortCode, namespaceId, displayName, bio, price, desc, addr, tx } = await getNamespaceInfoFromTx(ecl, txid);
   if (!shortCode || !namespaceId) {
     return null;
   }
@@ -968,9 +972,11 @@ export async function findOtherNamespace(ecl, nsidOrShortCode) {
   let namespaces = {}
   namespaces[namespaceId] = {
     id: namespaceId,
+    txId: tx,
     shortCode,
     displayName,
-    bio
+    bio,
+    price, desc, addr,
   };
   return namespaces;
 }

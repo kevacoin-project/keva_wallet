@@ -128,6 +128,7 @@ class Namespace extends React.Component {
       rootAddress: namespace.rootAddress,
       walletId: namespace.walletId,
       isOther,
+      price: namespace.price, desc: namespace.desc, addr: namespace.addr,
     });
   }
 

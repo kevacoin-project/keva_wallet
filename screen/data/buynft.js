@@ -48,8 +48,9 @@ class Reply extends React.Component {
   }
 
   onAccept = (offerTx) => {
-    const {price, desc, addr} = this.props;
+    const {price, desc, addr, shortCode} = this.props;
     this.props.navigation.push('AcceptNFT', {
+      shortCode,
       offerTx,
       price,
       desc,
@@ -495,7 +496,7 @@ class BuyNFT extends React.Component {
         onRefresh={() => this.fetchReplies()}
         refreshing={this.state.isRefreshing}
         keyExtractor={(item, index) => item.key + index}
-        renderItem={({item, index}) => <Reply item={item} price={price} addr={addr} navigation={this.props.navigation} />}
+        renderItem={({item, index}) => <Reply item={item} price={price} addr={addr} shortCode={shortCode} navigation={this.props.navigation} />}
       />
     )
   }
