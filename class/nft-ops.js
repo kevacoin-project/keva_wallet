@@ -6,6 +6,7 @@ let loc = require('../loc');
 
 import {
     getKeyValueUpdateScript, getNamespaceUtxo, getNonNamespaceUxtos,
+    KEVA_OP_NAMESPACE, KEVA_OP_PUT, KEVA_OP_DELETE,
 } from './keva-ops';
 
 // Reference: https://github.com/bitcoin/bips/blob/master/bip-0141.mediawiki
@@ -632,4 +633,35 @@ export async function acceptNFTBid(wallet, partialTransaction, namespaceId) {
   partialTx.finalizeAllInputs();
   let hexTx = partialTx.extractTransaction(true).toHex();
   return hexTx;
+}
+
+export function validateOffer(offerTx, paymentAddress, price) {
+  try {
+    const psbt = bitcoin.Psbt.fromBuffer(offerTx);
+    psbt.finalizeAllInputs();
+    const tx = psbt.extractTransaction(true);
+
+    let hasNS = false;
+    let paymentValue = 0;
+    let index;
+    for (index = 0; index < tx.outs.length; index++) {
+      const value = tx.outs[index].value;
+      const script = tx.outs[index].script;
+      if (script[0] == KEVA_OP_PUT) {
+        hasNS = true;
+        continue;
+      }
+      const address = bitcoin.address.fromOutputScript(tx.outs[index].script);
+      if (address == paymentAddress) {
+        paymentValue = value;
+      }
+    }
+    if (hasNS && paymentValue) {
+      return paymentValue / 100000000;
+    }
+    return 0;
+  } catch (err) {
+    console.log(err)
+    return 0;
+  }
 }
