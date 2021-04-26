@@ -9,7 +9,6 @@ import {
   StatusBar,
   ActivityIndicator,
 } from 'react-native';
-import HTMLView from 'react-native-htmlview';
 const BlueElectrum = require('../../BlueElectrum');
 const StyleSheet = require('../../PlatformStyleSheet');
 const KevaColors = require('../../common/KevaColors');
@@ -26,7 +25,7 @@ import {
 } from '../../BlueComponents';
 import VideoPlayer from 'react-native-video-player';
 import ImageViewer from 'react-native-image-zoom-viewer';
-import { Avatar, Button, Image } from 'react-native-elements';
+import { Avatar, Button, Card, Image } from 'react-native-elements';
 const loc = require('../../loc');
 import { connect } from 'react-redux';
 
@@ -390,7 +389,7 @@ class BuyNFT extends React.Component {
 
   render() {
     const {keyValueList} = this.props;
-    const {hashtags} = this.props.navigation.state.params;
+    const {hashtags, price, desc} = this.props.navigation.state.params;
     let {replies, isRaw} = this.state;
     const {shortCode, displayName, namespaceId, index, type} = this.state;
     if (!type) {
@@ -437,16 +436,13 @@ class BuyNFT extends React.Component {
           </View>
         </View>
         <View style={styles.valueContainer}>
-          { isRaw ?
-            <Text style={styles.value} selectable>{value}</Text>
-          :
-            <HTMLView value={`${value}`}
-              addLineBreaks={false}
-              stylesheet={htmlStyles}
-              nodeComponentProps={{selectable: true}}
-              renderNode={this.renderNode}
-            />
-          }
+          <Text style={{fontSize: 18, marginBottom: 10, color: KevaColors.darkText}}>
+              {"Asking Price: "}
+            <Text style={{fontSize: 18, marginBottom: 10, color: KevaColors.darkText, fontWeight: '700'}}>
+              {price + ' KVA'}
+            </Text>
+          </Text>
+          <Text style={{fontSize: 16, color: KevaColors.darkText}}>{desc}</Text>
         </View>
         <View style={styles.actionContainer}>
           <View style={{flexDirection: 'row'}}>
@@ -503,6 +499,7 @@ var styles = StyleSheet.create({
   },
   key: {
     fontSize: 16,
+    fontWeight: '700',
     color: KevaColors.darkText,
     flex: 1,
     flexWrap: 'wrap',
@@ -517,7 +514,8 @@ var styles = StyleSheet.create({
     borderWidth: THIN_BORDER,
     borderColor: KevaColors.cellBorder,
     backgroundColor: '#fff',
-    padding: 10,
+    paddingHorizontal: 10,
+    paddingVertical: 18,
   },
   actionContainer: {
     flexDirection: 'row',
@@ -526,6 +524,7 @@ var styles = StyleSheet.create({
     borderColor: KevaColors.cellBorder,
     backgroundColor: '#fff',
     padding: 10,
+    paddingVertical: 15,
   },
   shareIcon: {
     color: KevaColors.arrowIcon,
@@ -634,37 +633,4 @@ var styles = StyleSheet.create({
     color: KevaColors.actionText,
     lineHeight: 23
   }
-});
-
-export const htmlStyles = StyleSheet.create({
-  div: {
-    fontSize: 16,
-    color: KevaColors.darkText,
-    lineHeight: 25,
-    padding: 0,
-    marginBottom: 0,
-  },
-  p: {
-    fontSize: 16,
-    color: KevaColors.darkText,
-    lineHeight: 25,
-    padding: 0,
-    margin: 0,
-  },
-  a: {
-    fontSize: 16,
-    color: '#0000ee',
-    lineHeight: 25,
-    padding: 0,
-    margin: 0,
-  },
-  h3: {
-    fontSize: 20,
-    fontWeight: '700',
-    alignSelf: 'center',
-    color: KevaColors.darkText,
-    lineHeight: 25,
-    paddingVertical: 20,
-    textAlign: 'center',
-  },
 });
