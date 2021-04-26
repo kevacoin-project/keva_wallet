@@ -511,14 +511,28 @@ export async function confirmSellNFT(nftWallet, requestedSatPerByte, namespaceId
 
 // nsNFTId: namespaceId of the NFT namespace to bid for.
 // paymentAddress: the address to send the payment.
-export async function createNFTBid(wallet, requestedSatPerByte, nsNFTId, paymentAddress, price)
+export async function createNFTBid(wallet, requestedSatPerByte, nsNFTId, paymentAddress, price, profile, displayName)
 {
   await wallet.fetchBalance();
   await wallet.fetchTransactions();
 
   const nsTargetAddress = await wallet.getAddressAsync();
-  //TODO: fix key/value.
-  const nsScript = getKeyValueUpdateScript(nsNFTId, nsTargetAddress, '_transfer_', '_transfer_value_');
+
+  // Remove the for sale info in the profile after transferring.
+  const key = '\x01_KEVA_NS_';
+  let value;
+  if (profile) {
+    let newProfile = { ...JSON.parse(profile) };
+    delete newProfile.price;
+    delete newProfile.desc;
+    delete newProfile.addr;
+    value = JSON.stringify(newProfile);
+  } else {
+    value = JSON.stringify({displayName});
+  }
+
+  const nsScript = getKeyValueUpdateScript(nsNFTId, nsTargetAddress, key, value);
+
   // Namespace needs at least 0.01 KVA.
   const namespaceValue = 1000000;
   let targets = [{

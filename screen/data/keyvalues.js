@@ -730,7 +730,7 @@ class KeyValues extends React.Component {
     });
   }
 
-  onBuy = (namespaceId, displayName, saleTx, price, desc, addr, height) => {
+  onBuy = (namespaceId, displayName, saleTx, price, desc, addr, profile) => {
     const {navigation, keyValueList} = this.props;
     const {isOther, shortCode} = navigation.state.params;
     const index = findTxIndex(keyValueList.keyValues[namespaceId], saleTx);
@@ -742,16 +742,16 @@ class KeyValues extends React.Component {
       shortCode,
       replyTxid: saleTx,
       isOther,
-      height,
       price,
       desc,
       addr,
+      profile,
     });
   }
 
   render() {
     let {navigation, dispatch, keyValueList, mediaInfoList, namespaceList, otherNamespaceList} = this.props;
-    let {isOther, namespaceId, displayName, shortCode} = navigation.state.params;
+    let {isOther, namespaceId, displayName, shortCode, profile} = navigation.state.params;
     if (!namespaceId) {
       namespaceId = this.namespaceId;
     }
@@ -786,7 +786,7 @@ class KeyValues extends React.Component {
         buttonStyle={{marginLeft: 15, borderRadius: 30, height: 28, width: 120, padding: 0, borderColor: KevaColors.okColor, backgroundColor: KevaColors.okColor}}
         title={ isOther ? 'Buy It' : 'Manage'}
         titleStyle={{fontSize: 14, color: '#fff', marginLeft: 8}}
-        onPress={()=>{this.onBuy(namespaceId, displayName, this.state.saleTx, this.state.price, this.state.desc, this.state.addr)}}
+        onPress={()=>{this.onBuy(namespaceId, displayName, this.state.saleTx, this.state.price, this.state.desc, this.state.addr, profile)}}
         icon={
           <Icon
             name="ios-cart"

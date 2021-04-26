@@ -205,7 +205,7 @@ class BuyNFT extends React.Component {
 
   onOffer = () => {
     const {navigation, namespaceList} = this.props;
-    const {replyTxid, namespaceId, index, type, hashtags, price, desc, addr} = navigation.state.params;
+    const {replyTxid, namespaceId, index, type, hashtags, price, desc, addr, displayName, profile} = navigation.state.params;
     // Must have a namespace.
     if (Object.keys(namespaceList).length == 0) {
       toastError('Create a namespace first');
@@ -217,7 +217,8 @@ class BuyNFT extends React.Component {
       namespaceId,
       index,
       type,
-      price, desc, addr, // NFT related.
+      displayName,
+      price, desc, addr, profile, // NFT related.
       //updateReplies: this.updateReplies,
       //hashtags,
     })
