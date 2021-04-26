@@ -48,7 +48,13 @@ class Reply extends React.Component {
   }
 
   onAccept = (offerTx) => {
-
+    const {price, desc, addr} = this.props;
+    this.props.navigation.push('AcceptNFT', {
+      offerTx,
+      price,
+      desc,
+      addr,
+    });
   }
 
   render() {
@@ -411,7 +417,7 @@ class BuyNFT extends React.Component {
 
   render() {
     const {keyValueList} = this.props;
-    const {hashtags, price, desc} = this.props.navigation.state.params;
+    const {hashtags, price, addr, desc} = this.props.navigation.state.params;
     let {replies, isRaw} = this.state;
     const {shortCode, displayName, namespaceId, index, type} = this.state;
     if (!type) {
@@ -489,7 +495,7 @@ class BuyNFT extends React.Component {
         onRefresh={() => this.fetchReplies()}
         refreshing={this.state.isRefreshing}
         keyExtractor={(item, index) => item.key + index}
-        renderItem={({item, index}) => <Reply item={item} navigation={this.props.navigation} />}
+        renderItem={({item, index}) => <Reply item={item} price={price} addr={addr} navigation={this.props.navigation} />}
       />
     )
   }
