@@ -566,7 +566,7 @@ class MyNamespaces extends React.Component {
           }
         </View>
         {
-          namespaceList.order.length > 0 ?
+          (namespaceList.order.length > 0) ?
           <SortableListView
             style={styles.listStyle}
             contentContainerStyle={{paddingBottom: 400}}
@@ -587,17 +587,17 @@ class MyNamespaces extends React.Component {
               <RefreshControl onRefresh={() => this.refreshNamespaces()} refreshing={this.state.isRefreshing} />
             }
           >
-            <Text style={[styles.emptyMessage, { marginBottom: 7, marginTop: 30 }]}>
+            <Text style={[styles.emptyMessage, { marginBottom: 40, marginTop: 30 }]}>
               {loc.namespaces.click_add_btn}
+            </Text>
+            <Text style={[styles.emptyMessage, styles.help, {marginTop: 10}]}>
+              {loc.namespaces.explain}
             </Text>
             <MCIcon type='material-community'
               name='chevron-double-down'
               color={KevaColors.inactiveText}
-              size={80}
+              size={60}
             />
-            <Text style={[styles.emptyMessage, styles.help, {marginTop: 10}]}>
-              {loc.namespaces.explain}
-            </Text>
           </ScrollView>
         }
       </View>
@@ -1285,7 +1285,6 @@ var styles = StyleSheet.create({
     textAlign: 'center',
     lineHeight: 24,
     paddingHorizontal: 20,
-    fontWeight: '700',
   },
   inputAndroid: {
     width: SCREEN_WIDTH*0.8,

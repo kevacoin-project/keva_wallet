@@ -40,7 +40,7 @@ module.exports = {
     shortcode_id: "Shortcode or Namespace ID",
     search_hashtag: "Enter hashtag, e.g. kevacoin",
     no_data: "No Data",
-    click_add_btn: "Enter profile name and click the '+' button to create your first namespace",
+    click_add_btn: "Type name and click the '+' button to create a profile",
     click_search_btn: "Enter shortcode (e.g. 5570511) and click the 'search' button",
     explain: "Not see your namespaces? Pull down to refresh",
     namespace_creation_err: 'Cannot create namespace. Please wait a few minutes until your last change is confirmed in the blockchain.',
