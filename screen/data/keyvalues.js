@@ -300,11 +300,10 @@ class KeyValues extends React.Component {
   }
 
   fetchKeyValues = async (min_tx_num) => {
-    const {navigation, dispatch, keyValueList, namespaceList, reactions} = this.props;
+    const {navigation, dispatch, keyValueList, reactions} = this.props;
     let {namespaceId, shortCode} = navigation.state.params;
 
-    //if (!namespaceId && shortCode) {
-    if (true) {
+    if (!namespaceId && shortCode) {
       // We are here because user clicks on the short code.
       // There is no namespaceId yet.
       let nsData = await getNamespaceInfoFromShortCode(BlueElectrum, shortCode);
@@ -383,6 +382,10 @@ class KeyValues extends React.Component {
   }
 
   async componentDidMount() {
+    // NFT sale info.
+    let {price, desc, addr, txid} = this.props.navigation.state.params;
+    this.setState({price, desc, addr, saleTx: txid});
+
     // Check the version of redux store KeyValue list version.
     // If not matched, nuke it and start over again.
     let {keyValueList, dispatch} = this.props;
@@ -778,6 +781,23 @@ class KeyValues extends React.Component {
       mergeList = mergeListAll;
     }
 
+    const buyNFTBtn = (
+      <Button
+        type='solid'
+        buttonStyle={{marginLeft: 15, borderRadius: 30, height: 28, width: 100, padding: 0, borderColor: KevaColors.okColor, backgroundColor: KevaColors.okColor}}
+        title={'Buy It'}
+        titleStyle={{fontSize: 14, color: '#fff', marginLeft: 8}}
+        onPress={()=>{this.onBuy(namespaceId, displayName, this.state.saleTx, this.state.price, this.state.desc, this.state.addr)}}
+        icon={
+          <Icon
+            name="ios-cart"
+            size={20}
+            color="#fff"
+          />
+        }
+      />
+    );
+
     let listHeader = null;
     if (mergeList && mergeList.length > 0) {
       const isFollowing = !!otherNamespaceList.namespaces[namespaceId];
@@ -807,24 +827,30 @@ class KeyValues extends React.Component {
               {
                 isOther ?
                 (isFollowing ?
-                  <Button
-                    type='solid'
-                    buttonStyle={{borderRadius: 30, height: 28, width: 120, padding: 0, borderColor: KevaColors.actionText, backgroundColor: KevaColors.actionText}}
-                    title={loc.namespaces.following}
-                    titleStyle={{fontSize: 14, color: '#fff'}}
-                    onPress={()=>{this.onUnfollow(namespaceId)}}
-                  />
+                  <View style={{flexDirection: 'row'}}>
+                    <Button
+                      type='solid'
+                      buttonStyle={{borderRadius: 30, height: 28, width: 120, borderColor: KevaColors.actionText, backgroundColor: KevaColors.actionText}}
+                      title={loc.namespaces.following}
+                      titleStyle={{fontSize: 14, color: '#fff'}}
+                      onPress={()=>{this.onUnfollow(namespaceId)}}
+                    />
+                    { this.state.price && buyNFTBtn }
+                  </View>
                   :
-                  <Button
-                    type='outline'
-                    buttonStyle={{borderRadius: 30, height: 28, width: 120, padding: 0, borderColor: KevaColors.actionText}}
-                    title={loc.namespaces.follow}
-                    titleStyle={{fontSize: 14, color: KevaColors.actionText}}
-                    onPress={()=>{this.onFollow(namespaceId, namespaceInfo)}}
-                  />
-              )
-              :
-              (
+                  <View style={{flexDirection: 'row'}}>
+                    <Button
+                      type='outline'
+                      buttonStyle={{borderRadius: 30, height: 28, width: 120, borderColor: KevaColors.actionText}}
+                      title={loc.namespaces.follow}
+                      titleStyle={{fontSize: 14, color: KevaColors.actionText}}
+                      onPress={()=>{this.onFollow(namespaceId, namespaceInfo)}}
+                    />
+                    { this.state.price && buyNFTBtn }
+                  </View>
+                )
+                :
+                (
                 <View style={{flexDirection: 'row'}}>
                   <Button
                     type='outline'
@@ -835,13 +861,7 @@ class KeyValues extends React.Component {
                   />
                   {
                     this.state.price ?
-                    <Button
-                      type='solid'
-                      buttonStyle={{marginLeft: 10, borderRadius: 30, height: 28, width: 100, padding: 0, borderColor: KevaColors.okColor, backgroundColor: KevaColors.okColor}}
-                      title={'Buy It'}
-                      titleStyle={{fontSize: 14, color: '#fff'}}
-                      onPress={()=>{this.onBuy(namespaceId, displayName, this.state.saleTx, this.state.price, this.state.desc, this.state.addr)}}
-                    />
+                    buyNFTBtn
                     :
                     <Button
                       type='solid'
@@ -852,7 +872,7 @@ class KeyValues extends React.Component {
                     />
                   }
                 </View>
-              )
+                )
             }
             </View>
           </View>

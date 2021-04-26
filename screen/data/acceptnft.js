@@ -50,17 +50,17 @@ class AcceptNFT extends React.Component {
   }
 
   render() {
-    const { offerTx, price, addr } = this.props.navigation.state.params;
+    const { shortCode, offerTx, price, addr } = this.props.navigation.state.params;
     return (
       <View style={styles.container}>
         <View style={styles.inputKey}>
-          <Text style={{fontSize: 20, color: KevaColors.darkText, fontWeight: '700', textAlign: 'center'}}>{price + " KVA"}</Text>
-          <Text style={{fontSize: 18, color: KevaColors.darkText, textAlign: 'center', marginVertical: 15}}>{"will be paid to your address"}</Text>
-          <Text style={{fontSize: 16, color: KevaColors.darkText, textAlign: 'center'}}>{addr}</Text>
+          <Text style={{fontSize: 18, color: KevaColors.darkText, textAlign: 'center'}}>{"By sigining the transaction"}</Text>
+          <Text style={{fontSize: 18, color: KevaColors.darkText, textAlign: 'center', marginTop: 7}}>{`you sell NFT ${shortCode} and receive`}</Text>
+          <Text style={{fontSize: 20, color: '#37c0a1', fontWeight: '700', textAlign: 'center', marginTop: 10}}>{price + " KVA"}</Text>
 
           <Button
             type='solid'
-            buttonStyle={{alignSelf: 'center', marginTop: 30, borderRadius: 30, height: 40, width: 200, backgroundColor: KevaColors.actionText, borderColor: KevaColors.actionText}}
+            buttonStyle={{alignSelf: 'center', marginTop: 20, borderRadius: 30, height: 40, width: 200, backgroundColor: KevaColors.actionText, borderColor: KevaColors.actionText}}
             title={"Accept and Sign"}
             titleStyle={{fontSize: 16, color: "#fff", marginLeft: 10}}
             icon={
