@@ -36,7 +36,7 @@ import {
         getNamespaceScriptHash, parseSpecialKey,
         deleteKeyValue, getSpecialKeyText,
         getNamespaceInfoFromShortCode, decodeBase64,
-        findTxIndex,
+        findTxIndex, getNamespaceInfo,
         } from '../../class/keva-ops';
 import Toast from 'react-native-root-toast';
 import StepModal from "../../common/StepModalWizard";
@@ -303,24 +303,29 @@ class KeyValues extends React.Component {
     const {navigation, dispatch, keyValueList, reactions} = this.props;
     let {namespaceId, shortCode} = navigation.state.params;
 
+    let nsData;
     if (!namespaceId && shortCode) {
       // We are here because user clicks on the short code.
       // There is no namespaceId yet.
-      let nsData = await getNamespaceInfoFromShortCode(BlueElectrum, shortCode);
+      nsData = await getNamespaceInfoFromShortCode(BlueElectrum, shortCode);
       if (!nsData) {
         return;
       }
       namespaceId = nsData.namespaceId;
       this.namespaceId = namespaceId;
       this.displayName = nsData.displayName;
-      const value = JSON.parse(nsData.value);
-      const {price, desc, addr} = value;
-      if (price) {
-        this.setState({
-          price, desc, addr, saleTx: nsData.tx,
-        });
+    } else if (namespaceId) {
+      nsData = await getNamespaceInfo(BlueElectrum, namespaceId, false);
+      if (!nsData) {
+        return;
       }
     }
+
+    const value = JSON.parse(nsData.value);
+    const {price, desc, addr} = value;
+    this.setState({
+      price, desc, addr, saleTx: nsData.tx,
+    });
 
     const history = await BlueElectrum.blockchainKeva_getKeyValues(getNamespaceScriptHash(namespaceId), min_tx_num);
     if (history.keyvalues.length == 0) {
@@ -858,6 +863,7 @@ class KeyValues extends React.Component {
                     title={'Edit'}
                     titleStyle={{fontSize: 14, color: KevaColors.actionText}}
                     onPress={()=>{this.onEditProfile(namespaceId, namespaceInfo[namespaceId])}}
+                    disabled={!!this.state.price}
                   />
                   {
                     this.state.price ?
