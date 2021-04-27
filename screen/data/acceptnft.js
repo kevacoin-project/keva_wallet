@@ -74,7 +74,7 @@ class AcceptNFT extends React.Component {
             this.setState({
               showSellNFTModal: false,
             });
-            this.props.navigation.goBack();
+            this.props.navigation.popToTop();
           }}
         />
       </View>
@@ -95,6 +95,7 @@ class AcceptNFT extends React.Component {
   onAccept = async () => {
     const {walletId, namespaceId, offerTx} = this.props.navigation.state.params;
     this.setState({loading: true});
+
     const signedTx = await acceptNFTBid(walletId, offerTx, namespaceId);
     if (!signedTx) {
       return toastError('Failed to sign transaction');

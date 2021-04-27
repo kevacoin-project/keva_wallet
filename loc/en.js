@@ -16,6 +16,7 @@ module.exports = {
     reward: 'Reward',
     other_amount: 'Other Amount',
     reply_sent: 'Reply sent',
+    offer_sent: 'Offer submitted',
     reward_sent: 'Reward sent',
     share: 'Share',
     share_sent: 'Shared successfully',
