@@ -115,9 +115,10 @@ class Namespace extends React.Component {
   }
 
   onSold = () => {
+    const {refresh} = this.props;
     setTimeout(async () => {
-      await this.fetchNamespaces();
-    }, 1000);
+      await refresh();
+    }, 2000);
   }
 
   onKey = () => {
@@ -620,11 +621,16 @@ class MyNamespaces extends React.Component {
           <View style={styles.inputContainer}>
             <Text style={{fontSize: 16, marginLeft: 10, color: KevaColors.errColor}}>{this.state.lockedAmount/100000000 + ' KVA Locked'}</Text>
             <Button
-              type='solid'
-              buttonStyle={{alignSelf: 'center', marginVertical: 5, marginRight: 10, borderRadius: 40, height: 30, width: 100, backgroundColor: KevaColors.actionText, borderColor: KevaColors.actionText}}
-              title={"Manage"}
-              titleStyle={{fontSize: 14, color: "#fff"}}
+              type='clear'
+              buttonStyle={{alignSelf: 'center', marginRight: 10}}
               onPress={()=>{this.onManageLockedFund()}}
+              icon={
+                <Icon
+                  name="ios-settings"
+                  size={24}
+                  color={KevaColors.actionText}
+                />
+              }
             />
           </View>
         }
