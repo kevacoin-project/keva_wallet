@@ -234,8 +234,8 @@ class BuyNFT extends React.Component {
   }
 
   fetchReplies = async () => {
-    const {dispatch, navigation, keyValueList, reactions} = this.props;
-    const {replyTxid, namespaceId, index, type, hashtags, price, addr} = navigation.state.params;
+    const {navigation} = this.props;
+    const {replyTxid, price, addr} = navigation.state.params;
 
     try {
       this.setState({isRefreshing: true});
@@ -425,7 +425,9 @@ class BuyNFT extends React.Component {
               this.setState({
                 showCancelSaleModal: false,
               });
-              this.props.navigate.goBack();
+              const {onCancelSale} = this.props.navigation.state.params;
+              onCancelSale();
+              this.props.navigation.goBack();
             }}
           />
         </View>
@@ -478,8 +480,6 @@ class BuyNFT extends React.Component {
           const key = '\x01_KEVA_NS_';
           const value = JSON.stringify(profileJSON);
           const { tx, fee } = await updateKeyValue(wallet, FALLBACK_DATA_PER_BYTE_FEE, namespaceId, key, value);
-          console.log('JWU fee: ' + fee)
-          console.log(value)
           let feeKVA = fee / 100000000;
           this.setState({ showCancelSaleModal: true, currentPage: 1, fee: feeKVA });
           this.updateProfileTx = tx;

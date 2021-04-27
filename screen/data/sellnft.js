@@ -264,6 +264,8 @@ class SellNFT extends React.Component {
                 showSellNFTModal: false,
                 nsName: '',
               });
+              const {onSaleCreated} = this.props.navigation.state.params;
+              onSaleCreated();
               this.props.navigation.goBack();
             }}
           />

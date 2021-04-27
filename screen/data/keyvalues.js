@@ -727,6 +727,12 @@ class KeyValues extends React.Component {
     return keyValues.reverse();
   }
 
+  onSaleCreated = () => {
+    setTimeout(() => {
+      this.refreshKeyValues(-1);
+    }, 1000);
+  }
+
   onSellNFT = (namespaceId, namespaceInfo) => {
     const {navigation} = this.props;
     const {walletId} = navigation.state.params;
@@ -734,7 +740,14 @@ class KeyValues extends React.Component {
       walletId,
       namespaceId,
       namespaceInfo,
+      onSaleCreated: this.onSaleCreated,
     });
+  }
+
+  onCancelSale = () => {
+    setTimeout(() => {
+      this.refreshKeyValues(-1);
+    }, 1000);
   }
 
   onBuy = (namespaceId, displayName, saleTx, price, desc, addr, profile) => {
@@ -754,6 +767,7 @@ class KeyValues extends React.Component {
       desc,
       addr,
       profile,
+      onCancelSale: this.onCancelSale,
     });
   }
 
