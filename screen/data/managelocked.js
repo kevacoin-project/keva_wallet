@@ -3,6 +3,7 @@ import {
   Text,
   View,
   TouchableOpacity,
+  Alert,
 } from 'react-native';
 let BlueApp = require('../../BlueApp');
 const StyleSheet = require('../../PlatformStyleSheet');
@@ -47,12 +48,30 @@ class ManageLocked extends React.Component {
     this.setState({lockedFund});
   }
 
-  onClear = async (namespaceId) => {
+  confirmClear = ({ onSuccess = () => {}, onFailure }) => {
+    Alert.alert(
+      'Unlock Fund',
+      'If you unlock fund, the offer you have submitted may become invalid. Unlock?',
+      [
+        { text: 'Yes', onPress: onSuccess, style: 'cancel' },
+        {
+          text: 'No',
+          onPress: onFailure,
+        },
+      ],
+      { cancelable: false },
+    );
+  };
+
+
+  onClear = (namespaceId) => {
     const {onLockedChange} = this.props.navigation.state.params;
-    await BlueApp.removeNamespaceLockedFund(namespaceId);
-    const lockedFund = await BlueApp.getLockedFund();
-    await onLockedChange();
-    this.setState({lockedFund});
+    this.confirmClear(async () => {
+      await BlueApp.removeNamespaceLockedFund(namespaceId);
+      const lockedFund = await BlueApp.getLockedFund();
+      await onLockedChange();
+      this.setState({lockedFund});
+    });
   }
 
   render() {
