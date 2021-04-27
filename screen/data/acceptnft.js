@@ -5,8 +5,8 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
+let BlueElectrum = require('../../BlueElectrum');
 const StyleSheet = require('../../PlatformStyleSheet');
-const KevaButton = require('../../common/KevaButton');
 const KevaColors = require('../../common/KevaColors');
 import { THIN_BORDER, SCREEN_WIDTH, toastError } from '../../util';
 import {
@@ -49,14 +49,38 @@ class AcceptNFT extends React.Component {
     this.isBiometricUseCapableAndEnabled = await Biometric.isBiometricUseCapableAndEnabled();
   }
 
+  onAccept = async () => {
+    const {walletId, namespaceId, offerTx} = this.props.navigation.state.params;
+    this.setState({loading: true});
+    const signedTx = await acceptNFTBid(walletId, offerTx, namespaceId);
+    console.log(signedTx);
+    if (!signedTx) {
+      return toastError('Failed to sign transaction');
+    }
+    let result = await BlueElectrum.broadcast(signedTx);
+    if (result.code) {
+      // Error.
+      console.warn(result.message);
+      toastError(result.message);
+    }
+    this.setState({
+      loading: false,
+    });
+  }
+
   render() {
-    const { shortCode, offerTx, price, addr } = this.props.navigation.state.params;
+    const { shortCode, offerTx, offerPrice, displayName} = this.props.navigation.state.params;
     return (
       <View style={styles.container}>
         <View style={styles.inputKey}>
-          <Text style={{fontSize: 18, color: KevaColors.darkText, textAlign: 'center'}}>{"By sigining the transaction"}</Text>
-          <Text style={{fontSize: 18, color: KevaColors.darkText, textAlign: 'center', marginTop: 7}}>{`you sell NFT ${shortCode} and receive`}</Text>
-          <Text style={{fontSize: 20, color: '#37c0a1', fontWeight: '700', textAlign: 'center', marginTop: 10}}>{price + " KVA"}</Text>
+          <Text style={{fontSize: 18, color: KevaColors.darkText, textAlign: 'center'}}>{"By sigining the transaction, you sell"}</Text>
+          <Text style={{fontSize: 18, color: KevaColors.actionText, textAlign: 'center', marginTop: 7}}>
+            {displayName + '@' + shortCode}
+          </Text>
+          <Text style={{fontSize: 18, color: KevaColors.darkText, textAlign: 'center', marginTop: 7}}>
+            {`and receive`}
+          </Text>
+          <Text style={{fontSize: 20, color: '#37c0a1', fontWeight: '700', textAlign: 'center', marginTop: 10}}>{offerPrice + " KVA"}</Text>
 
           <Button
             type='solid'
@@ -70,7 +94,9 @@ class AcceptNFT extends React.Component {
                 color="#fff"
               />
             }
-            onPress={()=>{this.onAccept(item.value)}}
+            onPress={()=>{this.onAccept()}}
+            loading={this.state.loading}
+            disabled={this.state.loading}
           />
         </View>
         <Text

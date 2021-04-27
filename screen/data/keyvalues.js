@@ -732,9 +732,10 @@ class KeyValues extends React.Component {
 
   onBuy = (namespaceId, displayName, saleTx, price, desc, addr, profile) => {
     const {navigation, keyValueList} = this.props;
-    const {isOther, shortCode} = navigation.state.params;
+    const {isOther, shortCode, walletId} = navigation.state.params;
     const index = findTxIndex(keyValueList.keyValues[namespaceId], saleTx);
     navigation.push('BuyNFT', {
+      walletId,
       namespaceId,
       index,
       type: 'keyvalue',
