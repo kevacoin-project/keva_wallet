@@ -48,7 +48,7 @@ class ManageLocked extends React.Component {
     this.setState({lockedFund});
   }
 
-  confirmClear = ({ onSuccess = () => {}, onFailure }) => {
+  confirmClear = (onSuccess, onFailure = () => {}) => {
     Alert.alert(
       'Unlock Fund',
       'If you unlock fund, the offer you have submitted may become invalid. Unlock?',
