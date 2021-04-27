@@ -8,19 +8,26 @@ import {
 } from 'react-native';
 const BlueElectrum = require('../../BlueElectrum');
 const StyleSheet = require('../../PlatformStyleSheet');
+const KevaButton = require('../../common/KevaButton');
 const KevaColors = require('../../common/KevaColors');
 import { THIN_BORDER, timeConverter, toastError, getInitials, stringToColor } from "../../util";
 import {
   parseSpecialKey,
   getSpecialKeyText,
+  updateKeyValue,
 } from '../../class/keva-ops';
 import {
   validateOffer,
 } from '../../class/nft-ops';
+import { FALLBACK_DATA_PER_BYTE_FEE } from '../../models/networkTransactionFees';
 import {
   BlueNavigationStyle,
+  BlueLoading,
+  BlueBigCheckmark,
 } from '../../BlueComponents';
 import { Avatar, Button, Icon, } from 'react-native-elements';
+import StepModal from "../../common/StepModalWizard";
+const BlueApp = require('../../BlueApp');
 const loc = require('../../loc');
 import { connect } from 'react-redux';
 
@@ -226,10 +233,6 @@ class BuyNFT extends React.Component {
     })
   }
 
-  onCancelSale = () => {
-    // Cancel the sale.
-  }
-
   fetchReplies = async () => {
     const {dispatch, navigation, keyValueList, reactions} = this.props;
     const {replyTxid, namespaceId, index, type, hashtags, price, addr} = navigation.state.params;
@@ -317,6 +320,176 @@ class BuyNFT extends React.Component {
     });
   }
 
+  getDeleteModal = () => {
+    if (!this.state.showCancelSaleModal) {
+      return null;
+    }
+
+    let deleteKeyPage = (
+      <View style={styles.modalDelete}>
+        {
+          this.state.createTransactionErr ?
+            <>
+              <Text style={[styles.modalText, {color: KevaColors.errColor, fontWeight: 'bold'}]}>{"Error"}</Text>
+              <Text style={styles.modalErr}>{this.state.createTransactionErr}</Text>
+              <KevaButton
+                type='secondary'
+                style={{margin:10, marginTop: 30}}
+                caption={'Cancel'}
+                onPress={async () => {
+                  this.setState({showCancelSaleModal: false, createTransactionErr: null});
+                }}
+              />
+            </>
+          :
+            <>
+              <Text style={[styles.modalText, {alignSelf: 'center', color: KevaColors.darkText}]}>{loc.namespaces.creating_tx}</Text>
+              <Text style={styles.waitText}>{loc.namespaces.please_wait}</Text>
+              <BlueLoading style={{paddingTop: 30}}/>
+            </>
+        }
+      </View>
+    );
+
+    let confirmPage = (
+      <View style={styles.modalDelete}>
+        <Text style={styles.modalText}>{"Transaction fee:  "}
+          <Text style={styles.modalFee}>{this.state.fee + ' KVA'}</Text>
+        </Text>
+        <KevaButton
+          type='secondary'
+          style={{margin:10, marginTop: 40}}
+          caption={'Confirm'}
+          onPress={async () => {
+            this.setState({currentPage: 2, isBroadcasting: true});
+            try {
+              await BlueElectrum.ping();
+              await BlueElectrum.waitTillConnected();
+              if (this.isBiometricUseCapableAndEnabled) {
+                if (!(await Biometric.unlockWithBiometrics())) {
+                  this.setState({isBroadcasting: false});
+                  return;
+                }
+              }
+              let result = await BlueElectrum.broadcast(this.updateProfileTx);
+              if (result.code) {
+                // Error.
+                return this.setState({
+                  isBroadcasting: false,
+                  broadcastErr: result.message,
+                });
+              }
+              await BlueApp.saveToDisk();
+              this.setState({isBroadcasting: false, showSkip: false});
+            } catch (err) {
+              this.setState({isBroadcasting: false});
+              console.warn(err);
+            }
+          }}
+        />
+      </View>
+    );
+
+    let broadcastPage;
+    if (this.state.isBroadcasting) {
+      broadcastPage = (
+        <View style={styles.modalDelete}>
+          <Text style={styles.modalText}>{"Broadcasting Transaction ..."}</Text>
+          <BlueLoading style={{paddingTop: 30}}/>
+        </View>
+      );
+    } else if (this.state.broadcastErr) {
+      broadcastPage = (
+        <View style={styles.modalDelete}>
+          <Text style={[styles.modalText, {color: KevaColors.errColor, fontWeight: 'bold'}]}>{"Error"}</Text>
+          <Text style={styles.modalErr}>{this.state.broadcastErr}</Text>
+          <KevaButton
+            type='secondary'
+            style={{margin:10, marginTop: 30}}
+            caption={'Cancel'}
+            onPress={async () => {
+              this.setState({showCancelSaleModal: false});
+            }}
+          />
+        </View>
+      );
+    } else {
+      broadcastPage = (
+        <View style={styles.modalDelete}>
+          <BlueBigCheckmark style={{marginHorizontal: 50}}/>
+          <KevaButton
+            type='secondary'
+            style={{margin:10, marginTop: 30}}
+            caption={'Done'}
+            onPress={async () => {
+              this.setState({
+                showCancelSaleModal: false,
+              });
+              this.props.navigate.goBack();
+            }}
+          />
+        </View>
+      );
+    }
+
+    return (
+      <View>
+        <StepModal
+          showNext={false}
+          showSkip={this.state.showSkip}
+          currentPage={this.state.currentPage}
+          stepComponents={[deleteKeyPage, confirmPage, broadcastPage]}
+          onFinish={this.keyDeleteFinish}
+          onNext={this.keyDeleteNext}
+          onCancel={this.keyDeleteCancel}/>
+      </View>
+    );
+  }
+
+  keyDeleteCancel = () => {
+    return this.setState({ showCancelSaleModal: false });
+  }
+
+  onCancelSale = async () => {
+    const {namespaceId, walletId, profile} = this.props.navigation.state.params;
+
+    const wallets = BlueApp.getWallets();
+    const wallet = wallets.find(w => w.getID() == walletId);
+    if (!wallet) {
+      Toast.show('Cannot find the wallet');
+      return;
+    }
+    this.setState({
+      showCancelSaleModal: true,
+      currentPage: 0,
+      showSkip: true,
+      broadcastErr: null,
+      isBroadcasting: false,
+      createTransactionErr: null,
+      fee: 0,
+    }, () => {
+      setTimeout(async () => {
+        try {
+          let profileJSON = JSON.parse(profile);
+          // Remove sale related info.
+          delete profileJSON['price'];
+          delete profileJSON['addr'];
+          delete profileJSON['desc'];
+          const key = '\x01_KEVA_NS_';
+          const value = JSON.stringify(profileJSON);
+          const { tx, fee } = await updateKeyValue(wallet, FALLBACK_DATA_PER_BYTE_FEE, namespaceId, key, value);
+          console.log('JWU fee: ' + fee)
+          console.log(value)
+          let feeKVA = fee / 100000000;
+          this.setState({ showCancelSaleModal: true, currentPage: 1, fee: feeKVA });
+          this.updateProfileTx = tx;
+        } catch (err) {
+          this.setState({createTransactionErr: err.message});
+        }
+      }, 800);
+    });
+  }
+
   render() {
     const {keyValueList} = this.props;
     const {hashtags, price, addr, desc, isOther} = this.props.navigation.state.params;
@@ -342,6 +515,7 @@ class BuyNFT extends React.Component {
 
     const listHeader = (
       <View style={styles.container}>
+        {this.getDeleteModal()}
         <View style={styles.keyContainer}>
           <View style={{paddingRight: 10}}>
             <Avatar rounded size="medium" title={getInitials(displayName)}
@@ -578,5 +752,28 @@ var styles = StyleSheet.create({
     fontSize: 16,
     color: KevaColors.actionText,
     lineHeight: 23
-  }
+  },
+  modalDelete: {
+    height: 300,
+    alignSelf: 'center',
+    justifyContent: 'flex-start'
+  },
+  modalText: {
+    fontSize: 18,
+    color: KevaColors.lightText,
+  },
+  waitText: {
+    fontSize: 16,
+    color: KevaColors.lightText,
+    paddingTop: 10,
+    alignSelf: 'center',
+  },
+  modalFee: {
+    fontSize: 18,
+    color: KevaColors.statusColor,
+  },
+  modalErr: {
+    fontSize: 16,
+    marginTop: 20,
+  },
 });
