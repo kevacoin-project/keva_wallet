@@ -216,7 +216,7 @@ class BuyNFT extends React.Component {
   onOfferDone = () => {
     setTimeout(async () => {
       await this.fetchReplies();
-    }, 1000)
+    }, 2000)
   }
 
   onOffer = () => {
