@@ -384,7 +384,7 @@ export function getNonNamespaceUxtosSync(transactions, utxos) {
   return nonNSutxos;
 }
 
-export async function getNonNamespaceUxtos(wallet, transactions, utxos, tryAgain) {
+export async function getNonNamespaceUxtos(wallet, transactions, utxos, defaultLockedFund, tryAgain) {
   let nonNSutxos = [];
   for (let u of utxos) {
     const tx = transactions.find(t => t.txid == u.txId);
@@ -398,6 +398,13 @@ export async function getNonNamespaceUxtos(wallet, transactions, utxos, tryAgain
     }
   }
 
+  // Remove the locked fund (due to bidding) as we cannot use them.
+  const lockedFund = defaultLockedFund ? defaultLockedFund : await BlueApp.getLockedFund();
+  nonNSutxos = nonNSutxos.filter(u => {
+    const key = `${u.txId}:${u.vout}`;
+    return !lockedFund[key];
+  })
+
   if (nonNSutxos.length == 0 && !tryAgain) {
     // Try again.
     console.log('Try again for getNonNamespaceUxtos')
@@ -407,7 +414,7 @@ export async function getNonNamespaceUxtos(wallet, transactions, utxos, tryAgain
     await wallet.fetchUtxo();
     const transactions = wallet.getTransactions();
     let utxos = wallet.getUtxo();
-    return await getNonNamespaceUxtos(wallet, transactions, utxos, true);
+    return await getNonNamespaceUxtos(wallet, transactions, utxos, defaultLockedFund, true);
   }
   return nonNSutxos;
 }
@@ -685,7 +692,7 @@ export async function rewardKeyValue(ecl, wallet, requestedSatPerByte, namespace
 // replyRootAddress: the root namespace of the post.
 // replyTxid: the txid of the post
 //
-export async function replyKeyValue(wallet, requestedSatPerByte, namespaceId, value, replyTxid, binaryValue = false) {
+export async function replyKeyValue(wallet, requestedSatPerByte, namespaceId, value, replyTxid, binaryValue = false, lockedFund = null) {
   await wallet.fetchBalance();
   await wallet.fetchTransactions();
   let nsUtxo = await getNamespaceUtxo(wallet, namespaceId);
@@ -708,7 +715,7 @@ export async function replyKeyValue(wallet, requestedSatPerByte, namespaceId, va
 
   const transactions = wallet.getTransactions();
   let utxos = wallet.getUtxo();
-  let nonNamespaceUtxos = await getNonNamespaceUxtos(wallet, transactions, utxos);
+  let nonNamespaceUtxos = await getNonNamespaceUxtos(wallet, transactions, utxos, lockedFund);
   if (!nonNamespaceUtxos || nonNamespaceUtxos.length == 0) {
     throw new Error('No nonNamespaceUtxos');
   }

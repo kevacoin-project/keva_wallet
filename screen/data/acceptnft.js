@@ -53,10 +53,17 @@ class AcceptNFT extends React.Component {
     const {walletId, namespaceId, offerTx} = this.props.navigation.state.params;
     this.setState({loading: true});
     const signedTx = await acceptNFTBid(walletId, offerTx, namespaceId);
-    console.log(signedTx);
     if (!signedTx) {
       return toastError('Failed to sign transaction');
     }
+
+    if (this.isBiometricUseCapableAndEnabled) {
+      if (!(await Biometric.unlockWithBiometrics())) {
+        this.setState({loading: false});
+        return;
+      }
+    }
+
     let result = await BlueElectrum.broadcast(signedTx);
     if (result.code) {
       // Error.
