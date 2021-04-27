@@ -212,6 +212,12 @@ class BuyNFT extends React.Component {
     }
   }
 
+  onOfferDone = () => {
+    setTimeout(async () => {
+      await this.fetchReplies();
+    }, 1000)
+  }
+
   onOffer = () => {
     const {navigation, namespaceList} = this.props;
     const {replyTxid, namespaceId, index, type, hashtags, price, desc, addr, displayName, profile} = navigation.state.params;
@@ -228,8 +234,7 @@ class BuyNFT extends React.Component {
       type,
       displayName,
       price, desc, addr, profile, // NFT related.
-      //updateReplies: this.updateReplies,
-      //hashtags,
+      onOfferDone: this.onOfferDone,
     })
   }
 

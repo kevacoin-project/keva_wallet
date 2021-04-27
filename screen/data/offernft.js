@@ -126,8 +126,8 @@ class OfferNFT extends React.Component {
   }
 
   getOfferModal = () => {
-    const { namespaceList, keyValueList, dispatch } = this.props;
-    const { replyTxid, displayName, namespaceId: origNamespaceId, index, type, hashtags, updateReplies, updateHashtag, price, desc, addr, profile } = this.props.navigation.state.params;
+    const { namespaceList } = this.props;
+    const { replyTxid, displayName, namespaceId: origNamespaceId, addr, profile, onOfferDone } = this.props.navigation.state.params;
     if (!this.state.showKeyValueModal) {
       return null;
     }
@@ -294,41 +294,11 @@ class OfferNFT extends React.Component {
                 showKeyValueModal: false,
                 nsName: '',
               });
-              Toast.show(loc.general.reply_sent, {
+              Toast.show(loc.general.offer_sent, {
                 position: Toast.positions.TOP,
                 backgroundColor: "#53DD6C",
               });
-
-              // Update the previous screen.
-              const {key, value, namespaceId} = this.state;
-              const {shortCode, displayName} = namespaceList.namespaces[namespaceId];
-              const reply = {
-                key,
-                value,
-                height: 0,
-                sender: {
-                  shortCode,
-                  displayName,
-                }
-              }
-
-              if (type == 'keyvalue') {
-                let keyValue = (keyValueList.keyValues[origNamespaceId])[index];
-                keyValue.replies = keyValue.replies + 1;
-                dispatch(setKeyValue(origNamespaceId, index, keyValue));
-                if (updateReplies) {
-                  updateReplies(reply);
-                }
-              } else if (type == 'hashtag') {
-                let keyValue = hashtags[index];
-                keyValue.replies = keyValue.replies + 1;
-                if (updateHashtag) {
-                  updateHashtag(index, keyValue);
-                }
-                if (updateReplies) {
-                  updateReplies(reply);
-                }
-              }
+              onOfferDone();
               this.props.navigation.goBack();
             }}
           />

@@ -478,9 +478,30 @@ class MyNamespaces extends React.Component {
     this.setState({lockedFund, lockedAmount});
   }
 
+  cleanLockedFund = async (wallets) => {
+    // If utxo doesn't exist, remove it from lockedFund.
+    const lockedFund = await BlueApp.getLockedFund();
+    for (let key of Object.keys(lockedFund)) {
+      let found = false;
+      for (let w of wallets) {
+        found = w.getUtxo().find(u => {
+          const myKey = `${u.txId}:${u.vout}`;
+          return myKey == key;
+        });
+        if (found) {
+          break;
+        }
+      }
+
+      if (!found) {
+        delete lockedFund[f];
+      }
+    }
+    await BlueApp.saveAllLockedFund(lockedFund);
+  }
+
   fetchNamespaces = async () => {
     const { dispatch } = this.props;
-    await this.checkLockedFund();
     const wallets = BlueApp.getWallets();
     let namespaces = {};
     await BlueElectrum.ping();
@@ -497,6 +518,9 @@ class MyNamespaces extends React.Component {
         newOrder.unshift(id);
       }
     }
+
+    await this.cleanLockedFund(wallets);
+    await this.checkLockedFund();
     dispatch(setNamespaceList(namespaces, newOrder));
   }
 
