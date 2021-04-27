@@ -7,10 +7,12 @@ import {
 import Icon from 'react-native-vector-icons/Ionicons';
 let BlueElectrum = require('../../BlueElectrum');
 const StyleSheet = require('../../PlatformStyleSheet');
+const KevaButton = require('../../common/KevaButton');
 const KevaColors = require('../../common/KevaColors');
 import { THIN_BORDER, SCREEN_WIDTH, toastError } from '../../util';
 import {
   BlueNavigationStyle,
+  BlueBigCheckmark,
 } from '../../BlueComponents';
 const loc = require('../../loc');
 import { TransitionPresets } from 'react-navigation-stack';
@@ -19,6 +21,7 @@ import { Button } from 'react-native-elements';
 import { connect } from 'react-redux'
 import { acceptNFTBid, decodePSBT } from '../../class/nft-ops';
 import Biometric from '../../class/biometrics';
+import StepModal from "../../common/StepModalWizard";
 
 class AcceptNFT extends React.Component {
 
@@ -49,6 +52,46 @@ class AcceptNFT extends React.Component {
     this.isBiometricUseCapableAndEnabled = await Biometric.isBiometricUseCapableAndEnabled();
   }
 
+  onDone = () => {
+    return this.setState({showSellNFTModal: false});
+  }
+
+  showSuccess = () => {
+    if (!this.state.showSellNFTModal) {
+      return null;
+    }
+    const successPage = (
+      <View style={styles.modalNS}>
+        <Text style={{color: KevaColors.okColor, textAlign: 'center', fontSize: 26, marginBottom: 20, fontWeight: '700'}}>
+          Sold!
+        </Text>
+        <BlueBigCheckmark style={{marginHorizontal: 40}}/>
+        <KevaButton
+          type='secondary'
+          style={{margin:10, marginTop: 30}}
+          caption={'Done'}
+          onPress={async () => {
+            this.setState({
+              showSellNFTModal: false,
+            });
+            this.props.navigation.goBack();
+          }}
+        />
+      </View>
+    );
+
+    return (
+      <View>
+        <StepModal
+          showNext={false}
+          showSkip={false}
+          currentPage={0}
+          stepComponents={[successPage]}
+          onFinish={this.onDone}/>
+      </View>
+    );
+  }
+
   onAccept = async () => {
     const {walletId, namespaceId, offerTx} = this.props.navigation.state.params;
     this.setState({loading: true});
@@ -72,6 +115,7 @@ class AcceptNFT extends React.Component {
     }
     this.setState({
       loading: false,
+      showSellNFTModal: true,
     });
   }
 
@@ -79,6 +123,7 @@ class AcceptNFT extends React.Component {
     const { shortCode, offerTx, offerPrice, displayName} = this.props.navigation.state.params;
     return (
       <View style={styles.container}>
+        {this.showSuccess()}
         <View style={styles.inputKey}>
           <Text style={{fontSize: 18, color: KevaColors.darkText, textAlign: 'center'}}>{"By sigining the transaction, you sell"}</Text>
           <Text style={{fontSize: 18, color: KevaColors.actionText, textAlign: 'center', marginTop: 7}}>
