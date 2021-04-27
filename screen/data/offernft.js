@@ -175,14 +175,13 @@ class OfferNFT extends React.Component {
               this.setState({ showNSCreationModal: true, currentPage: 1 });
               await BlueElectrum.ping();
 
-              //TODO: WIP
               const offerPrice = this.state.value * 100000000;
-              console.log(profile)
-              const {offerTx} = await createNFTBid(wallet, FALLBACK_DATA_PER_BYTE_FEE, origNamespaceId, addr, offerPrice, profile, displayName);
-              const { tx, fee, cost, key } = await replyKeyValue(wallet, FALLBACK_DATA_PER_BYTE_FEE, namespaceId, offerTx, replyTxid, true);
+              const {offerTx, lockedFund} = await createNFTBid(wallet, FALLBACK_DATA_PER_BYTE_FEE, origNamespaceId, addr, offerPrice, profile, displayName);
+              const { tx, fee, cost, key } = await replyKeyValue(wallet, FALLBACK_DATA_PER_BYTE_FEE, namespaceId, offerTx, replyTxid, true, lockedFund);
               let feeKVA = (fee + cost) / 100000000;
               this.setState({ showNSCreationModal: true, currentPage: 2, fee: feeKVA, key });
               this.namespaceTx = tx;
+              this.lockedFund = lockedFund;
             } catch (err) {
               console.warn(err);
               this.setState({createTransactionErr: loc.namespaces.namespace_creation_err + ' [' + err.message + ']'});
@@ -246,6 +245,9 @@ class OfferNFT extends React.Component {
                   broadcastErr: result.message,
                 });
               }
+              const currentLockedFund = await BlueApp.getLockedFund();
+              const lockedFund = {...currentLockedFund, ...this.lockedFund};
+              await BlueApp.saveAllLockedFund(lockedFund);
               await BlueApp.saveToDisk();
               this.setState({ isBroadcasting: false, showSkip: false });
             } catch (err) {

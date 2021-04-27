@@ -558,6 +558,7 @@ export async function createNFTBid(wallet, requestedSatPerByte, nsNFTId, payment
   psbt.setVersion(0x7100); // Kevacoin transaction.
   const sighashType = bitcoin.Transaction.SIGHASH_ALL | bitcoin.Transaction.SIGHASH_ANYONECANPAY;
   let keypairs = [];
+  let lockedFund = {};
   for (let i = 0; i < inputs.length; i++) {
     let input = inputs[i];
     const pubkey = wallet._getPubkeyByAddress(input.address);
@@ -581,6 +582,13 @@ export async function createNFTBid(wallet, requestedSatPerByte, nsNFTId, payment
 
     let keyPair = bitcoin.ECPair.fromWIF(input.wif);
     keypairs.push(keyPair);
+
+    // Add it to locked fund as we cannot use them again.
+    //BlueApp.saveLockedFund(nsNFTId, input.txId, input.vout, input.value);
+    lockedFund[`${input.txId}:${input.vout}`] = {
+      namespaceId: nsNFTId,
+      fund: input.value
+    }
   }
 
   for (let i = 0; i < outputs.length; i++) {
@@ -615,7 +623,7 @@ export async function createNFTBid(wallet, requestedSatPerByte, nsNFTId, payment
   }
 
   let offerTx = psbt.toBuffer();
-  return {offerTx, fee};
+  return {offerTx, fee, lockedFund};
 }
 
 export async function acceptNFTBid(walletId, partialTransaction, namespaceId) {

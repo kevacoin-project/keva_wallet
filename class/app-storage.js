@@ -34,6 +34,7 @@ export class AppStorage {
   static IPFS_GATEWAY = 'ipfs_gateway';
   static IPFS_CUSTOM_GATEWAY = 'ipfs_custom_gateway';
   static STORAGE_VERSION = 'storage_version';
+  static LOCKED_FUND = 'locked_fund';
 
   constructor() {
     /** {Array.<AbstractWallet>} */
@@ -473,6 +474,52 @@ export class AppStorage {
 
   async savePosTxId(height, pos, txid) {
     await this.setItemStorage(height + '-' + pos, txid);
+  }
+
+  async getLockedFund() {
+    let lockedFund = {};
+    const lockedFundData = await this.getItemStorage(AppStorage.LOCKED_FUND);
+    if (lockedFundData) {
+      lockedFund = JSON.parse(lockedFundData);
+    }
+    return lockedFund;
+  }
+
+  async saveLockedFund(namespaceId, tx_hash, vout, fund) {
+    let lockedFund = await this.getLockedFund();
+
+    const key = `${tx_hash}:${vout}`;
+    let value;
+
+    if (fund > 0) {
+      value = {
+        namespaceId, fund
+      };
+      lockedFund[key] = value;
+    } else {
+      delete lockedFund[key];
+    }
+
+    await this.setItemStorage(AppStorage.LOCKED_FUND, JSON.stringify(lockedFund));
+  }
+
+  async saveAllLockedFund(lockedFund) {
+    await this.setItemStorage(AppStorage.LOCKED_FUND, JSON.stringify(lockedFund));
+  }
+
+  async removeAllLockedFund() {
+    await this.setItemStorage(AppStorage.LOCKED_FUND, JSON.stringify({}));
+  }
+
+  async removeNamespaceLockedFund(namespaceId) {
+    let lockedFund = await this.getLockedFund();
+    const keys = Object.keys(lockedFund);
+    for (let k of keys) {
+      if (lockedFund(k).namespaceId == namespaceId) {
+        delete lockedFund[k];
+      }
+    }
+    await this.setItemStorage(AppStorage.LOCKED_FUND, JSON.stringify(lockedFund));
   }
 
   splitIntoChunks(arr, chunkSize) {
