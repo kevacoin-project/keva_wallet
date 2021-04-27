@@ -321,11 +321,13 @@ class KeyValues extends React.Component {
       }
     }
 
-    const value = JSON.parse(nsData.value);
-    const {price, desc, addr} = value;
-    this.setState({
-      price, desc, addr, saleTx: nsData.tx,
-    });
+    if (nsData.value) {
+      const value = JSON.parse(nsData.value);
+      const {price, desc, addr} = value;
+      this.setState({
+        price, desc, addr, saleTx: nsData.tx,
+      });
+    }
 
     const history = await BlueElectrum.blockchainKeva_getKeyValues(getNamespaceScriptHash(namespaceId), min_tx_num);
     if (history.keyvalues.length == 0) {
