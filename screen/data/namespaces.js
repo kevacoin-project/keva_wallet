@@ -59,7 +59,7 @@ import StepModal from "../../common/StepModalWizard";
 
 import {
   createKevaNamespace, findMyNamespaces,
-  findOtherNamespace,
+  findOtherNamespace, getNamespaceInfo,
   waitPromise, populateReactions,
 } from '../../class/keva-ops';
 
@@ -121,7 +121,7 @@ class Namespace extends React.Component {
     let namespace = this.props.data;
     let isOther = this.props.isOther;
     this.props.navigation.push('KeyValues', {
-      namespaceId: namespace.id,
+      namespaceId: namespace.id || namespace.namespaceId,
       shortCode: namespace.shortCode,
       displayName: namespace.displayName,
       txid: namespace.txId,
@@ -165,7 +165,6 @@ class Namespace extends React.Component {
     const {canDelete, onDelete} = this.props;
     const {titleAvatar, colorAvatar} = this.getAvatar(namespace.displayName);
     const canTransfer = !canDelete;
-
     const isForSale = !!namespace.price;
 
     return (
@@ -663,9 +662,19 @@ class OtherNamespaces extends React.Component {
   }
 
   refreshNamespaces = async () => {
+    const { dispatch, otherNamespaceList } = this.props;
     this.setState({isRefreshing: true});
+    let namespaceAll = {};
     try {
-      // Do nothing.
+      for (let ns of Object.keys(otherNamespaceList.namespaces)) {
+        if (ns.length < 20) {
+          continue;
+        }
+        const namespace = await getNamespaceInfo(BlueElectrum, ns, true);
+        namespaceAll = {...namespaceAll, ...{[ns]: namespace}};
+      }
+      const order = otherNamespaceList.order;
+      dispatch(setOtherNamespaceList(namespaceAll, order));
     } catch (err) {
       console.error(err);
       this.setState({isRefreshing: false});
