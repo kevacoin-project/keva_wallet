@@ -42,7 +42,7 @@ import {
 import { HDSegwitP2SHWallet,  } from '../../class';
 import { FALLBACK_DATA_PER_BYTE_FEE } from '../../models/networkTransactionFees';
 import Biometric from '../../class/biometrics';
-import { Avatar } from 'react-native-elements';
+import { Avatar, Button } from 'react-native-elements';
 
 let BlueApp = require('../../BlueApp');
 let loc = require('../../loc');
@@ -226,6 +226,7 @@ class MyNamespaces extends React.Component {
       isRefreshing: false,
       createTransactionErr: null,
       inputMode: false,
+      lockedFund: {},
     };
   }
 
@@ -468,8 +469,19 @@ class MyNamespaces extends React.Component {
     });
   }
 
+  checkLockedFund = async () => {
+    // Check if any fund locked for NFT bidding.
+    const lockedFund = await BlueApp.getLockedFund();
+    let lockedAmount = 0;
+    for (let f of Object.keys(lockedFund)) {
+      lockedAmount += lockedFund[f].fund;
+    }
+    this.setState({lockedFund, lockedAmount});
+  }
+
   fetchNamespaces = async () => {
     const { dispatch } = this.props;
+    await this.checkLockedFund();
     const wallets = BlueApp.getWallets();
     let namespaces = {};
     await BlueElectrum.ping();
@@ -529,10 +541,22 @@ class MyNamespaces extends React.Component {
     this._inputRef && this._inputRef.clear();
   }
 
+  onLockedChange = async () => {
+    await this.checkLockedFund();
+  }
+
+  onManageLockedFund = () => {
+    this.props.navigation.push('ManageLocked', {
+      lockedFund: this.state.lockedFund,
+      onLockedChange: this.onLockedChange,
+    });
+  }
+
   render() {
     const { navigation, namespaceList, onInfo, onWait } = this.props;
     const canAdd = this.state.nsName && this.state.nsName.length > 0;
     const inputMode = this.state.inputMode;
+    const hasLockedFund = this.state.lockedAmount > 0;
     return (
       <View style={styles.container}>
         {this.getNSCreationModal()}
@@ -565,6 +589,18 @@ class MyNamespaces extends React.Component {
             </TouchableOpacity>
           }
         </View>
+        {hasLockedFund &&
+          <View style={styles.inputContainer}>
+            <Text style={{fontSize: 16, marginLeft: 10, color: KevaColors.errColor}}>{this.state.lockedAmount/100000000 + ' KVA Locked'}</Text>
+            <Button
+              type='solid'
+              buttonStyle={{alignSelf: 'center', marginVertical: 5, marginRight: 10, borderRadius: 40, height: 30, width: 100, backgroundColor: KevaColors.actionText, borderColor: KevaColors.actionText}}
+              title={"Manage"}
+              titleStyle={{fontSize: 16, color: "#fff"}}
+              onPress={()=>{this.onManageLockedFund()}}
+            />
+          </View>
+        }
         {
           (namespaceList.order.length > 0) ?
           <SortableListView
@@ -902,16 +938,6 @@ class Namespaces extends React.Component {
               <Text style={contentStyle}>{loc.general.unconfirmed}</Text>
             }
           </View>
-
-          {/*
-          <Text style={titleStyle}>{'Tx ID'}</Text>
-          <View style={container}>
-            <Text style={contentStyle}>{nsData.txId}</Text>
-            <TouchableOpacity onPress={() => {this.copyString(nsData.txId)}}>
-              {COPY_ICON}
-            </TouchableOpacity>
-          </View>
-          */}
         </View>
       </Modal>
     )

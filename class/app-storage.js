@@ -515,7 +515,7 @@ export class AppStorage {
     let lockedFund = await this.getLockedFund();
     const keys = Object.keys(lockedFund);
     for (let k of keys) {
-      if (lockedFund(k).namespaceId == namespaceId) {
+      if (lockedFund[k].namespaceId == namespaceId) {
         delete lockedFund[k];
       }
     }

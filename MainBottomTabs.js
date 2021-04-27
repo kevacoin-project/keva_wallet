@@ -55,6 +55,7 @@ import SellNFT from './screen/data/sellnft';
 import BuyNFT from './screen/data/buynft';
 import OfferNFT from './screen/data/offernft';
 import AcceptNFT from './screen/data/acceptnft';
+import ManageLocked from './screen/data/managelocked';
 import ReplyKeyValue from './screen/data/replykeyvalue';
 import ShareKeyValue from './screen/data/sharekeyvalue';
 import ShowKeyValue from './screen/data/showkeyvalue';
@@ -359,6 +360,9 @@ const HomeStackNavigator = createStackNavigator({
   },
   AcceptNFT: {
     screen: AcceptNFT,
+  },
+  ManageLocked: {
+    screen: ManageLocked,
   },
   ReplyKeyValue: {
     screen: ReplyKeyValue,
