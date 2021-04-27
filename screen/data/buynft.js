@@ -42,14 +42,16 @@ class Reply extends React.Component {
     });
   }
 
-  onAccept = (offerTx) => {
-    const {price, desc, addr, shortCode} = this.props;
+  onAccept = (offerTx, offerPrice) => {
+    const {namespaceId, displayName, walletId} = this.props.navigation.state.params;
+    const {shortCode} = this.props;
     this.props.navigation.push('AcceptNFT', {
+      walletId,
+      namespaceId,
+      displayName,
       shortCode,
       offerTx,
-      price,
-      desc,
-      addr,
+      offerPrice,
     });
   }
 
@@ -77,7 +79,7 @@ class Reply extends React.Component {
                     color={KevaColors.actionText}
                   />
                 }
-                onPress={()=>{this.onAccept(item.value)}}
+                onPress={()=>{this.onAccept(item.value, item.offerPrice)}}
               />
             }
           </View>

@@ -4,6 +4,8 @@ const base58check = require('bs58check')
 const coinSelectAccumulative = require('coinselect/accumulative');
 let loc = require('../loc');
 const Txdecoder = require('./txdecoder');
+import Toast from 'react-native-root-toast';
+let BlueApp = require('../BlueApp');
 
 import {
     getKeyValueUpdateScript, getNamespaceUtxo, getNonNamespaceUxtos,
@@ -616,7 +618,14 @@ export async function createNFTBid(wallet, requestedSatPerByte, nsNFTId, payment
   return {offerTx, fee};
 }
 
-export async function acceptNFTBid(wallet, partialTransaction, namespaceId) {
+export async function acceptNFTBid(walletId, partialTransaction, namespaceId) {
+  const wallets = BlueApp.getWallets();
+  let wallet = wallets.find(w => w.getID() == walletId);
+  if (!wallet) {
+    Toast.show('Cannot find wallet');
+    return;
+  }
+
   let partialTx = bitcoin.Psbt.fromHex(partialTransaction);
   let nsUtxo = await getNamespaceUtxo(wallet, namespaceId);
   if (!nsUtxo) {
