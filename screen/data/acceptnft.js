@@ -57,6 +57,7 @@ class AcceptNFT extends React.Component {
   }
 
   showSuccess = () => {
+    const {onSold} = this.props.navigation.state.params;
     if (!this.state.showSellNFTModal) {
       return null;
     }
@@ -74,6 +75,7 @@ class AcceptNFT extends React.Component {
             this.setState({
               showSellNFTModal: false,
             });
+            onSold();
             this.props.navigation.popToTop();
           }}
         />
@@ -112,7 +114,8 @@ class AcceptNFT extends React.Component {
     if (result.code) {
       // Error.
       console.warn(result.message);
-      toastError(result.message);
+      this.setState({loading: false});
+      return toastError(result.message.substring(0, 100) + '...');
     }
     this.setState({
       loading: false,

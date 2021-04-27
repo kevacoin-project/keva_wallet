@@ -109,12 +109,15 @@ class Namespace extends React.Component {
     };
   }
 
-  onPress() {
-  }
-
   onInfo = () => {
     let namespace = this.props.data;
     this.props.onInfo(namespace);
+  }
+
+  onSold = () => {
+    setTimeout(async () => {
+      await this.fetchNamespaces();
+    }, 1000);
   }
 
   onKey = () => {
@@ -130,6 +133,7 @@ class Namespace extends React.Component {
       isOther,
       price: namespace.price, desc: namespace.desc, addr: namespace.addr,
       profile: namespace.profile,
+      onSold: this.onSold,
     });
   }
 
@@ -494,7 +498,7 @@ class MyNamespaces extends React.Component {
       }
 
       if (!found) {
-        delete lockedFund[f];
+        delete lockedFund[key];
       }
     }
     await BlueApp.saveAllLockedFund(lockedFund);
@@ -619,7 +623,7 @@ class MyNamespaces extends React.Component {
               type='solid'
               buttonStyle={{alignSelf: 'center', marginVertical: 5, marginRight: 10, borderRadius: 40, height: 30, width: 100, backgroundColor: KevaColors.actionText, borderColor: KevaColors.actionText}}
               title={"Manage"}
-              titleStyle={{fontSize: 16, color: "#fff"}}
+              titleStyle={{fontSize: 14, color: "#fff"}}
               onPress={()=>{this.onManageLockedFund()}}
             />
           </View>
