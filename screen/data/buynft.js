@@ -367,7 +367,7 @@ class BuyNFT extends React.Component {
         <KevaButton
           type='secondary'
           style={{margin:10, marginTop: 40}}
-          caption={loc.namespace.confirm}
+          caption={loc.namespaces.confirm}
           onPress={async () => {
             this.setState({currentPage: 2, isBroadcasting: true});
             try {
