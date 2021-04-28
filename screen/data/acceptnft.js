@@ -57,7 +57,7 @@ class AcceptNFT extends React.Component {
   }
 
   showSuccess = () => {
-    const {onSold} = this.props.navigation.state.params;
+    const {onSoldorOffer} = this.props.navigation.state.params;
     if (!this.state.showSellNFTModal) {
       return null;
     }
@@ -75,7 +75,7 @@ class AcceptNFT extends React.Component {
             this.setState({
               showSellNFTModal: false,
             });
-            onSold();
+            onSoldorOffer();
             this.props.navigation.popToTop();
           }}
         />

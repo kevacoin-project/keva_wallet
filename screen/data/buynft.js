@@ -50,7 +50,7 @@ class Reply extends React.Component {
   }
 
   onAccept = (offerTx, offerPrice) => {
-    const {namespaceId, displayName, walletId, onSold} = this.props.navigation.state.params;
+    const {namespaceId, displayName, walletId, onSoldorOffer} = this.props.navigation.state.params;
     const {shortCode} = this.props;
     this.props.navigation.push('AcceptNFT', {
       walletId,
@@ -59,7 +59,7 @@ class Reply extends React.Component {
       shortCode,
       offerTx,
       offerPrice,
-      onSold,
+      onSoldorOffer,
     });
   }
 
@@ -214,6 +214,8 @@ class BuyNFT extends React.Component {
   }
 
   onOfferDone = () => {
+    const {onSoldorOffer} = this.props.navigation.state.params;
+    onSoldorOffer();
     setTimeout(async () => {
       await this.fetchReplies();
     }, 2000)

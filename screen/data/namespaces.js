@@ -67,6 +67,9 @@ const COPY_ICON = (<Icon name="ios-copy" size={22} color={KevaColors.extraLightT
                          style={{ paddingVertical: 5, paddingHorizontal: 5, position: 'relative', left: -3 }}
                   />)
 
+let _g_cleanLockedFund;
+let _g_checkLockedFund;
+
 class Namespace extends React.Component {
 
   constructor(props) {
@@ -114,10 +117,15 @@ class Namespace extends React.Component {
     this.props.onInfo(namespace);
   }
 
-  onSold = () => {
+  onSoldorOffer = () => {
     const {refresh} = this.props;
     setTimeout(async () => {
-      await refresh();
+      if (refresh) {
+        await refresh();
+      } else {
+        await _g_cleanLockedFund();
+        await _g_checkLockedFund();
+      }
     }, 2000);
   }
 
@@ -134,7 +142,7 @@ class Namespace extends React.Component {
       isOther,
       price: namespace.price, desc: namespace.desc, addr: namespace.addr,
       profile: namespace.profile,
-      onSold: this.onSold,
+      onSoldorOffer: this.onSoldorOffer,
     });
   }
 
@@ -530,6 +538,16 @@ class MyNamespaces extends React.Component {
   }
 
   async componentDidMount() {
+
+    _g_cleanLockedFund = async () => {
+      const wallets = BlueApp.getWallets();
+      await this.cleanLockedFund(wallets);
+    }
+
+    _g_checkLockedFund = async () => {
+      await this.checkLockedFund();
+    }
+
     try {
       await this.fetchNamespaces();
     } catch (err) {
