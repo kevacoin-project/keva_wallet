@@ -717,14 +717,18 @@ export async function replyKeyValue(wallet, requestedSatPerByte, namespaceId, va
   let utxos = wallet.getUtxo();
   let nonNamespaceUtxos = await getNonNamespaceUxtos(wallet, transactions, utxos, lockedFund);
   if (!nonNamespaceUtxos || nonNamespaceUtxos.length == 0) {
-    throw new Error('No nonNamespaceUtxos');
+    if (lockedFund) {
+      throw new Error(loc.namespaces.not_enough_fund_locked);
+    } else {
+      throw new Error(loc.namespaces.not_enough_fund);
+    }
   }
   // Move the nsUtxo to the first one, so that it will always be used.
   nonNamespaceUtxos.unshift(nsUtxo);
   let { inputs, outputs, fee } = coinSelectAccumulative(nonNamespaceUtxos, targets, requestedSatPerByte);
   // inputs and outputs will be undefined if no solution was found
   if (!inputs || !outputs) {
-    throw new Error('Not enough balance. Try sending smaller amount');
+    throw new Error(loc.namespaces.not_enough_fund);
   }
 
   const psbt = new bitcoin.Psbt();

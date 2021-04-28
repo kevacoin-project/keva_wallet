@@ -752,7 +752,7 @@ class KeyValues extends React.Component {
 
   onBuy = (namespaceId, displayName, saleTx, price, desc, addr, profile) => {
     const {navigation, keyValueList} = this.props;
-    const {isOther, shortCode, walletId, onSold} = navigation.state.params;
+    const {isOther, shortCode, walletId, onSoldorOffer} = navigation.state.params;
     const index = findTxIndex(keyValueList.keyValues[namespaceId], saleTx);
     navigation.push('BuyNFT', {
       walletId,
@@ -768,7 +768,7 @@ class KeyValues extends React.Component {
       addr,
       profile,
       onCancelSale: this.onCancelSale,
-      onSold,
+      onSoldorOffer,
     });
   }
 

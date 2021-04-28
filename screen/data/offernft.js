@@ -26,10 +26,9 @@ import { TransitionPresets } from 'react-navigation-stack';
 
 import { connect } from 'react-redux'
 import { replyKeyValue } from '../../class/keva-ops';
-import { createNFTBid, acceptNFTBid } from '../../class/nft-ops';
+import { createNFTBid, } from '../../class/nft-ops';
 import StepModal from "../../common/StepModalWizard";
 import Biometric from '../../class/biometrics';
-import { setKeyValue } from '../../actions';
 
 class OfferNFT extends React.Component {
 
