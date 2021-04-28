@@ -113,9 +113,18 @@ class Item extends React.Component {
     const {isOther} = navigation.state.params;
     const {mediaCID, mimeType} = extractMedia(item.value);
     let displayKey = item.key;
+    let displayValue = item.value;
+    let isBid = false;
     const {keyType} = parseSpecialKey(item.key);
     if (keyType) {
-      displayKey = getSpecialKeyText(keyType);
+      // TODO: fix this special hack for bidding.
+      if (keyType == 'comment' && displayValue.startsWith('psbt')) {
+        displayKey = loc.namespaces.make_offer;
+        displayValue = '';
+        isBid = true;
+      } else {
+        displayKey = getSpecialKeyText(keyType);
+      }
     }
     if ((typeof displayKey) != 'string') {
       displayKey = 'Unknown ' + item.height;
@@ -123,7 +132,7 @@ class Item extends React.Component {
       displayKey = loc.namespaces.ns_transfer_explain;
     }
 
-    const canEdit = !isOther && item.type !== 'REG' && keyType != 'profile';
+    const canEdit = !isOther && item.type !== 'REG' && keyType != 'profile' && !isBid;
 
     return (
       <View style={styles.card}>
@@ -157,7 +166,7 @@ class Item extends React.Component {
               :
               <Text style={styles.timestamp}>{loc.general.unconfirmed}</Text>
             }
-            <Text style={styles.valueDesc} numberOfLines={3} ellipsizeMode="tail">{this.stripHtml(removeMedia(item.value))}</Text>
+            <Text style={styles.valueDesc} numberOfLines={3} ellipsizeMode="tail">{this.stripHtml(removeMedia(displayValue))}</Text>
             {
               mediaCID && (
                 mimeType.startsWith('video') ?
