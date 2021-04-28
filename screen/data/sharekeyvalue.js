@@ -274,7 +274,7 @@ class ShareKeyValue extends React.Component {
         <KevaButton
           type='secondary'
           style={{ margin: 10, marginTop: 40 }}
-          caption={'Confirm'}
+          caption={loc.namespace.confirm}
           onPress={async () => {
             this.setState({ currentPage: 3, isBroadcasting: true });
             try {

@@ -223,7 +223,7 @@ class OfferNFT extends React.Component {
         <KevaButton
           type='secondary'
           style={{ margin: 10, marginTop: 40 }}
-          caption={'Confirm'}
+          caption={loc.namespace.confirm}
           onPress={async () => {
             this.setState({ currentPage: 3, isBroadcasting: true });
             try {
@@ -333,7 +333,7 @@ class OfferNFT extends React.Component {
             value={this.state.value}
             underlineColorAndroid='rgba(0,0,0,0)'
             style={{fontSize:15}}
-            placeholder={'Offer Price (KVA)'}
+            placeholder={loc.namespaces.bid_price + ' (KVA)'}
             clearButtonMode="while-editing"
             onChangeTextValue={value => {this.setState({value})}}
           />
