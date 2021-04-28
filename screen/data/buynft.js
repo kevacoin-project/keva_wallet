@@ -367,7 +367,7 @@ class BuyNFT extends React.Component {
         <KevaButton
           type='secondary'
           style={{margin:10, marginTop: 40}}
-          caption={'Confirm'}
+          caption={loc.namespace.confirm}
           onPress={async () => {
             this.setState({currentPage: 2, isBroadcasting: true});
             try {
@@ -542,12 +542,12 @@ class BuyNFT extends React.Component {
                 </Text>
               </TouchableOpacity>
             </View>
-            <Text style={styles.key} selectable>{"For Sale"}</Text>
+            <Text style={styles.key} selectable>{loc.namespaces.for_sale}</Text>
           </View>
         </View>
         <View style={styles.valueContainer}>
           <Text style={{fontSize: 18, marginBottom: 10, color: KevaColors.darkText}}>
-              {"Asking Price: "}
+              {loc.namespaces.asking_price}
             <Text style={{fontSize: 18, marginBottom: 10, color: KevaColors.darkText, fontWeight: '700'}}>
               {price + ' KVA'}
             </Text>
@@ -561,7 +561,7 @@ class BuyNFT extends React.Component {
               <Button
                 type='solid'
                 buttonStyle={{borderRadius: 30, height: 30, width: 120, marginVertical: 5, borderColor: KevaColors.actionText, backgroundColor: KevaColors.actionText}}
-                title={"Make an Offer"}
+                title={loc.namespaces.make_offer}
                 titleStyle={{fontSize: 14, color: '#fff'}}
                 onPress={()=>{this.onOffer()}}
               />
@@ -569,7 +569,7 @@ class BuyNFT extends React.Component {
               <Button
                 type='outline'
                 buttonStyle={{borderRadius: 30, height: 30, width: 120, marginVertical: 5, borderColor: KevaColors.actionText}}
-                title={"Cancel Sale"}
+                title={loc.namespaces.cancel_sale}
                 titleStyle={{fontSize: 14, color: KevaColors.actionText, marginLeft: 5}}
                 onPress={()=>{this.onCancelSale()}}
                 icon={

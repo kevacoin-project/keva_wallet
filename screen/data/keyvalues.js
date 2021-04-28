@@ -468,7 +468,7 @@ class KeyValues extends React.Component {
         <KevaButton
           type='secondary'
           style={{margin:10, marginTop: 40}}
-          caption={'Confirm'}
+          caption={loc.namespace.confirm}
           onPress={async () => {
             this.setState({currentPage: 2, isBroadcasting: true});
             try {
@@ -807,7 +807,7 @@ class KeyValues extends React.Component {
       <Button
         type='solid'
         buttonStyle={{marginLeft: 15, borderRadius: 30, height: 28, width: 120, padding: 0, borderColor: KevaColors.okColor, backgroundColor: KevaColors.okColor}}
-        title={ isOther ? 'Buy It' : 'Manage'}
+        title={ isOther ? loc.namespaces.buy_it : loc.namespaces.manage}
         titleStyle={{fontSize: 14, color: '#fff', marginLeft: 8}}
         onPress={()=>{this.onBuy(namespaceId, displayName, this.state.saleTx, this.state.price, this.state.desc, this.state.addr, profile)}}
         icon={
@@ -877,7 +877,7 @@ class KeyValues extends React.Component {
                   <Button
                     type='outline'
                     buttonStyle={{borderRadius: 30, height: 28, width: 100, padding: 0, borderColor: KevaColors.actionText}}
-                    title={'Edit'}
+                    title={loc.namespaces.edit}
                     titleStyle={{fontSize: 14, color: KevaColors.actionText}}
                     onPress={()=>{this.onEditProfile(namespaceId, namespaceInfo[namespaceId])}}
                     disabled={!!this.state.price}
@@ -889,7 +889,7 @@ class KeyValues extends React.Component {
                     <Button
                       type='solid'
                       buttonStyle={{marginLeft: 10, borderRadius: 30, height: 28, width: 100, padding: 0, borderColor: KevaColors.actionText, backgroundColor: KevaColors.actionText}}
-                      title={'Sell as NFT'}
+                      title={loc.namespaces.sell_nft}
                       titleStyle={{fontSize: 14, color: '#fff'}}
                       onPress={()=>{this.onSellNFT(namespaceId, namespaceInfo[namespaceId])}}
                     />

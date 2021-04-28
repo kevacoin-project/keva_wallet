@@ -194,7 +194,7 @@ class SellNFT extends React.Component {
         <KevaButton
           type='secondary'
           style={{margin:10, marginTop: 40}}
-          caption={'Confirm'}
+          caption={loc.namespace.confirm}
           onPress={async () => {
             this.setState({currentPage: 2, isBroadcasting: true});
             try {
@@ -301,7 +301,7 @@ class SellNFT extends React.Component {
             value={this.state.price}
             underlineColorAndroid='rgba(0,0,0,0)'
             style={{fontSize:15}}
-            placeholder={'Asking Price (KVA)'}
+            placeholder={loc.namespaces.asking_price + ' (KVA)'}
             clearButtonMode="while-editing"
             onChangeTextValue={price => {this.setState({price})}}
           />
@@ -319,7 +319,7 @@ class SellNFT extends React.Component {
             value={desc}
             underlineColorAndroid='rgba(0,0,0,0)'
             style={{fontSize:15}}
-            placeholder={'Description of your NFT'}
+            placeholder={loc.namespaces.nft_desc}
             clearButtonMode="while-editing"
             onChangeTextValue={desc => {this.setState({desc})}}
           />
