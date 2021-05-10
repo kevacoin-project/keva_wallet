@@ -77,7 +77,7 @@ class Reply extends React.Component {
             {(offerValue > 0 && !isOther) &&
               <Button
                 type='outline'
-                buttonStyle={{margin: 5, borderRadius: 30, height: 28, width: 90, borderColor: KevaColors.actionText}}
+                buttonStyle={{margin: 5, borderRadius: 30, height: 28, width: 90, padding: 0, borderColor: KevaColors.actionText}}
                 title={"Accept"}
                 titleStyle={{fontSize: 14, color: KevaColors.actionText, marginLeft: 4}}
                 icon={
