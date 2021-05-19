@@ -830,7 +830,7 @@ class KeyValues extends React.Component {
     );
 
     let listHeader = null;
-    if (mergeList && mergeList.length > 0) {
+    if (mergeList) {
       const isFollowing = !!otherNamespaceList.namespaces[namespaceId];
       const namespaceInfo = {}
       namespaceInfo[namespaceId] = {
