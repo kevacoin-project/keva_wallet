@@ -200,7 +200,7 @@ class Namespace extends React.Component {
                 <Icon name="ios-information-circle-outline" size={20} style={styles.actionIcon} />
               </TouchableOpacity>
               { canDelete &&
-              <TouchableOpacity onPress={() => onDelete(namespace.id)}>
+              <TouchableOpacity onPress={() => onDelete(namespace.id || namespace.namespaceId)}>
                 <Icon name="ios-remove-circle-outline" size={20} style={styles.actionIcon} />
               </TouchableOpacity>
               }
