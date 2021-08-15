@@ -89,6 +89,8 @@ module.exports = {
     for_sale: 'For Sale',
     cancel_sale: "Cancel Sale",
     confirm: 'Confirm',
+    add_post: 'Add',
+    qr_error: 'Invalid content',
   },
   wallets: {
     select_wallet: 'Select Wallet',

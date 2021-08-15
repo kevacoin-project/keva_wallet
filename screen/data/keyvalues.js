@@ -46,6 +46,7 @@ import Biometric from '../../class/biometrics';
 import { Avatar } from 'react-native-elements';
 import { extractMedia, getImageGatewayURL, removeMedia } from './mediaManager';
 
+
 const PLAY_ICON  = <MIcon name="play-arrow" size={50} color="#fff"/>;
 
 class Item extends React.Component {
@@ -235,9 +236,10 @@ class KeyValues extends React.Component {
         <TouchableOpacity
           style={{ marginHorizontal: 16, minWidth: 150, justifyContent: 'center', alignItems: 'flex-end' }}
           onPress={() =>
-            navigation.navigate('AddKeyValue', {
-              walletId: navigation.state.params.walletId,
-              namespaceId: navigation.state.params.namespaceId,
+            navigation.navigate('ScanQRCode', {
+              launchedBy: navigation.state.routeName,
+              onBarScanned: navigation.state.params.onBarCodeRead,
+              isKeyValue: true,
             })
           }
         >
@@ -252,7 +254,7 @@ class KeyValues extends React.Component {
             })
           }
         >
-          <Text style={{color: KevaColors.actionText, fontSize: 16}}>Add</Text>
+          <Text style={{color: KevaColors.actionText, fontSize: 16}}>{loc.namespaces.add_post}</Text>
         </TouchableOpacity>
       </View>
     ),
@@ -430,9 +432,30 @@ class KeyValues extends React.Component {
       Toast.show("Cannot fetch key-values");
     }
     this.isBiometricUseCapableAndEnabled = await Biometric.isBiometricUseCapableAndEnabled();
+
+    this.props.navigation.setParams({
+      onBarCodeRead: this.onBarCodeRead,
+    });
   }
 
-  componentWillUnmount () {
+  onBarCodeRead = data => {
+    const navigation = this.props.navigation;
+    InteractionManager.runAfterInteractions(() => {
+      const {key, value} = data;
+      // Check the content, it must have both key and value field.
+      if (!key || !value) {
+        alert(loc.namespaces.qr_error);
+        return;
+      }
+      navigation.navigate('AddKeyValue', {
+        walletId: navigation.state.params.walletId,
+        namespaceId: navigation.state.params.namespaceId,
+        key, value,
+      })
+    });
+  };
+
+  componentWillUnmount() {
     if (this.subs) {
       this.subs.forEach(sub => sub.remove());
     }
