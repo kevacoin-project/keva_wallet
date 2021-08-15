@@ -78,6 +78,7 @@
     "bignumber.js": "9.0.0",
     "bip32": "2.0.5",
     "bip39": "2.6.0",
+    "bip65": "^1.0.3",
     "bitcoinjs-lib": "git+https://github.com/kevacoin-project/bitcoinjs-lib.git",
     "bolt11": "1.2.7",
     "buffer": "5.5.0",

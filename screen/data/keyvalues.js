@@ -25,6 +25,7 @@ import { FALLBACK_DATA_PER_BYTE_FEE } from '../../models/networkTransactionFees'
 
 import Icon from 'react-native-vector-icons/Ionicons';
 import MIcon from 'react-native-vector-icons/MaterialIcons';
+import FAIcon from 'react-native-vector-icons/FontAwesome';
 import ActionSheet from 'react-native-actionsheet';
 import { connect } from 'react-redux'
 import { createThumbnail } from "react-native-create-thumbnail";
@@ -230,17 +231,30 @@ class KeyValues extends React.Component {
     title: '',
     tabBarVisible: false,
     headerRight: () => (!navigation.state.params.isOther &&
-      <TouchableOpacity
-        style={{ marginHorizontal: 16, minWidth: 150, justifyContent: 'center', alignItems: 'flex-end' }}
-        onPress={() =>
-          navigation.navigate('AddKeyValue', {
-            walletId: navigation.state.params.walletId,
-            namespaceId: navigation.state.params.namespaceId,
-          })
-        }
-      >
-        <Icon name="md-add" type="octicon" size={30} color={KevaColors.actionText} />
-      </TouchableOpacity>
+      <View style={{flexDirection: 'row'}}>
+        <TouchableOpacity
+          style={{ marginHorizontal: 16, minWidth: 150, justifyContent: 'center', alignItems: 'flex-end' }}
+          onPress={() =>
+            navigation.navigate('AddKeyValue', {
+              walletId: navigation.state.params.walletId,
+              namespaceId: navigation.state.params.namespaceId,
+            })
+          }
+        >
+          <FAIcon name="qrcode" size={26} color={KevaColors.actionText} />
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={{ marginHorizontal: 16, minWidth: 150, justifyContent: 'center', alignItems: 'flex-end' }}
+          onPress={() =>
+            navigation.navigate('AddKeyValue', {
+              walletId: navigation.state.params.walletId,
+              namespaceId: navigation.state.params.namespaceId,
+            })
+          }
+        >
+          <Text style={{color: KevaColors.actionText, fontSize: 16}}>Add</Text>
+        </TouchableOpacity>
+      </View>
     ),
     headerStyle: { backgroundColor: '#fff', elevation:0, shadowColor: 'transparent', borderBottomWidth: THIN_BORDER, borderColor: KevaColors.cellBorder },
   });
