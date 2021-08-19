@@ -455,7 +455,7 @@ class KeyValues extends React.Component {
       navigation.navigate('AddKeyValue', {
         walletId: navigation.state.params.walletId,
         namespaceId: navigation.state.params.namespaceId,
-        key, value,
+        key, value: (typeof value === 'string') ? value : JSON.stringify(value),
       })
     });
   };
