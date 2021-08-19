@@ -25,7 +25,6 @@ import { FALLBACK_DATA_PER_BYTE_FEE } from '../../models/networkTransactionFees'
 
 import Icon from 'react-native-vector-icons/Ionicons';
 import MIcon from 'react-native-vector-icons/MaterialIcons';
-import FAIcon from 'react-native-vector-icons/FontAwesome';
 import ActionSheet from 'react-native-actionsheet';
 import { connect } from 'react-redux'
 import { createThumbnail } from "react-native-create-thumbnail";
@@ -232,9 +231,9 @@ class KeyValues extends React.Component {
     title: '',
     tabBarVisible: false,
     headerRight: () => (!navigation.state.params.isOther &&
-      <View style={{flexDirection: 'row'}}>
+      <View style={{flexDirection: 'row', justifyContent: 'flex-end'}}>
         <TouchableOpacity
-          style={{ marginHorizontal: 16, minWidth: 150, justifyContent: 'center', alignItems: 'flex-end' }}
+          style={{ marginHorizontal: 5, justifyContent: 'center', alignItems: 'flex-end', position: 'relative', top: 1 }}
           onPress={() =>
             navigation.navigate('ScanQRCode', {
               launchedBy: navigation.state.routeName,
@@ -243,10 +242,10 @@ class KeyValues extends React.Component {
             })
           }
         >
-          <FAIcon name="qrcode" size={26} color={KevaColors.actionText} />
+          <Icon name="md-qr-scanner" size={26} color={KevaColors.actionText} />
         </TouchableOpacity>
         <TouchableOpacity
-          style={{ marginHorizontal: 16, minWidth: 150, justifyContent: 'center', alignItems: 'flex-end' }}
+          style={{ marginHorizontal: 16, minWidth: 30, justifyContent: 'center', alignItems: 'flex-end' }}
           onPress={() =>
             navigation.navigate('AddKeyValue', {
               walletId: navigation.state.params.walletId,
@@ -254,7 +253,7 @@ class KeyValues extends React.Component {
             })
           }
         >
-          <Text style={{color: KevaColors.actionText, fontSize: 16}}>{loc.namespaces.add_post}</Text>
+          <Icon name="md-add" size={30} color={KevaColors.actionText} />
         </TouchableOpacity>
       </View>
     ),

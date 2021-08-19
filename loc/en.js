@@ -78,7 +78,7 @@ module.exports = {
     namespace_not_found: 'Cannot find namespace',
     ns_transfer_explain: 'Transfer to the Other Wallet',
     ns_transfer_notes: 'Notes',
-    sell_nft: 'Sell this NFT',
+    sell_nft: 'Sell as NFT',
     edit: 'Edit',
     manage: 'Manage',
     asking_price: 'Asking Price: ',
