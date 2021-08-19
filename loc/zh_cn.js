@@ -90,7 +90,8 @@ module.exports = {
     cancel_sale: "取消出售",
     confirm: '确认',
     add_post: '添加',
-    qr_error: '内容错误',
+    qr_error: '内容错误, 缺少 key 或 value.',
+    qr_json_error: '错误 JSON 格式.',
   },
   wallets: {
     select_wallet: '选择钱包',

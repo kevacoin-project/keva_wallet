@@ -238,7 +238,6 @@ class KeyValues extends React.Component {
             navigation.navigate('ScanQRCode', {
               launchedBy: navigation.state.routeName,
               onBarScanned: navigation.state.params.onBarCodeRead,
-              isKeyValue: true,
             })
           }
         >
@@ -440,7 +439,14 @@ class KeyValues extends React.Component {
   onBarCodeRead = data => {
     const navigation = this.props.navigation;
     InteractionManager.runAfterInteractions(() => {
-      const {key, value} = data;
+      let dataJSON;
+      try {
+        dataJSON = JSON.parse(data);
+      } catch (e) {
+        alert(loc.namespaces.qr_json_error);
+        return;
+      }
+      const {key, value} = dataJSON;
       // Check the content, it must have both key and value field.
       if (!key || !value) {
         alert(loc.namespaces.qr_error);

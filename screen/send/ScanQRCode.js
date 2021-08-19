@@ -20,7 +20,6 @@ const ScanQRCode = ({
   showFileImportButton = useNavigationParam('showFileImportButton') || false,
   // eslint-disable-next-line react-hooks/rules-of-hooks
   launchedBy = useNavigationParam('launchedBy'),
-  isKeyValue = useNavigationParam('isKeyValue') || false,
 }) => {
   if (!launchedBy || !onBarScanned) console.warn('Necessary params missing');
   const [isLoading, setIsLoading] = useState(false);
@@ -73,8 +72,6 @@ const ScanQRCode = ({
           masterFingerprint = Number(fileParsed.keystore.ckcc_xfp);
         }
         onBarCodeRead({ data: fileParsed.keystore.xpub, additionalProperties: { masterFingerprint, label: fileParsed.keystore.label } });
-      } else if (isKeyValue) {
-        onBarCodeRead({ data: fileParsed});
       } else {
         throw new Error();
       }

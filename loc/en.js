@@ -90,7 +90,8 @@ module.exports = {
     cancel_sale: "Cancel Sale",
     confirm: 'Confirm',
     add_post: 'Add',
-    qr_error: 'Invalid content',
+    qr_error: 'Invalid content. Missing either key or value.',
+    qr_json_error: 'Invalid JSON format.',
   },
   wallets: {
     select_wallet: 'Select Wallet',
