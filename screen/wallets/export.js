@@ -5,6 +5,7 @@ import { BlueSpacing20, SafeBlueArea, BlueNavigationStyle, BlueText, BlueCopyTex
 import PropTypes from 'prop-types';
 import Privacy from '../../Privacy';
 import Biometric from '../../class/biometrics';
+import 'text-encoding';
 import { LegacyWallet, LightningCustodianWallet, SegwitBech32Wallet, SegwitP2SHWallet, WatchOnlyWallet } from '../../class';
 /** @type {AppStorage} */
 let BlueApp = require('../../BlueApp');
