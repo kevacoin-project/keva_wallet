@@ -62,3 +62,5 @@ release-notes.txt
 ios/Pods/
 
 artifacts/
+*.zip
+

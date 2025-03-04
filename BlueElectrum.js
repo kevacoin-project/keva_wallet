@@ -11,10 +11,9 @@ import { showStatus, hideStatus } from './util';
 let BlueApp = require('./BlueApp');
 
 const storageKey = 'ELECTRUM_PEERS';
-const defaultPeer = { host: 'ec0.kevacoin.org', ssl: '50002' };
+const defaultPeer = { host: 'ec.kevacoin.org', ssl: '50002' };
 const hardcodedPeers = [
-  { host: 'ec0.kevacoin.org', ssl: '50002' },
-  { host: 'ec1.kevacoin.org', ssl: '50002' },
+  { host: 'ec.kevacoin.org', ssl: '50002' },
 ];
 
 let mainClient: ElectrumClient = false;
