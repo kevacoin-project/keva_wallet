@@ -140,7 +140,7 @@ class AcceptNFT extends React.Component {
 
           <Button
             type='solid'
-            buttonStyle={{alignSelf: 'center', marginTop: 20, borderRadius: 30, height: 40, width: 200, backgroundColor: KevaColors.actionText, borderColor: KevaColors.actionText}}
+            buttonStyle={{alignSelf: 'center', marginTop: 20, borderRadius: 30, padding: 0, height: 40, width: 200, backgroundColor: KevaColors.actionText, borderColor: KevaColors.actionText}}
             title={"Accept and Sign"}
             titleStyle={{fontSize: 16, color: "#fff", marginLeft: 10}}
             icon={

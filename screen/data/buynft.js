@@ -77,7 +77,7 @@ class Reply extends React.Component {
             {(offerValue > 0 && !isOther) &&
               <Button
                 type='outline'
-                buttonStyle={{margin: 5, borderRadius: 30, height: 28, width: 90, borderColor: KevaColors.actionText}}
+                buttonStyle={{margin: 5, borderRadius: 30, height: 28, width: 90, padding: 0, borderColor: KevaColors.actionText}}
                 title={"Accept"}
                 titleStyle={{fontSize: 14, color: KevaColors.actionText, marginLeft: 4}}
                 icon={
@@ -560,7 +560,7 @@ class BuyNFT extends React.Component {
               isOther ?
               <Button
                 type='solid'
-                buttonStyle={{borderRadius: 30, height: 30, width: 120, marginVertical: 5, borderColor: KevaColors.actionText, backgroundColor: KevaColors.actionText}}
+                buttonStyle={{borderRadius: 30, height: 30, width: 120, padding: 0, marginVertical: 5, borderColor: KevaColors.actionText, backgroundColor: KevaColors.actionText}}
                 title={loc.namespaces.make_offer}
                 titleStyle={{fontSize: 14, color: '#fff'}}
                 onPress={()=>{this.onOffer()}}
@@ -568,7 +568,7 @@ class BuyNFT extends React.Component {
               :
               <Button
                 type='outline'
-                buttonStyle={{borderRadius: 30, height: 30, width: 120, marginVertical: 5, borderColor: KevaColors.actionText}}
+                buttonStyle={{borderRadius: 30, height: 30, width: 120, padding: 0, marginVertical: 5, borderColor: KevaColors.actionText}}
                 title={loc.namespaces.cancel_sale}
                 titleStyle={{fontSize: 14, color: KevaColors.actionText, marginLeft: 5}}
                 onPress={()=>{this.onCancelSale()}}
