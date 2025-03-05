@@ -467,6 +467,7 @@ export default class WalletTransactions extends Component {
 
   onWillBlur() {
     StatusBar.setBarStyle('dark-content');
+    StatusBar.setBackgroundColor('#ffffff');
   }
 
   componentWillUnmount() {
@@ -596,6 +597,7 @@ export default class WalletTransactions extends Component {
         <NavigationEvents
           onWillFocus={() => {
             StatusBar.setBarStyle('light-content');
+            StatusBar.setBackgroundColor(WalletGradient.headerColorFor(this.props.navigation.state.params.wallet.type));
             this.redrawScreen();
           }}
           onWillBlur={() => this.onWillBlur()}

@@ -286,6 +286,7 @@ export default class WalletsList extends Component {
   onPageSelected = e => {
     const index = e.nativeEvent.position;
     StatusBar.setBarStyle(index === 1 ? 'dark-content' : 'light-content');
+    index === 1 ? StatusBar.setBackgroundColor("#ffffff") : StatusBar.setBackgroundColor(WalletGradient.headerColorFor(this.props.navigation.state.params.wallet.type));
     this.setState({ cameraPreviewIsPaused: index === 1 || index === undefined, viewPagerIndex: index });
   };
 

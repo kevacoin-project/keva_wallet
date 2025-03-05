@@ -188,6 +188,7 @@ export default class SendDetails extends Component {
     this.renderNavigationHeader();
     console.log('send/details - componentDidMount');
     StatusBar.setBarStyle('dark-content');
+    StatusBar.setBackgroundColor("#ffffff");
     let addresses = [];
     let initialMemo = '';
     if (this.props.navigation.state.params.uri) {
