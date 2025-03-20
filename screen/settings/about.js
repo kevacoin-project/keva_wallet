@@ -38,7 +38,7 @@ const About = () => {
   };
 
   const handleOnTwitterPress = () => {
-    Linking.openURL('https://twitter.com/kevacoin');
+    Linking.openURL('https://twitter.com/TheReturnInt');
   };
 
   const handleOnGithubPress = () => {
@@ -56,7 +56,7 @@ const About = () => {
       preferredAndroidMarket: AndroidMarket.Google,
       preferInApp: true,
       openAppStoreIfInAppFails: true,
-      fallbackPlatformURL: 'https://kevacoin.org',
+      fallbackPlatformURL: 'https://thereturn.org/',
     };
     Rate.rate(options, success => {
       if (success) {
@@ -80,7 +80,7 @@ const About = () => {
               }}
             />
             <Text style={{ maxWidth: 260, marginVertical: 24, color: '#9AA0AA', fontSize: 15, textAlign: 'center', fontWeight: '500' }}>
-              KevaWallet is a free and open source project. Crafted by Kevacoin users.
+              Return is a free and open source project. Crafted by the Return users.
             </Text>
             <Text style={{ maxWidth: 260, marginBottom: 40, color: '#0C2550', fontSize: 15, textAlign: 'center', fontWeight: '500' }}>
               Always backup your keys!

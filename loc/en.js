@@ -39,7 +39,7 @@ module.exports = {
     name: 'name',
     shortcode: "Shortcode",
     shortcode_id: "Shortcode or Namespace ID",
-    search_hashtag: "Enter hashtag, e.g. kevacoin",
+    search_hashtag: "Enter hashtag, e.g. return",
     no_data: "No Data",
     click_add_btn: "Type name and click the '+' button to create a profile",
     click_search_btn: "Enter shortcode (e.g. 5570511) and click the 'search' button",
