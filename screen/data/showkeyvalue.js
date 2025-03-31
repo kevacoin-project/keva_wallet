@@ -456,6 +456,7 @@ class ShowKeyValue extends React.Component {
           "likes": <likes>,
           "replies": [{
             "height": <>,
+            "type": <>,
             "key": <>,
             "value": <>,
             "time": <>,
@@ -468,8 +469,10 @@ class ShowKeyValue extends React.Component {
           ...
         }
       */
+
+
       // Decode replies base64
-      const replies = totalReactions.replies.map(r => {
+      const replies = totalReactions.replies.filter(r => r.type !== 'DEL').map(r => {
         r.value = Buffer.from(r.value, 'base64').toString('utf-8');
         return r;
       });
