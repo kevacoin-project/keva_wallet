@@ -39,7 +39,7 @@ module.exports = {
     name: 'שם',
     shortcode: "קוד קצר",
     shortcode_id: "קוד קצר או מזהה פרופיל",
-    search_hashtag: "הכנס תג, למשל return",
+    search_hashtag: "הכנס תג, למשל aliyah",
     no_data: "אין נתונים",
     click_add_btn: "הקלד שם ולחץ על כפתור '+' ליצירת פרופיל",
     click_search_btn: "הכנס קוד קצר (למשל 5570511) ולחץ על כפתור 'חיפוש'",

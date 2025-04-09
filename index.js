@@ -70,7 +70,7 @@ class BlueAppComponent extends React.Component {
               loop={false}
             />
             <Text style={styles.keva}>
-              {"RETURN"}
+              {"ALIYAH"}
             </Text>
           </View>
         );
